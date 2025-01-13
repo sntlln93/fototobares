@@ -6,7 +6,7 @@ const routeables = [
     { name: 'Pedidos', route: 'orders.index' },
     { name: 'Escuelas', route: 'schools.index' },
     { name: 'Seguimiento', route: 'tracking.index' },
-    { name: 'Stockeables', route: 'stock.index' },
+    { name: 'Stockeables', route: 'stockables.index' },
 ] as const;
 
 export function Navigation() {

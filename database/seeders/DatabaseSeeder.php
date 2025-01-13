@@ -2,9 +2,11 @@
 
 namespace Database\Seeders;
 
+use App\Models\Product;
+use App\Models\Stockable;
 use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class DatabaseSeeder extends Seeder
 {
@@ -24,5 +26,11 @@ class DatabaseSeeder extends Seeder
             'name' => 'Matías Santillán',
             'email' => 'sntlln.93@gmail.com',
         ]);
+
+        Product::factory(10)->create();
+
+        Stockable::factory(20)->create();
+
+        DB::insert('insert into product_stockable(product_id, stockable_id) values (1,1)');
     }
 }

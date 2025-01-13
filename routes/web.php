@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\BO\SchoolController;
+use App\Http\Controllers\BO\StockController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -16,17 +18,13 @@ Route::get('/orders', function () {
     return Inertia::render('orders.index');
 })->middleware(['auth', 'verified'])->name('orders.index');
 
-Route::get('/schools', function () {
-    return Inertia::render('schools.index');
-})->middleware(['auth', 'verified'])->name('schools.index');
+Route::resource('schools', SchoolController::class)->middleware(['auth']);
 
 Route::get('/tracking', function () {
     return Inertia::render('tracking.index');
 })->middleware(['auth', 'verified'])->name('tracking.index');
 
-Route::get('/stock', function () {
-    return Inertia::render('stock.index');
-})->middleware(['auth', 'verified'])->name('stock.index');
+Route::resource('stockables', StockController::class)->middleware(['auth']);
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

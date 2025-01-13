@@ -1,7 +1,6 @@
 import { InputError } from '@/components/inputError';
 import { InputLabel } from '@/components/inputLabel';
 import { Modal } from '@/components/modal';
-import { SecondaryButton } from '@/components/secondaryButton';
 import { TextInput } from '@/components/textInput';
 import { Button } from '@/components/ui/button';
 import { useForm } from '@inertiajs/react';
@@ -105,9 +104,9 @@ export function DeleteUserForm({ className = '' }: { className?: string }) {
                     </div>
 
                     <div className="mt-6 flex justify-end">
-                        <SecondaryButton onClick={closeModal}>
+                        <Button variant="outline" onClick={closeModal}>
                             Cancel
-                        </SecondaryButton>
+                        </Button>
 
                         <Button
                             className="ms-3"
