@@ -116,7 +116,8 @@ export default function EditSchool({ school }: PageProps<{ school: School }>) {
                                 <TextInput
                                     id="principal.phone"
                                     name="principal.phone"
-                                    type="tel"
+                                    type="text"
+                                    pattern="[0-9]{10}"
                                     value={data.principal.phone}
                                     onChange={(e) =>
                                         setData('principal', {
