@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\BO;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\StockableResource;
 use App\Models\Product;
 use App\Models\Stockable;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class StockController extends Controller
@@ -18,15 +20,15 @@ class StockController extends Controller
 
         $stockables = Stockable::with('products')
             ->when($request->query('search'), function ($q) use ($search) {
-                return $q->where('name', '%LIKE%', $search)
-                    ->orWhere('unit', '%LIKE%', $search)
+                return $q->where('name', 'like', "%$search%")
+                    ->orWhere('unit', 'like', "%$search%")
                     ->orWhere('id', $search);
             })
             ->orderBy($sort_by, $sort_order)
             ->paginate(10);
 
         return Inertia::render('stock/index', [
-            'stockables' => $stockables,
+            'stockables' => StockableResource::collection($stockables),
         ]);
     }
 
@@ -51,9 +53,9 @@ class StockController extends Controller
             'products.*' => ['exists:products,id'],
         ]);
 
-        $stockable = Stockable::create($validated);
-
-        $stockable->products()->sync($related_products['products']);
+        Stockable::create($validated)
+            ->products()
+            ->sync($related_products['products']);
 
         return redirect(route('stockables.index'));
     }
@@ -71,8 +73,14 @@ class StockController extends Controller
             'products.*' => ['exists:products,id'],
         ]);
 
-        $stockable->update($validated);
-        $stockable->products()->sync($related_products['products']);
+        DB::transaction(function () use (
+            $related_products,
+            $validated,
+            $stockable,
+        ) {
+            $stockable->update($validated);
+            $stockable->products()->sync($related_products['products']);
+        });
 
         return redirect(route('stockables.index'));
     }
@@ -87,8 +95,10 @@ class StockController extends Controller
 
     public function destroy(Stockable $stockable): \Illuminate\Http\RedirectResponse
     {
-        $stockable->products()->detach();
-        $stockable->delete();
+        DB::transaction(function () use ($stockable) {
+            $stockable->products()->detach();
+            $stockable->delete();
+        });
 
         return redirect(route('stockables.index'));
     }

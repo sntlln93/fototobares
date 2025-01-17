@@ -11,10 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('product_stockable', function (Blueprint $table) {
+        Schema::create('addresses', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('product_id')->constrained()->onDelete('cascade');
-            $table->foreignId('stockable_id')->constrained()->onDelete('cascade');
+            $table->string('street')->nullable();
+            $table->string('number')->nullable();
+            $table->string('neighborhood')->nullable();
+            $table->string('city');
+
+            $table->string('addressable_id');
+            $table->string('addressable_type');
             $table->timestamps();
         });
     }
@@ -24,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        //
+        Schema::dropIfExists('addresses');
     }
 };

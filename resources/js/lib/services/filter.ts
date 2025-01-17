@@ -1,6 +1,6 @@
 import { router } from '@inertiajs/react';
 
-export const onSearch = (searchTerm: string) => {
+export function onSearch(searchTerm: string, indexRoute: string) {
     const query = route().queryParams;
     delete query.search;
 
@@ -8,16 +8,16 @@ export const onSearch = (searchTerm: string) => {
         query.search = searchTerm;
     }
 
-    router.get(route('stockables.index'), query);
-};
+    router.get(route(indexRoute), query);
+}
 
-export const onSort = (sort_by: Sort['sort_by']) => {
+export function onSort<T = string>(sort_by: T, indexRoute: string) {
     const sort_order =
         route().queryParams.sort_order === 'desc' ? 'asc' : 'desc';
 
-    router.get(route('stockables.index'), {
+    router.get(route(indexRoute), {
         ...route().queryParams,
         sort_order,
         sort_by,
     });
-};
+}

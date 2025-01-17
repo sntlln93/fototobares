@@ -1,3 +1,4 @@
+import { ContactRole } from '@/lib/enums';
 import { PageProps as InertiaPageProps } from '@inertiajs/core';
 import { AxiosInstance } from 'axios';
 import { route as ziggyRoute } from 'ziggy-js';
@@ -12,11 +13,6 @@ declare global {
     var route: typeof ziggyRoute;
 
     /* api */
-    type Sort = {
-        sort_by: 'id' | 'name' | 'quantity';
-        sort_order: 'asc' | 'desc';
-    };
-
     type PageProps<
         T extends Record<string, unknown> = Record<string, unknown>,
     > = T & {
@@ -25,39 +21,76 @@ declare global {
         };
     };
 
-    type Paginated<T> = {
+    interface Paginated<T> {
         [k: string]: {
-            current_page: number;
             data: T[];
-            first_page_url: string;
-            from: number;
-            last_page: number;
-            last_page_url: string;
-            links: PaginatedLink[];
-            next_page_url: string | null;
-            path: string;
-            per_page: number;
-            prev_page_url: string | null;
-            to: number;
-            total: number;
+            meta: {
+                current_page: number;
+                from: number;
+                last_page: number;
+                links: PaginatedLink[];
+                path: string;
+                per_page: number;
+                to: number;
+                total: number;
+            };
+            links: {
+                first_page_url: string;
+                last_page_url: string;
+                next_page_url: string | null;
+                prev_page_url: string | null;
+            };
         };
-    };
+    }
 
-    type PaginatedLink = {
+    interface PaginatedLink {
         url: string | undefined;
         label: string;
         active: boolean;
-    };
+    }
 
     /* entities */
-    type Stockable = {
+    interface Stockable {
         id: number;
         name: string;
         quantity: number;
         products: Product[];
         unit: string;
         alert_at: number;
-    };
+    }
+
+    interface Contact {
+        id: number;
+        name: string;
+        phone: string;
+        role: ContactRole;
+    }
+
+    interface Principal extends Contact {}
+    interface Teacher extends Contact {}
+
+    interface Classroom {
+        id: number;
+        name: string;
+        teacher: Teacher;
+    }
+
+    interface Address {
+        id: number;
+        street?: string;
+        number?: string;
+        neighborhood?: string;
+        city: string;
+    }
+
+    interface School {
+        id: number;
+        name: string;
+        principal: Principal;
+        classrooms: Omit<Classroom, 'teacher'>[];
+        full_address: string;
+        address: Address;
+    }
 
     interface User {
         id: number;
@@ -66,10 +99,10 @@ declare global {
         email_verified_at?: string;
     }
 
-    type Product = {
+    interface Product {
         id: number;
         name: string;
-    };
+    }
 }
 
 declare module '@inertiajs/core' {

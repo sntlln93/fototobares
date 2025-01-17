@@ -12,6 +12,7 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import { AuthenticatedLayout } from '@/layouts/authenticated.layout';
+import { onSearch, onSort } from '@/lib/services/filter';
 import { Head, Link, router } from '@inertiajs/react';
 import {
     ArrowUpDown,
@@ -25,7 +26,6 @@ import {
 import { useState } from 'react';
 import { AlterStockForm } from './partials/alterStockForm';
 import { DeleteStockableConfirmation } from './partials/deleteStockableConfirmation';
-import { onSearch, onSort } from './services/filter';
 
 export default function Stockables({
     stockables,
@@ -80,7 +80,7 @@ export default function Stockables({
                         <Button
                             variant="outline"
                             size="icon"
-                            onClick={() => onSearch(search)}
+                            onClick={() => onSearch(search, 'stockables.index')}
                         >
                             <Search />
                         </Button>
@@ -98,7 +98,11 @@ export default function Stockables({
                         <TableRow>
                             <TableHead className="w-[100px]">
                                 <div className="flex items-center gap-2">
-                                    <button onClick={() => onSort('id')}>
+                                    <button
+                                        onClick={() =>
+                                            onSort('id', 'stockables.index')
+                                        }
+                                    >
                                         <ArrowUpDown className="h-4 w-4" />
                                     </button>
                                     #
@@ -106,7 +110,11 @@ export default function Stockables({
                             </TableHead>
                             <TableHead>
                                 <div className="flex items-center gap-2">
-                                    <button onClick={() => onSort('name')}>
+                                    <button
+                                        onClick={() =>
+                                            onSort('name', 'stockables.index')
+                                        }
+                                    >
                                         <ArrowUpDown className="h-4 w-4" />
                                     </button>
                                     Stockeable
@@ -114,7 +122,14 @@ export default function Stockables({
                             </TableHead>
                             <TableHead>
                                 <div className="flex items-center gap-2">
-                                    <button onClick={() => onSort('quantity')}>
+                                    <button
+                                        onClick={() =>
+                                            onSort(
+                                                'quantity',
+                                                'stockables.index',
+                                            )
+                                        }
+                                    >
                                         <ArrowUpDown className="h-4 w-4" />
                                     </button>
                                     Cantidad
@@ -188,7 +203,7 @@ export default function Stockables({
                         ))}
                     </TableBody>
                 </Table>
-                <PaginationNav links={stockables.links} />
+                <PaginationNav links={stockables.meta.links} />
             </Card>
         </AuthenticatedLayout>
     );

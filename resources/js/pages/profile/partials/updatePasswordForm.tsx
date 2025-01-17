@@ -48,12 +48,11 @@ export function UpdatePasswordForm({ className = '' }: { className?: string }) {
         <section className={className}>
             <header>
                 <h2 className="text-lg font-medium text-gray-900 dark:text-gray-100">
-                    Update Password
+                    Cambiar contraseña
                 </h2>
 
                 <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                    Ensure your account is using a long, random password to stay
-                    secure.
+                    Usa una contraseña fácil de recordar.
                 </p>
             </header>
 
@@ -61,7 +60,7 @@ export function UpdatePasswordForm({ className = '' }: { className?: string }) {
                 <div>
                     <InputLabel
                         htmlFor="current_password"
-                        value="Current Password"
+                        value="Contraseña actual"
                     />
 
                     <TextInput
@@ -83,7 +82,7 @@ export function UpdatePasswordForm({ className = '' }: { className?: string }) {
                 </div>
 
                 <div>
-                    <InputLabel htmlFor="password" value="New Password" />
+                    <InputLabel htmlFor="password" value="Nueva contraseña" />
 
                     <TextInput
                         id="password"
@@ -101,7 +100,7 @@ export function UpdatePasswordForm({ className = '' }: { className?: string }) {
                 <div>
                     <InputLabel
                         htmlFor="password_confirmation"
-                        value="Confirm Password"
+                        value="Repite tu nueva contraseña"
                     />
 
                     <TextInput
@@ -122,7 +121,7 @@ export function UpdatePasswordForm({ className = '' }: { className?: string }) {
                 </div>
 
                 <div className="flex items-center gap-4">
-                    <Button disabled={processing}>Save</Button>
+                    <Button disabled={processing}>Guardar</Button>
 
                     <Transition
                         show={recentlySuccessful}
@@ -132,7 +131,7 @@ export function UpdatePasswordForm({ className = '' }: { className?: string }) {
                         leaveTo="opacity-0"
                     >
                         <p className="text-sm text-gray-600 dark:text-gray-400">
-                            Saved.
+                            Guardada.
                         </p>
                     </Transition>
                 </div>

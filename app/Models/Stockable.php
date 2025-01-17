@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Stockable extends Model
 {
+    /** @use HasFactory<\Database\Factories\StockableFactory> */
     use HasFactory;
 
     protected $fillable = [

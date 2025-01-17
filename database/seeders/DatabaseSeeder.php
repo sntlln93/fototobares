@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Product;
+use App\Models\School;
 use App\Models\Stockable;
 use App\Models\User;
 use Illuminate\Database\Seeder;
@@ -32,5 +33,7 @@ class DatabaseSeeder extends Seeder
         Stockable::factory(20)->create();
 
         DB::insert('insert into product_stockable(product_id, stockable_id) values (1,1)');
+
+        School::factory(3)->withClassRooms()->withPrincipal()->withAddress()->create();
     }
 }
