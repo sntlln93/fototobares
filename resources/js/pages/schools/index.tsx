@@ -1,6 +1,5 @@
 import { Card } from '@/components/card';
 import { PaginationNav } from '@/components/paginationNav';
-import { TextInput } from '@/components/textInput';
 import { Button } from '@/components/ui/button';
 import {
     Table,
@@ -10,10 +9,11 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
+import { Searchbar } from '@/features/searchbar';
 import { AuthenticatedLayout } from '@/layouts/authenticated.layout';
-import { onSearch, onSort } from '@/lib/services/filter';
-import { Head, Link, router } from '@inertiajs/react';
-import { ArrowUpDown, Edit2, FilterX, Plus, Search, Trash } from 'lucide-react';
+import { onSort } from '@/lib/services/filter';
+import { Head, Link } from '@inertiajs/react';
+import { ArrowUpDown, Edit2, Plus, Trash } from 'lucide-react';
 import { useState } from 'react';
 import { DeleteSchoolConfirmation } from './partials/delete-confirmation';
 
@@ -25,8 +25,6 @@ export default function Schools({ schools }: PageProps<Paginated<School>>) {
     const [deleteableSchool, setDeleteableSchool] = useState<School | null>(
         null,
     );
-
-    const [search, setSearch] = useState('');
 
     return (
         <AuthenticatedLayout>
@@ -42,29 +40,7 @@ export default function Schools({ schools }: PageProps<Paginated<School>>) {
 
             <Card>
                 <div className="mb-4 flex justify-between">
-                    <div className="flex">
-                        <Button
-                            variant="outline"
-                            size="icon"
-                            onClick={() => router.get(route('schools.index'))}
-                        >
-                            <FilterX />
-                        </Button>
-                        <TextInput
-                            id="search"
-                            name="search"
-                            className="h-10"
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                        />
-                        <Button
-                            variant="outline"
-                            size="icon"
-                            onClick={() => onSearch(search, 'schools.index')}
-                        >
-                            <Search />
-                        </Button>
-                    </div>
+                    <Searchbar indexRoute="schools.index" />
 
                     <Button asChild>
                         <Link href={route('schools.create')}>

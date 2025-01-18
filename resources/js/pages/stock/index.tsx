@@ -1,6 +1,5 @@
 import { Card } from '@/components/card';
 import { PaginationNav } from '@/components/paginationNav';
-import { TextInput } from '@/components/textInput';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -11,18 +10,11 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
+import { Searchbar } from '@/features/searchbar';
 import { AuthenticatedLayout } from '@/layouts/authenticated.layout';
-import { onSearch, onSort } from '@/lib/services/filter';
+import { onSort } from '@/lib/services/filter';
 import { Head, Link, router } from '@inertiajs/react';
-import {
-    ArrowUpDown,
-    Diff,
-    Edit2,
-    FilterX,
-    Plus,
-    Search,
-    Trash,
-} from 'lucide-react';
+import { ArrowUpDown, Diff, Edit2, Plus, Trash } from 'lucide-react';
 import { useState } from 'react';
 import { AlterStockForm } from './partials/alterStockForm';
 import { DeleteStockableConfirmation } from './partials/deleteStockableConfirmation';
@@ -36,8 +28,6 @@ export default function Stockables({
         showDeleteStockableConfirmation,
         setShowDeleteStockableConfirmation,
     ] = useState<Stockable | null>(null);
-
-    const [search, setSearch] = useState('');
 
     return (
         <AuthenticatedLayout>
@@ -60,31 +50,7 @@ export default function Stockables({
 
             <Card>
                 <div className="mb-4 flex justify-between">
-                    <div className="flex">
-                        <Button
-                            variant="outline"
-                            size="icon"
-                            onClick={() =>
-                                router.get(route('stockables.index'))
-                            }
-                        >
-                            <FilterX />
-                        </Button>
-                        <TextInput
-                            id="search"
-                            name="search"
-                            className="h-10"
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                        />
-                        <Button
-                            variant="outline"
-                            size="icon"
-                            onClick={() => onSearch(search, 'stockables.index')}
-                        >
-                            <Search />
-                        </Button>
-                    </div>
+                    <Searchbar indexRoute="stockables.index" />
 
                     <Button asChild>
                         <Link href={route('stockables.create')}>
