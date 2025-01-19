@@ -51,7 +51,7 @@ class SchoolController extends Controller
             'address.street' => ['sometimes'],
             'address.number' => ['sometimes'],
             'address.neighborhood' => ['sometimes'],
-            'address.city' => ['sometimes'],
+            'address.city' => ['required'],
         ]);
 
         DB::transaction(function () use ($validated) {

@@ -20,7 +20,7 @@ export function PaginationNav({ links }: { links: PaginatedLink[] }) {
 }
 
 function PaginatedItem({ link }: { link: PaginatedLink }) {
-    if (link.label.includes('rev')) {
+    if (link.label.includes('Anterior')) {
         return (
             <PaginationItem key={link.label}>
                 <PaginationPrevious href={link.url}>
@@ -30,7 +30,7 @@ function PaginatedItem({ link }: { link: PaginatedLink }) {
         );
     }
 
-    if (link.label.includes('ext')) {
+    if (link.label.includes('Siguiente')) {
         return (
             <PaginationItem key={link.label}>
                 <PaginationNext href={link.url}>{link.label}</PaginationNext>
