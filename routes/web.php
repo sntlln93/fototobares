@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\BO\ProductController;
 use App\Http\Controllers\BO\SchoolController;
 use App\Http\Controllers\BO\StockController;
 use App\Http\Controllers\ProfileController;
@@ -10,9 +11,7 @@ Route::get('/dashboard', function () {
     return Inertia::render('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
-Route::get('/products', function () {
-    return Inertia::render('products.index');
-})->middleware(['auth', 'verified'])->name('products.index');
+Route::resource('products', ProductController::class)->middleware(['auth']);
 
 Route::get('/orders', function () {
     return Inertia::render('orders.index');
