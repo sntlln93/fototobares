@@ -1,9 +1,7 @@
 import { Card } from '@/components/card';
-import { Checkbox } from '@/components/checkbox';
 import { InputError } from '@/components/inputError';
 import { InputLabel } from '@/components/inputLabel';
 import { PageTitle } from '@/components/pageTitle';
-import { SelectInput } from '@/components/selectInput';
 import { TextInput } from '@/components/textInput';
 import { Button } from '@/components/ui/button';
 import { AuthenticatedLayout } from '@/layouts/authenticated.layout';
@@ -18,7 +16,7 @@ export default function CreateProduct({
     const { data, setData, post, processing, errors } = useForm<FormData>({
         name: '',
     });
-
+    console.log(products);
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
 
@@ -47,7 +45,7 @@ export default function CreateProduct({
                         <InputError message={errors.name} className="mt-2" />
                     </div>
 
-                    <div className="mt-6">
+                    {/* <div className="mt-6">
                         <InputLabel htmlFor="quantity" value="Cantidad" />
 
                         <TextInput
@@ -139,7 +137,7 @@ export default function CreateProduct({
                                 </label>
                             ))}
                         </fieldset>
-                    </div>
+                    </div> */}
 
                     <div className="mt-6 flex justify-end gap-3">
                         <Button variant="outline" asChild>
