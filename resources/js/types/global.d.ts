@@ -102,6 +102,15 @@ declare global {
     interface Product {
         id: number;
         name: string;
+        unit_price: number;
+        max_payments: number;
+        variants: {
+            photo_type: 'grupo' | 'individual';
+            orientation: 'vertical' | 'horizontal';
+            backgrounds: string[];
+            colors: string[];
+            dimensions: string[];
+        };
     }
 }
 

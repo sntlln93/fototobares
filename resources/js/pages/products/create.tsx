@@ -2,8 +2,8 @@ import { Card } from '@/components/card';
 import { InputError } from '@/components/inputError';
 import { InputLabel } from '@/components/inputLabel';
 import { PageTitle } from '@/components/pageTitle';
-import { TextInput } from '@/components/textInput';
 import { Button } from '@/components/ui/button';
+import { Input as TextInput } from '@/components/ui/input';
 import { AuthenticatedLayout } from '@/layouts/authenticated.layout';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { FormEventHandler } from 'react';
@@ -38,7 +38,6 @@ export default function CreateProduct({
                             value={data.name}
                             onChange={(e) => setData('name', e.target.value)}
                             className="mt-1 block w-full"
-                            isFocused
                             placeholder="Nombre"
                         />
 

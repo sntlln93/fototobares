@@ -1,6 +1,7 @@
 import { Card } from '@/components/card';
 import { NavLink } from '@/components/navLink';
 import { PaginationNav } from '@/components/paginationNav';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
     Table,
@@ -14,7 +15,17 @@ import { Searchbar } from '@/features/searchbar';
 import { AuthenticatedLayout } from '@/layouts/authenticated.layout';
 import { onSort } from '@/lib/services/filter';
 import { Head, Link, router } from '@inertiajs/react';
-import { ArrowUpDown, Diff, Edit2, Plus, Trash } from 'lucide-react';
+import {
+    ArrowUpDown,
+    Diff,
+    Edit2,
+    Plus,
+    RectangleHorizontal,
+    RectangleVertical,
+    Trash,
+    User,
+    Users,
+} from 'lucide-react';
 import { useState } from 'react';
 import { DeleteProductConfirmation } from './partials/delete-confirmation';
 
@@ -45,7 +56,6 @@ export default function Stockables({
     const [deleteableProduct, setDeleteableProduct] = useState<Product | null>(
         null,
     );
-
     return (
         <AuthenticatedLayout header={<ProductNavigation />}>
             <Head title="Stock" />
@@ -65,7 +75,7 @@ export default function Stockables({
                     <Button asChild>
                         <Link href={route('products.create')}>
                             <Plus />
-                            Agregar stockeable
+                            Agregar producto
                         </Link>
                     </Button>
                 </div>
@@ -93,38 +103,80 @@ export default function Stockables({
                                     >
                                         <ArrowUpDown className="h-4 w-4" />
                                     </button>
-                                    Stockeable
+                                    Producto
                                 </div>
                             </TableHead>
                             <TableHead>
                                 <div className="flex items-center gap-2">
                                     <button
                                         onClick={() =>
-                                            onSort('quantity', 'products.index')
+                                            onSort(
+                                                'unit_price',
+                                                'products.index',
+                                            )
                                         }
                                     >
                                         <ArrowUpDown className="h-4 w-4" />
                                     </button>
-                                    Cantidad
+                                    Precio
                                 </div>
                             </TableHead>
                             <TableHead>
                                 <div className="flex items-center gap-2">
-                                    Productos
+                                    Cuotas máximas
+                                </div>
+                            </TableHead>
+                            <TableHead>
+                                <div className="flex items-center gap-2">
+                                    Diseño
+                                </div>
+                            </TableHead>
+                            <TableHead>
+                                <div className="flex items-center gap-2">
+                                    Colores
+                                </div>
+                            </TableHead>
+                            <TableHead>
+                                <div className="flex items-center gap-2">
+                                    Fondos
                                 </div>
                             </TableHead>
                             <TableHead>Acciones</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {products.data.map((stockable) => (
-                            <TableRow key={stockable.id}>
+                        {products.data.map((product) => (
+                            <TableRow key={product.id}>
                                 <TableCell className="font-medium">
-                                    {stockable.id}
+                                    {product.id}
                                 </TableCell>
-                                <TableCell>{stockable.name}</TableCell>
-                                <TableCell>{stockable.name}</TableCell>
-                                <TableCell>{stockable.name}</TableCell>
+                                <TableCell>{product.name}</TableCell>
+                                <TableCell>{product.unit_price}</TableCell>
+                                <TableCell>{product.max_payments}</TableCell>
+                                <TableCell>
+                                    <ProductDesign
+                                        variants={product.variants}
+                                    />
+                                </TableCell>
+                                <TableCell>
+                                    {product.variants.backgrounds.map(
+                                        (background) => (
+                                            <Badge
+                                                variant="secondary"
+                                                key={background}
+                                            >
+                                                {background}
+                                            </Badge>
+                                        ),
+                                    )}
+                                </TableCell>
+                                <TableCell>
+                                    {product.variants.colors.map((color) => (
+                                        <Badge variant="secondary" key={color}>
+                                            {color}
+                                        </Badge>
+                                    ))}
+                                </TableCell>
                                 <TableCell className="flex gap-2">
                                     <Button
                                         size={'sm'}
@@ -132,7 +184,7 @@ export default function Stockables({
                                         onClick={() =>
                                             router.visit(
                                                 route('products.edit', {
-                                                    stockable: stockable.id,
+                                                    product: product.id,
                                                 }),
                                             )
                                         }
@@ -143,7 +195,7 @@ export default function Stockables({
                                         size={'sm'}
                                         variant={'destructive'}
                                         onClick={() =>
-                                            setDeleteableProduct(stockable)
+                                            setDeleteableProduct(product)
                                         }
                                     >
                                         <Trash />
@@ -152,7 +204,7 @@ export default function Stockables({
                                         size={'sm'}
                                         variant={'secondary'}
                                         onClick={() =>
-                                            setDeleteableProduct(stockable)
+                                            setDeleteableProduct(product)
                                         }
                                     >
                                         <Diff />
@@ -165,5 +217,23 @@ export default function Stockables({
                 <PaginationNav links={products.meta.links} />
             </Card>
         </AuthenticatedLayout>
+    );
+}
+
+function ProductDesign({ variants }: { variants: Product['variants'] }) {
+    return (
+        <div className="flex gap-1">
+            <span>
+                {variants.photo_type === 'individual' ? <User /> : <Users />}
+            </span>
+            <span>
+                {variants.orientation === 'vertical' ? (
+                    <RectangleVertical />
+                ) : (
+                    <RectangleHorizontal />
+                )}
+            </span>
+            <span>{variants.dimensions}</span>
+        </div>
     );
 }
