@@ -3,9 +3,15 @@ import { Checkbox } from '@/components/checkbox';
 import { InputError } from '@/components/inputError';
 import { InputLabel } from '@/components/inputLabel';
 import { PageTitle } from '@/components/pageTitle';
-import { SelectInput } from '@/components/selectInput';
-import { TextInput } from '@/components/textInput';
 import { Button } from '@/components/ui/button';
+import { Input as TextInput } from '@/components/ui/input';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import { AuthenticatedLayout } from '@/layouts/authenticated.layout';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { FormEventHandler } from 'react';
@@ -50,7 +56,6 @@ export default function CreateStockable({
                             value={data.name}
                             onChange={(e) => setData('name', e.target.value)}
                             className="mt-1 block w-full"
-                            isFocused
                             placeholder="Nombre"
                         />
 
@@ -106,18 +111,22 @@ export default function CreateStockable({
 
                     <div className="mt-6">
                         <InputLabel htmlFor="unit" value="Unidad de medida" />
-                        <SelectInput
+                        <Select
                             name="unit"
-                            id="unit"
-                            className="mt-1 block w-full"
-                            onChange={(e) => setData('unit', e.target.value)}
+                            onValueChange={(value) => setData('unit', value)}
+                            defaultValue={'Unidad'}
                         >
-                            <option value="Unidad">Unidad</option>
-                            <option value="Paquete">Paquete</option>
-                            <option value="Caja">Caja</option>
-                            <option value="Pallet">Pallet</option>
-                            <option value="Lata">Lata</option>
-                        </SelectInput>
+                            <SelectTrigger>
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="Unidad">Unidad</SelectItem>
+                                <SelectItem value="Paquete">Paquete</SelectItem>
+                                <SelectItem value="Caja">Caja</SelectItem>
+                                <SelectItem value="Pallet">Pallet</SelectItem>
+                                <SelectItem value="Lata">Lata</SelectItem>
+                            </SelectContent>
+                        </Select>
 
                         <InputError message={errors.unit} className="mt-2" />
                     </div>

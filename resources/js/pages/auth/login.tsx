@@ -1,8 +1,8 @@
 import { Checkbox } from '@/components/checkbox';
 import { InputError } from '@/components/inputError';
 import { InputLabel } from '@/components/inputLabel';
-import { TextInput } from '@/components/textInput';
 import { Button } from '@/components/ui/button';
+import { Input as TextInput } from '@/components/ui/input';
 import { GuestLayout } from '@/layouts/guest.layout';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { FormEventHandler } from 'react';
@@ -49,7 +49,6 @@ export default function Login({
                         value={data.email}
                         className="mt-1 block w-full"
                         autoComplete="username"
-                        isFocused={true}
                         onChange={(e) => setData('email', e.target.value)}
                     />
 

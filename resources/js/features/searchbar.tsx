@@ -1,5 +1,5 @@
-import { TextInput } from '@/components/textInput';
 import { Button, buttonVariants } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { onSearch } from '@/lib/services/filter';
 import { cn } from '@/lib/utils';
 import { router } from '@inertiajs/react';
@@ -19,10 +19,9 @@ export function Searchbar({ indexRoute }: { indexRoute: string }) {
 
     return (
         <div className="relative flex gap-1">
-            <TextInput
+            <Input
                 id="search"
                 name="search"
-                className="h-10 pr-10"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
             />
