@@ -16,7 +16,7 @@ export function DeleteProductConfirmation({
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
-        destroy(route('products.update', { product: product.id }), {
+        destroy(route('products.destroy', { product: product.id }), {
             onFinish: () => {
                 onClose();
             },

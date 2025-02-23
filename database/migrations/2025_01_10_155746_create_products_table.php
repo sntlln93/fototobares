@@ -14,9 +14,10 @@ return new class extends Migration
         Schema::create('products', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->json('variants');
+            $table->json('variants')->nullable();
             $table->integer('unit_price');
             $table->integer('max_payments');
+            $table->string('type')->default('mural');
             $table->timestamps();
         });
     }

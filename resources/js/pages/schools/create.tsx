@@ -5,6 +5,7 @@ import { PageTitle } from '@/components/pageTitle';
 import { Button } from '@/components/ui/button';
 import { Input as TextInput } from '@/components/ui/input';
 import { AuthenticatedLayout } from '@/layouts/authenticated.layout';
+import { getError } from '@/lib/utils';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { FormEventHandler } from 'react';
 
@@ -22,17 +23,7 @@ export default function CreateSchool() {
         post(route('schools.store'));
     };
 
-    /**
-     * This should be typesafe
-     */
-    const getError = (key: string) => {
-        const err = errors as Record<string, string>;
-        /*
-        Errors { [key:keyof errors]: string | {[key: keyof errors]: string} }
-        */
-
-        return err[key];
-    };
+    const _getError = (path: string) => getError(path, errors);
 
     return (
         <AuthenticatedLayout header={<PageTitle>Nueva escuela</PageTitle>}>
@@ -63,7 +54,7 @@ export default function CreateSchool() {
                             />
 
                             <InputError
-                                message={getError('school.name')}
+                                message={_getError('school.name')}
                                 className="mt-2"
                             />
                         </div>
@@ -93,7 +84,7 @@ export default function CreateSchool() {
                                 />
 
                                 <InputError
-                                    message={getError('principal.name')}
+                                    message={_getError('principal.name')}
                                     className="mt-2"
                                 />
                             </div>
@@ -121,7 +112,7 @@ export default function CreateSchool() {
                                 />
 
                                 <InputError
-                                    message={getError('principal.phone')}
+                                    message={_getError('principal.phone')}
                                     className="mt-2"
                                 />
                             </div>
@@ -154,7 +145,7 @@ export default function CreateSchool() {
                                 />
 
                                 <InputError
-                                    message={getError('address.street')}
+                                    message={_getError('address.street')}
                                     className="mt-2"
                                 />
                             </div>
@@ -180,7 +171,7 @@ export default function CreateSchool() {
                                 />
 
                                 <InputError
-                                    message={getError('address.number')}
+                                    message={_getError('address.number')}
                                     className="mt-2"
                                 />
                             </div>
@@ -208,7 +199,7 @@ export default function CreateSchool() {
                                 />
 
                                 <InputError
-                                    message={getError('address.neighborhood')}
+                                    message={_getError('address.neighborhood')}
                                     className="mt-2"
                                 />
                             </div>
@@ -234,7 +225,7 @@ export default function CreateSchool() {
                                 />
 
                                 <InputError
-                                    message={getError('address.city')}
+                                    message={_getError('address.city')}
                                     className="mt-2"
                                 />
                             </div>

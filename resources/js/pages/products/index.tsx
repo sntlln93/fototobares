@@ -2,7 +2,7 @@ import { Card } from '@/components/card';
 import { NavLink } from '@/components/navLink';
 import { PaginationNav } from '@/components/paginationNav';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
 import {
     Table,
     TableBody,
@@ -14,20 +14,13 @@ import {
 import { Searchbar } from '@/features/searchbar';
 import { AuthenticatedLayout } from '@/layouts/authenticated.layout';
 import { onSort } from '@/lib/services/filter';
-import { Head, Link, router } from '@inertiajs/react';
-import {
-    ArrowUpDown,
-    Diff,
-    Edit2,
-    Plus,
-    RectangleHorizontal,
-    RectangleVertical,
-    Trash,
-    User,
-    Users,
-} from 'lucide-react';
+import { formatPrice } from '@/lib/utils';
+import { Head, Link } from '@inertiajs/react';
+import { ArrowUpDown, Diff, Edit2, Plus, Trash } from 'lucide-react';
 import { useState } from 'react';
 import { DeleteProductConfirmation } from './partials/delete-confirmation';
+import { ProductDesign } from './partials/product-design';
+import { ProductIcon } from './partials/product-icon';
 
 const routeables = [
     { name: 'Productos', route: 'products.index' },
@@ -128,6 +121,11 @@ export default function Stockables({
                             </TableHead>
                             <TableHead>
                                 <div className="flex items-center gap-2">
+                                    Medidas
+                                </div>
+                            </TableHead>
+                            <TableHead>
+                                <div className="flex items-center gap-2">
                                     Diseño
                                 </div>
                             </TableHead>
@@ -150,47 +148,61 @@ export default function Stockables({
                                 <TableCell className="font-medium">
                                     {product.id}
                                 </TableCell>
-                                <TableCell>{product.name}</TableCell>
-                                <TableCell>{product.unit_price}</TableCell>
-                                <TableCell>{product.max_payments}</TableCell>
-                                <TableCell>
-                                    <ProductDesign
-                                        variants={product.variants}
-                                    />
+                                <TableCell className="flex gap-2">
+                                    <ProductIcon type={product.type} />{' '}
+                                    {product.name}
                                 </TableCell>
                                 <TableCell>
-                                    {product.variants.backgrounds.map(
-                                        (background) => (
-                                            <Badge
-                                                variant="secondary"
-                                                key={background}
-                                            >
-                                                {background}
-                                            </Badge>
-                                        ),
+                                    {formatPrice(product.unit_price)}
+                                </TableCell>
+                                <TableCell>{product.max_payments}</TableCell>
+                                <TableCell>
+                                    {product.variants?.dimentions}
+                                </TableCell>
+                                <TableCell>
+                                    {product.variants && (
+                                        <ProductDesign
+                                            variants={product.variants}
+                                        />
                                     )}
                                 </TableCell>
                                 <TableCell>
-                                    {product.variants.colors.map((color) => (
-                                        <Badge variant="secondary" key={color}>
-                                            {color}
-                                        </Badge>
-                                    ))}
+                                    {product.variants?.backgrounds?.length >
+                                        0 &&
+                                        product.variants.backgrounds.map(
+                                            (background) => (
+                                                <Badge
+                                                    variant="secondary"
+                                                    key={background}
+                                                >
+                                                    {background}
+                                                </Badge>
+                                            ),
+                                        )}
+                                </TableCell>
+                                <TableCell>
+                                    {product.variants?.colors?.length > 0 &&
+                                        product.variants.colors.map((color) => (
+                                            <Badge
+                                                variant="secondary"
+                                                key={color}
+                                            >
+                                                {color}
+                                            </Badge>
+                                        ))}
                                 </TableCell>
                                 <TableCell className="flex gap-2">
-                                    <Button
-                                        size={'sm'}
-                                        variant={'warning'}
-                                        onClick={() =>
-                                            router.visit(
-                                                route('products.edit', {
-                                                    product: product.id,
-                                                }),
-                                            )
-                                        }
+                                    <Link
+                                        className={buttonVariants({
+                                            variant: 'warning',
+                                            size: 'sm',
+                                        })}
+                                        href={route('products.edit', {
+                                            product: product.id,
+                                        })}
                                     >
                                         <Edit2 />
-                                    </Button>
+                                    </Link>
                                     <Button
                                         size={'sm'}
                                         variant={'destructive'}
@@ -217,23 +229,5 @@ export default function Stockables({
                 <PaginationNav links={products.meta.links} />
             </Card>
         </AuthenticatedLayout>
-    );
-}
-
-function ProductDesign({ variants }: { variants: Product['variants'] }) {
-    return (
-        <div className="flex gap-1">
-            <span>
-                {variants.photo_type === 'individual' ? <User /> : <Users />}
-            </span>
-            <span>
-                {variants.orientation === 'vertical' ? (
-                    <RectangleVertical />
-                ) : (
-                    <RectangleHorizontal />
-                )}
-            </span>
-            <span>{variants.dimensions}</span>
-        </div>
     );
 }
