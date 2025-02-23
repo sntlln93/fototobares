@@ -2,7 +2,6 @@
 
 namespace Database\Factories;
 
-use App\Data\VariantData;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -14,7 +13,7 @@ class ProductFactory extends Factory
      * Define the model's default state.
      *
      * @return array<string
-    *  mixed>
+     *  mixed>
      */
     public function definition(): array
     {
@@ -24,12 +23,13 @@ class ProductFactory extends Factory
             'name' => fake()->word(),
             'unit_price' => fake()->numberBetween(1000, 10000),
             'max_payments' => fake()->numberBetween(1, 12),
+            'type' => fake()->randomElement(['mural', 'taza', 'banda', 'medalla']),
             'variants' => [
-                'photo_type' => fake()->randomElement(['grupo', 'individual']),
-                'orientation' => fake()->randomElement(['vertical', 'horizontal']),
-                'backgrounds' => fake()->randomElements(['white', 'black', 'green', 'blue'], 2),
-                'colors' => fake()->randomElements(['white', 'black', 'green', 'blue'], 2),
-                'dimensions' => "{$x}x{$y}",
+                'photo_types' => fake()->randomElements(['grupo', 'individual'], fake()->numberBetween(1, 2)),
+                'orientations' => fake()->randomElements(['vertical', 'horizontal'], fake()->numberBetween(1, 2)),
+                'backgrounds' => fake()->randomElements(['blanco', 'negro', 'azul', 'rosa'], fake()->numberBetween(1, 4)),
+                'colors' => fake()->randomElements(['blanco', 'negro', 'azul', 'rosa'], fake()->numberBetween(1, 4)),
+                'dimentions' => "{$x}x{$y}",
             ],
         ];
     }

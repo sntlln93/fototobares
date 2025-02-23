@@ -104,14 +104,19 @@ declare global {
         name: string;
         unit_price: number;
         max_payments: number;
+        type: ProductType;
         variants: {
-            photo_type: 'grupo' | 'individual';
-            orientation: 'vertical' | 'horizontal';
+            photo_types: ProductPhotoType[];
+            orientations: ProductOrientation[];
             backgrounds: string[];
             colors: string[];
-            dimensions: string[];
+            dimentions: string;
         };
     }
+
+    type ProductType = 'mural' | 'banda' | 'medalla' | 'taza';
+    type ProductPhotoType = 'grupo' | 'individual';
+    type ProductOrientation = 'vertical' | 'horizontal';
 }
 
 declare module '@inertiajs/core' {
