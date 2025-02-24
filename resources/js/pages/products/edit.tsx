@@ -322,7 +322,9 @@ export default function EditProduct({
                             <Link href={route('products.index')}>Cancelar</Link>
                         </Button>
 
-                        <Button disabled={processing}>Agregar producto</Button>
+                        <Button disabled={processing}>
+                            Modificar producto
+                        </Button>
                     </div>
                 </form>
             </Card>

@@ -1,5 +1,4 @@
 import { Card } from '@/components/card';
-import { NavLink } from '@/components/navLink';
 import { PaginationNav } from '@/components/paginationNav';
 import { Badge } from '@/components/ui/badge';
 import { Button, buttonVariants } from '@/components/ui/button';
@@ -12,47 +11,22 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import { Searchbar } from '@/features/searchbar';
-import { AuthenticatedLayout } from '@/layouts/authenticated.layout';
 import { onSort } from '@/lib/services/filter';
 import { formatPrice } from '@/lib/utils';
-import { Head, Link } from '@inertiajs/react';
-import { ArrowUpDown, Diff, Edit2, Plus, Trash } from 'lucide-react';
+import { Link } from '@inertiajs/react';
+import { ArrowUpDown, Edit2, Plus, Trash } from 'lucide-react';
 import { useState } from 'react';
 import { DeleteProductConfirmation } from './partials/delete-confirmation';
 import { ProductDesign } from './partials/product-design';
 import { ProductIcon } from './partials/product-icon';
+import { ProductLayout } from './partials/products.layout';
 
-const routeables = [
-    { name: 'Productos', route: 'products.index' },
-    { name: 'Combos', route: 'products.index' },
-] as const;
-
-const ProductNavigation = () => {
-    return (
-        <nav className="flex gap-2">
-            {routeables.map((routeable) => (
-                <NavLink
-                    key={routeable.name}
-                    href={route(routeable.route)}
-                    active={route().current(routeable.route)}
-                >
-                    {routeable.name}
-                </NavLink>
-            ))}
-        </nav>
-    );
-};
-
-export default function Stockables({
-    products,
-}: PageProps<Paginated<Product>>) {
+export default function Products({ products }: PageProps<Paginated<Product>>) {
     const [deleteableProduct, setDeleteableProduct] = useState<Product | null>(
         null,
     );
     return (
-        <AuthenticatedLayout header={<ProductNavigation />}>
-            <Head title="Stock" />
-
+        <ProductLayout>
             {deleteableProduct && (
                 <DeleteProductConfirmation
                     product={deleteableProduct}
@@ -212,15 +186,6 @@ export default function Stockables({
                                     >
                                         <Trash />
                                     </Button>
-                                    <Button
-                                        size={'sm'}
-                                        variant={'secondary'}
-                                        onClick={() =>
-                                            setDeleteableProduct(product)
-                                        }
-                                    >
-                                        <Diff />
-                                    </Button>
                                 </TableCell>
                             </TableRow>
                         ))}
@@ -228,6 +193,6 @@ export default function Stockables({
                 </Table>
                 <PaginationNav links={products.meta.links} />
             </Card>
-        </AuthenticatedLayout>
+        </ProductLayout>
     );
 }
