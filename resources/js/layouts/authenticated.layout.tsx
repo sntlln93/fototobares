@@ -1,5 +1,7 @@
 import { Dropdown } from '@/components/dropdown';
 import { ResponsiveNavLink } from '@/components/responsiveNavLink';
+import { buttonVariants } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 import { usePage } from '@inertiajs/react';
 import { PropsWithChildren, ReactNode, useState } from 'react';
 import { Navigation } from './partials/navigation';
@@ -21,6 +23,15 @@ export function AuthenticatedLayout({
                         <Navigation />
 
                         <div className="hidden sm:ms-6 sm:flex sm:items-center">
+                            <a
+                                className={cn(
+                                    buttonVariants({ size: 'sm' }),
+                                    'rounded-xl',
+                                )}
+                                href={route('sales')}
+                            >
+                                Vender
+                            </a>
                             <div className="relative ms-3">
                                 <Dropdown>
                                     <Dropdown.Trigger>
