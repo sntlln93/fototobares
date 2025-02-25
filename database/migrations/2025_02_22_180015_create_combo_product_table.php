@@ -19,9 +19,8 @@ return new class extends Migration
             $table->foreignId('product_id')
                 ->constrained()
                 ->onDelete('cascade');
-            $table->integer('quantity');
-            $table->integer('suggested_price');
-            $table->integer('suggested_number_of_payments');
+            $table->json('variants')->nullable();
+            $table->integer('quantity')->default(1);
             $table->timestamps();
         });
     }

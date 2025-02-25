@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('combos', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->integer('price');
-            $table->integer('max_payments');
+            $table->integer('suggested_price');
+            $table->integer('suggested_max_payments');
             $table->timestamps();
         });
     }

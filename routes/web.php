@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Bo\ComboController;
 use App\Http\Controllers\BO\ProductController;
 use App\Http\Controllers\BO\SchoolController;
 use App\Http\Controllers\BO\StockController;
@@ -12,6 +13,7 @@ Route::get('/dashboard', function () {
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::resource('products', ProductController::class)->middleware(['auth']);
+Route::resource('combos', ComboController::class)->middleware(['auth']);
 
 Route::get('/orders', function () {
     return Inertia::render('orders.index');

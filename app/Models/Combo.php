@@ -9,4 +9,11 @@ class Combo extends Model
 {
     /** @use HasFactory<\Database\Factories\ComboFactory> */
     use HasFactory;
+
+    protected $guarded = [];
+
+    public function products()
+    {
+        return $this->belongsToMany(Product::class);
+    }
 }

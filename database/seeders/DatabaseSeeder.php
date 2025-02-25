@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Combo;
 use App\Models\Product;
 use App\Models\School;
 use App\Models\Stockable;
@@ -29,6 +30,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         Product::factory(10)->create();
+        Combo::factory(3)->create();
 
         Stockable::factory(20)->create();
 

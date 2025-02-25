@@ -117,6 +117,14 @@ declare global {
     type ProductType = 'mural' | 'banda' | 'medalla' | 'taza';
     type ProductPhotoType = 'grupo' | 'individual';
     type ProductOrientation = 'vertical' | 'horizontal';
+
+    interface Combo {
+        id: number;
+        name: string;
+        suggested_price: number;
+        suggested_max_payments: number;
+        products: Product[];
+    }
 }
 
 declare module '@inertiajs/core' {
