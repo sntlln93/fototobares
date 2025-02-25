@@ -28,7 +28,7 @@ export function AuthenticatedLayout({
                                     buttonVariants({ size: 'sm' }),
                                     'rounded-xl',
                                 )}
-                                href={route('sales')}
+                                href={route('orders.create')}
                             >
                                 Vender
                             </a>

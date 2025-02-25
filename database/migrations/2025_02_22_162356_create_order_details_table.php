@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('order_products', function (Blueprint $table) {
+        Schema::create('order_details', function (Blueprint $table) {
             $table->id();
             $table->foreignId('order_id')
                 ->constrained()
@@ -19,7 +19,7 @@ return new class extends Migration
             $table->foreignId('product_id')
                 ->constrained()
                 ->onDelete('cascade');
-            $table->json('variant');
+            $table->json('variant')->nullable();
             $table->text('note')->nullable();
             $table->timestamp('delivered_at');
             $table->timestamps();
