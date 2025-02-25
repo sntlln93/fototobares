@@ -21,7 +21,7 @@ class ProductFactory extends Factory
 
         return [
             'name' => fake()->word(),
-            'unit_price' => fake()->numberBetween(1000, 10000),
+            'unit_price' => fake()->numberBetween(1, 9) * 1000,
             'max_payments' => fake()->numberBetween(1, 12),
             'type' => fake()->randomElement(['mural', 'taza', 'banda', 'medalla']),
             'variants' => [

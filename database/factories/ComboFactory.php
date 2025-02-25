@@ -20,7 +20,7 @@ class ComboFactory extends Factory
     {
         return [
             'name' => fake()->word(),
-            'suggested_price' => fake()->numberBetween(100, 1000),
+            'suggested_price' => fake()->numberBetween(1, 9) * 10000,
             'suggested_max_payments' => fake()->numberBetween(1, 12),
         ];
     }

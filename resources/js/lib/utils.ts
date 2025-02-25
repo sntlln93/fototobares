@@ -9,7 +9,7 @@ export function formatPrice(amount: number) {
     return new Intl.NumberFormat('es-AR', {
         style: 'currency',
         currency: 'ARS',
-        minimumFractionDigits: 2,
+        minimumFractionDigits: 0,
     }).format(amount);
 }
 
