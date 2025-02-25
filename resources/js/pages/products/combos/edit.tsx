@@ -1,57 +1,119 @@
 import { Card } from '@/components/card';
+import { InputError } from '@/components/inputError';
+import { InputLabel } from '@/components/inputLabel';
 import { PageTitle } from '@/components/pageTitle';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { AuthenticatedLayout } from '@/layouts/authenticated.layout';
-import { Head } from '@inertiajs/react';
+import { Head, Link, useForm } from '@inertiajs/react';
+import { FormEventHandler, useEffect, useState } from 'react';
+import { FormData, SelectedProduct } from './form';
+import { AddProduct } from './partials/add-product';
+import { ComboProducts } from './partials/combo-products';
 
-export default function EditProduct() {
-    // const { data, setData, put, processing, errors } = useForm<FormData>({
-    //     name: product.name,
-    //     unit_price: product.unit_price,
-    //     max_payments: product.max_payments,
-    //     type: product.type,
-    //     variants: product.variants || default_variants,
-    // });
+export default function EditCombo({
+    products,
+    combo,
+}: PageProps<{
+    products: Product[];
+    combo: { data: { id: number } & FormData };
+}>) {
+    const [addProduct, setAddProduct] = useState<number | null>(null);
+    const [showAddMuralProduct, setShowAddMuralProduct] =
+        useState<Product | null>(null);
 
-    // const submit: FormEventHandler = (e) => {
-    //     e.preventDefault();
+    const { data, setData, put, processing, errors, setError } =
+        useForm<FormData>({
+            name: combo.data.name,
+            suggested_price: combo.data.suggested_price,
+            suggested_max_payments: combo.data.suggested_max_payments,
+            products: combo.data.products,
+        });
 
-    //     put(route('products.update', { product: product.id }));
-    // };
+    const submit: FormEventHandler = (e) => {
+        e.preventDefault();
 
-    // const _getError = (path: string) => getError(path, errors);
+        if (products.length === 0) {
+            setError('products', 'Debes seleccionar al menos un producto');
 
-    // const _setVariant =
-    //     (
-    //         key: Exclude<keyof FormData['variants'], 'dimentions'>,
-    //         value: string,
-    //     ) =>
-    //     (e: React.ChangeEvent<HTMLInputElement>) => {
-    //         setData('variants', {
-    //             ...data.variants,
-    //             [key]: e.target.checked
-    //                 ? Array.from(
-    //                       new Set([
-    //                           ...(Array.isArray(data.variants[key])
-    //                               ? data.variants[key]
-    //                               : []),
-    //                           value,
-    //                       ]),
-    //                   ) // Add if checked
-    //                 : data.variants[key].filter((item) => item !== value),
-    //         });
-    //     };
+            return;
+        }
+        put(route('combos.update', { combo: combo.data.id }));
+    };
+
+    useEffect(() => {
+        if (!addProduct) return;
+
+        const product = products.find((producto) => producto.id === addProduct);
+
+        if (!product) return;
+
+        if (product.type !== 'mural') {
+            setData('products', [
+                ...data.products,
+                {
+                    id: product.id,
+                    quantity: 1,
+                },
+            ]);
+        } else {
+            setShowAddMuralProduct(products.find((p) => p.id === addProduct)!);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [addProduct]);
+
+    const updateQuantity = (id: number, value: number) => {
+        const updatableProduct = data.products.find(
+            (product) => product.id === id,
+        );
+
+        if (!updatableProduct) {
+            throw new Error('No se encontró ningún producto con id: ${id}');
+        }
+
+        updatableProduct.quantity = updatableProduct.quantity + value;
+
+        if (updatableProduct.quantity < 1) {
+            setData(
+                'products',
+                data.products.filter(
+                    (product) => product.id !== updatableProduct.id,
+                ),
+            );
+        } else {
+            setData('products', [
+                ...data.products.filter(
+                    (product) => product.id !== updatableProduct.id,
+                ),
+                updatableProduct,
+            ]);
+        }
+    };
 
     return (
-        <AuthenticatedLayout header={<PageTitle>Agregar producto</PageTitle>}>
-            <Head title="Productos" />
+        <AuthenticatedLayout
+            header={<PageTitle>Modificar combo {combo.data.name}</PageTitle>}
+        >
+            <Head title="Combos" />
+
+            {showAddMuralProduct ? (
+                <AddProduct
+                    addProduct={(product: SelectedProduct) => {
+                        setData('products', [...data.products, product]);
+                    }}
+                    product={showAddMuralProduct}
+                    show={Boolean(showAddMuralProduct)}
+                    onClose={() => setShowAddMuralProduct(null)}
+                />
+            ) : undefined}
+
             <Card>
-                {/* <form onSubmit={submit} className="p-6">
+                <form onSubmit={submit} className="p-6">
                     <div className="mt-6">
                         <InputLabel htmlFor="name" value="Nombre" />
 
-                        <TextInput
+                        <Input
                             id="name"
-                            type="text"
                             name="name"
                             value={data.name}
                             onChange={(e) => setData('name', e.target.value)}
@@ -63,246 +125,78 @@ export default function EditProduct() {
                     </div>
 
                     <div className="mt-6">
-                        <InputLabel htmlFor="type" value="Tipo" />
+                        <InputLabel htmlFor="suggested_price" value="Precio" />
 
-                        <Select
-                            name="type"
-                            onValueChange={(value) =>
-                                setData('type', value as ProductType)
-                            }
-                            defaultValue={data.type}
-                        >
-                            <SelectTrigger>
-                                <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="mural">Mural</SelectItem>
-                                <SelectItem value="banda">Banda</SelectItem>
-                                <SelectItem value="taza">Taza</SelectItem>
-                                <SelectItem value="medalla">Medalla</SelectItem>
-                            </SelectContent>
-                        </Select>
-
-                        <InputError message={errors.type} className="mt-2" />
-                    </div>
-
-                    <div className="mt-6">
-                        <InputLabel
-                            htmlFor="unit_price"
-                            value="Precio unitario"
-                        />
-
-                        <TextInput
-                            id="unit_price"
+                        <Input
+                            id="suggested_price"
                             type="number"
-                            name="unit_price"
+                            name="suggested_price"
                             min={0}
-                            value={data.unit_price}
+                            value={data.suggested_price}
                             onChange={(e) =>
-                                setData('unit_price', Number(e.target.value))
+                                setData(
+                                    'suggested_price',
+                                    Number(e.target.value),
+                                )
                             }
                             className="mt-1 block w-full"
                             placeholder="Cantidad en números enteros"
                         />
 
                         <InputError
-                            message={errors.unit_price}
+                            message={errors.suggested_price}
                             className="mt-2"
                         />
                     </div>
                     <div className="mt-6">
-                        <InputLabel htmlFor="max_payments">
+                        <InputLabel htmlFor="suggested_max_payments">
                             Cantidad máxima de cuotas
                         </InputLabel>
 
-                        <TextInput
-                            id="max_payments"
+                        <Input
+                            id="suggested_max_payments"
                             type="number"
-                            name="max_payments"
+                            name="suggested_max_payments"
                             min={0}
-                            value={data.max_payments}
+                            value={data.suggested_max_payments}
                             onChange={(e) =>
-                                setData('max_payments', Number(e.target.value))
+                                setData(
+                                    'suggested_max_payments',
+                                    Number(e.target.value),
+                                )
                             }
                             className="mt-1 block w-full"
                             placeholder="Cantidad en números enteros"
                         />
 
                         <InputError
-                            message={errors.max_payments}
+                            message={errors.suggested_max_payments}
                             className="mt-2"
                         />
                     </div>
 
-                    {data.type === 'mural' ? (
-                        <>
-                            <div className="mt-6">
-                                <InputLabel
-                                    htmlFor="dimentions"
-                                    value="Medidas (ancho x alto)"
-                                />
-                                <TextInput
-                                    id="dimentions"
-                                    name="variants.dimentions"
-                                    min={0}
-                                    value={data.variants.dimentions}
-                                    onChange={(e) =>
-                                        setData('variants', {
-                                            ...data.variants,
-                                            dimentions: e.target.value,
-                                        })
-                                    }
-                                    className="mt-1 block w-full"
-                                    placeholder="Cantidad en números enteros"
-                                />
-
-                                <InputError
-                                    message={_getError('variants.dimentions')}
-                                    className="mt-2"
-                                />
-                            </div>
-
-                            <div className="mt-6">
-                                <fieldset>
-                                    <legend className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                        Orientaciones disponibles para este
-                                        producto
-                                    </legend>
-                                    {orientations.map((orientation) => (
-                                        <label
-                                            className="flex items-center"
-                                            key={orientation}
-                                        >
-                                            <Checkbox
-                                                name={orientation}
-                                                checked={data.variants.orientations.includes(
-                                                    orientation,
-                                                )}
-                                                onChange={_setVariant(
-                                                    'orientations',
-                                                    orientation,
-                                                )}
-                                            />
-                                            <span className="ms-2 text-sm text-gray-600 dark:text-gray-400">
-                                                {orientation}
-                                            </span>
-                                        </label>
-                                    ))}
-                                </fieldset>
-                                <InputError
-                                    message={_getError('variants.orientations')}
-                                    className="mt-2"
-                                />
-                            </div>
-
-                            <div className="mt-6">
-                                <fieldset>
-                                    <legend className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                        Colores disponibles para este producto
-                                    </legend>
-                                    {colors.map((color) => (
-                                        <label
-                                            className="flex items-center"
-                                            key={color}
-                                        >
-                                            <Checkbox
-                                                name={color}
-                                                checked={data.variants.colors.includes(
-                                                    color,
-                                                )}
-                                                onChange={_setVariant(
-                                                    'colors',
-                                                    color,
-                                                )}
-                                            />
-                                            <span className="ms-2 text-sm text-gray-600 dark:text-gray-400">
-                                                {color}
-                                            </span>
-                                        </label>
-                                    ))}
-                                </fieldset>
-                                <InputError
-                                    message={_getError('variants.colors')}
-                                    className="mt-2"
-                                />
-                            </div>
-
-                            <div className="mt-6">
-                                <fieldset>
-                                    <legend className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                        Fondos disponibles para este producto
-                                    </legend>
-                                    {backgrounds.map((background) => (
-                                        <label
-                                            className="flex items-center"
-                                            key={background}
-                                        >
-                                            <Checkbox
-                                                name={background}
-                                                checked={data.variants.backgrounds.includes(
-                                                    background,
-                                                )}
-                                                onChange={_setVariant(
-                                                    'backgrounds',
-                                                    background,
-                                                )}
-                                            />
-                                            <span className="ms-2 text-sm text-gray-600 dark:text-gray-400">
-                                                {background}
-                                            </span>
-                                        </label>
-                                    ))}
-                                </fieldset>
-                                <InputError
-                                    message={_getError('variants.backgrounds')}
-                                    className="mt-2"
-                                />
-                            </div>
-
-                            <div className="mt-6">
-                                <fieldset>
-                                    <legend className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                        Tipo de foto
-                                    </legend>
-                                    {photo_types.map((photo_type) => (
-                                        <label
-                                            className="flex items-center"
-                                            key={photo_type}
-                                        >
-                                            <Checkbox
-                                                name={photo_type}
-                                                checked={data.variants.photo_types.includes(
-                                                    photo_type,
-                                                )}
-                                                onChange={_setVariant(
-                                                    'photo_types',
-                                                    photo_type,
-                                                )}
-                                            />
-                                            <span className="ms-2 text-sm text-gray-600 dark:text-gray-400">
-                                                {photo_type}
-                                            </span>
-                                        </label>
-                                    ))}
-                                </fieldset>
-                                <InputError
-                                    message={_getError('variants.photo_types')}
-                                    className="mt-2"
-                                />
-                            </div>
-                        </>
-                    ) : undefined}
+                    <div className="mt-6">
+                        <ComboProducts
+                            selectedProducts={data.products}
+                            products={products}
+                            openAddProductModal={setAddProduct}
+                            updateQuantity={updateQuantity}
+                        >
+                            <InputError
+                                message={errors.products}
+                                className="my-2"
+                            />
+                        </ComboProducts>
+                    </div>
 
                     <div className="mt-6 flex justify-end gap-3">
                         <Button variant="outline" asChild>
-                            <Link href={route('products.index')}>Cancelar</Link>
+                            <Link href={route('combos.index')}>Cancelar</Link>
                         </Button>
 
-                        <Button disabled={processing}>
-                            Modificar producto
-                        </Button>
+                        <Button disabled={processing}>Modificar combo</Button>
                     </div>
-                </form> */}
+                </form>
             </Card>
         </AuthenticatedLayout>
     );

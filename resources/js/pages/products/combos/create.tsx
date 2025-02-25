@@ -37,8 +37,6 @@ export default function CreateCombo({
         post(route('combos.store'));
     };
 
-    console.log(errors);
-
     useEffect(() => {
         if (!addProduct) return;
 

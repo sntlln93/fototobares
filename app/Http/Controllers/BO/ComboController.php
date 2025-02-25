@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Bo;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ComboResource;
+use App\Http\Resources\EditableComboResource;
 use App\Models\Combo;
 use App\Models\Product;
 use Illuminate\Http\Request;
@@ -55,7 +56,12 @@ class ComboController extends Controller
 
     public function edit(Combo $combo)
     {
-        return inertia('products/combos/edit', ['combo' => new ComboResource($combo)]);
+        $products = Product::all();
+
+        return inertia('products/combos/edit', [
+            'products' => $products,
+            'combo' => new EditableComboResource($combo->load('products'))
+        ]);
     }
 
     public function update(Request $request, Combo $combo)

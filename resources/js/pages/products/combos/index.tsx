@@ -80,11 +80,8 @@ export default function Combos({ combos }: PageProps<Paginated<Combo>>) {
                                     Precio
                                 </div>
                             </TableHead>
-                            <TableHead>
-                                <div className="flex items-center gap-2">
-                                    Cuotas máximas
-                                </div>
-                            </TableHead>
+                            <TableHead>Cuotas máximas</TableHead>
+                            <TableHead>Productos</TableHead>
                             <TableHead>Acciones</TableHead>
                         </TableRow>
                     </TableHeader>
