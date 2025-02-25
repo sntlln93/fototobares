@@ -1,6 +1,7 @@
 <?php
 
-use App\Http\Controllers\Bo\ComboController;
+use App\Http\Controllers\BO\ComboController;
+use App\Http\Controllers\BO\OrderController;
 use App\Http\Controllers\BO\ProductController;
 use App\Http\Controllers\BO\SchoolController;
 use App\Http\Controllers\BO\StockController;
@@ -14,11 +15,7 @@ Route::get('/dashboard', function () {
 
 Route::resource('products', ProductController::class)->middleware(['auth']);
 Route::resource('combos', ComboController::class)->middleware(['auth']);
-
-Route::get('/orders', function () {
-    return Inertia::render('orders.index');
-})->middleware(['auth', 'verified'])->name('orders.index');
-
+Route::resource('orders', OrderController::class)->middleware(['auth']);
 Route::resource('schools', SchoolController::class)->middleware(['auth']);
 
 Route::get('/tracking', function () {
@@ -26,12 +23,6 @@ Route::get('/tracking', function () {
 })->middleware(['auth', 'verified'])->name('tracking.index');
 
 Route::resource('stockables', StockController::class)->middleware(['auth']);
-
-Route::group(['prefix'=> 'sales'], function(){
-    Route::get('/', function() {
-        return "sales";
-    })->name('sales');
-});
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
