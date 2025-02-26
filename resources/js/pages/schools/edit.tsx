@@ -3,7 +3,14 @@ import { InputError } from '@/components/inputError';
 import { InputLabel } from '@/components/inputLabel';
 import { PageTitle } from '@/components/pageTitle';
 import { Button } from '@/components/ui/button';
-import { Input as TextInput } from '@/components/ui/input';
+import { Input } from '@/components/ui/input';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import { AuthenticatedLayout } from '@/layouts/authenticated.layout';
 import { getError } from '@/lib/utils';
 import { Head, Link, useForm } from '@inertiajs/react';
@@ -13,6 +20,7 @@ export default function EditSchool({ school }: PageProps<{ school: School }>) {
     const { data, setData, put, processing, errors } = useForm({
         school: {
             name: school.name,
+            level: school.level,
         },
         principal: {
             name: school.principal.name,
@@ -40,31 +48,70 @@ export default function EditSchool({ school }: PageProps<{ school: School }>) {
                 <form onSubmit={submit} className="p-6">
                     <section className="mt-6">
                         <h2>Escuela</h2>
-                        <div>
-                            <InputLabel
-                                htmlFor="school.name"
-                                value="Nombre de la escuela"
-                            />
+                        <div className="flex items-end gap-2">
+                            <div className="w-full">
+                                <InputLabel
+                                    htmlFor="school.name"
+                                    value="Nombre de la escuela"
+                                />
 
-                            <TextInput
-                                id="school.name"
-                                type="text"
-                                name="school.name"
-                                value={data.school.name}
-                                onChange={(e) =>
-                                    setData('school', {
-                                        ...data.school,
-                                        name: e.target.value,
-                                    })
-                                }
-                                className="mt-1 block w-full"
-                                placeholder="Nombre de la escuela"
-                            />
+                                <Input
+                                    id="school.name"
+                                    type="text"
+                                    name="school.name"
+                                    value={data.school.name}
+                                    onChange={(e) =>
+                                        setData('school', {
+                                            ...data.school,
+                                            name: e.target.value,
+                                        })
+                                    }
+                                    className="mt-1 block w-full"
+                                    placeholder="Nombre de la escuela"
+                                />
 
-                            <InputError
-                                message={_getError('school.name')}
-                                className="mt-2"
-                            />
+                                <InputError
+                                    message={_getError('school.name')}
+                                    className="mt-2"
+                                />
+                            </div>
+
+                            <div className="w-full">
+                                <InputLabel htmlFor="level" value="Nivel" />
+                                <Select
+                                    name="level"
+                                    onValueChange={(value) =>
+                                        setData('school', {
+                                            ...data.school,
+                                            level: value as
+                                                | 'Jardín'
+                                                | 'Primaria'
+                                                | 'Secundaria',
+                                        })
+                                    }
+                                    defaultValue={'Primaria'}
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="Jardin">
+                                            Jardín
+                                        </SelectItem>
+                                        <SelectItem value="Primaria">
+                                            Primaria
+                                        </SelectItem>
+                                        <SelectItem value="Secundaria">
+                                            Secundaria
+                                        </SelectItem>
+                                    </SelectContent>
+                                </Select>
+
+                                <InputError
+                                    message={_getError('school.name')}
+                                    className="mt-2"
+                                />
+                            </div>
                         </div>
                     </section>
 
@@ -77,7 +124,7 @@ export default function EditSchool({ school }: PageProps<{ school: School }>) {
                                     value="Nombre de la autoridad"
                                 />
 
-                                <TextInput
+                                <Input
                                     id="principal.name"
                                     name="principal.name"
                                     value={data.principal.name}
@@ -103,7 +150,7 @@ export default function EditSchool({ school }: PageProps<{ school: School }>) {
                                     value="Teléfono de la autoridad"
                                 />
 
-                                <TextInput
+                                <Input
                                     id="principal.phone"
                                     name="principal.phone"
                                     type="text"
@@ -138,7 +185,7 @@ export default function EditSchool({ school }: PageProps<{ school: School }>) {
                                     value="Calle"
                                 />
 
-                                <TextInput
+                                <Input
                                     id="address.street"
                                     name="address.street"
                                     value={data.address.street}
@@ -164,7 +211,7 @@ export default function EditSchool({ school }: PageProps<{ school: School }>) {
                                     value="Altura"
                                 />
 
-                                <TextInput
+                                <Input
                                     id="address.number"
                                     name="address.number"
                                     value={data.address.number}
@@ -192,7 +239,7 @@ export default function EditSchool({ school }: PageProps<{ school: School }>) {
                                     value="Barrio"
                                 />
 
-                                <TextInput
+                                <Input
                                     id="address.neighborhood"
                                     name="address.neighborhood"
                                     value={data.address.neighborhood}
@@ -218,7 +265,7 @@ export default function EditSchool({ school }: PageProps<{ school: School }>) {
                                     value="Localidad"
                                 />
 
-                                <TextInput
+                                <Input
                                     id="address.city"
                                     name="address.city"
                                     value={data.address.city}

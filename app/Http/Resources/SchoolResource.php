@@ -17,6 +17,7 @@ class SchoolResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
+            'level' => $this->level,
             'principal' => new ContactResource($this->principal),
             'full_address' => (string) $this->address,
             'classrooms' => ClassroomResource::collection($this->classrooms),

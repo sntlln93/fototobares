@@ -86,6 +86,7 @@ declare global {
     interface School {
         id: number;
         name: string;
+        level: 'Jardín' | 'Primaria' | 'Secundaria';
         principal: Principal;
         classrooms: Omit<Classroom, 'teacher'>[];
         full_address: string;

@@ -68,6 +68,7 @@ export default function Schools({ schools }: PageProps<Paginated<School>>) {
                                     Nombre
                                 </div>
                             </TableHead>
+                            <TableHead>Nivel</TableHead>
                             <TableHead>
                                 <div className="flex items-center gap-2">
                                     Director/a
@@ -94,6 +95,7 @@ export default function Schools({ schools }: PageProps<Paginated<School>>) {
                                     {school.id}
                                 </TableCell>
                                 <TableCell>{school.name}</TableCell>
+                                <TableCell>{school.level}</TableCell>
                                 <TableCell>{school.principal.name}</TableCell>
                                 <TableCell>{school.full_address}</TableCell>
                                 <TableCell>

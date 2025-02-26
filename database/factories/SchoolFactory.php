@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Enums\ContactRole;
+use App\Enums\SchoolLevel;
 use App\Models\Address;
 use App\Models\Classroom;
 use App\Models\Contact;
@@ -22,6 +23,7 @@ class SchoolFactory extends Factory
     {
         return [
             'name' => fake()->streetName(),
+            'level' => fake()->randomElement(SchoolLevel::cases()),
         ];
     }
 

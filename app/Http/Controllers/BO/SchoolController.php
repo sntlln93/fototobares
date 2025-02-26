@@ -44,6 +44,7 @@ class SchoolController extends Controller
         $validated = $request->validate([
             'school' => ['required'],
             'school.name' => ['required'],
+            'school.level' => ['required'],
             'principal' => ['required'],
             'principal.name' => ['required'],
             'principal.phone' => ['required', 'numeric'],
@@ -80,6 +81,7 @@ class SchoolController extends Controller
         $validated = $request->validate([
             'school' => ['required'],
             'school.name' => ['required'],
+            'school.level' => ['required'],
             'principal' => ['required'],
             'principal.name' => ['required'],
             'principal.phone' => ['required', 'numeric'],
