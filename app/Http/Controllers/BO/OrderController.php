@@ -5,7 +5,6 @@ namespace App\Http\Controllers\BO;
 use App\Http\Controllers\Controller;
 use App\Models\Combo;
 use App\Models\School;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class OrderController extends Controller

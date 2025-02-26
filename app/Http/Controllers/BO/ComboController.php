@@ -60,7 +60,7 @@ class ComboController extends Controller
 
         return inertia('products/combos/edit', [
             'products' => $products,
-            'combo' => new EditableComboResource($combo->load('products'))
+            'combo' => new EditableComboResource($combo->load('products')),
         ]);
     }
 

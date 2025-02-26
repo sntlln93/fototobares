@@ -19,13 +19,13 @@ class EditableComboResource extends JsonResource
             'name' => $this->resource->name,
             'suggested_price' => $this->resource->suggested_price,
             'suggested_max_payments' => $this->resource->suggested_max_payments,
-            'products' => $this->products->map(function($p) {
+            'products' => $this->products->map(function ($p) {
                 return [
                     'id' => $p->id,
                     'quantity' => $p->pivot->quantity,
-                    'variants' => $p->pivot->variants
+                    'variants' => $p->pivot->variants,
                 ];
-            })
+            }),
         ];
     }
 }
