@@ -1,7 +1,7 @@
-import { InputLabel } from '@/components/inputLabel';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Combobox } from '@/components/ui/combobox';
+import { Label } from '@/components/ui/label';
 import {
     Edit,
     Minus,
@@ -38,9 +38,9 @@ export function ComboProducts({
 
     return (
         <div className="w-[100%]">
-            <InputLabel htmlFor="suggested_max_payments">
+            <Label htmlFor="suggested_max_payments">
                 Productos del combo ({selectedProducts.length})
-            </InputLabel>
+            </Label>
 
             <ul className="my-2 gap-4">
                 {selectedProducts.map((selected) => {

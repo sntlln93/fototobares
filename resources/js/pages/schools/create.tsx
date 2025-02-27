@@ -1,9 +1,8 @@
 import { Card } from '@/components/card';
-import { InputError } from '@/components/inputError';
-import { InputLabel } from '@/components/inputLabel';
-import { PageTitle } from '@/components/pageTitle';
+import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input as TextInput } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
     Select,
     SelectContent,
@@ -11,7 +10,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { AuthenticatedLayout } from '@/layouts/authenticated.layout';
+import AppLayout from '@/layouts/app-layout';
 import { getError } from '@/lib/utils';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { FormEventHandler } from 'react';
@@ -34,7 +33,7 @@ export default function CreateSchool() {
     const _getError = (path: string) => getError(path, errors);
 
     return (
-        <AuthenticatedLayout header={<PageTitle>Nueva escuela</PageTitle>}>
+        <AppLayout>
             <Head title="Stock" />
             <Card>
                 <form onSubmit={submit} className="p-6">
@@ -42,10 +41,9 @@ export default function CreateSchool() {
                         <h2>Escuela</h2>
                         <div className="flex items-end gap-2">
                             <div className="w-full">
-                                <InputLabel
-                                    htmlFor="school.name"
-                                    value="Nombre de la escuela"
-                                />
+                                <Label htmlFor="school.name">
+                                    Nombre de la escuela
+                                </Label>
 
                                 <TextInput
                                     id="school.name"
@@ -69,7 +67,7 @@ export default function CreateSchool() {
                             </div>
 
                             <div className="w-full">
-                                <InputLabel htmlFor="level" value="Nivel" />
+                                <Label htmlFor="level">Nivel</Label>
                                 <Select
                                     name="level"
                                     onValueChange={(value) =>
@@ -108,10 +106,9 @@ export default function CreateSchool() {
                         <h2>Director/a</h2>
                         <div className="flex gap-6">
                             <div className="w-full">
-                                <InputLabel
-                                    htmlFor="principal.name"
-                                    value="Nombre de la autoridad"
-                                />
+                                <Label htmlFor="principal.name">
+                                    Nombre de la autoridad
+                                </Label>
 
                                 <TextInput
                                     id="principal.name"
@@ -134,10 +131,9 @@ export default function CreateSchool() {
                             </div>
 
                             <div className="w-full">
-                                <InputLabel
-                                    htmlFor="principal.phone"
-                                    value="Teléfono de la autoridad"
-                                />
+                                <Label htmlFor="principal.phone">
+                                    Teléfono de la autoridad
+                                </Label>
 
                                 <TextInput
                                     id="principal.phone"
@@ -169,10 +165,7 @@ export default function CreateSchool() {
                         </h2>
                         <div className="flex gap-6">
                             <div className="w-full">
-                                <InputLabel
-                                    htmlFor="address.street"
-                                    value="Calle"
-                                />
+                                <Label htmlFor="address.street">Calle</Label>
 
                                 <TextInput
                                     id="address.street"
@@ -195,10 +188,7 @@ export default function CreateSchool() {
                             </div>
 
                             <div className="w-full">
-                                <InputLabel
-                                    htmlFor="address.number"
-                                    value="Altura"
-                                />
+                                <Label htmlFor="address.number">Altura</Label>
 
                                 <TextInput
                                     id="address.number"
@@ -223,10 +213,9 @@ export default function CreateSchool() {
 
                         <div className="mt-6 flex gap-6">
                             <div className="w-full">
-                                <InputLabel
-                                    htmlFor="address.neighborhood"
-                                    value="Barrio"
-                                />
+                                <Label htmlFor="address.neighborhood">
+                                    Barrio
+                                </Label>
 
                                 <TextInput
                                     id="address.neighborhood"
@@ -249,10 +238,7 @@ export default function CreateSchool() {
                             </div>
 
                             <div className="w-full">
-                                <InputLabel
-                                    htmlFor="address.city"
-                                    value="Localidad"
-                                />
+                                <Label htmlFor="address.city">Localidad</Label>
 
                                 <TextInput
                                     id="address.city"
@@ -285,6 +271,6 @@ export default function CreateSchool() {
                     </div>
                 </form>
             </Card>
-        </AuthenticatedLayout>
+        </AppLayout>
     );
 }

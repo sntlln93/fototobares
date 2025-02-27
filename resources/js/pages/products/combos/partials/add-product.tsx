@@ -1,5 +1,5 @@
 import { Checkbox } from '@/components/checkbox';
-import { InputError } from '@/components/inputError';
+import InputError from '@/components/input-error';
 import { Modal } from '@/components/modal';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';

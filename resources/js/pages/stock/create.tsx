@@ -1,10 +1,9 @@
 import { Card } from '@/components/card';
 import { Checkbox } from '@/components/checkbox';
-import { InputError } from '@/components/inputError';
-import { InputLabel } from '@/components/inputLabel';
-import { PageTitle } from '@/components/pageTitle';
+import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input as TextInput } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
     Select,
     SelectContent,
@@ -12,7 +11,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { AuthenticatedLayout } from '@/layouts/authenticated.layout';
+import AppLayout from '@/layouts/app-layout';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { FormEventHandler } from 'react';
 
@@ -42,12 +41,12 @@ export default function CreateStockable({
     };
 
     return (
-        <AuthenticatedLayout header={<PageTitle>Agregar stockeable</PageTitle>}>
+        <AppLayout>
             <Head title="Stock" />
             <Card>
                 <form onSubmit={submit} className="p-6">
                     <div className="mt-6">
-                        <InputLabel htmlFor="name" value="Nombre" />
+                        <Label htmlFor="name">Nombre</Label>
 
                         <TextInput
                             id="name"
@@ -63,7 +62,7 @@ export default function CreateStockable({
                     </div>
 
                     <div className="mt-6">
-                        <InputLabel htmlFor="quantity" value="Cantidad" />
+                        <Label htmlFor="quantity">Cantidad</Label>
 
                         <TextInput
                             id="quantity"
@@ -85,10 +84,10 @@ export default function CreateStockable({
                     </div>
 
                     <div className="mt-6">
-                        <InputLabel htmlFor="alert_at">
+                        <Label htmlFor="alert_at">
                             Enviar alerta cuando la cantidad sea menor a{' '}
                             <span className="uppercase italic">(opcional)</span>
-                        </InputLabel>
+                        </Label>
 
                         <TextInput
                             id="alert_at"
@@ -110,7 +109,7 @@ export default function CreateStockable({
                     </div>
 
                     <div className="mt-6">
-                        <InputLabel htmlFor="unit" value="Unidad de medida" />
+                        <Label htmlFor="unit">Unidad de medida</Label>
                         <Select
                             name="unit"
                             onValueChange={(value) => setData('unit', value)}
@@ -173,6 +172,6 @@ export default function CreateStockable({
                     </div>
                 </form>
             </Card>
-        </AuthenticatedLayout>
+        </AppLayout>
     );
 }

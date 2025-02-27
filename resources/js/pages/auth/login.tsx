@@ -1,9 +1,9 @@
 import { Checkbox } from '@/components/checkbox';
-import { InputError } from '@/components/inputError';
-import { InputLabel } from '@/components/inputLabel';
+import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
-import { Input as TextInput } from '@/components/ui/input';
-import { GuestLayout } from '@/layouts/guest.layout';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import AuthLayout from '@/layouts/auth-layout';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { FormEventHandler } from 'react';
 
@@ -29,7 +29,10 @@ export default function Login({
     };
 
     return (
-        <GuestLayout>
+        <AuthLayout
+            title="Log in to your account"
+            description="Enter your email and password below to log in"
+        >
             <Head title="Iniciar sesión" />
 
             {status && (
@@ -40,9 +43,9 @@ export default function Login({
 
             <form onSubmit={submit}>
                 <div>
-                    <InputLabel htmlFor="email" value="Email" />
+                    <Label htmlFor="email">Email</Label>
 
-                    <TextInput
+                    <Input
                         id="email"
                         type="email"
                         name="email"
@@ -56,9 +59,9 @@ export default function Login({
                 </div>
 
                 <div className="mt-4">
-                    <InputLabel htmlFor="password" value="Password" />
+                    <Label htmlFor="password">Password</Label>
 
-                    <TextInput
+                    <Input
                         id="password"
                         type="password"
                         name="password"
@@ -101,6 +104,6 @@ export default function Login({
                     </Button>
                 </div>
             </form>
-        </GuestLayout>
+        </AuthLayout>
     );
 }

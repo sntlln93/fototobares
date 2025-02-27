@@ -1,8 +1,8 @@
-import { InputError } from '@/components/inputError';
-import { InputLabel } from '@/components/inputLabel';
+import InputError from '@/components/input-error';
 import { Modal } from '@/components/modal';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Link, useForm } from '@inertiajs/react';
 import { ArrowRight, Minus, Plus } from 'lucide-react';
 import { FormEventHandler, MouseEventHandler } from 'react';
@@ -56,7 +56,7 @@ export function AlterStockForm({
                     </h2>
                 </header>
                 <div className="mt-6">
-                    <InputLabel htmlFor="quantity" value="Cantidad" />
+                    <Label htmlFor="quantity">Cantidad</Label>
 
                     <div className="mt-1 flex gap-2">
                         <Input

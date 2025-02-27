@@ -11,7 +11,7 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import { Searchbar } from '@/features/searchbar';
-import { AuthenticatedLayout } from '@/layouts/authenticated.layout';
+import AppLayout from '@/layouts/app-layout';
 import { onSort } from '@/lib/services/filter';
 import { Head, Link, router } from '@inertiajs/react';
 import { ArrowUpDown, Diff, Edit2, Plus, Trash } from 'lucide-react';
@@ -30,7 +30,7 @@ export default function Stockables({
     ] = useState<Stockable | null>(null);
 
     return (
-        <AuthenticatedLayout>
+        <AppLayout>
             <Head title="Stock" />
             {showAddStockModal ? (
                 <AlterStockForm
@@ -157,7 +157,7 @@ export default function Stockables({
                                     </Button>
                                     <Button
                                         size={'sm'}
-                                        variant={'secondary'}
+                                        variant="secondary"
                                         onClick={() =>
                                             setShowAddStockModal(stockable)
                                         }
@@ -171,6 +171,6 @@ export default function Stockables({
                 </Table>
                 <PaginationNav links={stockables.meta.links} />
             </Card>
-        </AuthenticatedLayout>
+        </AppLayout>
     );
 }

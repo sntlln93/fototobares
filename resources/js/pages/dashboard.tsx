@@ -1,9 +1,17 @@
-import { AuthenticatedLayout } from '@/layouts/authenticated.layout';
+import AppLayout from '@/layouts/app-layout';
+import { BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
+
+const breadcrumbs: BreadcrumbItem[] = [
+    {
+        title: 'Dashboard',
+        href: '/dashboard',
+    },
+];
 
 export default function Dashboard() {
     return (
-        <AuthenticatedLayout>
+        <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Dashboard" />
 
             <div className="py-12">
@@ -16,6 +24,6 @@ export default function Dashboard() {
                     </div>
                 </div>
             </div>
-        </AuthenticatedLayout>
+        </AppLayout>
     );
 }

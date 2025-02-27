@@ -5,7 +5,6 @@ use App\Http\Controllers\BO\OrderController;
 use App\Http\Controllers\BO\ProductController;
 use App\Http\Controllers\BO\SchoolController;
 use App\Http\Controllers\BO\StockController;
-use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -24,10 +23,5 @@ Route::get('/tracking', function () {
 
 Route::resource('stockables', StockController::class)->middleware(['auth']);
 
-Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-});
-
 require __DIR__.'/auth.php';
+require __DIR__.'/settings.php';

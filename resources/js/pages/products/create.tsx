@@ -1,10 +1,9 @@
 import { Card } from '@/components/card';
 import { Checkbox } from '@/components/checkbox';
-import { InputError } from '@/components/inputError';
-import { InputLabel } from '@/components/inputLabel';
-import { PageTitle } from '@/components/pageTitle';
+import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input as TextInput } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
     Select,
     SelectContent,
@@ -12,7 +11,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { AuthenticatedLayout } from '@/layouts/authenticated.layout';
+import AppLayout from '@/layouts/app-layout';
 import { getError } from '@/lib/utils';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { FormEventHandler } from 'react';
@@ -64,12 +63,12 @@ export default function CreateProduct() {
         };
 
     return (
-        <AuthenticatedLayout header={<PageTitle>Agregar producto</PageTitle>}>
+        <AppLayout>
             <Head title="Productos" />
             <Card>
                 <form onSubmit={submit} className="p-6">
                     <div className="mt-6">
-                        <InputLabel htmlFor="name" value="Nombre" />
+                        <Label htmlFor="name">Nombre</Label>
 
                         <TextInput
                             id="name"
@@ -85,7 +84,7 @@ export default function CreateProduct() {
                     </div>
 
                     <div className="mt-6">
-                        <InputLabel htmlFor="type" value="Tipo" />
+                        <Label htmlFor="type">Tipo</Label>
 
                         <Select
                             name="type"
@@ -109,10 +108,7 @@ export default function CreateProduct() {
                     </div>
 
                     <div className="mt-6">
-                        <InputLabel
-                            htmlFor="unit_price"
-                            value="Precio unitario"
-                        />
+                        <Label htmlFor="unit_price">Precio unitario</Label>
 
                         <TextInput
                             id="unit_price"
@@ -133,9 +129,9 @@ export default function CreateProduct() {
                         />
                     </div>
                     <div className="mt-6">
-                        <InputLabel htmlFor="max_payments">
+                        <Label htmlFor="max_payments">
                             Cantidad máxima de cuotas
-                        </InputLabel>
+                        </Label>
 
                         <TextInput
                             id="max_payments"
@@ -159,10 +155,9 @@ export default function CreateProduct() {
                     {data.type === 'mural' ? (
                         <>
                             <div className="mt-6">
-                                <InputLabel
-                                    htmlFor="dimentions"
-                                    value="Medidas (ancho x alto)"
-                                />
+                                <Label htmlFor="dimentions">
+                                    Medidas (ancho x alto)
+                                </Label>
                                 <TextInput
                                     id="dimentions"
                                     name="variants.dimentions"
@@ -324,6 +319,6 @@ export default function CreateProduct() {
                     </div>
                 </form>
             </Card>
-        </AuthenticatedLayout>
+        </AppLayout>
     );
 }

@@ -1,10 +1,9 @@
 import { Card } from '@/components/card';
-import { InputError } from '@/components/inputError';
-import { InputLabel } from '@/components/inputLabel';
-import { PageTitle } from '@/components/pageTitle';
+import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { AuthenticatedLayout } from '@/layouts/authenticated.layout';
+import { Label } from '@/components/ui/label';
+import AppLayout from '@/layouts/app-layout';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { FormEventHandler, useEffect, useState } from 'react';
 import { FormData, SelectedProduct } from './form';
@@ -87,7 +86,7 @@ export default function CreateCombo({
     };
 
     return (
-        <AuthenticatedLayout header={<PageTitle>Agregar combo</PageTitle>}>
+        <AppLayout>
             <Head title="Combos" />
 
             {showAddMuralProduct ? (
@@ -104,7 +103,7 @@ export default function CreateCombo({
             <Card>
                 <form onSubmit={submit} className="p-6">
                     <div className="mt-6">
-                        <InputLabel htmlFor="name" value="Nombre" />
+                        <Label htmlFor="name">Nombre</Label>
 
                         <Input
                             id="name"
@@ -119,7 +118,7 @@ export default function CreateCombo({
                     </div>
 
                     <div className="mt-6">
-                        <InputLabel htmlFor="suggested_price" value="Precio" />
+                        <Label htmlFor="suggested_price">Precio</Label>
 
                         <Input
                             id="suggested_price"
@@ -143,9 +142,9 @@ export default function CreateCombo({
                         />
                     </div>
                     <div className="mt-6">
-                        <InputLabel htmlFor="suggested_max_payments">
+                        <Label htmlFor="suggested_max_payments">
                             Cantidad máxima de cuotas
-                        </InputLabel>
+                        </Label>
 
                         <Input
                             id="suggested_max_payments"
@@ -192,6 +191,6 @@ export default function CreateCombo({
                     </div>
                 </form>
             </Card>
-        </AuthenticatedLayout>
+        </AppLayout>
     );
 }

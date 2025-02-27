@@ -11,10 +11,21 @@ class OrderController extends Controller
 {
     public function create()
     {
-        $schools = School::with(['classrooms.teacher', 'principal'])->get();
+        $schools = School::query()
+            ->with(['classrooms.teacher', 'principal'])
+            ->whereHas('classrooms')
+            ->get();
         $combos = Combo::with(['products'])->get();
 
+        $schoolLevels = [
+            'Todos',
+            ...$schools->map(fn ($school) => $school->level)->sort(function($level1, $level2) {
+                return strcmp($level1, $level2) > 0;
+            })->unique(),
+        ];
+
         return Inertia::render('orders/create', [
+            'schoolLevels' => $schoolLevels,
             'schools' => $schools,
             'combos' => $combos,
         ]);

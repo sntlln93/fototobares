@@ -10,7 +10,7 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import { Searchbar } from '@/features/searchbar';
-import { AuthenticatedLayout } from '@/layouts/authenticated.layout';
+import AppLayout from '@/layouts/app-layout';
 import { onSort } from '@/lib/services/filter';
 import { Head, Link } from '@inertiajs/react';
 import { ArrowUpDown, Edit2, Plus, Trash } from 'lucide-react';
@@ -27,7 +27,7 @@ export default function Schools({ schools }: PageProps<Paginated<School>>) {
     );
 
     return (
-        <AuthenticatedLayout>
+        <AppLayout>
             <Head title="Escuelas" />
 
             {deleteableSchool && (
@@ -132,6 +132,6 @@ export default function Schools({ schools }: PageProps<Paginated<School>>) {
                 </Table>
                 <PaginationNav links={schools.meta.links} />
             </Card>
-        </AuthenticatedLayout>
+        </AppLayout>
     );
 }
