@@ -87,7 +87,7 @@ export default function EditSchool({ school }: PageProps<{ school: School }>) {
                                                 | 'Secundaria',
                                         })
                                     }
-                                    defaultValue={'Primaria'}
+                                    defaultValue={school.level}
                                 >
                                     <SelectTrigger>
                                         <SelectValue />
