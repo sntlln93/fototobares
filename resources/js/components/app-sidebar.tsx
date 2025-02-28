@@ -15,6 +15,7 @@ import {
     DollarSign,
     Home,
     Package,
+    Package2Icon,
     PackageOpen,
     Rss,
     School,
@@ -26,6 +27,7 @@ import { NavUser } from './nav-user';
 
 const routeables = [
     { name: 'Dashboard', route: 'dashboard', icon: Home },
+    { name: 'Combos', route: 'combos.index', icon: Package2Icon },
     { name: 'Productos', route: 'products.index', icon: Package },
     { name: 'Pedidos', route: 'orders.index', icon: ShoppingCart },
     { name: 'Escuelas', route: 'schools.index', icon: School },
