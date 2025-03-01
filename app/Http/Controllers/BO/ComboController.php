@@ -15,7 +15,7 @@ class ComboController extends Controller
     {
         $combos = Combo::with('products')->paginate(10);
 
-        return inertia('products/combos/index', [
+        return inertia('combos/index', [
             'combos' => ComboResource::collection($combos),
         ]);
     }
@@ -24,7 +24,7 @@ class ComboController extends Controller
     {
         $products = Product::all();
 
-        return inertia('products/combos/create', [
+        return inertia('combos/create', [
             'products' => $products,
         ]);
     }
@@ -58,7 +58,7 @@ class ComboController extends Controller
     {
         $products = Product::all();
 
-        return inertia('products/combos/edit', [
+        return inertia('combos/edit', [
             'products' => $products,
             'combo' => new EditableComboResource($combo->load('products')),
         ]);

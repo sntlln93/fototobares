@@ -12,21 +12,24 @@ import {
 } from '@/components/ui/sidebar';
 import { Link } from '@inertiajs/react';
 import {
+    DollarSign,
+    Group,
     Home,
     Package,
-    Package2Icon,
     PackageOpen,
     Rss,
     School,
+    ShoppingCart,
 } from 'lucide-react';
 import AppLogo from './app-logo';
+import { NavFooter } from './nav-footer';
 import { NavUser } from './nav-user';
 
 const routeables = [
     { name: 'Dashboard', route: 'dashboard', icon: Home },
-    { name: 'Combos', route: 'combos.index', icon: Package2Icon },
+    { name: 'Combos', route: 'combos.index', icon: Group },
     { name: 'Productos', route: 'products.index', icon: Package },
-    // { name: 'Pedidos', route: 'orders.index', icon: ShoppingCart },
+    { name: 'Pedidos', route: 'orders.index', icon: ShoppingCart },
     { name: 'Escuelas', route: 'schools.index', icon: School },
     { name: 'Seguimiento', route: 'tracking.index', icon: Rss },
     { name: 'Stockeables', route: 'stockables.index', icon: PackageOpen },
@@ -66,7 +69,7 @@ export function AppSidebar() {
                 </SidebarGroup>
             </SidebarContent>
             <SidebarFooter>
-                {/* <NavFooter
+                <NavFooter
                     items={[
                         {
                             title: 'Vender',
@@ -75,8 +78,7 @@ export function AppSidebar() {
                         },
                     ]}
                     className="mt-auto"
-                /> */}
-
+                />
                 <NavUser />
             </SidebarFooter>
         </Sidebar>

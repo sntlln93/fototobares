@@ -15,7 +15,7 @@ import { formatPrice } from '@/lib/utils';
 import { Link } from '@inertiajs/react';
 import { ArrowUpDown, Edit2, Plus, Trash } from 'lucide-react';
 import { useState } from 'react';
-import { ProductLayout } from '../partials/products.layout';
+import { ProductLayout } from '../products/partials/products.layout';
 import { DeleteComboConfirmation } from './partials/delete-confirmation';
 
 export default function Combos({ combos }: PageProps<Paginated<Combo>>) {
