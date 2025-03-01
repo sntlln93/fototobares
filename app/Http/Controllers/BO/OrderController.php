@@ -4,6 +4,7 @@ namespace App\Http\Controllers\BO;
 
 use App\Http\Controllers\Controller;
 use App\Models\Combo;
+use App\Models\Product;
 use App\Models\School;
 use Inertia\Inertia;
 
@@ -15,7 +16,9 @@ class OrderController extends Controller
             ->with(['classrooms.teacher', 'principal'])
             ->whereHas('classrooms')
             ->get();
+
         $combos = Combo::with(['products'])->get();
+        $products = Product::get();
 
         $schoolLevels = [
             'Todos',
@@ -28,6 +31,7 @@ class OrderController extends Controller
             'schoolLevels' => $schoolLevels,
             'schools' => $schools,
             'combos' => $combos,
+            'products' => $products,
         ]);
     }
 }

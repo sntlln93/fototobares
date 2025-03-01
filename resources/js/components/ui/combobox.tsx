@@ -21,19 +21,21 @@ export function Combobox({
     action,
     items,
     setOpen,
+    placeholder,
 }: PropsWithChildren<{
     className?: string;
     setOpen: React.Dispatch<React.SetStateAction<boolean>>;
     open: boolean;
     items: { label: string; value: number | string }[];
     action: (value: string) => void;
+    placeholder: string;
 }>) {
     return (
         <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>{children}</PopoverTrigger>
             <PopoverContent className={cn('w-[200px] p-0', className)}>
                 <Command>
-                    <CommandInput placeholder="Buscar producto" />
+                    <CommandInput placeholder={placeholder} />
                     <CommandList>
                         <CommandEmpty>
                             No se encontró ningún producto

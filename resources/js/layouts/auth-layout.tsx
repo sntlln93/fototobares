@@ -1,3 +1,4 @@
+import useCsrfAutoRefresh from '@/hooks/use-csrf-auto-refresh';
 import AuthLayoutTemplate from '@/layouts/auth/auth-simple-layout';
 
 export default function AuthLayout({
@@ -10,6 +11,8 @@ export default function AuthLayout({
     title: string;
     description: string;
 }) {
+    useCsrfAutoRefresh();
+
     return (
         <AuthLayoutTemplate title={title} description={description} {...props}>
             {children}

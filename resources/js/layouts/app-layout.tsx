@@ -1,3 +1,4 @@
+import useCsrfAutoRefresh from '@/hooks/use-csrf-auto-refresh';
 import AppLayoutTemplate from '@/layouts/app/app-sidebar-layout';
 import { type BreadcrumbItem } from '@/types';
 
@@ -11,6 +12,8 @@ export default function AppLayout({
     breadcrumbs,
     ...props
 }: AppLayoutProps) {
+    useCsrfAutoRefresh();
+
     return (
         <AppLayoutTemplate breadcrumbs={breadcrumbs} {...props}>
             {children}

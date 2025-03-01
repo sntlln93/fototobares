@@ -35,7 +35,6 @@ export function ComboProducts({
         setOpen(false);
         openAddProductModal(Number(id));
     };
-
     return (
         <div className="w-[100%]">
             <Label htmlFor="suggested_max_payments">
@@ -160,6 +159,7 @@ export function ComboProducts({
                 action={action}
                 open={open}
                 setOpen={setOpen}
+                placeholder="Buscar producto"
             >
                 <Button variant="secondary" size="sm" className="ml-auto">
                     Añadir
