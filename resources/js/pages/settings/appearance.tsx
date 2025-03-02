@@ -7,7 +7,7 @@ import { Head } from '@inertiajs/react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Appearance settings',
+        title: 'Modo de color',
         href: '/settings/appearance',
     },
 ];
@@ -15,13 +15,13 @@ const breadcrumbs: BreadcrumbItem[] = [
 export default function Appearance() {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Appearance settings" />
+            <Head title="Ajustes" />
 
             <SettingsLayout>
                 <div className="space-y-6">
                     <HeadingSmall
-                        title="Appearance settings"
-                        description="Update your account's appearance settings"
+                        title="Modo de color"
+                        description="Elegí el modo de color de la aplicación"
                     />
                     <AppearanceTabs />
                 </div>

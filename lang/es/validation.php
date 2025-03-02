@@ -182,6 +182,7 @@ return [
     'attributes' => [
         'current_password' => 'contraseña actual',
         'password' => 'contraseña',
+        'email' => 'correo electrónico',
 
         //School
         'school' => 'escuela',

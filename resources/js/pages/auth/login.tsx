@@ -30,8 +30,8 @@ export default function Login({
 
     return (
         <AuthLayout
-            title="Log in to your account"
-            description="Enter your email and password below to log in"
+            title="Iniciar sesión"
+            description="Ingresá tu usuario y contraseña"
         >
             <Head title="Iniciar sesión" />
 
@@ -43,7 +43,7 @@ export default function Login({
 
             <form onSubmit={submit}>
                 <div>
-                    <Label htmlFor="email">Email</Label>
+                    <Label htmlFor="email">Correo electrónico</Label>
 
                     <Input
                         id="email"
@@ -59,7 +59,7 @@ export default function Login({
                 </div>
 
                 <div className="mt-4">
-                    <Label htmlFor="password">Password</Label>
+                    <Label htmlFor="password">Contraseña</Label>
 
                     <Input
                         id="password"
@@ -84,7 +84,7 @@ export default function Login({
                             }
                         />
                         <span className="ms-2 text-sm text-gray-600 dark:text-gray-400">
-                            Remember me
+                            Recordarme
                         </span>
                     </label>
                 </div>
@@ -95,12 +95,12 @@ export default function Login({
                             href={route('password.request')}
                             className="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:text-gray-400 dark:hover:text-gray-100 dark:focus:ring-offset-gray-800"
                         >
-                            Forgot your password?
+                            ¿Olvidaste tu contraseña?
                         </Link>
                     )}
 
                     <Button className="ms-4" disabled={processing}>
-                        Log in
+                        Iniciar sesión
                     </Button>
                 </div>
             </form>

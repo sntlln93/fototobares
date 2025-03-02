@@ -12,7 +12,7 @@ import { FormEventHandler, useRef } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Password settings',
+        title: 'Actualizar contraseña',
         href: '/settings/password',
     },
 ];
@@ -62,14 +62,14 @@ export default function Password() {
             <SettingsLayout>
                 <div className="space-y-6">
                     <HeadingSmall
-                        title="Update password"
-                        description="Ensure your account is using a long, random password to stay secure"
+                        title="Actualizar contraseña"
+                        description="Usá una contraseña fácil de recordar"
                     />
 
                     <form onSubmit={updatePassword} className="space-y-6">
                         <div className="grid gap-2">
                             <Label htmlFor="current_password">
-                                Current password
+                                Contraseña actual
                             </Label>
 
                             <Input
@@ -82,14 +82,14 @@ export default function Password() {
                                 type="password"
                                 className="mt-1 block w-full"
                                 autoComplete="current-password"
-                                placeholder="Current password"
+                                placeholder="Contraseña actual"
                             />
 
                             <InputError message={errors.current_password} />
                         </div>
 
                         <div className="grid gap-2">
-                            <Label htmlFor="password">New password</Label>
+                            <Label htmlFor="password">Nueva contraseña</Label>
 
                             <Input
                                 id="password"
@@ -101,7 +101,7 @@ export default function Password() {
                                 type="password"
                                 className="mt-1 block w-full"
                                 autoComplete="new-password"
-                                placeholder="New password"
+                                placeholder="Nueva contraseña"
                             />
 
                             <InputError message={errors.password} />
@@ -109,7 +109,7 @@ export default function Password() {
 
                         <div className="grid gap-2">
                             <Label htmlFor="password_confirmation">
-                                Confirm password
+                                Confirmar nueva contraseña
                             </Label>
 
                             <Input
@@ -124,7 +124,7 @@ export default function Password() {
                                 type="password"
                                 className="mt-1 block w-full"
                                 autoComplete="new-password"
-                                placeholder="Confirm password"
+                                placeholder="Confirmar nueva contraseña"
                             />
 
                             <InputError
@@ -133,7 +133,9 @@ export default function Password() {
                         </div>
 
                         <div className="flex items-center gap-4">
-                            <Button disabled={processing}>Save password</Button>
+                            <Button disabled={processing}>
+                                Actualizar contraseña
+                            </Button>
 
                             <Transition
                                 show={recentlySuccessful}
@@ -143,7 +145,7 @@ export default function Password() {
                                 leaveTo="opacity-0"
                             >
                                 <p className="text-sm text-neutral-600">
-                                    Saved
+                                    Actualizada
                                 </p>
                             </Transition>
                         </div>

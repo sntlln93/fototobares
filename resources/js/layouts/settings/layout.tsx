@@ -7,12 +7,12 @@ import { Link } from '@inertiajs/react';
 
 const sidebarNavItems: NavItem[] = [
     {
-        title: 'Password',
+        title: 'Contraseña',
         url: '/settings/password',
         icon: null,
     },
     {
-        title: 'Appearance',
+        title: 'Modo de color',
         url: '/settings/appearance',
         icon: null,
     },
@@ -28,8 +28,8 @@ export default function SettingsLayout({
     return (
         <div className="px-4 py-6">
             <Heading
-                title="Settings"
-                description="Manage your profile and account settings"
+                title="Ajustes"
+                description="Administra los ajustes de tu cuenta"
             />
 
             <div className="flex flex-col space-y-8 lg:flex-row lg:space-x-12 lg:space-y-0">
