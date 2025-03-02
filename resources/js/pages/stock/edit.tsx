@@ -11,8 +11,20 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import AppLayout from '@/layouts/app-layout';
+import { BreadcrumbItem } from '@/types';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { FormEventHandler } from 'react';
+
+const breadcrumbs: BreadcrumbItem[] = [
+    {
+        title: 'Stockeables',
+        href: '/stockables',
+    },
+    {
+        title: 'Editar stockeable',
+        href: '',
+    },
+];
 
 export default function EditStockable({
     products,
@@ -32,7 +44,7 @@ export default function EditStockable({
     };
 
     return (
-        <AppLayout>
+        <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Editar stockeable" />
 
             <form onSubmit={submit} className="p-6">

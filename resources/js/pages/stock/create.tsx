@@ -11,8 +11,20 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import AppLayout from '@/layouts/app-layout';
+import { BreadcrumbItem } from '@/types';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { FormEventHandler } from 'react';
+
+const breadcrumbs: BreadcrumbItem[] = [
+    {
+        title: 'Stockeables',
+        href: '/stockables',
+    },
+    {
+        title: 'Nuevo stockeable',
+        href: '/stockables/create',
+    },
+];
 
 type FormData = Pick<Stockable, 'name' | 'alert_at' | 'unit' | 'quantity'> & {
     products: number[];
@@ -40,7 +52,7 @@ export default function CreateStockable({
     };
 
     return (
-        <AppLayout>
+        <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Nuevo stockeable" />
 
             <form onSubmit={submit} className="p-6">

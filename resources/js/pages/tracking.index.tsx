@@ -1,9 +1,17 @@
 import AppLayout from '@/layouts/app-layout';
+import { BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
+
+const breadcrumbs: BreadcrumbItem[] = [
+    {
+        title: 'Seguimiento',
+        href: '/tracking',
+    },
+];
 
 export default function Products() {
     return (
-        <AppLayout>
+        <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Seguimiento" />
 
             <div className="py-12">

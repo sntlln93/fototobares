@@ -11,8 +11,20 @@ import {
 } from '@/components/ui/select';
 import AppLayout from '@/layouts/app-layout';
 import { getError } from '@/lib/utils';
+import { BreadcrumbItem } from '@/types';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { FormEventHandler } from 'react';
+
+const breadcrumbs: BreadcrumbItem[] = [
+    {
+        title: 'Escuelas',
+        href: '/schools',
+    },
+    {
+        title: 'Editar escuela',
+        href: '',
+    },
+];
 
 export default function EditSchool({ school }: PageProps<{ school: School }>) {
     const { data, setData, put, processing, errors } = useForm({
@@ -40,8 +52,9 @@ export default function EditSchool({ school }: PageProps<{ school: School }>) {
     const _getError = (path: string) => getError(path, errors);
 
     return (
-        <AppLayout>
+        <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Editar escuela" />
+
             <form onSubmit={submit} className="p-6">
                 <section className="mt-6">
                     <h2>Escuela</h2>

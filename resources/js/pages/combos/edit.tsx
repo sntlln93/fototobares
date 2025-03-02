@@ -3,11 +3,23 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
+import { BreadcrumbItem } from '@/types';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { FormEventHandler, useEffect, useState } from 'react';
 import { FormData, SelectedProduct } from './form';
 import { AddProduct } from './partials/add-product';
 import { ComboProducts } from './partials/combo-products';
+
+const breadcrumbs: BreadcrumbItem[] = [
+    {
+        title: 'Combos',
+        href: '/combos',
+    },
+    {
+        title: 'Editar combo',
+        href: '',
+    },
+];
 
 export default function EditCombo({
     products,
@@ -89,7 +101,7 @@ export default function EditCombo({
     };
 
     return (
-        <AppLayout>
+        <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Combos" />
 
             {showAddMuralProduct ? (

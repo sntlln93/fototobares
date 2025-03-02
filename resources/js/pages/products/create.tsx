@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/select';
 import AppLayout from '@/layouts/app-layout';
 import { getError } from '@/lib/utils';
+import { BreadcrumbItem } from '@/types';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { FormEventHandler } from 'react';
 import {
@@ -22,6 +23,17 @@ import {
     orientations,
     photo_types,
 } from './form';
+
+const breadcrumbs: BreadcrumbItem[] = [
+    {
+        title: 'Productos',
+        href: '/products',
+    },
+    {
+        title: 'Nuevo producto',
+        href: '/products/create',
+    },
+];
 
 export default function CreateProduct() {
     const { data, setData, post, processing, errors } = useForm<FormData>({
@@ -62,7 +74,7 @@ export default function CreateProduct() {
         };
 
     return (
-        <AppLayout>
+        <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Nuevo producto" />
 
             <form onSubmit={submit} className="p-6">

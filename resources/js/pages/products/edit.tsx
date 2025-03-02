@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/select';
 import AppLayout from '@/layouts/app-layout';
 import { getError } from '@/lib/utils';
+import { BreadcrumbItem } from '@/types';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { FormEventHandler } from 'react';
 import {
@@ -22,6 +23,17 @@ import {
     orientations,
     photo_types,
 } from './form';
+
+const breadcrumbs: BreadcrumbItem[] = [
+    {
+        title: 'Productos',
+        href: '/products',
+    },
+    {
+        title: 'Editar producto',
+        href: '',
+    },
+];
 
 export default function EditProduct({
     product,
@@ -64,7 +76,7 @@ export default function EditProduct({
         };
 
     return (
-        <AppLayout>
+        <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Editar producto" />
 
             <form onSubmit={submit} className="p-6">
