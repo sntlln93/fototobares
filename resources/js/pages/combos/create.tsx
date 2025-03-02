@@ -1,4 +1,3 @@
-import { Card } from '@/components/card';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -100,97 +99,92 @@ export default function CreateCombo({
                 />
             ) : undefined}
 
-            <Card>
-                <form onSubmit={submit} className="p-6">
-                    <div className="mt-6">
-                        <Label htmlFor="name">Nombre</Label>
+            <form onSubmit={submit} className="p-6">
+                <div className="mt-6">
+                    <Label htmlFor="name">Nombre</Label>
 
-                        <Input
-                            id="name"
-                            name="name"
-                            value={data.name}
-                            onChange={(e) => setData('name', e.target.value)}
-                            className="mt-1 block w-full"
-                            placeholder="Nombre"
-                        />
+                    <Input
+                        id="name"
+                        name="name"
+                        value={data.name}
+                        onChange={(e) => setData('name', e.target.value)}
+                        className="mt-1 block w-full"
+                        placeholder="Nombre"
+                    />
 
-                        <InputError message={errors.name} className="mt-2" />
-                    </div>
+                    <InputError message={errors.name} className="mt-2" />
+                </div>
 
-                    <div className="mt-6">
-                        <Label htmlFor="suggested_price">Precio</Label>
+                <div className="mt-6">
+                    <Label htmlFor="suggested_price">Precio</Label>
 
-                        <Input
-                            id="suggested_price"
-                            type="number"
-                            name="suggested_price"
-                            min={0}
-                            value={data.suggested_price}
-                            onChange={(e) =>
-                                setData(
-                                    'suggested_price',
-                                    Number(e.target.value),
-                                )
-                            }
-                            className="mt-1 block w-full"
-                            placeholder="Cantidad en números enteros"
-                        />
+                    <Input
+                        id="suggested_price"
+                        type="number"
+                        name="suggested_price"
+                        min={0}
+                        value={data.suggested_price}
+                        onChange={(e) =>
+                            setData('suggested_price', Number(e.target.value))
+                        }
+                        className="mt-1 block w-full"
+                        placeholder="Cantidad en números enteros"
+                    />
 
+                    <InputError
+                        message={errors.suggested_price}
+                        className="mt-2"
+                    />
+                </div>
+                <div className="mt-6">
+                    <Label htmlFor="suggested_max_payments">
+                        Cantidad máxima de cuotas
+                    </Label>
+
+                    <Input
+                        id="suggested_max_payments"
+                        type="number"
+                        name="suggested_max_payments"
+                        min={0}
+                        value={data.suggested_max_payments}
+                        onChange={(e) =>
+                            setData(
+                                'suggested_max_payments',
+                                Number(e.target.value),
+                            )
+                        }
+                        className="mt-1 block w-full"
+                        placeholder="Cantidad en números enteros"
+                    />
+
+                    <InputError
+                        message={errors.suggested_max_payments}
+                        className="mt-2"
+                    />
+                </div>
+
+                <div className="mt-6">
+                    <ComboProducts
+                        selectedProducts={data.products}
+                        products={products}
+                        openAddProductModal={setAddProduct}
+                        updateQuantity={updateQuantity}
+                    >
                         <InputError
-                            message={errors.suggested_price}
-                            className="mt-2"
+                            message={errors.products}
+                            className="my-2"
                         />
-                    </div>
-                    <div className="mt-6">
-                        <Label htmlFor="suggested_max_payments">
-                            Cantidad máxima de cuotas
-                        </Label>
+                    </ComboProducts>
+                </div>
 
-                        <Input
-                            id="suggested_max_payments"
-                            type="number"
-                            name="suggested_max_payments"
-                            min={0}
-                            value={data.suggested_max_payments}
-                            onChange={(e) =>
-                                setData(
-                                    'suggested_max_payments',
-                                    Number(e.target.value),
-                                )
-                            }
-                            className="mt-1 block w-full"
-                            placeholder="Cantidad en números enteros"
-                        />
+                <div className="mt-6 flex justify-end gap-3">
+                    <Button variant="outline" asChild>
+                        <Link href={route('combos.index')}>Cancelar</Link>
+                    </Button>
 
-                        <InputError
-                            message={errors.suggested_max_payments}
-                            className="mt-2"
-                        />
-                    </div>
-
-                    <div className="mt-6">
-                        <ComboProducts
-                            selectedProducts={data.products}
-                            products={products}
-                            openAddProductModal={setAddProduct}
-                            updateQuantity={updateQuantity}
-                        >
-                            <InputError
-                                message={errors.products}
-                                className="my-2"
-                            />
-                        </ComboProducts>
-                    </div>
-
-                    <div className="mt-6 flex justify-end gap-3">
-                        <Button variant="outline" asChild>
-                            <Link href={route('combos.index')}>Cancelar</Link>
-                        </Button>
-
-                        <Button disabled={processing}>Agregar combo</Button>
-                    </div>
-                </form>
-            </Card>
+                    <Button disabled={processing}>Agregar combo</Button>
+                </div>
+            </form>
         </AppLayout>
     );
 }

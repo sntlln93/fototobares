@@ -1,4 +1,3 @@
-import { Card } from '@/components/card';
 import { PaginationNav } from '@/components/paginationNav';
 import { Button } from '@/components/ui/button';
 import {
@@ -38,100 +37,90 @@ export default function Schools({ schools }: PageProps<Paginated<School>>) {
                 />
             )}
 
-            <Card>
-                <div className="mb-4 flex justify-between">
-                    <Searchbar indexRoute="schools.index" />
+            <div className="mb-4 flex justify-between">
+                <Searchbar indexRoute="schools.index" />
 
-                    <Button asChild>
-                        <Link href={route('schools.create')}>
-                            <Plus />
-                            Nueva escuela
-                        </Link>
-                    </Button>
-                </div>
-                <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead className="w-[100px]">
-                                <div className="flex items-center gap-2">
-                                    <button onClick={() => sort('id')}>
-                                        <ArrowUpDown className="h-4 w-4" />
-                                    </button>
-                                    #
-                                </div>
-                            </TableHead>
-                            <TableHead>
-                                <div className="flex items-center gap-2">
-                                    <button onClick={() => sort('name')}>
-                                        <ArrowUpDown className="h-4 w-4" />
-                                    </button>
-                                    Nombre
-                                </div>
-                            </TableHead>
-                            <TableHead>Nivel</TableHead>
-                            <TableHead>
-                                <div className="flex items-center gap-2">
-                                    Director/a
-                                </div>
-                            </TableHead>
-                            <TableHead>
-                                <div className="flex items-center gap-2">
-                                    Dirección (localidad)
-                                </div>
-                            </TableHead>
-                            <TableHead>
-                                <div className="flex items-center gap-2">
-                                    Aulas
-                                </div>
-                            </TableHead>
+                <Button asChild>
+                    <Link href={route('schools.create')}>
+                        <Plus />
+                        Nueva escuela
+                    </Link>
+                </Button>
+            </div>
+            <Table>
+                <TableHeader>
+                    <TableRow>
+                        <TableHead className="w-[100px]">
+                            <div className="flex items-center gap-2">
+                                <button onClick={() => sort('id')}>
+                                    <ArrowUpDown className="h-4 w-4" />
+                                </button>
+                                #
+                            </div>
+                        </TableHead>
+                        <TableHead>
+                            <div className="flex items-center gap-2">
+                                <button onClick={() => sort('name')}>
+                                    <ArrowUpDown className="h-4 w-4" />
+                                </button>
+                                Nombre
+                            </div>
+                        </TableHead>
+                        <TableHead>Nivel</TableHead>
+                        <TableHead>
+                            <div className="flex items-center gap-2">
+                                Director/a
+                            </div>
+                        </TableHead>
+                        <TableHead>
+                            <div className="flex items-center gap-2">
+                                Dirección (localidad)
+                            </div>
+                        </TableHead>
+                        <TableHead>
+                            <div className="flex items-center gap-2">Aulas</div>
+                        </TableHead>
 
-                            <TableHead>Acciones</TableHead>
+                        <TableHead>Acciones</TableHead>
+                    </TableRow>
+                </TableHeader>
+                <TableBody>
+                    {schools.data.map((school) => (
+                        <TableRow key={school.id}>
+                            <TableCell className="font-medium">
+                                {school.id}
+                            </TableCell>
+                            <TableCell>{school.name}</TableCell>
+                            <TableCell>{school.level}</TableCell>
+                            <TableCell>{school.principal.name}</TableCell>
+                            <TableCell>{school.full_address}</TableCell>
+                            <TableCell>
+                                {school.classrooms.length} aulas
+                            </TableCell>
+
+                            <TableCell className="flex gap-2">
+                                <Button size={'sm'} variant={'warning'} asChild>
+                                    <Link
+                                        href={route('schools.edit', {
+                                            school: school.id,
+                                        })}
+                                    >
+                                        <Edit2 />
+                                    </Link>
+                                </Button>
+                                <Button
+                                    size={'sm'}
+                                    variant={'destructive'}
+                                    onClick={() => setDeleteableSchool(school)}
+                                >
+                                    <Trash />
+                                </Button>
+                            </TableCell>
                         </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {schools.data.map((school) => (
-                            <TableRow key={school.id}>
-                                <TableCell className="font-medium">
-                                    {school.id}
-                                </TableCell>
-                                <TableCell>{school.name}</TableCell>
-                                <TableCell>{school.level}</TableCell>
-                                <TableCell>{school.principal.name}</TableCell>
-                                <TableCell>{school.full_address}</TableCell>
-                                <TableCell>
-                                    {school.classrooms.length} aulas
-                                </TableCell>
-
-                                <TableCell className="flex gap-2">
-                                    <Button
-                                        size={'sm'}
-                                        variant={'warning'}
-                                        asChild
-                                    >
-                                        <Link
-                                            href={route('schools.edit', {
-                                                school: school.id,
-                                            })}
-                                        >
-                                            <Edit2 />
-                                        </Link>
-                                    </Button>
-                                    <Button
-                                        size={'sm'}
-                                        variant={'destructive'}
-                                        onClick={() =>
-                                            setDeleteableSchool(school)
-                                        }
-                                    >
-                                        <Trash />
-                                    </Button>
-                                </TableCell>
-                            </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-                <PaginationNav links={schools.meta.links} />
-            </Card>
+                    ))}
+                </TableBody>
+            </Table>
+            <PaginationNav links={schools.meta.links} />
         </AppLayout>
     );
 }
