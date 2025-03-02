@@ -10,6 +10,11 @@ use Inertia\Inertia;
 
 class OrderController extends Controller
 {
+    public function index()
+    {
+        return Inertia::render('orders.index');
+    }
+
     public function create()
     {
         $schools = School::query()
