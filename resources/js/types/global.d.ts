@@ -126,6 +126,28 @@ declare global {
         suggested_max_payments: number;
         products: Product[];
     }
+
+    interface Order {
+        id: number;
+        notes: string;
+        client_id: string;
+        classroom: Classroom;
+        details: OrderDetail[];
+    }
+
+    interface OrderDetail {
+        id: number;
+        order_id: number;
+        product: Product;
+        notes: string;
+        variant: {
+            photo_type: ProductPhotoType;
+            orientation: ProductOrientation;
+            background: string;
+            color: string;
+            dimentions: string;
+        };
+    }
 }
 
 declare module '@inertiajs/core' {
