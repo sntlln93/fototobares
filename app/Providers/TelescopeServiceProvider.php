@@ -2,7 +2,10 @@
 
 namespace App\Providers;
 
+use Illuminate\Log\Logger;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Log;
 use Laravel\Telescope\IncomingEntry;
 use Laravel\Telescope\Telescope;
 use Laravel\Telescope\TelescopeApplicationServiceProvider;
@@ -14,6 +17,18 @@ class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
      */
     public function register(): void
     {
+        Telescope::tag(function (IncomingEntry $entry) {
+            if($entry->type !== 'request') {
+                return [];
+            }
+
+            $user = Auth::user();
+            
+            return $user
+                ? ['user:' . $user->email]
+                : [];
+        });
+
         Telescope::night();
 
         $this->hideSensitiveRequestDetails();
