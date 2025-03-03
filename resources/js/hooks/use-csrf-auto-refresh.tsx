@@ -35,7 +35,6 @@ const isCsrfTokenExpired = (): boolean => {
 
 const useCsrfAutoRefresh = () => {
     useEffect(() => {
-        console.log({ expired: isCsrfTokenExpired() });
         const handleFocus = async () => {
             if (isCsrfTokenExpired()) {
                 try {
