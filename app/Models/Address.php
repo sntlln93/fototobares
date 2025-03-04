@@ -11,10 +11,6 @@ class Address extends Model
     /** @use HasFactory<\Database\Factories\AddressFactory> */
     use HasFactory;
 
-    protected $fillable = [
-        'street', 'number', 'neighborhood', 'city',
-    ];
-
     public function addressable(): MorphTo
     {
         return $this->morphTo();

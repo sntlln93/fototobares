@@ -10,8 +10,6 @@ class Classroom extends Model
     /** @use HasFactory<\Database\Factories\ClassroomFactory> */
     use HasFactory;
 
-    protected $fillable = ['name'];
-
     public function teacher()
     {
         return $this->morphOne(Contact::class, 'contactable');

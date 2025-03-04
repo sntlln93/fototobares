@@ -10,8 +10,6 @@ class Product extends Model
     /** @use HasFactory<\Database\Factories\ProductFactory> */
     use HasFactory;
 
-    protected $guarded = [];
-
     protected $casts = [
         'variants' => 'array',
     ];

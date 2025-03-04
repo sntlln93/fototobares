@@ -12,8 +12,6 @@ class School extends Model
     /** @use HasFactory<\Database\Factories\SchoolFactory> */
     use HasFactory;
 
-    protected $fillable = ['name', 'level'];
-
     public function classrooms(): HasMany
     {
         return $this->hasMany(Classroom::class);
