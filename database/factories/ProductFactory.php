@@ -28,7 +28,7 @@ class ProductFactory extends Factory
                 'photo_types' => fake()->randomElements(['grupo', 'individual'], fake()->numberBetween(1, 2)),
                 'orientations' => fake()->randomElements(['vertical', 'horizontal'], fake()->numberBetween(1, 2)),
                 'backgrounds' => fake()->randomElements(['blanco', 'negro', 'azul', 'rosa'], fake()->numberBetween(1, 4)),
-                'colors' => fake()->randomElements(['white', 'black', 'blue', 'pink'], fake()->numberBetween(1, 4)),
+                'colors' => fake()->randomElements(['blanco', 'negro', 'azul', 'rosa'], fake()->numberBetween(1, 4)),
                 'dimentions' => "{$x}x{$y}",
             ],
         ];
