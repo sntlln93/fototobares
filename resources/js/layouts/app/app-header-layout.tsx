@@ -8,7 +8,10 @@ interface AppHeaderLayoutProps {
     breadcrumbs?: BreadcrumbItem[];
 }
 
-export default function AppHeaderLayout({ children, breadcrumbs }: AppHeaderLayoutProps) {
+export default function AppHeaderLayout({
+    children,
+    breadcrumbs,
+}: AppHeaderLayoutProps) {
     return (
         <AppShell>
             <AppHeader breadcrumbs={breadcrumbs} />
