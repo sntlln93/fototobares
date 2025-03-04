@@ -25,7 +25,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        $this->configureCommands();
+        //$this->configureCommands();
 
         $this->configureModels();
 
