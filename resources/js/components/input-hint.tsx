@@ -10,7 +10,7 @@ export default function InputHint({
         <p
             {...props}
             className={cn(
-                'text-sm text-muted dark:text-muted-foreground',
+                'text-sm text-gray-500 dark:text-gray-100',
                 className,
             )}
         >
