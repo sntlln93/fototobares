@@ -19,16 +19,6 @@ class DatabaseSeeder extends Seeder
     {
         User::factory(10)->create();
 
-        User::factory()->create([
-            'name' => 'Agustín Perez',
-            'email' => 'agustin@fototobares.com',
-        ]);
-
-        User::factory()->create([
-            'name' => 'Matías Santillán',
-            'email' => 'sntlln.93@gmail.com',
-        ]);
-
         Product::factory(10)->create();
         Combo::factory(3)->create();
 
