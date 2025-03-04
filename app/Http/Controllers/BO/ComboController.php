@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Bo;
+namespace App\Http\Controllers\BO;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ComboResource;
