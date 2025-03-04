@@ -14,8 +14,6 @@ return new class extends Migration
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
             $table->foreignId('client_id')
-                ->references('id')
-                ->on('contacts')
                 ->constrained()
                 ->onDelete('cascade');
             $table->foreignId('classroom_id')

@@ -21,7 +21,7 @@ return new class extends Migration
                 ->onDelete('cascade');
             $table->json('variant')->nullable();
             $table->text('note')->nullable();
-            $table->timestamp('delivered_at');
+            $table->timestamp('delivered_at')->nullable();
             $table->timestamps();
         });
     }

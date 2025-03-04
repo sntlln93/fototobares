@@ -1,3 +1,4 @@
+import { DatePicker } from '@/components/date-picker';
 import InputError from '@/components/input-error';
 import InputHint from '@/components/input-hint';
 import {
@@ -22,8 +23,20 @@ import AppLayout from '@/layouts/app-layout';
 import { cn } from '@/lib/utils';
 import { BreadcrumbItem } from '@/types';
 import { Head, Link, useForm } from '@inertiajs/react';
-import { PlusIcon } from 'lucide-react';
+import { format } from 'date-fns';
+import {
+    Edit,
+    PlusIcon,
+    RectangleHorizontal,
+    RectangleVertical,
+    Square,
+    Trash,
+    User,
+    Users,
+} from 'lucide-react';
 import { FormEvent, FormEventHandler, useState } from 'react';
+import { AddDetail } from './add-detail';
+import { ProductOrder } from './form';
 
 type SchoolLevel = 'Todos' | 'Jardin' | 'Primaria' | 'Secundaria';
 type AccordionValue = 'schools' | 'products' | 'client' | 'order' | undefined;
@@ -57,26 +70,53 @@ export default function CreateOrder({
     const [productDropdownOpen, setProductDropdownOpen] = useState(false);
 
     const [accordionValue, setAccordionValue] =
-        useState<AccordionValue>('schools');
+        useState<AccordionValue>('order');
 
-    const [openAddModal, setOpenAddModal] = useState<number[] | null>(null);
+    const [openAddModal, setOpenAddModal] = useState<
+        (Product & { combo_id?: number })[] | null
+    >(null);
 
-    const { data, setData, post, processing, errors } = useForm<{
-        classroomId: number;
-        products: Product[];
-        client_name: string;
-        client_phone: string;
+    const { data, setData, post, processing, errors, clearErrors } = useForm<{
+        classroom_id: number;
+        order_details: ProductOrder[];
+        name: string;
+        phone: string;
+        total_price: number;
+        payments: number;
+        due_date: string;
     }>({
-        classroomId: 0,
-        products: [],
-        client_name: '',
-        client_phone: '',
+        classroom_id: 0,
+        order_details: [],
+        name: '',
+        phone: '',
+        total_price: 0,
+        payments: 0,
+        due_date: '',
     });
 
     const _selectedSchool = schools.find((s) => s.id === selectedSchool);
+    const _selectedClassroom = _selectedSchool?.classrooms.find(
+        (c) => c.id === data.classroom_id,
+    );
 
     const filteredSchools = schools.filter(
         (school) => levelFilter === 'Todos' || school.level === levelFilter,
+    );
+
+    const counts = data.order_details.reduce<{
+        combos: Record<number, number>;
+        undefinedCount: number;
+    }>(
+        (acc, order) => {
+            if (order.combo_id !== undefined) {
+                acc.combos[order.combo_id] =
+                    (acc.combos[order.combo_id] || 0) + 1;
+            } else {
+                acc.undefinedCount++;
+            }
+            return acc;
+        },
+        { combos: {}, undefinedCount: 0 },
     );
 
     const toStep = (newAccordionValue: AccordionValue) => {
@@ -91,15 +131,38 @@ export default function CreateOrder({
         };
     };
 
+    console.log(errors);
+
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
 
         post(route('orders.store'));
     };
 
+    const handleAddProduct = (id: number) => {
+        setOpenAddModal([products.find((p) => p.id === id)!]);
+    };
+
+    const handleAddCombo = (id: number) => {
+        const combo = combos.find((p) => p.id === id)!;
+        setData('total_price', data.total_price + combo.suggested_price);
+        setOpenAddModal(combo.products.map((p) => ({ ...p, combo_id: id })));
+    };
+
+    const setProductsOrder = (productsOrder: ProductOrder[]) =>
+        setData('order_details', [...data.order_details, ...productsOrder]);
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Nuevo pedido" />
+            {openAddModal ? (
+                <AddDetail
+                    addProducts={setProductsOrder}
+                    products={openAddModal}
+                    show={Boolean(openAddModal)}
+                    onClose={() => setOpenAddModal(null)}
+                />
+            ) : undefined}
 
             <form onSubmit={submit} className="p-6">
                 <Accordion
@@ -110,14 +173,16 @@ export default function CreateOrder({
                 >
                     <AccordionItem value="schools">
                         <AccordionTrigger onClick={toStep('schools')}>
-                            Escuela
-                            {_selectedSchool ? (
-                                <Badge className="ml-2">
-                                    {_selectedSchool.name}
-                                </Badge>
-                            ) : undefined}
+                            <span>
+                                Escuela
+                                {_selectedSchool ? (
+                                    <Badge className="ml-2">
+                                        {`${_selectedSchool.name} ${_selectedClassroom ? `"${_selectedClassroom.name.toUpperCase()}"` : ''}`}
+                                    </Badge>
+                                ) : undefined}
+                            </span>
                         </AccordionTrigger>
-                        <AccordionContent className="flex flex-col gap-6">
+                        <AccordionContent className="flex flex-col gap-3 px-1">
                             <div className="flex gap-2 py-2">
                                 Niveles:
                                 {schoolLevels.map((level) => (
@@ -143,6 +208,11 @@ export default function CreateOrder({
                                 <Label htmlFor="schoolId">Escuela</Label>
 
                                 <Select
+                                    value={String(
+                                        schools.find(
+                                            (s) => s.id === selectedSchool,
+                                        )?.id ?? '',
+                                    )}
                                     name="schoolId"
                                     onValueChange={(value) =>
                                         setSelectedSchool(Number(value))
@@ -168,14 +238,16 @@ export default function CreateOrder({
                             </div>
 
                             <div>
-                                <Label htmlFor="classroomId">Curso</Label>
+                                <Label htmlFor="classroom_id">Curso</Label>
 
                                 <Select
+                                    value={String(data.classroom_id)}
                                     disabled={selectedSchool === 0}
-                                    name="classroomId"
-                                    onValueChange={(value) =>
-                                        setData('classroomId', Number(value))
-                                    }
+                                    name="classroom_id"
+                                    onValueChange={(value) => {
+                                        clearErrors('classroom_id');
+                                        setData('classroom_id', Number(value));
+                                    }}
                                 >
                                     <SelectTrigger>
                                         <SelectValue />
@@ -202,7 +274,7 @@ export default function CreateOrder({
                                 </Select>
 
                                 <InputError
-                                    message={errors.classroomId}
+                                    message={errors.classroom_id}
                                     className="mt-2"
                                 />
                             </div>
@@ -217,15 +289,22 @@ export default function CreateOrder({
 
                     <AccordionItem value="products">
                         <AccordionTrigger onClick={toStep('products')}>
-                            Productos
+                            <span>
+                                Productos
+                                {data.order_details && (
+                                    <Badge className="ml-2">{`${data.order_details.length} productos`}</Badge>
+                                )}
+                            </span>
                         </AccordionTrigger>
-                        <AccordionContent>
+                        <AccordionContent className="px-1">
                             <Combobox
                                 items={combos.map((combo) => ({
                                     label: combo.name,
                                     value: combo.id,
                                 }))}
-                                action={() => setOpenAddModal([1, 2])}
+                                action={(value) =>
+                                    handleAddCombo(Number(value))
+                                }
                                 open={comboDropdownOpen}
                                 setOpen={setComboDropdownOpen}
                                 placeholder="Buscar combo"
@@ -241,7 +320,9 @@ export default function CreateOrder({
                                     label: product.name,
                                     value: product.id,
                                 }))}
-                                action={() => setOpenAddModal([3])}
+                                action={(value) =>
+                                    handleAddProduct(Number(value))
+                                }
                                 open={productDropdownOpen}
                                 setOpen={setProductDropdownOpen}
                                 placeholder="Buscar producto"
@@ -255,6 +336,109 @@ export default function CreateOrder({
                                     <PlusIcon />
                                 </Button>
                             </Combobox>
+
+                            <ul className="my-2 gap-4">
+                                {data.order_details.map((selected) => {
+                                    const product = products.find(
+                                        (p) => p.id === selected.product_id,
+                                    )!;
+                                    const combo = combos.find(
+                                        (c) => c.id === selected.combo_id,
+                                    );
+                                    return (
+                                        <li
+                                            className="flex items-center justify-between rounded-md border border-input bg-background px-4 py-2"
+                                            key={`${product.id}${combo ? combo.id : ''}`}
+                                        >
+                                            <div className="flex flex-col gap-2">
+                                                <span>
+                                                    {product.name}
+                                                    {combo
+                                                        ? ` (combo ${combo.name})`
+                                                        : ''}
+                                                </span>
+                                                {product.type === 'mural' ? (
+                                                    <>
+                                                        <div className="flex items-center">
+                                                            <Badge
+                                                                variant="outline"
+                                                                className="gap-1 rounded-lg"
+                                                            >
+                                                                <Square
+                                                                    className="h-4 w-4"
+                                                                    style={{
+                                                                        fill: selected
+                                                                            .variant
+                                                                            ?.color,
+                                                                    }}
+                                                                />
+                                                            </Badge>
+                                                            <Badge
+                                                                variant="outline"
+                                                                className="rounded-lg"
+                                                            >
+                                                                {
+                                                                    selected
+                                                                        .variant
+                                                                        ?.background
+                                                                }
+                                                            </Badge>
+                                                            <Badge
+                                                                variant="outline"
+                                                                className="rounded-lg"
+                                                            >
+                                                                {selected
+                                                                    .variant
+                                                                    ?.photo_type ===
+                                                                'individual' ? (
+                                                                    <User className="h-4 w-4" />
+                                                                ) : (
+                                                                    <Users className="h-4 w-4" />
+                                                                )}
+                                                            </Badge>
+                                                            <Badge
+                                                                variant="outline"
+                                                                className="rounded-lg"
+                                                            >
+                                                                {selected
+                                                                    .variant
+                                                                    ?.orientation ===
+                                                                'vertical' ? (
+                                                                    <RectangleVertical className="h-4 w-4" />
+                                                                ) : (
+                                                                    <RectangleHorizontal className="h-4 w-4" />
+                                                                )}
+                                                            </Badge>
+                                                        </div>
+                                                    </>
+                                                ) : undefined}
+                                            </div>
+                                            <div className="flex gap-1">
+                                                <Button
+                                                    variant="warning"
+                                                    size="icon"
+                                                    disabled={
+                                                        product.type !== 'mural'
+                                                    }
+                                                >
+                                                    <Edit className="h-4 w-4" />
+                                                </Button>
+                                                <Button
+                                                    variant="destructive"
+                                                    size="icon"
+                                                    onClick={(e) => {
+                                                        e.preventDefault();
+                                                    }}
+                                                >
+                                                    <Trash className="h-4 w-4" />
+                                                </Button>
+                                            </div>
+                                        </li>
+                                    );
+                                })}
+                            </ul>
+
+                            <InputError message={errors.order_details} />
 
                             <div className="mt-6 flex flex-col justify-end gap-3 md:flex-row">
                                 <Button
@@ -273,43 +457,55 @@ export default function CreateOrder({
 
                     <AccordionItem value="client">
                         <AccordionTrigger onClick={toStep('client')}>
-                            Cliente
+                            <span>
+                                Cliente
+                                {data.name && (
+                                    <Badge className="ml-2">{`${data.name}`}</Badge>
+                                )}
+                                {data.phone && (
+                                    <Badge className="ml-2">{`${data.phone}`}</Badge>
+                                )}
+                            </span>
                         </AccordionTrigger>
-                        <AccordionContent className="gap-6">
-                            <Label>Nombre</Label>
-                            <Input
-                                placeholder="Agustín Perez"
-                                type="text"
-                                id="client_name"
-                                name="client_name"
-                                value={data.client_name}
-                                onChange={(e) =>
-                                    setData('client_name', e.target.value)
-                                }
-                                className="mt-1 block w-full"
-                            />
-                            <InputError message={errors.client_name} />
+                        <AccordionContent className="px-1">
+                            <div>
+                                <Label>Nombre</Label>
+                                <Input
+                                    placeholder="Agustín Perez"
+                                    type="text"
+                                    id="name"
+                                    name="name"
+                                    value={data.name}
+                                    onChange={(e) =>
+                                        setData('name', e.target.value)
+                                    }
+                                    className="mt-1 block w-full"
+                                />
+                                <InputError message={errors.name} />
+                            </div>
 
-                            <Label>Teléfono</Label>
-                            <Input
-                                placeholder="3804125834"
-                                type="text"
-                                id="client_phone"
-                                name="client_phone"
-                                value={data.client_phone}
-                                onChange={(e) =>
-                                    setData('client_phone', e.target.value)
-                                }
-                                className="mt-1 block w-full"
-                            />
-                            <InputHint
-                                className="mt-2"
-                                message="Un número de teléfono válido contiene sólo 10 dígitos"
-                            />
-                            <InputError
-                                className="mt-2"
-                                message={errors.client_phone}
-                            />
+                            <div className="mt-3">
+                                <Label>Teléfono</Label>
+                                <InputHint
+                                    className="mt-2"
+                                    message="Un número de teléfono válido contiene sólo 10 dígitos"
+                                />
+                                <Input
+                                    placeholder="3804125834"
+                                    type="text"
+                                    id="phone"
+                                    name="phone"
+                                    value={data.phone}
+                                    onChange={(e) =>
+                                        setData('phone', e.target.value)
+                                    }
+                                    className="mt-1 block w-full"
+                                />
+                                <InputError
+                                    className="mt-2"
+                                    message={errors.phone}
+                                />
+                            </div>
 
                             <div className="mt-6 flex flex-col justify-end gap-3 md:flex-row">
                                 <Button
@@ -329,17 +525,90 @@ export default function CreateOrder({
                         <AccordionTrigger onClick={toStep('order')}>
                             Pedido
                         </AccordionTrigger>
-                        <AccordionContent>
-                            Yes. It&apos;s animated by default, but you can
-                            disable it if you prefer.
+                        <AccordionContent className="px-1">
+                            <div className="mt-3">
+                                <Label>Precio final</Label>
+                                <InputHint
+                                    message={`Calculado a base de (${Object.keys(counts.combos).length}) combo y (${counts.undefinedCount}) productos`}
+                                />
+                                <Input
+                                    type="number"
+                                    id="total_price"
+                                    name="total_price"
+                                    value={data.total_price}
+                                    onChange={(e) =>
+                                        setData(
+                                            'total_price',
+                                            Number(e.target.value),
+                                        )
+                                    }
+                                    className="mt-1 block w-full"
+                                />
+                                <InputError message={errors.total_price} />
+                            </div>
+
+                            <div className="mt-3">
+                                <Label>Cuotas</Label>
+                                <Input
+                                    min={0}
+                                    max={12}
+                                    type="number"
+                                    id="payments"
+                                    name="payments"
+                                    value={data.payments}
+                                    onChange={(e) =>
+                                        setData(
+                                            'payments',
+                                            Number(e.target.value),
+                                        )
+                                    }
+                                    className="mt-1 block w-full"
+                                />
+                                <InputError
+                                    className="mt-2"
+                                    message={errors.payments}
+                                />
+                            </div>
+
+                            <div className="mt-3">
+                                <Label>Primer vencimiento</Label>
+                                <div className="block">
+                                    <DatePicker
+                                        placeholder="Primer vencimiento"
+                                        date={
+                                            data.due_date
+                                                ? new Date(data.due_date)
+                                                : new Date()
+                                        }
+                                        setDate={(date) =>
+                                            setData(
+                                                'due_date',
+                                                format(
+                                                    date ?? new Date(),
+                                                    'yyyy-MM-dd',
+                                                ),
+                                            )
+                                        }
+                                    />
+                                </div>
+
+                                <InputError
+                                    className="mt-2"
+                                    message={errors.due_date}
+                                />
+                            </div>
+
                             <div className="mt-6 flex flex-col justify-end gap-3 md:flex-row">
-                                <Button variant="secondary" asChild>
+                                <Button variant="outline" asChild>
                                     <Link href={route('orders.index')}>
                                         Cancelar
                                     </Link>
                                 </Button>
 
-                                <Button variant="outline" disabled={processing}>
+                                <Button
+                                    variant="secondary"
+                                    disabled={processing}
+                                >
                                     Guardar
                                 </Button>
 
