@@ -24,20 +24,20 @@ import {
     photo_types,
 } from './form';
 
-const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'Productos',
-        href: '/products',
-    },
-    {
-        title: 'Editar producto',
-        href: '',
-    },
-];
-
 export default function EditProduct({
     product,
 }: PageProps<{ product: Product }>) {
+    const breadcrumbs: BreadcrumbItem[] = [
+        {
+            title: 'Productos',
+            href: route('products.index'),
+        },
+        {
+            title: 'Editar producto',
+            href: route('products.edit', { product: product.id }),
+        },
+    ];
+
     const { data, setData, put, processing, errors } = useForm<FormData>({
         name: product.name,
         unit_price: product.unit_price,

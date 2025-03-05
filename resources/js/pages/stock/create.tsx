@@ -18,11 +18,11 @@ import { FormEventHandler } from 'react';
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Stockeables',
-        href: '/stockables',
+        href: route('stockables.index'),
     },
     {
         title: 'Nuevo stockeable',
-        href: '/stockables/create',
+        href: route('stockables.create'),
     },
 ];
 

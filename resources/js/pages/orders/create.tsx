@@ -44,11 +44,11 @@ type AccordionValue = 'schools' | 'products' | 'client' | 'order' | undefined;
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Pedidos',
-        href: '/orders',
+        href: route('orders.index'),
     },
     {
         title: 'Nuevo pedido',
-        href: '/orders/create',
+        href: route('orders.create'),
     },
 ];
 

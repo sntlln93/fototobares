@@ -21,7 +21,7 @@ import { DeleteComboConfirmation } from './partials/delete-confirmation';
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Combos',
-        href: '/combos',
+        href: route('combos.index'),
     },
 ];
 

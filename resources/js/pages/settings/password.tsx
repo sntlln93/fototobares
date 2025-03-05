@@ -13,7 +13,7 @@ import { FormEventHandler, useRef } from 'react';
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Actualizar contraseña',
-        href: '/settings/password',
+        href: route('password.edit'),
     },
 ];
 

@@ -13,11 +13,11 @@ import { ComboProducts } from './partials/combo-products';
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Combos',
-        href: '/combos',
+        href: route('combos.index'),
     },
     {
         title: 'Nuevo combo',
-        href: '/combos/create',
+        href: route('combos.create'),
     },
 ];
 

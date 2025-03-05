@@ -24,7 +24,7 @@ import { ProductIcon } from './partials/product-icon';
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Productos',
-        href: '/products',
+        href: route('products.index'),
     },
 ];
 

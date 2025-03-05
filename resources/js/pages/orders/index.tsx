@@ -5,7 +5,7 @@ import { Head } from '@inertiajs/react';
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Pedidos',
-        href: '/orders',
+        href: route('orders.index'),
     },
 ];
 

@@ -27,11 +27,11 @@ import {
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Productos',
-        href: '/products',
+        href: route('products.index'),
     },
     {
         title: 'Nuevo producto',
-        href: '/products/create',
+        href: route('products.create'),
     },
 ];
 

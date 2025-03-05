@@ -15,18 +15,18 @@ import { BreadcrumbItem } from '@/types';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { FormEventHandler } from 'react';
 
-const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'Escuelas',
-        href: '/schools',
-    },
-    {
-        title: 'Editar escuela',
-        href: '',
-    },
-];
-
 export default function EditSchool({ school }: PageProps<{ school: School }>) {
+    const breadcrumbs: BreadcrumbItem[] = [
+        {
+            title: 'Escuelas',
+            href: route('schools.index'),
+        },
+        {
+            title: 'Editar escuela',
+            href: route('schools.edit', { school: school.id }),
+        },
+    ];
+
     const { data, setData, put, processing, errors } = useForm({
         school: {
             name: school.name,

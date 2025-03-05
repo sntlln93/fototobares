@@ -18,11 +18,11 @@ import { FormEventHandler } from 'react';
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Escuelas',
-        href: '/schools',
+        href: route('schools.index'),
     },
     {
         title: 'Nueva escuela',
-        href: '/schools/create',
+        href: route('schools.create'),
     },
 ];
 

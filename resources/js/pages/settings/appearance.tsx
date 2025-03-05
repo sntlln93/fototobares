@@ -8,7 +8,7 @@ import { Head } from '@inertiajs/react';
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Modo de color',
-        href: '/settings/appearance',
+        href: route('appearance'),
     },
 ];
 

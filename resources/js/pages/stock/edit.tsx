@@ -15,21 +15,21 @@ import { BreadcrumbItem } from '@/types';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { FormEventHandler } from 'react';
 
-const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'Stockeables',
-        href: '/stockables',
-    },
-    {
-        title: 'Editar stockeable',
-        href: '',
-    },
-];
-
 export default function EditStockable({
     products,
     stockable,
 }: PageProps<{ products: Product[]; stockable: Stockable }>) {
+    const breadcrumbs: BreadcrumbItem[] = [
+        {
+            title: 'Stockeables',
+            href: route('stockables.index'),
+        },
+        {
+            title: 'Editar stockeable',
+            href: route('stockables.edit', { stockable: stockable.id }),
+        },
+    ];
+
     const { data, setData, put, processing, errors } = useForm({
         name: stockable.name,
         quantity: stockable.quantity,

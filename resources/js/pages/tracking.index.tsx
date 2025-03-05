@@ -5,7 +5,7 @@ import { Head } from '@inertiajs/react';
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Seguimiento',
-        href: '/tracking',
+        href: route('tracking.index'),
     },
 ];
 

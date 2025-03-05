@@ -1,5 +1,5 @@
 import { PaginationNav } from '@/components/paginationNav';
-import { Button } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
 import {
     Table,
     TableBody,
@@ -11,16 +11,17 @@ import {
 import { Searchbar } from '@/features/searchbar';
 import AppLayout from '@/layouts/app-layout';
 import { onSort } from '@/lib/services/filter';
+import { cn } from '@/lib/utils';
 import { BreadcrumbItem } from '@/types';
 import { Head, Link } from '@inertiajs/react';
-import { ArrowUpDown, Edit2, Plus, Trash } from 'lucide-react';
+import { ArrowUpDown, Edit2, Eye, Plus, Trash } from 'lucide-react';
 import { useState } from 'react';
 import { DeleteSchoolConfirmation } from './partials/delete-confirmation';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Escuelas',
-        href: '/schools',
+        href: route('schools.index'),
     },
 ];
 
@@ -110,19 +111,32 @@ export default function Schools({ schools }: PageProps<Paginated<School>>) {
                                 </TableCell>
 
                                 <TableCell className="flex gap-2">
-                                    <Button
-                                        size={'sm'}
-                                        variant={'warning'}
-                                        asChild
+                                    <Link
+                                        className={cn(
+                                            buttonVariants({
+                                                size: 'sm',
+                                                variant: 'outline',
+                                            }),
+                                        )}
+                                        href={route('schools.show', {
+                                            school: school.id,
+                                        })}
                                     >
-                                        <Link
-                                            href={route('schools.edit', {
-                                                school: school.id,
-                                            })}
-                                        >
-                                            <Edit2 />
-                                        </Link>
-                                    </Button>
+                                        <Eye />
+                                    </Link>
+                                    <Link
+                                        className={cn(
+                                            buttonVariants({
+                                                size: 'sm',
+                                                variant: 'warning',
+                                            }),
+                                        )}
+                                        href={route('schools.edit', {
+                                            school: school.id,
+                                        })}
+                                    >
+                                        <Edit2 />
+                                    </Link>
                                     <Button
                                         size={'sm'}
                                         variant={'destructive'}

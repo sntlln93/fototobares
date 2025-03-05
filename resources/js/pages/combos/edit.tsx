@@ -10,17 +10,6 @@ import { FormData, SelectedProduct } from './form';
 import { AddProduct } from './partials/add-product';
 import { ComboProducts } from './partials/combo-products';
 
-const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'Combos',
-        href: '/combos',
-    },
-    {
-        title: 'Editar combo',
-        href: '',
-    },
-];
-
 export default function EditCombo({
     products,
     combo,
@@ -28,6 +17,17 @@ export default function EditCombo({
     products: Product[];
     combo: { data: { id: number } & FormData };
 }>) {
+    const breadcrumbs: BreadcrumbItem[] = [
+        {
+            title: 'Combos',
+            href: route('combos.index'),
+        },
+        {
+            title: 'Editar combo',
+            href: route('combos.edit', { combo: combo.data.id }),
+        },
+    ];
+
     const [addProduct, setAddProduct] = useState<number | null>(null);
     const [showAddMuralProduct, setShowAddMuralProduct] =
         useState<Product | null>(null);
