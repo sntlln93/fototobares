@@ -10,7 +10,7 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import {
     DollarSign,
     Group,
@@ -36,6 +36,14 @@ const routeables = [
 ] as const;
 
 export function AppSidebar() {
+    const { url } = usePage();
+
+    const isActive = (path: string) => {
+        const [base, ...rest] = url.split('/').filter((s) => s.length > 1);
+
+        return route(path).includes(base);
+    };
+
     return (
         <Sidebar variant="floating" collapsible="icon">
             <SidebarHeader>
@@ -56,7 +64,10 @@ export function AppSidebar() {
                         <SidebarMenu>
                             {routeables.map((routeable) => (
                                 <SidebarMenuItem key={routeable.name}>
-                                    <SidebarMenuButton asChild>
+                                    <SidebarMenuButton
+                                        asChild
+                                        isActive={isActive(routeable.route)}
+                                    >
                                         <Link href={route(routeable.route)}>
                                             <routeable.icon />
                                             <span>{routeable.name}</span>
