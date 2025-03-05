@@ -72,7 +72,7 @@ declare global {
     interface Classroom {
         id: number;
         name: string;
-        teacher: Teacher;
+        teacher?: Teacher;
     }
 
     interface Address {
@@ -88,7 +88,7 @@ declare global {
         name: string;
         level: 'Jardín' | 'Primaria' | 'Secundaria';
         principal: Principal;
-        classrooms: Omit<Classroom, 'teacher'>[];
+        classrooms: Classroom[];
         full_address: string;
         address: Address;
     }

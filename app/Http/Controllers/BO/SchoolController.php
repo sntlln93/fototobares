@@ -117,4 +117,11 @@ class SchoolController extends Controller
 
         return redirect(route('schools.index'));
     }
+
+    public function show(School $school): \Inertia\Response
+    {
+        return inertia::render('schools/show')->with([
+            'school' => $school->load(['classrooms.teacher', 'principal', 'address']),
+        ]);
+    }
 }

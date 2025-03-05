@@ -131,8 +131,6 @@ export default function CreateOrder({
         };
     };
 
-    console.log(errors);
-
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
 
@@ -144,6 +142,7 @@ export default function CreateOrder({
     };
 
     const handleAddCombo = (id: number) => {
+        console.log({ id });
         const combo = combos.find((p) => p.id === id)!;
         setData('total_price', data.total_price + combo.suggested_price);
         setOpenAddModal(combo.products.map((p) => ({ ...p, combo_id: id })));

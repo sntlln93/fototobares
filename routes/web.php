@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\BO\ClassroomController;
 use App\Http\Controllers\BO\ComboController;
 use App\Http\Controllers\BO\OrderController;
 use App\Http\Controllers\BO\ProductController;
@@ -22,6 +23,7 @@ Route::get('/tracking', function () {
 })->middleware(['auth', 'verified'])->name('tracking.index');
 
 Route::resource('stockables', StockController::class)->middleware(['auth']);
+Route::resource('classrooms', ClassroomController::class)->only(['destroy', 'update', 'store'])->middleware(['auth']);
 
 require __DIR__.'/auth.php';
 require __DIR__.'/settings.php';

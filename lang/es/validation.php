@@ -183,6 +183,12 @@ return [
         'current_password' => 'contraseña actual',
         'password' => 'contraseña',
         'email' => 'correo electrónico',
+        'name' => 'nombre',
+        'quantity' => 'cantidad',
+        'phone' => 'teléfono',
+        'teacher' => 'maestro/a',
+        'unit' => 'unidad',
+        'products' => 'productos',
 
         //School
         'school' => 'escuela',
@@ -197,10 +203,6 @@ return [
         'address.city' => 'localidad',
 
         //Stockable
-        'name' => 'nombre',
-        'quantity' => 'cantidad',
         'alert_at' => 'alerta',
-        'unit' => 'unidad',
-        'products' => 'productos',
     ],
 ];
