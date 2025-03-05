@@ -1,4 +1,5 @@
 import InputError from '@/components/input-error';
+import InputHint from '@/components/input-hint';
 import { Modal } from '@/components/modal';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -59,8 +60,10 @@ export function CreateClassroom({
                         className="h-10"
                     />
                     <InputError message={errors.teacher} />
-
+                </div>
+                <div className="flex flex-col gap-2 py-4">
                     <Label htmlFor="phone">Teléfono del maestro</Label>
+                    <InputHint message="Un número de teléfono válido contiene sólo 10 dígitos" />
                     <Input
                         id="phone"
                         name="phone"
