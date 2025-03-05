@@ -14,11 +14,11 @@ return new class extends Migration
         Schema::create('combo_product', function (Blueprint $table) {
             $table->id();
             $table->foreignId('combo_id')
-                ->constrained()
-                ->onDelete('cascade');
+                ->constrained();
+
             $table->foreignId('product_id')
-                ->constrained()
-                ->onDelete('cascade');
+                ->constrained();
+
             $table->json('variants')->nullable();
             $table->integer('quantity')->default(1);
             $table->timestamps();

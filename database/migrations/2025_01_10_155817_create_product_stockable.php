@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('product_stockable', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('product_id')->constrained()->onDelete('cascade');
-            $table->foreignId('stockable_id')->constrained()->onDelete('cascade');
+            $table->foreignId('product_id')->constrained();
+            $table->foreignId('stockable_id')->constrained();
             $table->timestamps();
         });
     }

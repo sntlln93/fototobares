@@ -17,8 +17,8 @@ return new class extends Migration
             $table->boolean('should_create_automacally')
                 ->default(false);
             $table->foreignId('school_id')
-                ->constrained()
-                ->onDelete('cascade');
+                ->constrained();
+
             $table->timestamps();
         });
     }

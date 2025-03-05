@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\BO\StoreProductRequest;
 use App\Http\Resources\ProductResource;
 use App\Models\Product;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class ProductController extends Controller
@@ -45,7 +46,11 @@ class ProductController extends Controller
 
     public function destroy(Product $product)
     {
-        $product->delete();
+        DB::transaction(function () use ($product) {
+            $product->combos()->detach();
+            $product->stockables()->detach();
+            $product->delete();
+        });
 
         return redirect()->route('products.index');
     }

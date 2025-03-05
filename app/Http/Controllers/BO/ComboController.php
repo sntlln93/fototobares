@@ -8,6 +8,7 @@ use App\Http\Resources\EditableComboResource;
 use App\Models\Combo;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ComboController extends Controller
 {
@@ -91,7 +92,10 @@ class ComboController extends Controller
 
     public function destroy(Combo $combo)
     {
-        $combo->delete();
+        DB::transaction(function () use ($combo) {
+            $combo->products()->detach();
+            $combo->delete();
+        });
 
         return redirect()->route('combos.index');
     }

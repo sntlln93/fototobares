@@ -14,8 +14,13 @@ class Product extends Model
         'variants' => 'array',
     ];
 
-    public function products()
+    public function stockables()
     {
         return $this->belongsToMany(Stockable::class);
+    }
+
+    public function combos()
+    {
+        return $this->belongsToMany(Combo::class);
     }
 }
