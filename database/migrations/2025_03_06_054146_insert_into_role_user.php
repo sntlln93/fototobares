@@ -10,22 +10,27 @@ return new class extends Migration
      */
     public function up(): void
     {
+        $created_at = new DateTime;
+
         $roles = [
             [
                 'role_id' => 2, //administración
                 'user_id' => 1, //agustin@fototobares.com
+                'created_at' => $created_at,
             ],
             [
                 'role_id' => 1, //master
                 'user_id' => 2, //sntlln.93@gmail.com
+                'created_at' => $created_at,
             ], [
                 'role_id' => 2, //administración
                 'user_id' => 3, //gabriela@fototobares.com
+                'created_at' => $created_at,
             ],
         ];
 
         foreach ($roles as $role) {
-            DB::insert('INSERT INTO role_user(role_id, user_id) VALUES (:role_id, :user_id)', $role);
+            DB::insert('INSERT INTO role_user(role_id, user_id, created_at) VALUES (:role_id, :user_id, :created_at)', $role);
         }
     }
 };
