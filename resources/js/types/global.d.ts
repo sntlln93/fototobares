@@ -106,7 +106,7 @@ declare global {
         name: string;
         unit_price: number;
         max_payments: number;
-        type: ProductType;
+        product_type_id: number;
         variants: {
             photo_types: ProductPhotoType[];
             orientations: ProductOrientation[];
@@ -116,7 +116,11 @@ declare global {
         };
     }
 
-    type ProductType = 'mural' | 'banda' | 'medalla' | 'taza';
+    interface ProductType {
+        id: number;
+        name: string;
+    }
+
     type ProductPhotoType = 'grupo' | 'individual';
     type ProductOrientation = 'vertical' | 'horizontal';
 

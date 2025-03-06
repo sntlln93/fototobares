@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\BO\StoreProductRequest;
 use App\Http\Resources\ProductResource;
 use App\Models\Product;
+use App\Models\ProductType;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
@@ -18,7 +19,9 @@ class ProductController extends Controller
 
     public function create()
     {
-        return Inertia::render('products/create');
+        $types = ProductType::orderBy('name')->get();
+
+        return Inertia::render('products/create', ['product_types' => $types]);
     }
 
     public function store(StoreProductRequest $request)
@@ -32,7 +35,12 @@ class ProductController extends Controller
 
     public function edit(Product $product)
     {
-        return Inertia::render('products/edit', ['product' => $product]);
+        $types = ProductType::orderBy('name')->get();
+
+        return Inertia::render('products/edit', [
+            'product' => $product,
+            'product_types' => $types,
+        ]);
     }
 
     public function update(StoreProductRequest $request, Product $product)
