@@ -54,7 +54,7 @@ export default function CreateCombo({
 
         if (!product) return;
 
-        if (product.type !== 'mural') {
+        if (product.product_type_id !== 1) {
             setData('products', [
                 ...data.products,
                 {

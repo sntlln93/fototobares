@@ -132,7 +132,9 @@ export default function Products({ products }: PageProps<Paginated<Product>>) {
                                     {product.id}
                                 </TableCell>
                                 <TableCell className="flex gap-2">
-                                    <ProductIcon type={product.type} />{' '}
+                                    <ProductIcon
+                                        type={product.product_type_id}
+                                    />
                                     {product.name}
                                 </TableCell>
                                 <TableCell>

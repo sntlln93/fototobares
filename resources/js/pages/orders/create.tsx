@@ -423,7 +423,8 @@ export default function CreateOrder({
                                                         ? ` (combo ${combo.name})`
                                                         : ''}
                                                 </span>
-                                                {product.type === 'mural' ? (
+                                                {product.product_type_id ===
+                                                1 ? (
                                                     <>
                                                         <div className="flex items-center">
                                                             <Badge
@@ -484,7 +485,8 @@ export default function CreateOrder({
                                                     variant="warning"
                                                     size="icon"
                                                     disabled={
-                                                        product.type !== 'mural'
+                                                        product.product_type_id !==
+                                                        1
                                                     }
                                                 >
                                                     <Edit className="h-4 w-4" />
