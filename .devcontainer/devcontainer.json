@@ -22,7 +22,7 @@
     },
     "remoteUser": "sail",
     "postCreateCommand": "chown -R 1000:1000 /var/www/html 2>/dev/null || true",
-    "postStartCommand": "npm run dev"
+    "postStartCommand": "nohup bash -c 'npm run dev &'"
     // "postStartCommand": "nohup bash -c 'npm run dev &' && nohup bash -c 'php artisan schedule:work &'"
 
     // "forwardPorts": [],
