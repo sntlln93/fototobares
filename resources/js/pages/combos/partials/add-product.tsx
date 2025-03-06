@@ -2,6 +2,7 @@ import { Checkbox } from '@/components/checkbox';
 import InputError from '@/components/input-error';
 import { Modal } from '@/components/modal';
 import { Button } from '@/components/ui/button';
+import { getColorEs } from '@/lib/utils';
 import { useState } from 'react';
 import { SelectedProduct } from '../form';
 
@@ -138,7 +139,7 @@ export function AddProduct({
                 photo_types: Array.from(photoTypes),
                 orientations: Array.from(orientations),
                 backgrounds: Array.from(backgrounds),
-                colors: Array.from(colors),
+                colors: Array.from(colors) as Color[],
                 dimentions: product.variants.dimentions,
             },
         };
@@ -246,7 +247,7 @@ export function AddProduct({
                                     onChange={handleSetColors}
                                 />
                                 <span className="ms-2 text-sm text-gray-600 dark:text-gray-400">
-                                    {color}
+                                    {getColorEs(color)}
                                 </span>
                             </label>
                         ))}

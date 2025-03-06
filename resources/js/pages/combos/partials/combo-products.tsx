@@ -74,12 +74,6 @@ export function ComboProducts({
                                             variant="outline"
                                             className="rounded-lg"
                                         >
-                                            Fondos: liso
-                                        </Badge>
-                                        <Badge
-                                            variant="outline"
-                                            className="rounded-lg"
-                                        >
                                             <User className="h-4 w-4" />
                                             <Users className="h-4 w-4" />
                                         </Badge>

@@ -39,10 +39,10 @@ class StoreProductRequest extends FormRequest
                 'variants.orientations.*' => ['string', 'in:vertical,horizontal'],
 
                 'variants.backgrounds' => ['required', 'array', 'min:1'],
-                'variants.backgrounds.*' => ['string', 'in:blanco,negro,azul,rosa'],
+                'variants.backgrounds.*' => ['string', 'in:white,black,blue,pink'],
 
                 'variants.colors' => ['required', 'array', 'min:1'],
-                'variants.colors.*' => ['string', 'in:blanco,negro,azul,rosa'],
+                'variants.colors.*' => ['string', 'in:white,black,blue,pink'],
 
                 'variants.dimentions' => ['required', 'regex:/^\d+x\d+$/'],
             ]);
