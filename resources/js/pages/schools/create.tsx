@@ -26,11 +26,12 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-export default function CreateSchool() {
+export default function CreateSchool({ users }: PageProps<{ users: User[] }>) {
     const { data, setData, post, processing, errors } = useForm({
         school: {
             name: '',
             level: 'Primaria',
+            user_id: 0,
         },
         principal: { name: '', phone: '' },
         address: { street: '', number: '', neighborhood: '', city: 'La Rioja' },
@@ -109,6 +110,38 @@ export default function CreateSchool() {
                                 className="mt-2"
                             />
                         </div>
+                    </div>
+
+                    <div className="mt-6">
+                        <Label htmlFor="'school.user_id'">Encargado</Label>
+                        <Select
+                            name="'school.user_id'"
+                            onValueChange={(value) =>
+                                setData('school', {
+                                    ...data.school,
+                                    user_id: Number(value),
+                                })
+                            }
+                        >
+                            <SelectTrigger>
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {users.map((user) => (
+                                    <SelectItem
+                                        key={user.id}
+                                        value={String(user.id)}
+                                    >
+                                        {user.name}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+
+                        <InputError
+                            message={_getError('school.user_id')}
+                            className="mt-2"
+                        />
                     </div>
                 </section>
 

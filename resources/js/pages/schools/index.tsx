@@ -29,7 +29,9 @@ const sort = (sortBy: 'name' | 'id') => {
     return onSort(sortBy, 'schools.index');
 };
 
-export default function Schools({ schools }: PageProps<Paginated<School>>) {
+export default function Schools({
+    schools,
+}: PageProps<Paginated<School & { user: User }>>) {
     const [deleteableSchool, setDeleteableSchool] = useState<School | null>(
         null,
     );
@@ -77,21 +79,8 @@ export default function Schools({ schools }: PageProps<Paginated<School>>) {
                                 </div>
                             </TableHead>
                             <TableHead>Nivel</TableHead>
-                            <TableHead>
-                                <div className="flex items-center gap-2">
-                                    Director/a
-                                </div>
-                            </TableHead>
-                            <TableHead>
-                                <div className="flex items-center gap-2">
-                                    Dirección (localidad)
-                                </div>
-                            </TableHead>
-                            <TableHead>
-                                <div className="flex items-center gap-2">
-                                    Aulas
-                                </div>
-                            </TableHead>
+                            <TableHead>Encargado</TableHead>
+                            <TableHead>Aulas</TableHead>
 
                             <TableHead>Acciones</TableHead>
                         </TableRow>
@@ -104,8 +93,7 @@ export default function Schools({ schools }: PageProps<Paginated<School>>) {
                                 </TableCell>
                                 <TableCell>{school.name}</TableCell>
                                 <TableCell>{school.level}</TableCell>
-                                <TableCell>{school.principal.name}</TableCell>
-                                <TableCell>{school.full_address}</TableCell>
+                                <TableCell>{school.user.name}</TableCell>
                                 <TableCell>
                                     {school.classrooms.length} aulas
                                 </TableCell>

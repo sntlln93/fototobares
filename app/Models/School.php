@@ -32,4 +32,9 @@ class School extends Model
         return $this->hasManyThrough(Contact::class, Classroom::class, 'school_id', 'id')
             ->where('contactable_type', Classroom::class);
     }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }

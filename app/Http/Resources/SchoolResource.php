@@ -21,6 +21,8 @@ class SchoolResource extends JsonResource
             'principal' => new ContactResource($this->principal),
             'full_address' => (string) $this->address,
             'classrooms' => ClassroomResource::collection($this->classrooms),
+            'user_id' => $this->user_id,
+            'user' => $this->user,
         ];
     }
 }
