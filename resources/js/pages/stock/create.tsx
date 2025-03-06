@@ -14,6 +14,7 @@ import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { FormEventHandler } from 'react';
+import { FormData } from './form';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -26,17 +27,13 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-type FormData = Pick<Stockable, 'name' | 'alert_at' | 'unit' | 'quantity'> & {
-    products: number[];
-};
-
 export default function CreateStockable({
     products,
 }: PageProps<{ products: Product[] }>) {
     const { data, setData, post, processing, errors } = useForm<FormData>({
         name: '',
-        quantity: 0,
-        alert_at: 0,
+        quantity: '0',
+        alert_at: '0',
         unit: 'unit',
         products: [],
     });
@@ -79,11 +76,8 @@ export default function CreateStockable({
                         id="quantity"
                         type="number"
                         name="quantity"
-                        min={0}
                         value={data.quantity}
-                        onChange={(e) =>
-                            setData('quantity', Number(e.target.value))
-                        }
+                        onChange={(e) => setData('quantity', e.target.value)}
                         className="mt-1 block w-full"
                         placeholder="Cantidad en números enteros"
                     />
@@ -101,11 +95,8 @@ export default function CreateStockable({
                         id="alert_at"
                         type="number"
                         name="alert_at"
-                        min={0}
                         value={data.alert_at}
-                        onChange={(e) =>
-                            setData('alert_at', Number(e.target.value))
-                        }
+                        onChange={(e) => setData('alert_at', e.target.value)}
                         className="mt-1 block w-full"
                         placeholder="Cantidad en números enteros"
                     />

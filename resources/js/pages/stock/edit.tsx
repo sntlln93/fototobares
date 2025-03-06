@@ -14,6 +14,7 @@ import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { FormEventHandler } from 'react';
+import { FormData } from './form';
 
 export default function EditStockable({
     products,
@@ -30,10 +31,10 @@ export default function EditStockable({
         },
     ];
 
-    const { data, setData, put, processing, errors } = useForm({
+    const { data, setData, put, processing, errors } = useForm<FormData>({
         name: stockable.name,
-        quantity: stockable.quantity,
-        alert_at: stockable.alert_at,
+        quantity: String(stockable.quantity),
+        alert_at: String(stockable.alert_at),
         unit: stockable.unit,
         products: stockable.products.map((p) => p.id),
     });
@@ -70,11 +71,8 @@ export default function EditStockable({
                         id="quantity"
                         type="number"
                         name="quantity"
-                        min={0}
                         value={data.quantity}
-                        onChange={(e) =>
-                            setData('quantity', Number(e.target.value))
-                        }
+                        onChange={(e) => setData('quantity', e.target.value)}
                         className="mt-1 block w-full"
                         placeholder="Cantidad en números enteros"
                     />
@@ -92,11 +90,8 @@ export default function EditStockable({
                         id="alert_at"
                         type="number"
                         name="alert_at"
-                        min={0}
                         value={data.alert_at}
-                        onChange={(e) =>
-                            setData('alert_at', Number(e.target.value))
-                        }
+                        onChange={(e) => setData('alert_at', e.target.value)}
                         className="mt-1 block w-full"
                         placeholder="Cantidad en números enteros"
                     />

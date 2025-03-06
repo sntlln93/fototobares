@@ -23,8 +23,8 @@ class StoreProductRequest extends FormRequest
     {
         $base_rules = [
             'name' => ['required', 'string'],
-            'unit_price' => ['required', 'numeric', 'min:1000'],
-            'max_payments' => ['required', 'numeric'],
+            'unit_price' => ['required', 'numeric', 'min:1'],
+            'max_payments' => ['required', 'numeric', 'min:1'],
             'type' => ['required', 'string', 'in:taza,mural,banda,medalla'],
         ];
 

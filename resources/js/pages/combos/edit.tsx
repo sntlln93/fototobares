@@ -141,7 +141,7 @@ export default function EditCombo({
                         min={0}
                         value={data.suggested_price}
                         onChange={(e) =>
-                            setData('suggested_price', Number(e.target.value))
+                            setData('suggested_price', e.target.value)
                         }
                         className="mt-1 block w-full"
                         placeholder="Cantidad en números enteros"
@@ -164,10 +164,7 @@ export default function EditCombo({
                         min={0}
                         value={data.suggested_max_payments}
                         onChange={(e) =>
-                            setData(
-                                'suggested_max_payments',
-                                Number(e.target.value),
-                            )
+                            setData('suggested_max_payments', e.target.value)
                         }
                         className="mt-1 block w-full"
                         placeholder="Cantidad en números enteros"

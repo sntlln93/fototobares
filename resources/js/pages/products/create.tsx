@@ -38,8 +38,8 @@ const breadcrumbs: BreadcrumbItem[] = [
 export default function CreateProduct() {
     const { data, setData, post, processing, errors } = useForm<FormData>({
         name: '',
-        unit_price: 0,
-        max_payments: 1,
+        unit_price: '0',
+        max_payments: '0',
         type: 'mural',
         variants: default_variants,
     });
@@ -125,11 +125,8 @@ export default function CreateProduct() {
                         id="unit_price"
                         type="number"
                         name="unit_price"
-                        min={0}
                         value={data.unit_price}
-                        onChange={(e) =>
-                            setData('unit_price', Number(e.target.value))
-                        }
+                        onChange={(e) => setData('unit_price', e.target.value)}
                         className="mt-1 block w-full"
                         placeholder="Cantidad en números enteros"
                     />
@@ -145,10 +142,9 @@ export default function CreateProduct() {
                         id="max_payments"
                         type="number"
                         name="max_payments"
-                        min={0}
                         value={data.max_payments}
                         onChange={(e) =>
-                            setData('max_payments', Number(e.target.value))
+                            setData('max_payments', e.target.value)
                         }
                         className="mt-1 block w-full"
                         placeholder="Cantidad en números enteros"
