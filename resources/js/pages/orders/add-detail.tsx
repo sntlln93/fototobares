@@ -111,7 +111,7 @@ export function AddDetail({
                 Record<keyof typeof productData, string>
             > = {};
 
-            if (product.type !== 'mural') {
+            if (product.product_type_id !== 1) {
                 return;
             }
 
@@ -168,7 +168,7 @@ export function AddDetail({
             combo_id: product.combo_id,
             product_id: product.id,
             variant:
-                product.type === 'mural'
+                product.product_type_id === 1
                     ? {
                           orientation: productData.orientation.find(
                               (item) => item.product_id === product.id,
@@ -216,7 +216,7 @@ export function AddDetail({
                     Agregando {currentStep + 1} de {products.length} productos
                 </h3>
 
-                {products[currentStep].type === 'mural' ? (
+                {products[currentStep].product_type_id === 1 ? (
                     <>
                         <div className="mt-2">
                             <fieldset>

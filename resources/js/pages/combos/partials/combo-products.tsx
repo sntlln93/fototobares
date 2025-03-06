@@ -52,7 +52,7 @@ export function ComboProducts({
                         >
                             <div className="flex gap-1">
                                 {`${selected.quantity}x ${product.name}`}
-                                {product.type === 'mural' && (
+                                {product.product_type_id === 1 && (
                                     <>
                                         <Badge
                                             variant="outline"
@@ -118,7 +118,7 @@ export function ComboProducts({
                                 <Button
                                     variant="warning"
                                     size="icon"
-                                    disabled={product.type !== 'mural'}
+                                    disabled={product.product_type_id !== 1}
                                 >
                                     <Edit className="h-4 w-4" />
                                 </Button>
