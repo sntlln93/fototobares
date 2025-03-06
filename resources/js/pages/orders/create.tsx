@@ -70,7 +70,7 @@ export default function CreateOrder({
     const [productDropdownOpen, setProductDropdownOpen] = useState(false);
 
     const [accordionValue, setAccordionValue] =
-        useState<AccordionValue>('order');
+        useState<AccordionValue>('schools');
 
     const [openAddModal, setOpenAddModal] = useState<
         (Product & { combo_id?: number })[] | null
@@ -286,6 +286,73 @@ export default function CreateOrder({
                         </AccordionContent>
                     </AccordionItem>
 
+                    <AccordionItem value="client">
+                        <AccordionTrigger onClick={toStep('client')}>
+                            <span>
+                                Cliente
+                                {data.name && (
+                                    <Badge className="ml-2">{`${data.name}`}</Badge>
+                                )}
+                                {data.phone && (
+                                    <Badge className="ml-2">{`${data.phone}`}</Badge>
+                                )}
+                            </span>
+                        </AccordionTrigger>
+                        <AccordionContent className="px-1">
+                            <div>
+                                <Label>Nombre</Label>
+                                <Input
+                                    placeholder="Agustín Perez"
+                                    type="text"
+                                    id="name"
+                                    name="name"
+                                    value={data.name}
+                                    onChange={(e) =>
+                                        setData('name', e.target.value)
+                                    }
+                                    className="mt-1 block w-full"
+                                />
+                                <InputError message={errors.name} />
+                            </div>
+
+                            <div className="mt-3">
+                                <Label>Teléfono</Label>
+                                <InputHint
+                                    className="mt-2"
+                                    message="Un número de teléfono válido contiene sólo 10 dígitos"
+                                />
+                                <Input
+                                    placeholder="3804125834"
+                                    type="text"
+                                    id="phone"
+                                    name="phone"
+                                    value={data.phone}
+                                    onChange={(e) =>
+                                        setData('phone', e.target.value)
+                                    }
+                                    className="mt-1 block w-full"
+                                />
+                                <InputError
+                                    className="mt-2"
+                                    message={errors.phone}
+                                />
+                            </div>
+
+                            <div className="mt-6 flex flex-col justify-end gap-3 md:flex-row">
+                                <Button
+                                    variant="outline"
+                                    onClick={toStep('products')}
+                                >
+                                    Anterior
+                                </Button>
+
+                                <Button onClick={toStep('order')}>
+                                    Siguiente
+                                </Button>
+                            </div>
+                        </AccordionContent>
+                    </AccordionItem>
+
                     <AccordionItem value="products">
                         <AccordionTrigger onClick={toStep('products')}>
                             <span>
@@ -454,72 +521,6 @@ export default function CreateOrder({
                         </AccordionContent>
                     </AccordionItem>
 
-                    <AccordionItem value="client">
-                        <AccordionTrigger onClick={toStep('client')}>
-                            <span>
-                                Cliente
-                                {data.name && (
-                                    <Badge className="ml-2">{`${data.name}`}</Badge>
-                                )}
-                                {data.phone && (
-                                    <Badge className="ml-2">{`${data.phone}`}</Badge>
-                                )}
-                            </span>
-                        </AccordionTrigger>
-                        <AccordionContent className="px-1">
-                            <div>
-                                <Label>Nombre</Label>
-                                <Input
-                                    placeholder="Agustín Perez"
-                                    type="text"
-                                    id="name"
-                                    name="name"
-                                    value={data.name}
-                                    onChange={(e) =>
-                                        setData('name', e.target.value)
-                                    }
-                                    className="mt-1 block w-full"
-                                />
-                                <InputError message={errors.name} />
-                            </div>
-
-                            <div className="mt-3">
-                                <Label>Teléfono</Label>
-                                <InputHint
-                                    className="mt-2"
-                                    message="Un número de teléfono válido contiene sólo 10 dígitos"
-                                />
-                                <Input
-                                    placeholder="3804125834"
-                                    type="text"
-                                    id="phone"
-                                    name="phone"
-                                    value={data.phone}
-                                    onChange={(e) =>
-                                        setData('phone', e.target.value)
-                                    }
-                                    className="mt-1 block w-full"
-                                />
-                                <InputError
-                                    className="mt-2"
-                                    message={errors.phone}
-                                />
-                            </div>
-
-                            <div className="mt-6 flex flex-col justify-end gap-3 md:flex-row">
-                                <Button
-                                    variant="outline"
-                                    onClick={toStep('products')}
-                                >
-                                    Anterior
-                                </Button>
-
-                                <Button onClick={toStep('order')}>
-                                    Siguiente
-                                </Button>
-                            </div>
-                        </AccordionContent>
-                    </AccordionItem>
                     <AccordionItem value="order">
                         <AccordionTrigger onClick={toStep('order')}>
                             Pedido
