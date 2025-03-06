@@ -15,7 +15,10 @@ import { BreadcrumbItem } from '@/types';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { FormEventHandler } from 'react';
 
-export default function EditSchool({ school }: PageProps<{ school: School }>) {
+export default function EditSchool({
+    school,
+    users,
+}: PageProps<{ school: School; users: User[] }>) {
     const breadcrumbs: BreadcrumbItem[] = [
         {
             title: 'Escuelas',
@@ -31,6 +34,7 @@ export default function EditSchool({ school }: PageProps<{ school: School }>) {
         school: {
             name: school.name,
             level: school.level,
+            user_id: school.user_id,
         },
         principal: {
             name: school.principal.name,
@@ -121,6 +125,39 @@ export default function EditSchool({ school }: PageProps<{ school: School }>) {
                                 className="mt-2"
                             />
                         </div>
+                    </div>
+
+                    <div className="mt-6">
+                        <Label htmlFor="'school.user_id'">Encargado</Label>
+                        <Select
+                            name="'school.user_id'"
+                            value={String(data.school.user_id)}
+                            onValueChange={(value) =>
+                                setData('school', {
+                                    ...data.school,
+                                    user_id: Number(value),
+                                })
+                            }
+                        >
+                            <SelectTrigger>
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {users.map((user) => (
+                                    <SelectItem
+                                        key={user.id}
+                                        value={String(user.id)}
+                                    >
+                                        {user.name}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+
+                        <InputError
+                            message={_getError('school.user_id')}
+                            className="mt-2"
+                        />
                     </div>
                 </section>
 

@@ -1,4 +1,10 @@
-import { Button } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
+import {
+    Card,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card';
 import {
     Table,
     TableBody,
@@ -10,11 +16,12 @@ import {
 import { Searchbar } from '@/features/searchbar';
 import AppLayout from '@/layouts/app-layout';
 import { onSort } from '@/lib/services/filter';
+import { cn } from '@/lib/utils';
 import { DeleteClassroomConfirmation } from '@/pages/classrooms/delete-confirmation';
 import { EditClassroom } from '@/pages/classrooms/edit';
 import { BreadcrumbItem } from '@/types';
-import { Head } from '@inertiajs/react';
-import { ArrowUpDown, Edit2, Plus, Trash } from 'lucide-react';
+import { Head, Link } from '@inertiajs/react';
+import { ArrowUpDown, Edit, Edit2, Plus, Trash } from 'lucide-react';
 import { useState } from 'react';
 import { CreateClassroom } from '../classrooms/create';
 
@@ -22,7 +29,9 @@ const sort = (sortBy: 'name' | 'id') => {
     return onSort(sortBy, 'classrooms.index');
 };
 
-export default function School({ school }: PageProps<{ school: School }>) {
+export default function School({
+    school,
+}: PageProps<{ school: { data: School & { user: User } } }>) {
     const [deleteableClassroom, setDeleteableClassroom] =
         useState<Classroom | null>(null);
 
@@ -40,13 +49,13 @@ export default function School({ school }: PageProps<{ school: School }>) {
         },
         {
             title: 'Cursos',
-            href: route('schools.show', { school: school.id }),
+            href: route('schools.show', { school: school.data.id }),
         },
     ];
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title={`${school.name} - Cursos`} />
+            <Head title={`${school.data.name} - Cursos`} />
 
             {deleteableClassroom && (
                 <DeleteClassroomConfirmation
@@ -72,11 +81,42 @@ export default function School({ school }: PageProps<{ school: School }>) {
                 />
             )}
 
+            <section className="px-6 pt-6">
+                <Card className="relative max-w-[425px]">
+                    <Link
+                        href={route('schools.edit', {
+                            school: school.data.id,
+                        })}
+                        className={cn(
+                            'absolute right-4 top-4',
+                            buttonVariants({
+                                size: 'sm',
+                                variant: 'warning',
+                            }),
+                        )}
+                    >
+                        <Edit />
+                    </Link>
+                    <CardHeader>
+                        <CardDescription>
+                            {school.data.user.name}
+                        </CardDescription>
+                        <CardTitle>
+                            {school.data.level} {school.data.name}
+                        </CardTitle>
+                        <CardDescription>
+                            {school.data.principal.name}
+                        </CardDescription>
+                        <span>{school.data.full_address}</span>
+                    </CardHeader>
+                </Card>
+            </section>
+
             <section className="p-6">
                 <div className="mb-4 flex justify-between">
                     <Searchbar indexRoute="classrooms.index" />
 
-                    <Button onClick={() => setShowAddClassroom(school)}>
+                    <Button onClick={() => setShowAddClassroom(school.data)}>
                         <Plus />
                         Nuevo curso
                     </Button>
@@ -115,7 +155,7 @@ export default function School({ school }: PageProps<{ school: School }>) {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {school.classrooms.map((classroom) => (
+                        {school.data.classrooms.map((classroom) => (
                             <TableRow key={classroom.id}>
                                 <TableCell className="font-medium">
                                     {classroom.id}

@@ -207,6 +207,8 @@ return [
 
         //School
         'school' => 'escuela',
+        'school.level' => 'nivel',
+        'school.user_id' => 'encargado',
         'school.name' => 'nombre de la escuela',
         'principal' => 'director/a',
         'principal.name' => 'nombre',

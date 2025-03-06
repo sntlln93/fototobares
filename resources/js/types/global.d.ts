@@ -91,6 +91,7 @@ declare global {
         classrooms: Classroom[];
         full_address: string;
         address: Address;
+        user_id: number;
     }
 
     interface User {

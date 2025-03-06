@@ -11,16 +11,29 @@ return new class extends Migration
      */
     public function up(): void
     {
-        DB::insert('INSERT INTO users(name, email, password) VALUES (:name, :email, :password)', [
-            'name' => 'Agustín Pérez',
-            'email' => 'agustin@fototobares.com',
-            'password' => Hash::make('contraseña'),
-        ]);
+        $users = [
+            [
+                'id' => 1,
+                'name' => 'Agustín Pérez',
+                'email' => 'agustin@fototobares.com',
+                'password' => Hash::make('contraseña'),
+            ],
+            [
+                'id' => 2,
+                'name' => 'Matías Santillán',
+                'email' => 'sntlln.93@gmail.com',
+                'password' => Hash::make('contraseña'),
+            ],
+            [
+                'id' => 3,
+                'name' => 'Gabriela Tobares',
+                'email' => 'gabriela@fototobares.com',
+                'password' => Hash::make('contraseña'),
+            ],
+        ];
 
-        DB::insert('INSERT INTO users(name, email, password) VALUES (:name, :email, :password)', [
-            'name' => 'Matías Santillán',
-            'email' => 'sntlln.93@gmail.com',
-            'password' => Hash::make('contraseña'),
-        ]);
+        foreach ($users as $user) {
+            DB::insert('INSERT INTO users(id, name, email, password) VALUES (:id, :name, :email, :password)', $user);
+        }
     }
 };
