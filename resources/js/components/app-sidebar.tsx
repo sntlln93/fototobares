@@ -39,7 +39,7 @@ export function AppSidebar() {
     const { url } = usePage();
 
     const isActive = (path: string) => {
-        const [base, ...rest] = url.split('/').filter((s) => s.length > 1);
+        const [base] = url.split('/').filter((s) => s.length > 1);
 
         return route(path).includes(base);
     };
