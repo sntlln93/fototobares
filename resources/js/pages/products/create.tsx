@@ -11,7 +11,7 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import AppLayout from '@/layouts/app-layout';
-import { getError } from '@/lib/utils';
+import { getColorEs, getError } from '@/lib/utils';
 import { BreadcrumbItem } from '@/types';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { FormEventHandler } from 'react';
@@ -245,7 +245,7 @@ export default function CreateProduct({
                                             )}
                                         />
                                         <span className="ms-2 text-sm text-gray-600 dark:text-gray-400">
-                                            {color}
+                                            {getColorEs(color)}
                                         </span>
                                     </label>
                                 ))}

@@ -111,7 +111,7 @@ declare global {
             photo_types: ProductPhotoType[];
             orientations: ProductOrientation[];
             backgrounds: string[];
-            colors: string[];
+            colors: Color[];
             dimentions: string;
         };
     }
@@ -123,6 +123,7 @@ declare global {
 
     type ProductPhotoType = 'grupo' | 'individual';
     type ProductOrientation = 'vertical' | 'horizontal';
+    type Color = 'black' | 'white' | 'pink' | 'blue';
 
     interface Combo {
         id: number;

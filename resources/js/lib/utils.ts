@@ -24,3 +24,14 @@ export function getError(key: string, errors: Record<string, string>) {
 
     return err[key];
 }
+
+const color: Record<Color, string> = {
+    black: 'negro',
+    blue: 'celeste',
+    pink: 'rosa',
+    white: 'blanco',
+};
+
+export function getColorEs(color_en: Color) {
+    return color[color_en];
+}

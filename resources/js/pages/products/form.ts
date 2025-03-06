@@ -2,7 +2,7 @@ export type FormData = Pick<Product, 'name' | 'product_type_id'> & {
     unit_price: string;
     max_payments: string;
     variants: {
-        colors: string[];
+        colors: Color[];
         backgrounds: string[];
         dimentions: string;
         photo_types: ProductPhotoType[];
@@ -15,18 +15,13 @@ export const orientations: Product['variants']['orientations'] = [
     'horizontal',
 ];
 
-export const colors: Product['variants']['colors'] = [
-    'blanco',
-    'negro',
-    'azul',
-    'rosa',
-];
+export const colors: Color[] = ['white', 'black', 'blue', 'pink'];
 
 export const backgrounds: Product['variants']['backgrounds'] = [
-    'blanco',
-    'negro',
-    'azul',
-    'rosa',
+    'white',
+    'black',
+    'blue',
+    'pink',
 ];
 
 export const photo_types: Product['variants']['photo_types'] = [
