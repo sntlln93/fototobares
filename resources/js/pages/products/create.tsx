@@ -35,12 +35,14 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-export default function CreateProduct() {
+export default function CreateProduct({
+    product_types,
+}: PageProps<{ product_types: ProductType[] }>) {
     const { data, setData, post, processing, errors } = useForm<FormData>({
         name: '',
         unit_price: '0',
         max_payments: '0',
-        type: 'mural',
+        product_type_id: 0,
         variants: default_variants,
     });
 
@@ -95,12 +97,12 @@ export default function CreateProduct() {
                 </div>
 
                 <div className="mt-6">
-                    <Label htmlFor="type">Tipo</Label>
+                    <Label htmlFor="product_type_id">Tipo</Label>
 
                     <Select
-                        name="type"
+                        name="product_type_id"
                         onValueChange={(value) =>
-                            setData('type', value as ProductType)
+                            setData('product_type_id', Number(value))
                         }
                         defaultValue="mural"
                     >
@@ -108,14 +110,21 @@ export default function CreateProduct() {
                             <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="mural">Mural</SelectItem>
-                            <SelectItem value="banda">Banda</SelectItem>
-                            <SelectItem value="taza">Taza</SelectItem>
-                            <SelectItem value="medalla">Medalla</SelectItem>
+                            {product_types.map((type) => (
+                                <SelectItem
+                                    key={type.id}
+                                    value={String(type.id)}
+                                >
+                                    {type.name}
+                                </SelectItem>
+                            ))}
                         </SelectContent>
                     </Select>
 
-                    <InputError message={errors.type} className="mt-2" />
+                    <InputError
+                        message={errors.product_type_id}
+                        className="mt-2"
+                    />
                 </div>
 
                 <div className="mt-6">
@@ -156,7 +165,7 @@ export default function CreateProduct() {
                     />
                 </div>
 
-                {data.type === 'mural' ? (
+                {data.product_type_id === 1 ? (
                     <>
                         <div className="mt-6">
                             <Label htmlFor="dimentions">

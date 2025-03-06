@@ -25,10 +25,10 @@ class StoreProductRequest extends FormRequest
             'name' => ['required', 'string'],
             'unit_price' => ['required', 'numeric', 'min:1'],
             'max_payments' => ['required', 'numeric', 'min:1'],
-            'type' => ['required', 'string', 'in:taza,mural,banda,medalla'],
+            'product_type_id' => ['required', 'exists:product_types,id'],
         ];
 
-        if ($this->type === 'mural') {
+        if ($this->product_type_id === 1) {
             return array_merge($base_rules, [
                 'variants' => ['required', 'array'],
 

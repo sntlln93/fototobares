@@ -23,4 +23,9 @@ class Product extends Model
     {
         return $this->belongsToMany(Combo::class);
     }
+
+    public function type()
+    {
+        return $this->belongsTo(ProductType::class);
+    }
 }

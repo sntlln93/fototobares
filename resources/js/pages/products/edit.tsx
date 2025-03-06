@@ -26,7 +26,8 @@ import {
 
 export default function EditProduct({
     product,
-}: PageProps<{ product: Product }>) {
+    product_types,
+}: PageProps<{ product: Product; product_types: ProductType[] }>) {
     const breadcrumbs: BreadcrumbItem[] = [
         {
             title: 'Productos',
@@ -42,7 +43,7 @@ export default function EditProduct({
         name: product.name,
         unit_price: String(product.unit_price),
         max_payments: String(product.max_payments),
-        type: product.type,
+        product_type_id: product.product_type_id,
         variants: product.variants || default_variants,
     });
 
@@ -74,7 +75,7 @@ export default function EditProduct({
                     : data.variants[key].filter((item) => item !== value),
             });
         };
-
+    console.log(data.product_type_id);
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Editar producto" />
@@ -97,27 +98,34 @@ export default function EditProduct({
                 </div>
 
                 <div className="mt-6">
-                    <Label htmlFor="type">Tipo</Label>
+                    <Label htmlFor="product_type_id">Tipo</Label>
 
                     <Select
-                        name="type"
+                        name="product_type_id"
                         onValueChange={(value) =>
-                            setData('type', value as ProductType)
+                            setData('product_type_id', Number(value))
                         }
-                        defaultValue={data.type}
+                        value={String(data.product_type_id)}
                     >
                         <SelectTrigger>
                             <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="mural">Mural</SelectItem>
-                            <SelectItem value="banda">Banda</SelectItem>
-                            <SelectItem value="taza">Taza</SelectItem>
-                            <SelectItem value="medalla">Medalla</SelectItem>
+                            {product_types.map((type) => (
+                                <SelectItem
+                                    key={type.id}
+                                    value={String(type.id)}
+                                >
+                                    {type.name}
+                                </SelectItem>
+                            ))}
                         </SelectContent>
                     </Select>
 
-                    <InputError message={errors.type} className="mt-2" />
+                    <InputError
+                        message={errors.product_type_id}
+                        className="mt-2"
+                    />
                 </div>
 
                 <div className="mt-6">
@@ -158,7 +166,7 @@ export default function EditProduct({
                     />
                 </div>
 
-                {data.type === 'mural' ? (
+                {data.product_type_id === 1 ? (
                     <>
                         <div className="mt-6">
                             <Label htmlFor="dimentions">

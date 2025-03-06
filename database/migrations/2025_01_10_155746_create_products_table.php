@@ -17,7 +17,7 @@ return new class extends Migration
             $table->json('variants')->nullable();
             $table->integer('unit_price');
             $table->integer('max_payments');
-            $table->string('type')->default('mural');
+            $table->foreignId('product_type_id')->constrained();
             $table->timestamps();
         });
     }
