@@ -1,8 +1,7 @@
-export type FormData = Pick<
-    Combo,
-    'name' | 'suggested_price' | 'suggested_max_payments'
-> & {
+export type FormData = Pick<Combo, 'name'> & {
     products: SelectedProduct[];
+    suggested_max_payments: string;
+    suggested_price: string;
 };
 
 export type SelectedProduct = {

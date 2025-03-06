@@ -34,8 +34,8 @@ class ComboController extends Controller
     {
         $request->validate([
             'name' => 'required',
-            'suggested_price' => 'required',
-            'suggested_max_payments' => 'required',
+            'suggested_price' => ['required', 'numeric', 'min:1'],
+            'suggested_max_payments' => ['required', 'numeric', 'min:1'],
             'products' => 'required|array',
             'products.*.id' => 'required|exists:products,id',
             'products.*.quantity' => 'required|integer|min:1',
@@ -69,8 +69,8 @@ class ComboController extends Controller
     {
         $request->validate([
             'name' => 'required',
-            'suggested_price' => 'required',
-            'suggested_max_payments' => 'required',
+            'suggested_price' => ['required', 'numeric', 'min:1'],
+            'suggested_max_payments' => ['required', 'numeric', 'min:1'],
             'products' => 'required|array',
             'products.*.id' => 'required|exists:products,id',
             'products.*.quantity' => 'required|integer|min:1',

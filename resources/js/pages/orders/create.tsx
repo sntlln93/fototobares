@@ -81,19 +81,19 @@ export default function CreateOrder({
         order_details: ProductOrder[];
         name: string;
         phone: string;
-        total_price: number;
-        payments: number;
+        total_price: string;
+        payments: string;
         due_date: string;
     }>({
         classroom_id: 0,
         order_details: [],
         name: '',
         phone: '',
-        total_price: 0,
-        payments: 0,
-        due_date: '',
+        total_price: '0',
+        payments: '0',
+        due_date: format(new Date(), 'yyyy-MM-dd'),
     });
-
+    console.log({ errors, data });
     const _selectedSchool = schools.find((s) => s.id === selectedSchool);
     const _selectedClassroom = _selectedSchool?.classrooms.find(
         (c) => c.id === data.classroom_id,
@@ -536,10 +536,7 @@ export default function CreateOrder({
                                     name="total_price"
                                     value={data.total_price}
                                     onChange={(e) =>
-                                        setData(
-                                            'total_price',
-                                            Number(e.target.value),
-                                        )
+                                        setData('total_price', e.target.value)
                                     }
                                     className="mt-1 block w-full"
                                 />
@@ -549,17 +546,12 @@ export default function CreateOrder({
                             <div className="mt-3">
                                 <Label>Cuotas</Label>
                                 <Input
-                                    min={0}
-                                    max={12}
                                     type="number"
                                     id="payments"
                                     name="payments"
                                     value={data.payments}
                                     onChange={(e) =>
-                                        setData(
-                                            'payments',
-                                            Number(e.target.value),
-                                        )
+                                        setData('payments', e.target.value)
                                     }
                                     className="mt-1 block w-full"
                                 />

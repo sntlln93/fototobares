@@ -1,7 +1,6 @@
-export type FormData = Pick<
-    Product,
-    'name' | 'unit_price' | 'max_payments' | 'type'
-> & {
+export type FormData = Pick<Product, 'name' | 'type'> & {
+    unit_price: string;
+    max_payments: string;
     variants: {
         colors: string[];
         backgrounds: string[];

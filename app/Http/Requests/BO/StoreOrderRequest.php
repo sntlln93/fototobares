@@ -26,7 +26,7 @@ class StoreOrderRequest extends FormRequest
             'phone' => ['required'],
 
             'classroom_id' => ['required', 'exists:classrooms,id'],
-            'total_price' => ['required', 'numeric'],
+            'total_price' => ['required', 'numeric', 'min:1'],
             'payments' => ['required', 'numeric', 'min:1'],
             'due_date' => ['required', 'date_format:Y-m-d'],
 

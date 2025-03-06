@@ -40,8 +40,8 @@ export default function EditProduct({
 
     const { data, setData, put, processing, errors } = useForm<FormData>({
         name: product.name,
-        unit_price: product.unit_price,
-        max_payments: product.max_payments,
+        unit_price: String(product.unit_price),
+        max_payments: String(product.max_payments),
         type: product.type,
         variants: product.variants || default_variants,
     });
@@ -127,11 +127,8 @@ export default function EditProduct({
                         id="unit_price"
                         type="number"
                         name="unit_price"
-                        min={0}
                         value={data.unit_price}
-                        onChange={(e) =>
-                            setData('unit_price', Number(e.target.value))
-                        }
+                        onChange={(e) => setData('unit_price', e.target.value)}
                         className="mt-1 block w-full"
                         placeholder="Cantidad en números enteros"
                     />
@@ -147,10 +144,9 @@ export default function EditProduct({
                         id="max_payments"
                         type="number"
                         name="max_payments"
-                        min={0}
                         value={data.max_payments}
                         onChange={(e) =>
-                            setData('max_payments', Number(e.target.value))
+                            setData('max_payments', e.target.value)
                         }
                         className="mt-1 block w-full"
                         placeholder="Cantidad en números enteros"

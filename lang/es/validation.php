@@ -189,6 +189,21 @@ return [
         'teacher' => 'maestro/a',
         'unit' => 'unidad',
         'products' => 'productos',
+        'suggested_price' => 'precio',
+        'suggested_max_payments' => 'cantidad máxima de cuotas',
+        'max_payments' => 'cantidad máxima de cuotas',
+        'payments' => 'cuotas',
+        'due_date' => 'vencimiento',
+        'total_price' => 'precio final',
+        'order_details' => 'productos',
+        'classroom_id' => 'curso',
+        'unit_price' => 'precio unitario',
+
+        //product
+        'variants.dimentions' => 'medidas',
+        'variants.colors' => 'colores',
+        'variants.photo_types' => 'tipos de foto',
+        'variants.orientations' => 'orientaciones',
 
         //School
         'school' => 'escuela',

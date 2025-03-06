@@ -43,8 +43,8 @@ class StockController extends Controller
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'min: 4'],
-            'quantity' => ['required', 'integer', 'min:1'],
-            'alert_at' => ['required', 'integer', 'min:1'],
+            'quantity' => ['required', 'numeric', 'min:1'],
+            'alert_at' => ['required', 'numeric', 'min:1'],
             'unit' => ['required'],
         ]);
 
@@ -64,8 +64,8 @@ class StockController extends Controller
     {
         $validated = $request->validate([
             'name' => ['sometimes', 'string', 'min: 4'],
-            'quantity' => ['sometimes', 'integer', 'min:1'],
-            'alert_at' => ['sometimes', 'integer', 'min:1'],
+            'quantity' => ['sometimes', 'numeric', 'min:1'],
+            'alert_at' => ['sometimes', 'numeric', 'min:1'],
         ]);
 
         $related_products = $request->validate([
