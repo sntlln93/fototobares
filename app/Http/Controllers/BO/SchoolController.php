@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\BO;
 
 use App\Enums\ContactRole;
@@ -55,9 +57,9 @@ class SchoolController extends Controller
             'school' => ['required'],
             'school.name' => ['required'],
             'school.level' => ['required'],
-            'principal' => ['required'],
-            'principal.name' => ['required'],
-            'principal.phone' => ['required', 'numeric'],
+            'principal' => ['sometimes'],
+            'principal.name' => ['sometimes'],
+            'principal.phone' => ['present_with:principal.name', 'numeric'],
             'address' => ['nullable'],
             'address.street' => ['sometimes'],
             'address.number' => ['sometimes'],
@@ -99,9 +101,9 @@ class SchoolController extends Controller
             'school' => ['required'],
             'school.name' => ['required'],
             'school.level' => ['required'],
-            'principal' => ['required'],
-            'principal.name' => ['required'],
-            'principal.phone' => ['required', 'numeric'],
+            'principal' => ['sometimes'],
+            'principal.name' => ['sometimes'],
+            'principal.phone' => ['present_with:principal.name', 'numeric'],
             'address' => ['nullable'],
             'address.street' => ['sometimes'],
             'address.number' => ['sometimes'],

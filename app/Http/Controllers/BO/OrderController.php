@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\BO;
 
 use App\Http\Controllers\Controller;
@@ -33,7 +35,7 @@ class OrderController extends Controller
         $schoolLevels = [
             'Todos',
             ...$schools->map(fn ($school) => $school->level)->sort(function ($level1, $level2) {
-                return strcmp($level1, $level2) > 0;
+                return strcmp($level1, $level2);
             })->unique(),
         ];
 

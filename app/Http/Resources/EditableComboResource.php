@@ -1,10 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/**
+ * @mixin \App\Models\Combo
+ */
 class EditableComboResource extends JsonResource
 {
     /**
@@ -15,15 +20,15 @@ class EditableComboResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id' => $this->resource->id,
-            'name' => $this->resource->name,
-            'suggested_price' => $this->resource->suggested_price,
-            'suggested_max_payments' => $this->resource->suggested_max_payments,
-            'products' => $this->products->map(function ($p) {
+            'id' => $this->id,
+            'name' => $this->name,
+            'suggested_price' => $this->suggested_price,
+            'suggested_max_payments' => $this->suggested_max_payments,
+            'products' => $this->products->map(function (\App\Models\Product $p) {
                 return [
                     'id' => $p->id,
-                    'quantity' => $p->pivot->quantity,
-                    'variants' => $p->pivot->variants,
+                    'quantity' => $p->getRelationValue('pivot')->quantity,
+                    'variants' => $p->getRelationValue('pivot')->variants,
                 ];
             }),
         ];
