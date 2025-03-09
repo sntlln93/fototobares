@@ -27,7 +27,9 @@ class EditableComboResource extends JsonResource
             'products' => $this->products->map(function (\App\Models\Product $p) {
                 return [
                     'id' => $p->id,
+                    /* @phpstan-ignore-next-line */
                     'quantity' => $p->getRelationValue('pivot')->quantity,
+                    /* @phpstan-ignore-next-line */
                     'variants' => $p->getRelationValue('pivot')->variants,
                 ];
             }),

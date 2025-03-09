@@ -42,4 +42,54 @@ class StoreOrderRequest extends FormRequest
             'order_details.*.variant.color' => ['required_with:order_details.*.variant', 'string'],
         ];
     }
+
+    /**
+     * Get the validated data as a structured array.
+     *
+     * @param  string|null  $key
+     * @param  mixed  $default
+     * @return array{
+     *     name: string,
+     *     phone: string,
+     *     classroom_id: int,
+     *     total_price: float,
+     *     payments: int,
+     *     due_date: string,
+     *     order_details: array<int, array{
+     *         product_id: int,
+     *         note: string,
+     *         variant?: array{
+     *             orientation?: string,
+     *             photo_type?: string,
+     *             background?: string,
+     *             color?: string
+     *         }
+     *     }>
+     * }
+     */
+    public function validated($key = null, $default = null): array
+    {
+        /** @var array{
+         *     name: string,
+         *     phone: string,
+         *     classroom_id: int,
+         *     total_price: float,
+         *     payments: int,
+         *     due_date: string,
+         *     order_details: array<int, array{
+         *         product_id: int,
+         *         note: string,
+         *         variant?: array{
+         *             orientation?: string,
+         *             photo_type?: string,
+         *             background?: string,
+         *             color?: string
+         *         }
+         *     }>
+         * }
+         */
+        $validated = parent::validated($key, $default);
+
+        return $validated;
+    }
 }

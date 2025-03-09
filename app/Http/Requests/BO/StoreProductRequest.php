@@ -52,4 +52,44 @@ class StoreProductRequest extends FormRequest
 
         return $base_rules;
     }
+
+    /**
+     * Get the validated data as a structured array.
+     *
+     * @return array{
+     *     name: string,
+     *     unit_price: float,
+     *     max_payments: int,
+     *     product_type_id: int,
+     *     variants?: array{
+     *         photo_types: array<string>,
+     *         orientations: array<string>,
+     *         backgrounds: array<string>,
+     *         colors: array<string>,
+     *         dimentions: string
+     *     }
+     * }
+     */
+    public function validated($key = null, $default = null)
+    {
+
+        /**
+         * @var array{
+         *     name: string,
+         *     unit_price: float,
+         *     max_payments: int,
+         *     product_type_id: int,
+         *     variants?: array{
+         *         photo_types: array<string>,
+         *         orientations: array<string>,
+         *         backgrounds: array<string>,
+         *         colors: array<string>,
+         *         dimentions: string
+         *     }
+         * }
+         */
+        $validated = parent::validated();
+
+        return $validated;
+    }
 }

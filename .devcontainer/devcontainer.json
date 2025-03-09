@@ -17,7 +17,8 @@
                 "bradlc.vscode-tailwindcss",
                 "usernamehw.errorlens",
                 "eamodio.gitlens",
-                "dbaeumer.vscode-eslint"
+                "dbaeumer.vscode-eslint",
+                "sanderronde.phpstan-vscode"
             ],
             "settings": {}
         }
