@@ -8,10 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Stockable extends Model
 {
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany<Product, self>
-     */
-    public function products()
+    public function products(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
     {
         return $this->belongsToMany(Product::class);
     }
