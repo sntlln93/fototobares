@@ -13,12 +13,16 @@ use Illuminate\Http\Resources\Json\JsonResource;
 class ComboResource extends JsonResource
 {
     /**
-     * Transform the resource into an array.
-     *
      * @return array<string, mixed>
      */
-    public function toArray(Request $request): array
+    public function toArray(Request $request)
     {
-        return parent::toArray($request);
+        return [
+            'id' => $this->id,
+            'name' => $this->name,
+            'suggested_price' => $this->suggested_price,
+            'suggested_max_payments' => $this->suggested_max_payments,
+            'products' => ProductResource::collection($this->products),
+        ];
     }
 }

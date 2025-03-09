@@ -12,6 +12,7 @@ use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Inertia\Inertia;
 
 class ComboController extends Controller
 {
@@ -19,7 +20,7 @@ class ComboController extends Controller
     {
         $combos = Combo::with('products')->paginate(10);
 
-        return inertia('combos/index', [
+        return Inertia::render('combos/index', [
             'combos' => ComboResource::collection($combos),
         ]);
     }
@@ -28,7 +29,7 @@ class ComboController extends Controller
     {
         $products = Product::all();
 
-        return inertia('combos/create', [
+        return Inertia::render('combos/create', [
             'products' => $products,
         ]);
     }
@@ -66,7 +67,7 @@ class ComboController extends Controller
     {
         $products = Product::all();
 
-        return inertia('combos/edit', [
+        return Inertia::render('combos/edit', [
             'products' => $products,
             'combo' => new EditableComboResource($combo->load('products')),
         ]);

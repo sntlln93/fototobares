@@ -18,8 +18,13 @@ class SchoolController extends Controller
 {
     public function index(Request $request): \Inertia\Response
     {
+        /** @var string search */
         $search = $request->query('search');
+
+        /** @var string sort_by */
         $sort_by = $request->query('sort_by') ?? 'id';
+
+        /** @var string sort_order */
         $sort_order = $request->query('sort_order') ?? 'asc';
 
         $schools = School::with(['principal', 'classrooms', 'address', 'user'])
