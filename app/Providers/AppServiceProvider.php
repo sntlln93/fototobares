@@ -1,10 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Providers;
 
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Vite;
@@ -25,8 +26,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //$this->configureCommands();
-
         $this->configureModels();
 
         $this->configureURLs();
@@ -38,30 +37,25 @@ class AppServiceProvider extends ServiceProvider
         $this->configureVite();
     }
 
-    private function configureVite()
+    private function configureVite(): void
     {
         Vite::prefetch(concurrency: 3);
     }
 
-    private function configureURLs()
+    private function configureURLs(): void
     {
         if ($this->isProduction()) {
             URL::forceScheme('https');
         }
     }
 
-    private function configureCommands()
-    {
-        DB::prohibitDestructiveCommands($this->isProduction());
-    }
-
-    private function configureModels()
+    private function configureModels(): void
     {
         Model::shouldBeStrict();
         Model::unguard();
     }
 
-    private function isProduction()
+    private function isProduction(): bool
     {
         return $this->app->environment() === 'production';
     }
