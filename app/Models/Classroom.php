@@ -8,7 +8,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class Classroom extends Model
 {
-    public function teacher(): \Illuminate\Database\Eloquent\Relations\MorphOne
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\MorphOne<Contact, $this>
+     */
+    public function teacher()
     {
         return $this->morphOne(Contact::class, 'contactable');
     }

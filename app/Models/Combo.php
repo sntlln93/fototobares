@@ -8,7 +8,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class Combo extends Model
 {
-    public function products(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany<Product, $this>
+     */
+    public function products()
     {
         return $this->belongsToMany(Product::class)
             ->withPivot(['quantity', 'variants']);

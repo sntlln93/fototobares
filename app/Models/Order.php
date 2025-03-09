@@ -8,7 +8,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class Order extends Model
 {
-    public function client(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<Client, $this>
+     */
+    public function client()
     {
         return $this->belongsTo(Client::class);
     }

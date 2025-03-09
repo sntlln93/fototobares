@@ -8,7 +8,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class Contact extends Model
 {
-    public function contactable(): \Illuminate\Database\Eloquent\Relations\MorphTo
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\MorphTo<Model, $this>
+     */
+    public function contactable()
     {
         return $this->morphTo();
     }

@@ -43,7 +43,7 @@
         }
     },
     "scripts": {
-        "analyze": "./vendor/bin/phpstan analyse",
+        "analyse": "./vendor/bin/phpstan analyse",
         "pint": "./vendor/bin/pint",
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",

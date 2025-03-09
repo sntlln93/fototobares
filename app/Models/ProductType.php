@@ -8,7 +8,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class ProductType extends Model
 {
-    public function types(): \Illuminate\Database\Eloquent\Relations\HasMany
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<Product, $this>
+     */
+    public function types()
     {
         return $this->hasMany(Product::class);
     }

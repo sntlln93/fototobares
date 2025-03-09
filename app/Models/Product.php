@@ -12,17 +12,26 @@ class Product extends Model
         'variants' => 'array',
     ];
 
-    public function stockables(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany<Stockable, $this>
+     */
+    public function stockables()
     {
         return $this->belongsToMany(Stockable::class);
     }
 
-    public function combos(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany<Combo, $this>
+     */
+    public function combos()
     {
         return $this->belongsToMany(Combo::class);
     }
 
-    public function type(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<ProductType, $this>
+     */
+    public function type()
     {
         return $this->belongsTo(ProductType::class);
     }

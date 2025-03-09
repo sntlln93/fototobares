@@ -16,7 +16,7 @@ use Inertia\Inertia;
 
 class SchoolController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request): \Inertia\Response
     {
         $search = $request->query('search');
         $sort_by = $request->query('sort_by') ?? 'id';

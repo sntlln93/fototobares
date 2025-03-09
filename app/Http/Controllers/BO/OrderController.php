@@ -17,12 +17,12 @@ use Inertia\Inertia;
 
 class OrderController extends Controller
 {
-    public function index()
+    public function index(): \Inertia\Response
     {
         return Inertia::render('orders/index');
     }
 
-    public function create()
+    public function create(): \Inertia\Response
     {
         $schools = School::query()
             ->with(['classrooms.teacher', 'principal'])
@@ -47,7 +47,7 @@ class OrderController extends Controller
         ]);
     }
 
-    public function store(StoreOrderRequest $request)
+    public function store(StoreOrderRequest $request): \Illuminate\Http\RedirectResponse
     {
         $validated = $request->validated();
 

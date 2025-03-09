@@ -10,11 +10,12 @@ use App\Http\Resources\EditableComboResource;
 use App\Models\Combo;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 class ComboController extends Controller
 {
-    public function index()
+    public function index(): \Inertia\Response
     {
         $combos = Combo::with('products')->paginate(10);
 
@@ -23,7 +24,7 @@ class ComboController extends Controller
         ]);
     }
 
-    public function create()
+    public function create(): \Inertia\Response
     {
         $products = Product::all();
 
@@ -32,21 +33,25 @@ class ComboController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function store(Request $request): \Illuminate\Http\RedirectResponse
     {
         $request->validate([
-            'name' => 'required',
+            'name' => ['required'],
             'suggested_price' => ['required', 'numeric', 'min:1'],
             'suggested_max_payments' => ['required', 'numeric', 'min:1'],
-            'products' => 'required|array',
-            'products.*.id' => 'required|exists:products,id',
-            'products.*.quantity' => 'required|integer|min:1',
+            'products' => ['required', 'array'],
+            'products.*.id' => ['required', 'exists:products,id'],
+            'products.*.quantity' => ['required', 'integer', 'min:1'],
         ]);
 
-        $combo = Combo::create($request->only('name', 'suggested_price', 'suggested_max_payments'));
+        $combo = Combo::create($request->only([
+            'name',
+            'suggested_price',
+            'suggested_max_payments',
+        ]));
 
         $combo->products()->attach(
-            collect($request->products)->mapWithKeys(function ($product) {
+            new Collection($request->products)->mapWithKeys(function ($product) {
                 return [$product['id'] => [
                     'quantity' => $product['quantity'],
                     'variants' => isset($product['variants']) ? json_encode($product['variants']) : null,
@@ -57,7 +62,7 @@ class ComboController extends Controller
         return redirect()->route('combos.index');
     }
 
-    public function edit(Combo $combo)
+    public function edit(Combo $combo): \Inertia\Response
     {
         $products = Product::all();
 
@@ -67,7 +72,7 @@ class ComboController extends Controller
         ]);
     }
 
-    public function update(Request $request, Combo $combo)
+    public function update(Request $request, Combo $combo): \Illuminate\Http\RedirectResponse
     {
         $request->validate([
             'name' => 'required',
@@ -78,10 +83,14 @@ class ComboController extends Controller
             'products.*.quantity' => 'required|integer|min:1',
         ]);
 
-        $combo->update($request->only('name', 'suggested_price', 'suggested_max_payments'));
+        $combo->update($request->only([
+            'name',
+            'suggested_price',
+            'suggested_max_payments',
+        ]));
 
         $combo->products()->sync(
-            collect($request->products)->mapWithKeys(function ($product) {
+            new Collection($request->products)->mapWithKeys(function ($product) {
                 return [$product['id'] => [
                     'quantity' => $product['quantity'],
                     'variants' => isset($product['variants']) ? json_encode($product['variants']) : null,
@@ -92,7 +101,7 @@ class ComboController extends Controller
         return redirect()->route('combos.index');
     }
 
-    public function destroy(Combo $combo)
+    public function destroy(Combo $combo): \Illuminate\Http\RedirectResponse
     {
         DB::transaction(function () use ($combo) {
             $combo->products()->detach();
