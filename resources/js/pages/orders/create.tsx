@@ -60,8 +60,8 @@ export default function CreateOrder({
     products,
 }: PageProps<{
     schoolLevels: SchoolLevel[];
-    combos: Combo[];
-    schools: School[];
+    combos: Array<Combo & { products: Product[] }>;
+    schools: Array<School & { classrooms: Classroom[] }>;
     products: Product[];
 }>) {
     const [selectedSchool, setSelectedSchool] = useState<number>(0);

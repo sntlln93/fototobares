@@ -54,7 +54,6 @@ declare global {
         id: number;
         name: string;
         quantity: number;
-        products: Product[];
         unit: string;
         alert_at: number;
     }
@@ -72,7 +71,7 @@ declare global {
     interface Classroom {
         id: number;
         name: string;
-        teacher?: Teacher;
+        school_id: number;
     }
 
     interface Address {
@@ -81,15 +80,13 @@ declare global {
         number?: string;
         neighborhood?: string;
         city: string;
+        full_address: string;
     }
 
     interface School {
         id: number;
         name: string;
         level: 'Jardín' | 'Primaria' | 'Secundaria';
-        classrooms: Classroom[];
-        full_address: string;
-        address: Address;
         user_id: number;
     }
 
@@ -97,7 +94,6 @@ declare global {
         id: number;
         name: string;
         email: string;
-        email_verified_at?: string;
     }
 
     interface Product {
@@ -129,22 +125,24 @@ declare global {
         name: string;
         suggested_price: number;
         suggested_max_payments: number;
-        products: Product[];
     }
 
     interface Order {
         id: number;
         notes: string;
-        client_id: string;
-        classroom: Classroom;
-        details: OrderDetail[];
+        client_id: number;
+        classroom_id: number;
+        total_price: number;
+        payments: number;
+        due_date: Date;
     }
 
     interface OrderDetail {
         id: number;
         order_id: number;
-        product: Product;
+        product_id: number;
         notes: string;
+        delivered_at?: Date;
         variant: {
             photo_type: ProductPhotoType;
             orientation: ProductOrientation;

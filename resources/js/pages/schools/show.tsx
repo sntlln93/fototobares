@@ -32,7 +32,14 @@ const sort = (sortBy: 'name' | 'id') => {
 export default function School({
     school,
 }: PageProps<{
-    school: { data: School & { user: User; principal?: Principal } };
+    school: {
+        data: School & {
+            user: User;
+            principal?: Principal;
+            classrooms: Array<Classroom & { teacher: Teacher }>;
+            full_address?: string;
+        };
+    };
 }>) {
     const [deleteableClassroom, setDeleteableClassroom] =
         useState<Classroom | null>(null);

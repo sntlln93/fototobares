@@ -19,7 +19,10 @@ import { FormData } from './form';
 export default function EditStockable({
     products,
     stockable,
-}: PageProps<{ products: Product[]; stockable: Stockable }>) {
+}: PageProps<{
+    products: Product[];
+    stockable: Stockable & { products: Product[] };
+}>) {
     const breadcrumbs: BreadcrumbItem[] = [
         {
             title: 'Stockeables',
