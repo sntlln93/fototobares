@@ -10,6 +10,7 @@ use App\Models\Product;
 use App\Models\Stockable;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class StockController extends Controller
@@ -69,6 +70,8 @@ class StockController extends Controller
 
     public function update(Request $request, Stockable $stockable): \Illuminate\Http\RedirectResponse
     {
+        Log::info('quantity: ', $request->all());
+
         $validated = $request->validate([
             'name' => ['sometimes', 'string', 'min: 4'],
             'quantity' => ['sometimes', 'numeric', 'min:1'],
@@ -86,7 +89,10 @@ class StockController extends Controller
             $stockable,
         ) {
             $stockable->update($validated);
-            $stockable->products()->sync($related_products['products']);
+
+            if (isset($related_products['products'])) {
+                $stockable->products()->sync($related_products['products']);
+            }
         });
 
         return redirect(route('stockables.index'));
