@@ -12,7 +12,7 @@ export function EditClassroom({
     show,
     onClose,
 }: {
-    classroom: Classroom;
+    classroom: Classroom & { teacher?: Teacher };
     show: boolean;
     onClose: CallableFunction;
 }) {

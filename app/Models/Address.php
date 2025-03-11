@@ -4,8 +4,12 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @property-read string $full_address
+ */
 class Address extends Model
 {
     /**
@@ -16,32 +20,39 @@ class Address extends Model
         return $this->morphTo();
     }
 
-    public function __toString(): string
+    /**
+     * @return \Illuminate\Database\Eloquent\Casts\Attribute<string, never>
+     */
+    protected function fullAddress(): Attribute
     {
-        $full_address = '';
+        return Attribute::make(
+            get: function () {
+                $full_address = '';
 
-        if ($this->street) {
-            $full_address .= $this->street;
-        }
+                if ($this->street) {
+                    $full_address .= $this->street;
+                }
 
-        if ($this->number) {
-            $full_address .= strlen($full_address) < 1
-            ? "S/N N° $this->number"
-            : " N° $this->number";
-        }
+                if ($this->number) {
+                    $full_address .= strlen($full_address) < 1
+                    ? "S/N N° $this->number"
+                    : " N° $this->number";
+                }
 
-        if ($this->neighborhood) {
-            $full_address .= strlen($full_address) < 1
-            ? "B° $this->neighborhood"
-            : ", B° $this->neighborhood";
-        }
+                if ($this->neighborhood) {
+                    $full_address .= strlen($full_address) < 1
+                    ? "B° $this->neighborhood"
+                    : ", B° $this->neighborhood";
+                }
 
-        if ($this->city) {
-            $full_address .= strlen($full_address) < 1
-            ? $this->city
-            : ", $this->city";
-        }
+                if ($this->city) {
+                    $full_address .= strlen($full_address) < 1
+                    ? $this->city
+                    : ", $this->city";
+                }
 
-        return $full_address;
+                return $full_address;
+            }
+        );
     }
 }

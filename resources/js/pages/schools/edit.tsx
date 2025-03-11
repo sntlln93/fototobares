@@ -19,7 +19,10 @@ import { type SchoolFormData } from './form';
 export default function EditSchool({
     school,
     users,
-}: PageProps<{ school: School & { principal?: Principal }; users: User[] }>) {
+}: PageProps<{
+    school: School & { principal?: Principal; address: Address };
+    users: User[];
+}>) {
     const breadcrumbs: BreadcrumbItem[] = [
         {
             title: 'Escuelas',

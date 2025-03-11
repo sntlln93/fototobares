@@ -31,7 +31,7 @@ const sort = (sortBy: 'name' | 'id') => {
 
 export default function Schools({
     schools,
-}: PageProps<Paginated<School & { user: User }>>) {
+}: PageProps<Paginated<School & { user: User; classrooms: Classroom[] }>>) {
     const [deleteableSchool, setDeleteableSchool] = useState<School | null>(
         null,
     );
