@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\BO;
 
 use App\Enums\ContactRole;
@@ -10,7 +12,7 @@ use Illuminate\Support\Facades\DB;
 
 class ClassroomController extends Controller
 {
-    public function destroy(Classroom $classroom)
+    public function destroy(Classroom $classroom): \Illuminate\Http\RedirectResponse
     {
         $school_id = $classroom->school_id;
 
@@ -22,7 +24,7 @@ class ClassroomController extends Controller
         return redirect()->route('schools.show', ['school' => $school_id]);
     }
 
-    public function update(Request $request, Classroom $classroom)
+    public function update(Request $request, Classroom $classroom): \Illuminate\Http\RedirectResponse
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'min:1', 'max:10'],
@@ -46,7 +48,7 @@ class ClassroomController extends Controller
         ]));
     }
 
-    public function store(Request $request)
+    public function store(Request $request): \Illuminate\Http\RedirectResponse
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'min:1', 'max:10'],

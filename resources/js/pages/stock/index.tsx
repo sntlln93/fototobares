@@ -28,7 +28,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 export default function Stockables({
     stockables,
-}: PageProps<Paginated<Stockable>>) {
+}: PageProps<Paginated<Stockable & { products: Product[] }>>) {
     const [showAddStockModal, setShowAddStockModal] =
         useState<Stockable | null>(null);
     const [

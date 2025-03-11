@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\BO;
 
 use App\Http\Controllers\Controller;
@@ -12,19 +14,19 @@ use Inertia\Inertia;
 
 class ProductController extends Controller
 {
-    public function index()
+    public function index(): \Inertia\Response
     {
         return Inertia::render('products/index', ['products' => ProductResource::collection(Product::paginate(10))]);
     }
 
-    public function create()
+    public function create(): \Inertia\Response
     {
         $types = ProductType::orderBy('name')->get();
 
         return Inertia::render('products/create', ['product_types' => $types]);
     }
 
-    public function store(StoreProductRequest $request)
+    public function store(StoreProductRequest $request): \Illuminate\Http\RedirectResponse
     {
         $validated = $request->validated();
 
@@ -33,7 +35,7 @@ class ProductController extends Controller
         return redirect()->route('products.index');
     }
 
-    public function edit(Product $product)
+    public function edit(Product $product): \Inertia\Response
     {
         $types = ProductType::orderBy('name')->get();
 
@@ -43,7 +45,7 @@ class ProductController extends Controller
         ]);
     }
 
-    public function update(StoreProductRequest $request, Product $product)
+    public function update(StoreProductRequest $request, Product $product): \Illuminate\Http\RedirectResponse
     {
         $validated = $request->validated();
 
@@ -52,7 +54,7 @@ class ProductController extends Controller
         return redirect()->route('products.index');
     }
 
-    public function destroy(Product $product)
+    public function destroy(Product $product): \Illuminate\Http\RedirectResponse
     {
         DB::transaction(function () use ($product) {
             $product->combos()->detach();

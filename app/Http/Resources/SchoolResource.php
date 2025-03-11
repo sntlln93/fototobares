@@ -1,10 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/**
+ * @mixin \App\Models\School
+ */
 class SchoolResource extends JsonResource
 {
     /**
@@ -19,7 +24,7 @@ class SchoolResource extends JsonResource
             'name' => $this->name,
             'level' => $this->level,
             'principal' => new ContactResource($this->principal),
-            'full_address' => (string) $this->address,
+            'full_address' => $this->address?->full_address,
             'classrooms' => ClassroomResource::collection($this->classrooms),
             'user_id' => $this->user_id,
             'user' => $this->user,

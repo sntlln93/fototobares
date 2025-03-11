@@ -1,10 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\BO;
 
 use App\Enums\ContactRole;
 use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreSchoolRequest;
 use App\Http\Resources\SchoolResource;
 use App\Models\School;
 use App\Models\User;
@@ -14,10 +17,15 @@ use Inertia\Inertia;
 
 class SchoolController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request): \Inertia\Response
     {
+        /** @var string search */
         $search = $request->query('search');
+
+        /** @var string sort_by */
         $sort_by = $request->query('sort_by') ?? 'id';
+
+        /** @var string sort_order */
         $sort_order = $request->query('sort_order') ?? 'asc';
 
         $schools = School::with(['principal', 'classrooms', 'address', 'user'])
@@ -48,30 +56,19 @@ class SchoolController extends Controller
         ]);
     }
 
-    public function store(Request $request): \Illuminate\Http\RedirectResponse
+    public function store(StoreSchoolRequest $request): \Illuminate\Http\RedirectResponse
     {
-        $validated = $request->validate([
-            'school.user_id' => ['required', 'exists:users,id'],
-            'school' => ['required'],
-            'school.name' => ['required'],
-            'school.level' => ['required'],
-            'principal' => ['required'],
-            'principal.name' => ['required'],
-            'principal.phone' => ['required', 'numeric'],
-            'address' => ['nullable'],
-            'address.street' => ['sometimes'],
-            'address.number' => ['sometimes'],
-            'address.neighborhood' => ['sometimes'],
-            'address.city' => ['required'],
-        ]);
+        $validated = $request->validated();
 
         DB::transaction(function () use ($validated) {
             $school = School::create($validated['school']);
 
-            $school->principal()->create([
-                ...$validated['principal'],
-                'role' => ContactRole::Principal,
-            ]);
+            if (isset($validated['principal'])) {
+                $school->principal()->create([
+                    ...$validated['principal'],
+                    'role' => ContactRole::Principal,
+                ]);
+            }
 
             $school->address()->create($validated['address']);
         });
@@ -92,27 +89,21 @@ class SchoolController extends Controller
         ]);
     }
 
-    public function update(School $school, Request $request): \Illuminate\Http\RedirectResponse
+    public function update(School $school, StoreSchoolRequest $request): \Illuminate\Http\RedirectResponse
     {
-        $validated = $request->validate([
-            'school.user_id' => ['required', 'exists:users,id'],
-            'school' => ['required'],
-            'school.name' => ['required'],
-            'school.level' => ['required'],
-            'principal' => ['required'],
-            'principal.name' => ['required'],
-            'principal.phone' => ['required', 'numeric'],
-            'address' => ['nullable'],
-            'address.street' => ['sometimes'],
-            'address.number' => ['sometimes'],
-            'address.neighborhood' => ['sometimes'],
-            'address.city' => ['sometimes'],
-        ]);
+        $validated = $request->validated();
 
         DB::transaction(function () use ($validated, $school) {
             $school->update($validated['school']);
 
-            $school->principal()->update($validated['principal']);
+            if (isset($validated['principal']) && ! $school->principal) {
+                $school->principal()->create([
+                    ...$validated['principal'],
+                    'role' => ContactRole::Principal,
+                ]);
+            } elseif (isset($validated['principal']) && $school->principal) {
+                $school->principal()->update($validated['principal']);
+            }
 
             $school->address()->update($validated['address']);
         });

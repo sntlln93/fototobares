@@ -31,7 +31,16 @@ const sort = (sortBy: 'name' | 'id') => {
 
 export default function School({
     school,
-}: PageProps<{ school: { data: School & { user: User } } }>) {
+}: PageProps<{
+    school: {
+        data: School & {
+            user: User;
+            principal?: Principal;
+            classrooms: Array<Classroom & { teacher: Teacher }>;
+            full_address?: string;
+        };
+    };
+}>) {
     const [deleteableClassroom, setDeleteableClassroom] =
         useState<Classroom | null>(null);
 
@@ -104,9 +113,11 @@ export default function School({
                         <CardTitle>
                             {school.data.level} {school.data.name}
                         </CardTitle>
-                        <CardDescription>
-                            {school.data.principal.name}
-                        </CardDescription>
+                        {school.data.principal && (
+                            <CardDescription>
+                                {school.data.principal.name}
+                            </CardDescription>
+                        )}
                         <span>{school.data.full_address}</span>
                     </CardHeader>
                 </Card>

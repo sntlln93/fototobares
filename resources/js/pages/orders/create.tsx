@@ -25,6 +25,7 @@ import { BreadcrumbItem } from '@/types';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { format } from 'date-fns';
 import {
+    AlertCircle,
     Edit,
     PlusIcon,
     RectangleHorizontal,
@@ -59,8 +60,8 @@ export default function CreateOrder({
     products,
 }: PageProps<{
     schoolLevels: SchoolLevel[];
-    combos: Combo[];
-    schools: School[];
+    combos: Array<Combo & { products: Product[] }>;
+    schools: Array<School & { classrooms: Classroom[] }>;
     products: Product[];
 }>) {
     const [selectedSchool, setSelectedSchool] = useState<number>(0);
@@ -93,7 +94,7 @@ export default function CreateOrder({
         payments: '0',
         due_date: format(new Date(), 'yyyy-MM-dd'),
     });
-    console.log({ errors, data });
+
     const _selectedSchool = schools.find((s) => s.id === selectedSchool);
     const _selectedClassroom = _selectedSchool?.classrooms.find(
         (c) => c.id === data.classroom_id,
@@ -119,6 +120,13 @@ export default function CreateOrder({
         { combos: {}, undefinedCount: 0 },
     );
 
+    const error_count: Record<Exclude<AccordionValue, undefined>, boolean> = {
+        client: !!errors.name || !!errors.phone,
+        order: !!errors.total_price || !!errors.payments || !!errors.due_date,
+        products: !!errors.order_details,
+        schools: !!errors.classroom_id,
+    };
+
     const toStep = (newAccordionValue: AccordionValue) => {
         return (e: FormEvent) => {
             e.preventDefault();
@@ -142,7 +150,6 @@ export default function CreateOrder({
     };
 
     const handleAddCombo = (id: number) => {
-        console.log({ id });
         const combo = combos.find((p) => p.id === id)!;
         setData('total_price', data.total_price + combo.suggested_price);
         setOpenAddModal(combo.products.map((p) => ({ ...p, combo_id: id })));
@@ -172,14 +179,17 @@ export default function CreateOrder({
                 >
                     <AccordionItem value="schools">
                         <AccordionTrigger onClick={toStep('schools')}>
-                            <span>
+                            <div className="flex items-center gap-2">
+                                {error_count['schools'] && (
+                                    <AlertCircle className="h-5 w-5 stroke-destructive" />
+                                )}
                                 Escuela
                                 {_selectedSchool ? (
-                                    <Badge className="ml-2">
+                                    <Badge>
                                         {`${_selectedSchool.name} ${_selectedClassroom ? `"${_selectedClassroom.name.toUpperCase()}"` : ''}`}
                                     </Badge>
                                 ) : undefined}
-                            </span>
+                            </div>
                         </AccordionTrigger>
                         <AccordionContent className="flex flex-col gap-3 px-1">
                             <div className="flex gap-2 py-2">
@@ -288,15 +298,14 @@ export default function CreateOrder({
 
                     <AccordionItem value="client">
                         <AccordionTrigger onClick={toStep('client')}>
-                            <span>
+                            <div className="flex items-center gap-2">
+                                {error_count['client'] && (
+                                    <AlertCircle className="h-5 w-5 stroke-destructive" />
+                                )}
                                 Cliente
-                                {data.name && (
-                                    <Badge className="ml-2">{`${data.name}`}</Badge>
-                                )}
-                                {data.phone && (
-                                    <Badge className="ml-2">{`${data.phone}`}</Badge>
-                                )}
-                            </span>
+                                {data.name && <Badge>{`${data.name}`}</Badge>}
+                                {data.phone && <Badge>{`${data.phone}`}</Badge>}
+                            </div>
                         </AccordionTrigger>
                         <AccordionContent className="px-1">
                             <div>
@@ -355,12 +364,15 @@ export default function CreateOrder({
 
                     <AccordionItem value="products">
                         <AccordionTrigger onClick={toStep('products')}>
-                            <span>
+                            <div className="flex items-center gap-2">
+                                {error_count['products'] && (
+                                    <AlertCircle className="h-5 w-5 stroke-destructive" />
+                                )}
                                 Productos
                                 {data.order_details && (
                                     <Badge className="ml-2">{`${data.order_details.length} productos`}</Badge>
                                 )}
-                            </span>
+                            </div>
                         </AccordionTrigger>
                         <AccordionContent className="px-1">
                             <Combobox
@@ -525,7 +537,12 @@ export default function CreateOrder({
 
                     <AccordionItem value="order">
                         <AccordionTrigger onClick={toStep('order')}>
-                            Pedido
+                            <div className="flex items-center gap-2">
+                                {error_count['products'] && (
+                                    <AlertCircle className="h-5 w-5 stroke-destructive" />
+                                )}
+                                Pedido
+                            </div>
                         </AccordionTrigger>
                         <AccordionContent className="px-1">
                             <div className="mt-3">

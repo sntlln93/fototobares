@@ -1,15 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Classroom extends Model
 {
-    /** @use HasFactory<\Database\Factories\ClassroomFactory> */
-    use HasFactory;
-
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\MorphOne<Contact, $this>
+     */
     public function teacher()
     {
         return $this->morphOne(Contact::class, 'contactable');

@@ -1,38 +1,49 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\MorphOne;
 
 class School extends Model
 {
-    /** @use HasFactory<\Database\Factories\SchoolFactory> */
-    use HasFactory;
-
-    public function classrooms(): HasMany
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<Classroom, $this>
+     */
+    public function classrooms()
     {
         return $this->hasMany(Classroom::class);
     }
 
-    public function principal(): MorphOne
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\MorphOne<Contact, $this>
+     */
+    public function principal()
     {
         return $this->morphOne(Contact::class, 'contactable');
     }
 
-    public function address(): MorphOne
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\MorphOne<Address, $this>
+     */
+    public function address()
     {
         return $this->morphOne(Address::class, 'addressable');
     }
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasManyThrough<Contact, Classroom, $this>
+     */
     public function teachers()
     {
         return $this->hasManyThrough(Contact::class, Classroom::class, 'school_id', 'id')
             ->where('contactable_type', Classroom::class);
     }
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<User, $this>
+     */
     public function user()
     {
         return $this->belongsTo(User::class);
