@@ -1,0 +1,61 @@
+name: Code Quality Checks
+
+on:
+  push:
+    branches:
+      - develop
+      - main
+  pull_request:
+    branches:
+      - develop
+      - main
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Clonar el repositorio
+        uses: actions/checkout@v4
+
+      # Setup PHP
+      - name: ⚙️ Configurar PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          tools: composer:v2
+          coverage: xdebug
+
+      # Setup Node.js
+      - name: ⚙️ Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      # Instalar dependencias
+      - name: 📦 Instalar dependencias
+        run: |
+          composer install --no-interaction --prefer-dist --optimize-autoloader
+          npm ci
+
+      # Preparar Laravel
+      - name: ⚡ Configurar Laravel
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+
+      # Formatear código con Pint y Prettier
+      - name: 🧹 Ejecutar Laravel Pint
+        run: vendor/bin/pint --test
+
+      - name: ✨ Ejecutar Prettier
+        run: npm run format -- --check
+
+      # Linting con ESLint
+      - name: 🔍 Ejecutar ESLint
+        run: npm run lint -- --max-warnings=0
+
+      # Compilar TypeScript
+      - name: 🛠️ Compilar TypeScript
+        run: npx tsc --noEmit
