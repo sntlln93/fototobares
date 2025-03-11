@@ -87,7 +87,6 @@ declare global {
         id: number;
         name: string;
         level: 'Jardín' | 'Primaria' | 'Secundaria';
-        principal: Principal;
         classrooms: Classroom[];
         full_address: string;
         address: Address;

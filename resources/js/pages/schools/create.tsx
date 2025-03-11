@@ -11,9 +11,10 @@ import {
 } from '@/components/ui/select';
 import AppLayout from '@/layouts/app-layout';
 import { getError } from '@/lib/utils';
-import { BreadcrumbItem } from '@/types';
+import { type BreadcrumbItem } from '@/types';
 import { Head, Link, useForm } from '@inertiajs/react';
-import { FormEventHandler } from 'react';
+import { type FormEventHandler } from 'react';
+import { type SchoolFormData } from './form';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -27,18 +28,19 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function CreateSchool({ users }: PageProps<{ users: User[] }>) {
-    const { data, setData, post, processing, errors } = useForm({
-        school: {
-            name: '',
-            level: 'Primaria',
-            user_id: 0,
+    const { data, setData, post, processing, errors } = useForm<SchoolFormData>(
+        {
+            school: {
+                name: '',
+                level: 'Primaria',
+            },
+            address: { city: 'La Rioja' },
         },
-        principal: { name: '', phone: '' },
-        address: { street: '', number: '', neighborhood: '', city: 'La Rioja' },
-    });
+    );
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
+
         post(route('schools.store'));
     };
 
@@ -106,7 +108,7 @@ export default function CreateSchool({ users }: PageProps<{ users: User[] }>) {
                             </Select>
 
                             <InputError
-                                message={_getError('school.name')}
+                                message={_getError('school.level')}
                                 className="mt-2"
                             />
                         </div>
@@ -156,7 +158,7 @@ export default function CreateSchool({ users }: PageProps<{ users: User[] }>) {
                             <TextInput
                                 id="principal.name"
                                 name="principal.name"
-                                value={data.principal.name}
+                                value={data.principal?.name ?? ''}
                                 onChange={(e) =>
                                     setData('principal', {
                                         ...data.principal,
@@ -183,7 +185,7 @@ export default function CreateSchool({ users }: PageProps<{ users: User[] }>) {
                                 name="principal.phone"
                                 type="text"
                                 pattern="[0-9]{10}"
-                                value={data.principal.phone}
+                                value={data.principal?.phone ?? ''}
                                 onChange={(e) =>
                                     setData('principal', {
                                         ...data.principal,

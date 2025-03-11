@@ -11,14 +11,15 @@ import {
 } from '@/components/ui/select';
 import AppLayout from '@/layouts/app-layout';
 import { getError } from '@/lib/utils';
-import { BreadcrumbItem } from '@/types';
+import { type BreadcrumbItem } from '@/types';
 import { Head, Link, useForm } from '@inertiajs/react';
-import { FormEventHandler } from 'react';
+import { type FormEventHandler } from 'react';
+import { type SchoolFormData } from './form';
 
 export default function EditSchool({
     school,
     users,
-}: PageProps<{ school: School; users: User[] }>) {
+}: PageProps<{ school: School & { principal?: Principal }; users: User[] }>) {
     const breadcrumbs: BreadcrumbItem[] = [
         {
             title: 'Escuelas',
@@ -30,16 +31,18 @@ export default function EditSchool({
         },
     ];
 
-    const { data, setData, put, processing, errors } = useForm({
+    const { data, setData, put, processing, errors } = useForm<SchoolFormData>({
         school: {
             name: school.name,
             level: school.level,
             user_id: school.user_id,
         },
-        principal: {
-            name: school.principal.name,
-            phone: school.principal.phone,
-        },
+        principal: school.principal
+            ? {
+                  name: school.principal.name,
+                  phone: school.principal.phone,
+              }
+            : undefined,
         address: {
             street: school.address.street ?? '',
             number: school.address.number ?? '',
@@ -172,7 +175,7 @@ export default function EditSchool({
                             <Input
                                 id="principal.name"
                                 name="principal.name"
-                                value={data.principal.name}
+                                value={data.principal?.name ?? ''}
                                 onChange={(e) =>
                                     setData('principal', {
                                         ...data.principal,
@@ -199,7 +202,7 @@ export default function EditSchool({
                                 name="principal.phone"
                                 type="text"
                                 pattern="[0-9]{10}"
-                                value={data.principal.phone}
+                                value={data.principal?.phone ?? ''}
                                 onChange={(e) =>
                                     setData('principal', {
                                         ...data.principal,
