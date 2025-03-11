@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\BO;
 
 use App\Http\Controllers\Controller;
@@ -14,8 +16,13 @@ class StockController extends Controller
 {
     public function index(Request $request): \Inertia\Response
     {
+        /** @var string search */
         $search = $request->query('search');
+
+        /** @var string sort_by */
         $sort_by = $request->query('sort_by') ?? 'id';
+
+        /** @var string sort_order */
         $sort_order = $request->query('sort_order') ?? 'asc';
 
         $stockables = Stockable::with('products')

@@ -9,13 +9,16 @@
             "extensions": [
                 "mikestead.dotenv",
                 "amiralizadeh9480.laravel-extra-intellisense",
-                "ryannaddy.laravel-artisan",
                 "open-southeners.laravel-pint",
                 "esbenp.prettier-vscode",
                 "inferrinizzard.prettier-sql-vscode",
                 "laravel.vscode-laravel",
                 "bmewburn.vscode-intelephense-client",
-                "bradlc.vscode-tailwindcss"
+                "bradlc.vscode-tailwindcss",
+                "usernamehw.errorlens",
+                "eamodio.gitlens",
+                "dbaeumer.vscode-eslint",
+                "sanderronde.phpstan-vscode"
             ],
             "settings": {}
         }

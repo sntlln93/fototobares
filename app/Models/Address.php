@@ -1,22 +1,22 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class Address extends Model
 {
-    /** @use HasFactory<\Database\Factories\AddressFactory> */
-    use HasFactory;
-
-    public function addressable(): MorphTo
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\MorphTo<Model, $this>
+     */
+    public function addressable()
     {
         return $this->morphTo();
     }
 
-    public function __toString()
+    public function __toString(): string
     {
         $full_address = '';
 
