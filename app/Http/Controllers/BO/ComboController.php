@@ -45,7 +45,7 @@ class ComboController extends Controller
         ]);
 
         $combo->products()->attach(
-            new Collection($validated['products'])->mapWithKeys(function ($product) {
+            (new Collection($validated['products']))->mapWithKeys(function ($product) {
                 return [$product['id'] => [
                     'quantity' => $product['quantity'],
                     'variants' => isset($product['variants']) ? json_encode($product['variants']) : null,
@@ -77,7 +77,7 @@ class ComboController extends Controller
         ]);
 
         $combo->products()->sync(
-            new Collection($validated['products'])->mapWithKeys(function ($product) {
+            (new Collection($validated['products']))->mapWithKeys(function ($product) {
                 return [$product['id'] => [
                     'quantity' => $product['quantity'],
                     'variants' => isset($product['variants']) ? json_encode($product['variants']) : null,
