@@ -34,7 +34,7 @@ export default function CreateStockable({
         name: '',
         quantity: '0',
         alert_at: '0',
-        unit: 'unit',
+        unit: 'Unidad',
         products: [],
     });
 

@@ -86,7 +86,10 @@ class StockController extends Controller
             $stockable,
         ) {
             $stockable->update($validated);
-            $stockable->products()->sync($related_products['products']);
+
+            if (isset($related_products['products'])) {
+                $stockable->products()->sync($related_products['products']);
+            }
         });
 
         return redirect(route('stockables.index'));
