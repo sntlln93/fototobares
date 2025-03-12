@@ -47,7 +47,7 @@ export default function CreateStockable({
 
         post(route('stockables.store'));
     };
-
+    console.log(errors);
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Nuevo stockeable" />
@@ -152,6 +152,8 @@ export default function CreateStockable({
                                 </span>
                             </label>
                         ))}
+
+                        <InputError message={errors.products} />
                     </fieldset>
                 </div>
 
