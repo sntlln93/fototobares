@@ -75,7 +75,7 @@ export default function EditProduct({
                     : data.variants[key].filter((item) => item !== value),
             });
         };
-    console.log(data.product_type_id);
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Editar producto" />

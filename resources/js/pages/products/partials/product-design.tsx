@@ -8,7 +8,7 @@ import {
 export function ProductDesign({ variants }: { variants: Product['variants'] }) {
     return (
         <div className="flex gap-1">
-            {variants.photo_types.length > 0 &&
+            {variants.photo_types?.length > 0 &&
                 variants.photo_types.map((photoType) =>
                     photoType === 'individual' ? (
                         <User key={photoType} />
@@ -16,7 +16,7 @@ export function ProductDesign({ variants }: { variants: Product['variants'] }) {
                         <Users key={photoType} />
                     ),
                 )}
-            {variants.orientations.map((orientation) =>
+            {variants.orientations?.map((orientation) =>
                 orientation === 'vertical' ? (
                     <RectangleVertical key={orientation} />
                 ) : (

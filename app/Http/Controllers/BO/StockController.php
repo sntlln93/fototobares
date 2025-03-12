@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\BO;
 
+use App\Enums\Unit;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\StockableResource;
 use App\Models\Product;
 use App\Models\Stockable;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
 class StockController extends Controller
@@ -73,6 +75,7 @@ class StockController extends Controller
             'name' => ['sometimes', 'string', 'min: 4'],
             'quantity' => ['sometimes', 'numeric', 'min:1'],
             'alert_at' => ['sometimes', 'numeric', 'min:1'],
+            'unit' => ['sometimes', Rule::in(Unit::cases())],
         ]);
 
         $related_products = $request->validate([

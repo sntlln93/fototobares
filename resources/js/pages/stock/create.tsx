@@ -152,6 +152,8 @@ export default function CreateStockable({
                                 </span>
                             </label>
                         ))}
+
+                        <InputError message={errors.products} />
                     </fieldset>
                 </div>
 
