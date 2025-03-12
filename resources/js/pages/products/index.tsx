@@ -12,7 +12,7 @@ import {
 import { Searchbar } from '@/features/searchbar';
 import AppLayout from '@/layouts/app-layout';
 import { onSort } from '@/lib/services/filter';
-import { formatPrice } from '@/lib/utils';
+import { formatPrice, getColorEs } from '@/lib/utils';
 import { BreadcrumbItem } from '@/types';
 import { Head, Link } from '@inertiajs/react';
 import { ArrowUpDown, Edit2, Plus, Trash } from 'lucide-react';
@@ -114,12 +114,12 @@ export default function Products({ products }: PageProps<Paginated<Product>>) {
                             </TableHead>
                             <TableHead>
                                 <div className="flex items-center gap-2">
-                                    Colores
+                                    Fondos
                                 </div>
                             </TableHead>
                             <TableHead>
                                 <div className="flex items-center gap-2">
-                                    Fondos
+                                    Colores
                                 </div>
                             </TableHead>
                             <TableHead>Acciones</TableHead>
@@ -172,7 +172,7 @@ export default function Products({ products }: PageProps<Paginated<Product>>) {
                                                 variant="secondary"
                                                 key={color}
                                             >
-                                                {color}
+                                                {getColorEs(color)}
                                             </Badge>
                                         ))}
                                 </TableCell>
