@@ -29,6 +29,9 @@ jobs:
 
       - name: 🧹 Laravel Pint
         run: vendor/bin/pint --test
+      
+      - name: 🧹 PhpStan
+        run: vendor/bin/phpstan analyse
 
   ci_frontend:
     runs-on: ubuntu-latest
