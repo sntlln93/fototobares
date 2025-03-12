@@ -22,6 +22,7 @@ class ClassroomResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => strtoupper($this->name),
+            'teacher' => new ContactResource($this->teacher),
         ];
     }
 }
