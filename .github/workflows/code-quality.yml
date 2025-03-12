@@ -2,80 +2,47 @@ name: Code Quality Checks
 
 on:
   pull_request:
-    branches:
-      - develop
-      - main
+    branches: [develop, main]
 
 jobs:
-  setup:
+  ci:
     runs-on: ubuntu-latest
-    outputs:
-      cache-key: ${{ steps.cache.outputs.cache-hit }}
+
     steps:
-      - name: 📥 Clonar el repositorio
+      - name: 📥 Clone repo
         uses: actions/checkout@v4
 
-      - name: ⚙️ Configurar PHP
+      - name: ⚙️ PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.4'
           tools: composer:v2
           coverage: xdebug
 
-      - name: ⚙️ Configurar Node.js
+      - name: ⚙️ Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '22'
           cache: 'npm'
 
-      - name: 📦 Cache Composer Dependencies
-        uses: actions/cache@v3
-        with:
-          path: vendor
-          key: php-${{ runner.os }}-${{ hashFiles('**/composer.lock') }}
-          restore-keys: |
-            php-${{ runner.os }}-
-
-      - name: 📦 Cache npm Dependencies
-        uses: actions/cache@v3
-        with:
-          path: ~/.npm
-          key: node-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            node-${{ runner.os }}-
-
-      - name: 📦 Instalar dependencias
+      - name: 📦 Install dependencies
         run: |
           composer install --no-interaction --prefer-dist --optimize-autoloader
           npm ci
 
-      - name: ⚡ Configurar Laravel
+      - name: ⚡ Setup Laravel
         run: |
           cp .env.example .env
           php artisan key:generate
 
-  linting:
-    runs-on: ubuntu-latest
-    needs: setup
-    steps:
-      - name: 📥 Clonar el repositorio
-        uses: actions/checkout@v4
-
-      - name: 🧹 Ejecutar Laravel Pint
+      - name: 🧹 Laravel Pint
         run: vendor/bin/pint --test
 
-      - name: ✨ Ejecutar Prettier
+      - name: ✨ Prettier
         run: npm run format -- --check
 
-      - name: 🔍 Ejecutar ESLint
+      - name: 🔍 ESLint
         run: npm run lint -- --max-warnings=0
 
-  typescript:
-    runs-on: ubuntu-latest
-    needs: setup
-    steps:
-      - name: 📥 Clonar el repositorio
-        uses: actions/checkout@v4
-
-      - name: 🛠️ Compilar TypeScript
+      - name: 🛠️ TypeScript checks
         run: npx tsc --noEmit
