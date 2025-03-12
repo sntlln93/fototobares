@@ -5,7 +5,7 @@ on:
     branches: [develop, main]
 
 jobs:
-  ci.backend:
+  ci_backend:
     runs-on: ubuntu-latest
 
     steps:
@@ -30,7 +30,7 @@ jobs:
       - name: 🧹 Laravel Pint
         run: vendor/bin/pint --test
 
-  ci.frontend:
+  ci_frontend:
     runs-on: ubuntu-latest
 
     steps:
