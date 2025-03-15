@@ -7,6 +7,7 @@ namespace App\Http\Controllers\BO;
 use App\Enums\ContactRole;
 use App\Http\Controllers\Controller;
 use App\Models\Classroom;
+use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -15,6 +16,14 @@ class ClassroomController extends Controller
     public function destroy(Classroom $classroom): \Illuminate\Http\RedirectResponse
     {
         $school_id = $classroom->school_id;
+
+        $orders = Order::query()
+            ->where('id', $classroom->id)
+            ->get();
+
+        if (count($orders) > 0) {
+            return back()->withErrors('No se pueden eliminar cursos que tengan pedidos registrados');
+        }
 
         DB::transaction(function () use ($classroom) {
             $classroom->teacher()->delete();
