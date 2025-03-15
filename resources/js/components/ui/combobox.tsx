@@ -38,7 +38,8 @@ export function Combobox({
                     <CommandInput placeholder={placeholder} />
                     <CommandList>
                         <CommandEmpty>
-                            No se encontró ningún producto
+                            No se encontró ningún elemento que coincida con la
+                            búsqueda
                         </CommandEmpty>
                         <CommandGroup>
                             {items.map((item) => (
