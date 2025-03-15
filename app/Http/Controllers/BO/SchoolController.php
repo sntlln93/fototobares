@@ -9,6 +9,7 @@ use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreSchoolRequest;
 use App\Http\Resources\SchoolResource;
+use App\Models\Order;
 use App\Models\School;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -114,6 +115,15 @@ class SchoolController extends Controller
 
     public function destroy(School $school): \Illuminate\Http\RedirectResponse
     {
+        $classrooms = $school->classrooms->pluck('id');
+        $orders = Order::query()
+            ->whereIn('id', $classrooms)
+            ->get();
+
+        if (count($orders) > 0) {
+            return back()->withErrors('No se pueden eliminar escuelas que tengan pedidos registrados');
+        }
+
         DB::transaction(function () use ($school) {
             $school->address()->delete();
             $school->principal()->delete();

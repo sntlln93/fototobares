@@ -1,3 +1,4 @@
+import { Toaster } from '@/components/ui/sonner';
 import useCsrfAutoRefresh from '@/hooks/use-csrf-auto-refresh';
 import AppLayoutTemplate from '@/layouts/app/app-sidebar-layout';
 import { type BreadcrumbItem } from '@/types';
@@ -17,6 +18,7 @@ export default function AppLayout({
     return (
         <AppLayoutTemplate breadcrumbs={breadcrumbs} {...props}>
             {children}
+            <Toaster />
         </AppLayoutTemplate>
     );
 }
