@@ -18,7 +18,7 @@ export default function AppLayout({
     return (
         <AppLayoutTemplate breadcrumbs={breadcrumbs} {...props}>
             {children}
-            <Toaster />
+            <Toaster swipeDirections={['right']} position="top-right" />
         </AppLayoutTemplate>
     );
 }
