@@ -34,7 +34,7 @@ class StockController extends Controller
                     ->orWhere('id', $search);
             })
             ->orderBy($sort_by, $sort_order)
-            ->paginate(10);
+            ->paginate(20);
 
         return Inertia::render('stock/index', [
             'stockables' => StockableResource::collection($stockables),

@@ -100,6 +100,7 @@ declare global {
         id: number;
         name: string;
         unit_price: number;
+        financed_price: number;
         max_payments: number;
         product_type_id: number;
         variants: {

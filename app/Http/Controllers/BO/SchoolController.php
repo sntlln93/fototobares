@@ -38,7 +38,7 @@ class SchoolController extends Controller
                     });
             })
             ->orderBy($sort_by, $sort_order)
-            ->paginate(10);
+            ->paginate(20);
 
         return Inertia::render('schools/index', [
             'schools' => SchoolResource::collection($schools),

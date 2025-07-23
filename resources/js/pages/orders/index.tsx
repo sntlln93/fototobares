@@ -110,7 +110,9 @@ export default function Orders({ orders }: PageProps<Paginated<Order>>) {
                                     <Button
                                         size={'sm'}
                                         variant={'destructive'}
-                                        onClick={() => console.log(order)}
+                                        onClick={() =>
+                                            alert(JSON.stringify(order))
+                                        }
                                     >
                                         <Trash />
                                     </Button>

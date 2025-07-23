@@ -33,7 +33,7 @@ class OrderController extends Controller
         $stockables = Order::with('client')
             ->where('id', 'like', "%$search%")
             ->orderBy($sort_by, $sort_order)
-            ->paginate(10);
+            ->paginate(20);
 
         return Inertia::render('orders/index', [
             'orders' => OrderResource::collection($stockables),
