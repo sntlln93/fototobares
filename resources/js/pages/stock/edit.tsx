@@ -143,6 +143,13 @@ export default function EditStockable({
                                                 ...data.products,
                                                 product.id,
                                             ]);
+                                        } else {
+                                            setData(
+                                                'products',
+                                                data.products.filter(
+                                                    (id) => id !== product.id,
+                                                ),
+                                            );
                                         }
                                     }}
                                 />

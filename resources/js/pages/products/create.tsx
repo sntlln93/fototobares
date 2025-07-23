@@ -277,7 +277,7 @@ export default function CreateProduct({
                                             )}
                                         />
                                         <span className="ms-2 text-sm text-gray-600 dark:text-gray-400">
-                                            {background}
+                                            {getColorEs(background)}
                                         </span>
                                     </label>
                                 ))}

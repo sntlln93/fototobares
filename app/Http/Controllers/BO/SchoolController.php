@@ -9,6 +9,7 @@ use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreSchoolRequest;
 use App\Http\Resources\SchoolResource;
+use App\Models\Order;
 use App\Models\School;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -28,7 +29,7 @@ class SchoolController extends Controller
         /** @var string sort_order */
         $sort_order = $request->query('sort_order') ?? 'asc';
 
-        $schools = School::with(['principal', 'classrooms', 'address', 'user'])
+        $schools = School::with(['principal', 'classrooms.teacher', 'address', 'user'])
             ->when($search, function ($q) use ($search) {
                 return $q->where('name', 'like', "%$search%")
                     ->orWhere('id', 'like', "%$search%")
@@ -37,7 +38,7 @@ class SchoolController extends Controller
                     });
             })
             ->orderBy($sort_by, $sort_order)
-            ->paginate(10);
+            ->paginate(20);
 
         return Inertia::render('schools/index', [
             'schools' => SchoolResource::collection($schools),
@@ -114,6 +115,15 @@ class SchoolController extends Controller
 
     public function destroy(School $school): \Illuminate\Http\RedirectResponse
     {
+        $classrooms = $school->classrooms->pluck('id');
+        $orders = Order::query()
+            ->whereIn('id', $classrooms)
+            ->get();
+
+        if (count($orders) > 0) {
+            return back()->withErrors('No se pueden eliminar escuelas que tengan pedidos registrados');
+        }
+
         DB::transaction(function () use ($school) {
             $school->address()->delete();
             $school->principal()->delete();

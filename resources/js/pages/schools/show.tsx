@@ -173,7 +173,7 @@ export default function School({
                                 </TableCell>
                                 <TableCell>{classroom.name}</TableCell>
                                 <TableCell>{classroom.teacher?.name}</TableCell>
-                                <TableCell>aulas</TableCell>
+                                <TableCell></TableCell>
 
                                 <TableCell className="flex gap-2">
                                     <Button

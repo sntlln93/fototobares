@@ -3,7 +3,7 @@ export type FormData = Pick<Product, 'name' | 'product_type_id'> & {
     max_payments: string;
     variants: {
         colors: Color[];
-        backgrounds: string[];
+        backgrounds: Color[];
         dimentions: string;
         photo_types: ProductPhotoType[];
         orientations: ProductOrientation[];
