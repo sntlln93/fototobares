@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::create('classrooms', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->boolean('should_create_automacally')
+            $table->boolean('should_create_automatically')
                 ->default(false);
             $table->foreignId('school_id')
                 ->constrained();
