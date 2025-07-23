@@ -16,7 +16,9 @@ class ProductController extends Controller
 {
     public function index(): \Inertia\Response
     {
-        return Inertia::render('products/index', ['products' => ProductResource::collection(Product::paginate(10))]);
+        return Inertia::render('products/index', [
+            'products' => ProductResource::collection(Product::paginate(20)),
+        ]);
     }
 
     public function create(): \Inertia\Response

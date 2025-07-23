@@ -34,7 +34,7 @@ class StoreOrderRequest extends FormRequest
 
             'order_details' => ['required', 'array'],
             'order_details.*.product_id' => ['required', 'integer', 'exists:products,id'],
-            'order_details.*.note' => ['required', 'string'],
+            'order_details.*.note' => ['nullable', 'string'],
             'order_details.*.variant' => ['sometimes', 'array'],
             'order_details.*.variant.orientation' => ['required_with:order_details.*.variant', 'string', 'in:horizontal,vertical'], // Adjust values as needed
             'order_details.*.variant.photo_type' => ['required_with:order_details.*.variant', 'string', 'in:individual,grupo'], // Adjust values as needed

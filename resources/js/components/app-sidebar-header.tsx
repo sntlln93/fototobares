@@ -1,6 +1,8 @@
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Breadcrumbs } from '@/features/breadcrumbs';
 import { type BreadcrumbItem as BreadcrumbItemType } from '@/types';
+import { Link } from '@inertiajs/react';
+import { buttonVariants } from './ui/button';
 
 export function AppSidebarHeader({
     breadcrumbs = [],
@@ -12,6 +14,17 @@ export function AppSidebarHeader({
             <div className="flex items-center gap-2">
                 <SidebarTrigger className="-ml-1" />
                 <Breadcrumbs breadcrumbs={breadcrumbs} />
+            </div>
+            <div className="ml-auto">
+                <Link
+                    href={route('orders.create')}
+                    className={buttonVariants({
+                        variant: 'secondary',
+                        size: 'sm',
+                    })}
+                >
+                    Vender
+                </Link>
             </div>
         </header>
     );

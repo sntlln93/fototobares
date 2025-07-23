@@ -19,6 +19,7 @@ return new class extends Migration
             $table->json('variants')->nullable();
             $table->integer('unit_price');
             $table->integer('max_payments');
+            $table->integer('financed_price')->nullable();
             $table->foreignId('product_type_id')->constrained();
             $table->timestamps();
         });

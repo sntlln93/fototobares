@@ -5,7 +5,7 @@ on:
     branches: [develop, main]
 
 jobs:
-  ci:
+  ci_backend:
     runs-on: ubuntu-latest
 
     steps:
@@ -19,16 +19,8 @@ jobs:
           tools: composer:v2
           coverage: xdebug
 
-      - name: ⚙️ Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-          cache: 'npm'
-
       - name: 📦 Install dependencies
-        run: |
-          composer install --no-interaction --prefer-dist --optimize-autoloader
-          npm ci
+        run: composer install --no-interaction --prefer-dist --optimize-autoloader
 
       - name: ⚡ Setup Laravel
         run: |
@@ -37,6 +29,25 @@ jobs:
 
       - name: 🧹 Laravel Pint
         run: vendor/bin/pint --test
+      
+      - name: 🧹 PhpStan
+        run: vendor/bin/phpstan analyse
+
+  ci_frontend:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Clone repo
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: 📦 Install dependencies
+        run: npm ci
 
       - name: ✨ Prettier
         run: npm run format -- --check

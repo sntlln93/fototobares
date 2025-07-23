@@ -18,7 +18,7 @@ class ComboController extends Controller
 {
     public function index(): \Inertia\Response
     {
-        $combos = Combo::with('products')->paginate(10);
+        $combos = Combo::with('products')->paginate(20);
 
         return Inertia::render('combos/index', [
             'combos' => ComboResource::collection($combos),

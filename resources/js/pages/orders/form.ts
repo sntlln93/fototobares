@@ -9,3 +9,8 @@ export type ProductOrder = {
     combo_id?: number;
     note: string;
 };
+
+export type SelectableProduct = Product & {
+    combo_id?: number;
+    pivot?: { variants: Product['variants'] };
+};

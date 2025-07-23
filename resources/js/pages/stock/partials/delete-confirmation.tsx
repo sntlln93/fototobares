@@ -2,7 +2,6 @@ import {
     AlertDialog,
     AlertDialogAction,
     AlertDialogCancel,
-    AlertDialogContent,
     AlertDialogDescription,
     AlertDialogFooter,
     AlertDialogHeader,
@@ -10,20 +9,21 @@ import {
 } from '@/components/ui/alert-dialog';
 import { buttonVariants } from '@/components/ui/button';
 import { useForm } from '@inertiajs/react';
+import { AlertDialogContent } from '@radix-ui/react-alert-dialog';
 
-export function DeleteSchoolConfirmation({
-    school,
+export function DeleteStockableConfirmation({
+    stockable,
     show,
     onClose,
 }: {
-    school: School;
+    stockable: Stockable;
     show: boolean;
     onClose: CallableFunction;
 }) {
     const { delete: destroy, processing } = useForm();
 
     const onDestroy = () => {
-        destroy(route('schools.destroy', { school: school.id }), {
+        destroy(route('stockables.update', { stockable: stockable.id }), {
             onFinish: () => onClose(),
         });
     };
@@ -33,22 +33,24 @@ export function DeleteSchoolConfirmation({
             <AlertDialogContent>
                 <AlertDialogHeader>
                     <AlertDialogTitle>
-                        ¿Estás seguro que querés eliminar esta escuela?
+                        ¿Estás seguro que querés eliminar este insumo?
                     </AlertDialogTitle>
-                    <AlertDialogDescription>
-                        Una vez eliminada, también se eliminarán los datos
-                        asociados a esta. No podrás recuperar los datos de esta
-                        escuela sin intervención de tu administrador.
-                    </AlertDialogDescription>
                 </AlertDialogHeader>
+
+                <AlertDialogDescription>
+                    Una vez eliminado, no podrás recuperar los datos de este
+                    insumo sin intervención de tu administrador.
+                </AlertDialogDescription>
+
                 <AlertDialogFooter>
                     <AlertDialogCancel>Cancelar</AlertDialogCancel>
+
                     <AlertDialogAction
                         className={buttonVariants({ variant: 'destructive' })}
                         disabled={processing}
                         onClick={onDestroy}
                     >
-                        Eliminar escuela
+                        Eliminar stockeable
                     </AlertDialogAction>
                 </AlertDialogFooter>
             </AlertDialogContent>

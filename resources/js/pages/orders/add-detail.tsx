@@ -5,8 +5,9 @@ import { Modal } from '@/components/modal';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { capitalize, getColorEs } from '@/lib/utils';
 import { useState } from 'react';
-import { ProductOrder } from './form';
+import { ProductOrder, SelectableProduct } from './form';
 
 type ProductData<T> = { product_id: number; value: T };
 
@@ -17,7 +18,7 @@ export function AddDetail({
     onClose,
 }: {
     addProducts: (products: ProductOrder[]) => void;
-    products: (Product & { combo_id?: number })[];
+    products: SelectableProduct[];
     show: boolean;
     onClose: CallableFunction;
 }) {
@@ -205,6 +206,15 @@ export function AddDetail({
         }
     };
 
+    const getVariants = (step: typeof currentStep) => {
+        const variants =
+            products[step].pivot?.variants ?? products[step].variants;
+
+        return typeof variants === 'string'
+            ? (JSON.parse(variants) as typeof variants)
+            : variants;
+    };
+
     return (
         <Modal show={show} onClose={onClose}>
             <div className="p-6" key={products[currentStep].id}>
@@ -224,9 +234,7 @@ export function AddDetail({
                                     Orientaciones disponibles para este producto
                                 </legend>
                                 <div className="mt-1 flex flex-wrap gap-4">
-                                    {products[
-                                        currentStep
-                                    ].variants.orientations.map(
+                                    {getVariants(currentStep).orientations.map(
                                         (orientation) => (
                                             <label
                                                 className="flex items-center"
@@ -254,7 +262,7 @@ export function AddDetail({
                                                     }
                                                 />
                                                 <span className="ms-2 text-sm text-gray-600 dark:text-gray-400">
-                                                    {orientation}
+                                                    {capitalize(orientation)}
                                                 </span>
                                             </label>
                                         ),
@@ -276,37 +284,39 @@ export function AddDetail({
                                     Tipo de foto
                                 </legend>
                                 <div className="mt-1 flex flex-wrap gap-4">
-                                    {products[
-                                        currentStep
-                                    ].variants.photo_types.map((photoType) => (
-                                        <label
-                                            className="flex items-center"
-                                            key={photoType}
-                                        >
-                                            <Checkbox
-                                                value={photoType}
-                                                checked={
-                                                    getProductValue(
-                                                        products[currentStep]
-                                                            .id,
-                                                        'photoType',
-                                                    ) === photoType
-                                                }
-                                                onChange={(e) =>
-                                                    updateProductData(
-                                                        'photoType',
-                                                        products[currentStep]
-                                                            .id,
-                                                        e.target
-                                                            .value as ProductPhotoType,
-                                                    )
-                                                }
-                                            />
-                                            <span className="ms-2 text-sm text-gray-600 dark:text-gray-400">
-                                                {photoType}
-                                            </span>
-                                        </label>
-                                    ))}
+                                    {getVariants(currentStep).photo_types.map(
+                                        (photoType) => (
+                                            <label
+                                                className="flex items-center"
+                                                key={photoType}
+                                            >
+                                                <Checkbox
+                                                    value={photoType}
+                                                    checked={
+                                                        getProductValue(
+                                                            products[
+                                                                currentStep
+                                                            ].id,
+                                                            'photoType',
+                                                        ) === photoType
+                                                    }
+                                                    onChange={(e) =>
+                                                        updateProductData(
+                                                            'photoType',
+                                                            products[
+                                                                currentStep
+                                                            ].id,
+                                                            e.target
+                                                                .value as ProductPhotoType,
+                                                        )
+                                                    }
+                                                />
+                                                <span className="ms-2 text-sm text-gray-600 dark:text-gray-400">
+                                                    {capitalize(photoType)}
+                                                </span>
+                                            </label>
+                                        ),
+                                    )}
                                 </div>
                             </fieldset>
                             <InputError
@@ -324,36 +334,38 @@ export function AddDetail({
                                     este combo
                                 </legend>
                                 <div className="mt-1 flex flex-wrap gap-4">
-                                    {products[
-                                        currentStep
-                                    ].variants.backgrounds.map((background) => (
-                                        <label
-                                            className="flex items-center"
-                                            key={background}
-                                        >
-                                            <Checkbox
-                                                value={background}
-                                                checked={
-                                                    getProductValue(
-                                                        products[currentStep]
-                                                            .id,
-                                                        'background',
-                                                    ) === background
-                                                }
-                                                onChange={(e) =>
-                                                    updateProductData(
-                                                        'background',
-                                                        products[currentStep]
-                                                            .id,
-                                                        e.target.value,
-                                                    )
-                                                }
-                                            />
-                                            <span className="ms-2 text-sm text-gray-600 dark:text-gray-400">
-                                                {background}
-                                            </span>
-                                        </label>
-                                    ))}
+                                    {getVariants(currentStep).backgrounds.map(
+                                        (background) => (
+                                            <label
+                                                className="flex items-center"
+                                                key={background}
+                                            >
+                                                <Checkbox
+                                                    value={background}
+                                                    checked={
+                                                        getProductValue(
+                                                            products[
+                                                                currentStep
+                                                            ].id,
+                                                            'background',
+                                                        ) === background
+                                                    }
+                                                    onChange={(e) =>
+                                                        updateProductData(
+                                                            'background',
+                                                            products[
+                                                                currentStep
+                                                            ].id,
+                                                            e.target.value,
+                                                        )
+                                                    }
+                                                />
+                                                <span className="ms-2 text-sm text-gray-600 dark:text-gray-400">
+                                                    {getColorEs(background)}
+                                                </span>
+                                            </label>
+                                        ),
+                                    )}
                                 </div>
                             </fieldset>
                             <InputError
@@ -371,7 +383,7 @@ export function AddDetail({
                                     este combo
                                 </legend>
                                 <div className="mt-1 flex flex-wrap gap-4">
-                                    {products[currentStep].variants.colors.map(
+                                    {getVariants(currentStep).colors.map(
                                         (color) => (
                                             <label
                                                 className="flex items-center"
@@ -398,7 +410,7 @@ export function AddDetail({
                                                     }
                                                 />
                                                 <span className="ms-2 text-sm text-gray-600 dark:text-gray-400">
-                                                    {color}
+                                                    {getColorEs(color)}
                                                 </span>
                                             </label>
                                         ),
@@ -461,7 +473,8 @@ export function AddDetail({
 
                     {currentStep === products.length - 1 ? (
                         <Button onClick={handleAddProduct}>
-                            Agregar {products.length} productos al pedido
+                            Agregar {products.length} producto
+                            {products.length > 1 ? 's' : ''} al pedido
                         </Button>
                     ) : (
                         <Button onClick={handleNextStep}>Siguiente</Button>

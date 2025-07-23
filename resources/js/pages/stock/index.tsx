@@ -17,7 +17,7 @@ import { Head, Link, router } from '@inertiajs/react';
 import { ArrowUpDown, Diff, Edit2, Plus, Trash } from 'lucide-react';
 import { useState } from 'react';
 import { AlterStockForm } from './partials/alter-stock-form';
-import { DeleteStockableConfirmation } from './partials/deleteStockableConfirmation';
+import { DeleteStockableConfirmation } from './partials/delete-confirmation';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -62,7 +62,9 @@ export default function Stockables({
                     <Button asChild>
                         <Link href={route('stockables.create')}>
                             <Plus />
-                            Agregar stockeable
+                            <span className="sr-only md:inline-block">
+                                Agregar stockeable
+                            </span>
                         </Link>
                     </Button>
                 </div>

@@ -87,6 +87,21 @@ export default function Products({ products }: PageProps<Paginated<Product>>) {
                                     <button
                                         onClick={() =>
                                             onSort(
+                                                'financed_price',
+                                                'products.index',
+                                            )
+                                        }
+                                    >
+                                        <ArrowUpDown className="h-4 w-4" />
+                                    </button>
+                                    Precio individual
+                                </div>
+                            </TableHead>
+                            <TableHead>
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        onClick={() =>
+                                            onSort(
                                                 'unit_price',
                                                 'products.index',
                                             )
@@ -94,7 +109,7 @@ export default function Products({ products }: PageProps<Paginated<Product>>) {
                                     >
                                         <ArrowUpDown className="h-4 w-4" />
                                     </button>
-                                    Precio
+                                    1 Pago con descuento
                                 </div>
                             </TableHead>
                             <TableHead>
@@ -138,7 +153,14 @@ export default function Products({ products }: PageProps<Paginated<Product>>) {
                                     {product.name}
                                 </TableCell>
                                 <TableCell>
-                                    {formatPrice(product.unit_price)}
+                                    {product.financed_price
+                                        ? formatPrice(product.financed_price)
+                                        : '-'}
+                                </TableCell>
+                                <TableCell>
+                                    {product.unit_price
+                                        ? formatPrice(product.unit_price)
+                                        : '-'}
                                 </TableCell>
                                 <TableCell>{product.max_payments}</TableCell>
                                 <TableCell>
@@ -160,7 +182,7 @@ export default function Products({ products }: PageProps<Paginated<Product>>) {
                                                     variant="secondary"
                                                     key={background}
                                                 >
-                                                    {background}
+                                                    {getColorEs(background)}
                                                 </Badge>
                                             ),
                                         )}

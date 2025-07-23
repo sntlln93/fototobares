@@ -12,7 +12,6 @@ import {
 } from '@/components/ui/sidebar';
 import { Link, usePage } from '@inertiajs/react';
 import {
-    DollarSign,
     Group,
     Home,
     Package,
@@ -22,7 +21,6 @@ import {
     ShoppingCart,
 } from 'lucide-react';
 import AppLogo from './app-logo';
-import { NavFooter } from './nav-footer';
 import { NavUser } from './nav-user';
 
 const routeables = [
@@ -80,16 +78,6 @@ export function AppSidebar() {
                 </SidebarGroup>
             </SidebarContent>
             <SidebarFooter>
-                <NavFooter
-                    items={[
-                        {
-                            title: 'Vender',
-                            url: route('orders.create'),
-                            icon: DollarSign,
-                        },
-                    ]}
-                    className="mt-auto"
-                />
                 <NavUser />
             </SidebarFooter>
         </Sidebar>
