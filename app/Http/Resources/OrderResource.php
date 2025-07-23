@@ -22,17 +22,19 @@ class OrderResource extends JsonResource
         return [
             'id' => $this->id,
             'client' => $this->client,
+            'payments' => $this->payments,
+            'total_price' => $this->total_price,
             'products' => $this->products->map(function ($product) {
                 return [
                     'id' => $product->id,
-                    'name' => $product->name,
-                    'quantity' => $product->pivot->quantity,
-                    'price' => $product->pivot->price,
                     'note' => $product->pivot->note,
                     'variant' => $product->pivot->variant,
                     'delivered_at' => $product->pivot->delivered_at,
                 ];
             }),
+            'classroom' => $this->classroom,
+            'school' => $this->classroom->school,
+            'due_date' => $this->due_date->isoFormat('D [de] MMM Y'),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

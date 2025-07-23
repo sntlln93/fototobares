@@ -20,7 +20,7 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import AppLayout from '@/layouts/app-layout';
-import { cn } from '@/lib/utils';
+import { cn, formatPrice } from '@/lib/utils';
 import { BreadcrumbItem } from '@/types';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { format } from 'date-fns';
@@ -161,7 +161,11 @@ export default function CreateOrder({
 
     const handleAddCombo = (id: number) => {
         const combo = combos.find((p) => p.id === id)!;
-        setData('total_price', data.total_price + combo.suggested_price);
+
+        setData(
+            'total_price',
+            String(Number(data.total_price) + Number(combo.suggested_price)),
+        );
         setOpenAddModal(combo.products.map((p) => ({ ...p, combo_id: id })));
     };
 
@@ -588,6 +592,10 @@ export default function CreateOrder({
                                 <InputError
                                     className="mt-2"
                                     message={errors.payments}
+                                />
+                                <InputHint
+                                    className="mt-2"
+                                    message={`${data.payments} cuotas de ${formatPrice(Number(data.total_price) / (Number(data.payments) || 1))}`}
                                 />
                             </div>
 

@@ -135,7 +135,26 @@ declare global {
         classroom_id: number;
         total_price: number;
         payments: number;
-        due_date: Date;
+        due_date: string;
+        client: Client;
+        classroom: Classroom;
+        school: School;
+        products: Product[];
+    }
+
+    interface Classroom {
+        id: number;
+        name: string;
+    }
+
+    interface School {
+        id: number;
+        name: string;
+    }
+
+    interface Client {
+        name: string;
+        phone: string;
     }
 
     interface OrderDetail {

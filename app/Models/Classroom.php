@@ -15,4 +15,12 @@ class Classroom extends Model
     {
         return $this->morphOne(Contact::class, 'contactable');
     }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<School, $this>
+     */
+    public function school()
+    {
+        return $this->belongsTo(School::class);
+    }
 }

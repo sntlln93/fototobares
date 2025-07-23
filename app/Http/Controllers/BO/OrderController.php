@@ -10,7 +10,6 @@ use App\Http\Resources\OrderResource;
 use App\Models\Client;
 use App\Models\Combo;
 use App\Models\Order;
-use App\Models\OrderDetail;
 use App\Models\Product;
 use App\Models\School;
 use Illuminate\Http\Request;
@@ -30,13 +29,13 @@ class OrderController extends Controller
         /** @var 'asc'|'desc' sort_order */
         $sort_order = $request->query('sort_order') ?? 'asc';
 
-        $stockables = Order::with('client')
+        $orders = Order::with('client', 'products', 'classroom.school')
             ->where('id', 'like', "%$search%")
             ->orderBy($sort_by, $sort_order)
             ->paginate(20);
 
         return Inertia::render('orders/index', [
-            'orders' => OrderResource::collection($stockables),
+            'orders' => OrderResource::collection($orders),
         ]);
     }
 
@@ -87,9 +86,7 @@ class OrderController extends Controller
             ]);
 
             foreach ($validated['order_details'] as $product) {
-                OrderDetail::create([
-                    'order_id' => $order->id,
-                    'product_id' => $product['product_id'],
+                $order->products()->attach($product['product_id'], [
                     'variant' => json_encode($product['variant'] ?? []),
                     'note' => $product['note'],
                 ]);

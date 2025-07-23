@@ -1,5 +1,4 @@
 import { PaginationNav } from '@/components/paginationNav';
-import { Button, buttonVariants } from '@/components/ui/button';
 import {
     Table,
     TableBody,
@@ -14,7 +13,7 @@ import { onSort } from '@/lib/services/filter';
 import { formatPrice } from '@/lib/utils';
 import { BreadcrumbItem } from '@/types';
 import { Head, Link } from '@inertiajs/react';
-import { ArrowUpDown, Edit2, Trash } from 'lucide-react';
+import { ArrowUpDown } from 'lucide-react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -56,9 +55,10 @@ export default function Orders({ orders }: PageProps<Paginated<Order>>) {
                                     >
                                         <ArrowUpDown className="h-4 w-4" />
                                     </button>
-                                    Producto
+                                    Cliente
                                 </div>
                             </TableHead>
+                            <TableHead>Productos</TableHead>
                             <TableHead>
                                 <div className="flex items-center gap-2">
                                     <button
@@ -74,11 +74,10 @@ export default function Orders({ orders }: PageProps<Paginated<Order>>) {
                                     Precio
                                 </div>
                             </TableHead>
-                            <TableHead>Cuotas máximas</TableHead>
-                            <TableHead>Medidas</TableHead>
-                            <TableHead>Diseño</TableHead>
-                            <TableHead>Fondos</TableHead>
-                            <TableHead>Acciones</TableHead>
+                            <TableHead>Cuotas ($)</TableHead>
+                            <TableHead>Escuela (Aula)</TableHead>
+                            <TableHead>Vencimiento</TableHead>
+                            {/* <TableHead>Acciones</TableHead> */}
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -88,16 +87,31 @@ export default function Orders({ orders }: PageProps<Paginated<Order>>) {
                                     {order.id}
                                 </TableCell>
                                 <TableCell className="flex gap-2">
-                                    {order.id}
+                                    {order.client.name}
                                 </TableCell>
+                                <TableCell>{order.products.length}</TableCell>
                                 <TableCell>
                                     {formatPrice(order.total_price)}
                                 </TableCell>
-                                <TableCell>{order.payments}</TableCell>
-                                <TableCell>{order.id}</TableCell>
-                                <TableCell>{order.id}</TableCell>
-                                <TableCell>{order.id}</TableCell>
-                                <TableCell className="flex gap-2">
+                                <TableCell>
+                                    {order.payments} (
+                                    {formatPrice(
+                                        order.total_price / order.payments,
+                                    )}
+                                    )
+                                </TableCell>
+                                <TableCell>
+                                    <Link
+                                        href={route('schools.show', {
+                                            school: order.school.id,
+                                        })}
+                                    >
+                                        {order.school.name}
+                                    </Link>{' '}
+                                    ({order.classroom.name})
+                                </TableCell>
+                                <TableCell>{order.due_date}</TableCell>
+                                {/* <TableCell className="flex gap-2">
                                     <Link
                                         className={buttonVariants({
                                             variant: 'warning',
@@ -116,7 +130,7 @@ export default function Orders({ orders }: PageProps<Paginated<Order>>) {
                                     >
                                         <Trash />
                                     </Button>
-                                </TableCell>
+                                </TableCell> */}
                             </TableRow>
                         ))}
                     </TableBody>

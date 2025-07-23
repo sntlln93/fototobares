@@ -5,6 +5,7 @@ import { Modal } from '@/components/modal';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { capitalize, getColorEs } from '@/lib/utils';
 import { useState } from 'react';
 import { ProductOrder, SelectableProduct } from './form';
 
@@ -206,9 +207,12 @@ export function AddDetail({
     };
 
     const getVariants = (step: typeof currentStep) => {
-        return products[step].pivot
-            ? products[step].pivot.variants
-            : products[step].variants;
+        const variants =
+            products[step].pivot?.variants ?? products[step].variants;
+
+        return typeof variants === 'string'
+            ? (JSON.parse(variants) as typeof variants)
+            : variants;
     };
 
     return (
@@ -258,7 +262,7 @@ export function AddDetail({
                                                     }
                                                 />
                                                 <span className="ms-2 text-sm text-gray-600 dark:text-gray-400">
-                                                    {orientation}
+                                                    {capitalize(orientation)}
                                                 </span>
                                             </label>
                                         ),
@@ -308,7 +312,7 @@ export function AddDetail({
                                                     }
                                                 />
                                                 <span className="ms-2 text-sm text-gray-600 dark:text-gray-400">
-                                                    {photoType}
+                                                    {capitalize(photoType)}
                                                 </span>
                                             </label>
                                         ),
@@ -357,7 +361,7 @@ export function AddDetail({
                                                     }
                                                 />
                                                 <span className="ms-2 text-sm text-gray-600 dark:text-gray-400">
-                                                    {background}
+                                                    {getColorEs(background)}
                                                 </span>
                                             </label>
                                         ),
@@ -406,7 +410,7 @@ export function AddDetail({
                                                     }
                                                 />
                                                 <span className="ms-2 text-sm text-gray-600 dark:text-gray-400">
-                                                    {color}
+                                                    {getColorEs(color)}
                                                 </span>
                                             </label>
                                         ),
@@ -469,7 +473,8 @@ export function AddDetail({
 
                     {currentStep === products.length - 1 ? (
                         <Button onClick={handleAddProduct}>
-                            Agregar {products.length} productos al pedido
+                            Agregar {products.length} producto
+                            {products.length > 1 ? 's' : ''} al pedido
                         </Button>
                     ) : (
                         <Button onClick={handleNextStep}>Siguiente</Button>

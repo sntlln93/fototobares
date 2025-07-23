@@ -34,5 +34,9 @@ const color: Record<Color, string> = {
 
 export function getColorEs(color_en: Color) {
     const value = color[color_en] ?? color_en;
+    return capitalize(value);
+}
+
+export function capitalize(value: string) {
     return value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
 }

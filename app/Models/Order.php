@@ -8,6 +8,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class Order extends Model
 {
+    protected $casts = [
+        'due_date' => 'datetime:Y-m-d',
+    ];
+
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<Client, $this>
      */
@@ -21,8 +25,17 @@ class Order extends Model
      */
     public function products()
     {
-        return $this->belongsToMany(Product::class)
-            ->withPivot('quantity', 'price', 'note', 'variant', 'delivered_at')
+        return $this->belongsToMany(Product::class, 'order_details')
+            ->using(OrderDetail::class)
+            ->withPivot('note', 'variant', 'delivered_at')
             ->withTimestamps();
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<Classroom, $this>
+     */
+    public function classroom()
+    {
+        return $this->belongsTo(Classroom::class);
     }
 }

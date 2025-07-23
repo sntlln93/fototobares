@@ -69,7 +69,6 @@ return new class extends Migration
                 'max_payments' => 1,
                 'unit_price' => 18000,
                 'product_type_id' => $product_types->firstWhere('name', 'carpeta')->id,
-                'variants' => $variants,
             ],
             [
                 'name' => 'Medalla',
