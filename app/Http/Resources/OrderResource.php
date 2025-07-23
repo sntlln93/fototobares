@@ -19,6 +19,9 @@ class OrderResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        /** @var \App\Models\Classroom $classroom */
+        $classroom = $this->classroom;
+
         return [
             'id' => $this->id,
             'client' => $this->client,
@@ -27,13 +30,13 @@ class OrderResource extends JsonResource
             'products' => $this->products->map(function ($product) {
                 return [
                     'id' => $product->id,
-                    'note' => $product->pivot->note,
-                    'variant' => $product->pivot->variant,
-                    'delivered_at' => $product->pivot->delivered_at,
+                    'note' => $product->pivot->note,  // @phpstan-ignore-line
+                    'variant' => $product->pivot->variant,  // @phpstan-ignore-line
+                    'delivered_at' => $product->pivot->delivered_at,  // @phpstan-ignore-line
                 ];
             }),
-            'classroom' => $this->classroom,
-            'school' => $this->classroom->school,
+            'classroom' => $classroom,
+            'school' => $classroom->school,
             'due_date' => $this->due_date->isoFormat('D [de] MMM Y'),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
