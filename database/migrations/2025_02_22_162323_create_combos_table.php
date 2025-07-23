@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('name');
             $table->integer('suggested_price');
             $table->integer('suggested_max_payments');
+            $table->integer('suggested_financed_price')->nullable();
             $table->timestamps();
         });
     }

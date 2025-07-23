@@ -160,7 +160,7 @@ export default function Products({ products }: PageProps<Paginated<Product>>) {
                                                     variant="secondary"
                                                     key={background}
                                                 >
-                                                    {background}
+                                                    {getColorEs(background)}
                                                 </Badge>
                                             ),
                                         )}
