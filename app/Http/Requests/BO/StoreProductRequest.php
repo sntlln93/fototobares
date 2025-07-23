@@ -8,6 +8,8 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class StoreProductRequest extends FormRequest
 {
+    const MURAL_PRODUCT_TYPE_ID = 1;
+
     /**
      * Determine if the user is authorized to make this request.
      */
@@ -30,7 +32,10 @@ class StoreProductRequest extends FormRequest
             'product_type_id' => ['required', 'exists:product_types,id'],
         ];
 
-        if ($this->product_type_id === 1) {
+        /** @var string $product_type_id */
+        $product_type_id = request('product_type_id');
+
+        if ((int) $product_type_id === self::MURAL_PRODUCT_TYPE_ID) {
             return array_merge($base_rules, [
                 'variants' => ['required', 'array'],
 

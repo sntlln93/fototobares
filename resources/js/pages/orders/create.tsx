@@ -36,6 +36,7 @@ import {
     Users,
 } from 'lucide-react';
 import { FormEvent, FormEventHandler, useState } from 'react';
+import { toast } from 'sonner';
 import { AddDetail } from './add-detail';
 import { ProductOrder } from './form';
 
@@ -142,7 +143,16 @@ export default function CreateOrder({
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
 
-        post(route('orders.store'));
+        post(
+            route('orders.store', {
+                _query: { redirectTo: '/' },
+            }),
+            {
+                onSuccess: () => {
+                    toast.success('Pedido guardado con éxito');
+                },
+            },
+        );
     };
 
     const handleAddProduct = (id: number) => {
@@ -289,7 +299,7 @@ export default function CreateOrder({
                             </div>
 
                             <div className="mt-6 flex flex-col justify-end gap-3 md:flex-row">
-                                <Button onClick={toStep('products')}>
+                                <Button onClick={toStep('client')}>
                                     Siguiente
                                 </Button>
                             </div>
@@ -350,12 +360,12 @@ export default function CreateOrder({
                             <div className="mt-6 flex flex-col justify-end gap-3 md:flex-row">
                                 <Button
                                     variant="outline"
-                                    onClick={toStep('products')}
+                                    onClick={toStep('schools')}
                                 >
                                     Anterior
                                 </Button>
 
-                                <Button onClick={toStep('order')}>
+                                <Button onClick={toStep('products')}>
                                     Siguiente
                                 </Button>
                             </div>
@@ -523,12 +533,12 @@ export default function CreateOrder({
                             <div className="mt-6 flex flex-col justify-end gap-3 md:flex-row">
                                 <Button
                                     variant="outline"
-                                    onClick={toStep('schools')}
+                                    onClick={toStep('client')}
                                 >
                                     Anterior
                                 </Button>
 
-                                <Button onClick={toStep('client')}>
+                                <Button onClick={toStep('order')}>
                                     Siguiente
                                 </Button>
                             </div>

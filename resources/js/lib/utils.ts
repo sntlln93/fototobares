@@ -33,5 +33,5 @@ const color: Record<Color, string> = {
 };
 
 export function getColorEs(color_en: Color) {
-    return color[color_en];
+    return color[color_en] ?? color_en;
 }

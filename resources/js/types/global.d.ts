@@ -118,7 +118,7 @@ declare global {
 
     type ProductPhotoType = 'grupo' | 'individual';
     type ProductOrientation = 'vertical' | 'horizontal';
-    type Color = 'black' | 'white' | 'pink' | 'blue';
+    type Color = string;
 
     interface Combo {
         id: number;

@@ -15,4 +15,14 @@ class Order extends Model
     {
         return $this->belongsTo(Client::class);
     }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany<Product, $this>
+     */
+    public function products()
+    {
+        return $this->belongsToMany(Product::class)
+            ->withPivot('quantity', 'price', 'note', 'variant', 'delivered_at')
+            ->withTimestamps();
+    }
 }

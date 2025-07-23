@@ -62,7 +62,9 @@ export default function Stockables({
                     <Button asChild>
                         <Link href={route('stockables.create')}>
                             <Plus />
-                            Agregar stockeable
+                            <span className="sr-only md:inline-block">
+                                Agregar stockeable
+                            </span>
                         </Link>
                     </Button>
                 </div>

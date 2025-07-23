@@ -29,7 +29,7 @@ class SchoolController extends Controller
         /** @var string sort_order */
         $sort_order = $request->query('sort_order') ?? 'asc';
 
-        $schools = School::with(['principal', 'classrooms', 'address', 'user'])
+        $schools = School::with(['principal', 'classrooms.teacher', 'address', 'user'])
             ->when($search, function ($q) use ($search) {
                 return $q->where('name', 'like', "%$search%")
                     ->orWhere('id', 'like', "%$search%")

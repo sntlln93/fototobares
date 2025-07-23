@@ -6,20 +6,38 @@ namespace App\Http\Controllers\BO;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\BO\StoreOrderRequest;
+use App\Http\Resources\OrderResource;
 use App\Models\Client;
 use App\Models\Combo;
 use App\Models\Order;
 use App\Models\OrderDetail;
 use App\Models\Product;
 use App\Models\School;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class OrderController extends Controller
 {
-    public function index(): \Inertia\Response
+    public function index(Request $request): \Inertia\Response
     {
-        return Inertia::render('orders/index');
+        /** @var 'id' search */
+        $search = $request->query('search');
+
+        /** @var string sort_by */
+        $sort_by = $request->query('sort_by') ?? 'id';
+
+        /** @var 'asc'|'desc' sort_order */
+        $sort_order = $request->query('sort_order') ?? 'asc';
+
+        $stockables = Order::with('client')
+            ->where('id', 'like', "%$search%")
+            ->orderBy($sort_by, $sort_order)
+            ->paginate(10);
+
+        return Inertia::render('orders/index', [
+            'orders' => OrderResource::collection($stockables),
+        ]);
     }
 
     public function create(): \Inertia\Response
@@ -51,6 +69,9 @@ class OrderController extends Controller
     {
         $validated = $request->validated();
 
+        /** @var string $redirect_to */
+        $redirect_to = request()->query('redirectTo', route('orders.index'));
+
         DB::transaction(function () use ($validated) {
             $client = Client::create([
                 'name' => $validated['name'],
@@ -75,6 +96,6 @@ class OrderController extends Controller
             }
         });
 
-        return redirect()->route('orders.index');
+        return redirect($redirect_to);
     }
 }
