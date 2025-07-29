@@ -1,4 +1,6 @@
 import { PaginationNav } from '@/components/paginationNav';
+import { Button } from '@/components/ui/button';
+import { Combobox } from '@/components/ui/combobox';
 import {
     Table,
     TableBody,
@@ -12,8 +14,9 @@ import AppLayout from '@/layouts/app-layout';
 import { onSort } from '@/lib/services/filter';
 import { formatPrice } from '@/lib/utils';
 import { BreadcrumbItem } from '@/types';
-import { Head, Link } from '@inertiajs/react';
-import { ArrowUpDown } from 'lucide-react';
+import { Head, Link, router } from '@inertiajs/react';
+import { ArrowUpDown, School } from 'lucide-react';
+import { useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -22,14 +25,48 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-export default function Orders({ orders }: PageProps<Paginated<Order>>) {
+export default function Orders({
+    orders,
+    schools,
+}: PageProps<Paginated<Order> & { schools: School[] }>) {
+    const params = new URLSearchParams(window.location.search);
+
+    const [comboDropdownOpen, setComboDropdownOpen] = useState(false);
+    const [selectedSchool] = useState<number | null>(
+        params.get('school_id') ? Number(params.get('school_id')!) : null,
+    );
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Productos" />
 
             <section className="p-6">
-                <div className="mb-4 flex justify-between">
+                <div className="mb-4 flex gap-4">
                     <Searchbar indexRoute="orders.index" />
+                    <Combobox
+                        items={schools.map((school) => ({
+                            label: school.name,
+                            value: school.id,
+                        }))}
+                        action={(value) => {
+                            params.set('school_id', value);
+                            router.get(
+                                `${route('orders.index')}?${params.toString()}`,
+                            );
+                        }}
+                        open={comboDropdownOpen}
+                        setOpen={setComboDropdownOpen}
+                        placeholder="Buscar combo"
+                    >
+                        <Button variant="secondary" role="combobox">
+                            {selectedSchool
+                                ? schools.find(
+                                      (school) => school.id === selectedSchool,
+                                  )?.name || 'Filtrar por escuela'
+                                : 'Filtrar por escuela'}
+                            <School />
+                        </Button>
+                    </Combobox>
                 </div>
                 <Table>
                     <TableHeader>
