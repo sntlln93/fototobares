@@ -29,13 +29,29 @@ class OrderController extends Controller
         /** @var 'asc'|'desc' sort_order */
         $sort_order = $request->query('sort_order') ?? 'asc';
 
+        /** @var int|null $school_id */
+        $school_id = $request->query('school_id');
+
+        $schools = School::query()
+            ->with(['classrooms'])
+            ->whereHas('classrooms')
+            ->get();
+
         $orders = Order::with('client', 'products', 'classroom.school')
             ->where('id', 'like', "%$search%")
+            ->whereHas('classroom', function ($query) use ($school_id) {
+                if (empty($school_id)) {
+                    return $query;
+                }
+
+                return $query->where('classrooms.school_id', $school_id);
+            })
             ->orderBy($sort_by, $sort_order)
             ->paginate(20);
 
         return Inertia::render('orders/index', [
             'orders' => OrderResource::collection($orders),
+            'schools' => $schools,
         ]);
     }
 
