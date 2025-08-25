@@ -29,7 +29,7 @@ class StoreOrderRequest extends FormRequest
 
             'classroom_id' => ['required', 'exists:classrooms,id'],
             'total_price' => ['required', 'numeric', 'min:1'],
-            'payments' => ['required', 'numeric', 'min:1'],
+            'payment_plan' => ['required', 'numeric', 'min:1'],
             'due_date' => ['required', 'date_format:Y-m-d'],
 
             'order_details' => ['required', 'array'],
@@ -53,7 +53,7 @@ class StoreOrderRequest extends FormRequest
      *     phone: string,
      *     classroom_id: int,
      *     total_price: float,
-     *     payments: int,
+     *     payment_plan: int,
      *     due_date: string,
      *     order_details: array<int, array{
      *         product_id: int,
@@ -74,7 +74,7 @@ class StoreOrderRequest extends FormRequest
          *     phone: string,
          *     classroom_id: int,
          *     total_price: float,
-         *     payments: int,
+         *     payment_plan: int,
          *     due_date: string,
          *     order_details: array<int, array{
          *         product_id: int,

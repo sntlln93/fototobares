@@ -22,7 +22,7 @@ return new class extends Migration
                 ->constrained();
 
             $table->integer('total_price');
-            $table->integer('payments');
+            $table->integer('payment_plan');
             $table->date('due_date');
             $table->timestamps();
         });
