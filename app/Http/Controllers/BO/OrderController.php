@@ -37,7 +37,7 @@ class OrderController extends Controller
             ->whereHas('classrooms')
             ->get();
 
-        $orders = Order::with('client', 'products', 'classroom.school')
+        $orders = Order::with('client', 'products.type', 'classroom.school')
             ->where('id', 'like', "%$search%")
             ->whereHas('classroom', function ($query) use ($school_id) {
                 if (empty($school_id)) {
@@ -97,7 +97,7 @@ class OrderController extends Controller
                 'client_id' => $client->id,
                 'classroom_id' => $validated['classroom_id'],
                 'total_price' => $validated['total_price'],
-                'payments' => $validated['payments'],
+                'payment_plan' => $validated['payment_plan'],
                 'due_date' => $validated['due_date'],
             ]);
 
@@ -110,5 +110,14 @@ class OrderController extends Controller
         });
 
         return redirect($redirect_to);
+    }
+
+    public function show(Order $order): \Inertia\Response
+    {
+        $order->load('client', 'products.type', 'payments');
+
+        return Inertia::render('orders/show', [
+            'order' => new OrderResource($order),
+        ]);
     }
 }

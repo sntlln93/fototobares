@@ -1,5 +1,5 @@
 import { PaginationNav } from '@/components/paginationNav';
-import { Button } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
 import { Combobox } from '@/components/ui/combobox';
 import {
     Table,
@@ -12,10 +12,10 @@ import {
 import { Searchbar } from '@/features/searchbar';
 import AppLayout from '@/layouts/app-layout';
 import { onSort } from '@/lib/services/filter';
-import { formatPrice } from '@/lib/utils';
+import { cn, formatPrice } from '@/lib/utils';
 import { BreadcrumbItem } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
-import { ArrowUpDown, School } from 'lucide-react';
+import { ArrowUpDown, Eye, School } from 'lucide-react';
 import { useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -56,7 +56,7 @@ export default function Orders({
                         }}
                         open={comboDropdownOpen}
                         setOpen={setComboDropdownOpen}
-                        placeholder="Buscar combo"
+                        placeholder="Buscar escuela"
                     >
                         <Button variant="secondary" role="combobox">
                             {selectedSchool
@@ -114,7 +114,7 @@ export default function Orders({
                             <TableHead>Cuotas ($)</TableHead>
                             <TableHead>Escuela (Aula)</TableHead>
                             <TableHead>Vencimiento</TableHead>
-                            {/* <TableHead>Acciones</TableHead> */}
+                            <TableHead>Acciones</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -131,9 +131,9 @@ export default function Orders({
                                     {formatPrice(order.total_price)}
                                 </TableCell>
                                 <TableCell>
-                                    {order.payments} (
+                                    {order.payment_plan} (
                                     {formatPrice(
-                                        order.total_price / order.payments,
+                                        order.total_price / order.payment_plan,
                                     )}
                                     )
                                 </TableCell>
@@ -148,26 +148,21 @@ export default function Orders({
                                     ({order.classroom.name})
                                 </TableCell>
                                 <TableCell>{order.due_date}</TableCell>
-                                {/* <TableCell className="flex gap-2">
+                                <TableCell className="flex gap-2">
                                     <Link
-                                        className={buttonVariants({
-                                            variant: 'warning',
-                                            size: 'sm',
+                                        className={cn(
+                                            buttonVariants({
+                                                size: 'sm',
+                                                variant: 'outline',
+                                            }),
+                                        )}
+                                        href={route('orders.show', {
+                                            order: order.id,
                                         })}
-                                        href={route('dashboard')}
                                     >
-                                        <Edit2 />
+                                        <Eye />
                                     </Link>
-                                    <Button
-                                        size={'sm'}
-                                        variant={'destructive'}
-                                        onClick={() =>
-                                            alert(JSON.stringify(order))
-                                        }
-                                    >
-                                        <Trash />
-                                    </Button>
-                                </TableCell> */}
+                                </TableCell>
                             </TableRow>
                         ))}
                     </TableBody>

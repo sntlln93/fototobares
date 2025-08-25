@@ -38,4 +38,12 @@ class Order extends Model
     {
         return $this->belongsTo(Classroom::class);
     }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<Payment, $this>
+     */
+    public function payments()
+    {
+        return $this->hasMany(Payment::class);
+    }
 }

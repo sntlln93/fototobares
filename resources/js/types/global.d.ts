@@ -103,6 +103,7 @@ declare global {
         financed_price: number;
         max_payments: number;
         product_type_id: number;
+        type: ProductType;
         variants: {
             photo_types: ProductPhotoType[];
             orientations: ProductOrientation[];
@@ -134,12 +135,22 @@ declare global {
         client_id: number;
         classroom_id: number;
         total_price: number;
-        payments: number;
+        payment_plan: number;
         due_date: string;
         client: Client;
         classroom: Classroom;
         school: School;
         products: Product[];
+        payments?: Payment[];
+    }
+
+    interface Payment {
+        id: number;
+        order_id: number;
+        amount: number;
+        type: string;
+        proof_of_payment: string;
+        paid_at: string;
     }
 
     interface Classroom {

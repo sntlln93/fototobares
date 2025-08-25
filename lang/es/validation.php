@@ -192,7 +192,7 @@ return [
         'suggested_price' => 'precio',
         'suggested_max_payments' => 'cantidad máxima de cuotas',
         'max_payments' => 'cantidad máxima de cuotas',
-        'payments' => 'cuotas',
+        'payment_plan' => 'cuotas',
         'due_date' => 'vencimiento',
         'total_price' => 'precio final',
         'order_details' => 'productos',

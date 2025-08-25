@@ -8,21 +8,29 @@ import {
     SquareUser,
 } from 'lucide-react';
 
-export function ProductIcon({ type }: { type: Product['product_type_id'] }) {
+export function ProductIcon({
+    type,
+    className,
+}: {
+    type: Product['product_type_id'];
+    className?: string;
+}) {
+    const classes = className ? className : 'h-6 w-6';
+
     switch (type) {
         case 1: // 1 => mural
-            return <BookImage className="h-6 w-6" />;
+            return <BookImage className={classes} />;
         case 2: // 2 => taza
-            return <Coffee className="h-6 w-6" />;
+            return <Coffee className={classes} />;
         case 3: // 3 => banda
-            return <Flag className="h-6 w-6" />;
+            return <Flag className={classes} />;
         case 4: // 4 => medalla
-            return <Medal className="h-6 w-6" />;
+            return <Medal className={classes} />;
         case 5: // 5 => carpeta
-            return <Folder className="h-6 w-6" />;
+            return <Folder className={classes} />;
         case 6: // 6 => foto
-            return <Camera className="h-6 w-6" />;
+            return <Camera className={classes} />;
         case 7: // 7 => portaretrato
-            return <SquareUser className="h-6 w-6" />;
+            return <SquareUser className={classes} />;
     }
 }

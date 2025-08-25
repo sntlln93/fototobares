@@ -84,7 +84,7 @@ export default function CreateOrder({
         name: string;
         phone: string;
         total_price: string;
-        payments: string;
+        payment_plan: string;
         due_date: string;
     }>({
         classroom_id: 0,
@@ -92,7 +92,7 @@ export default function CreateOrder({
         name: '',
         phone: '',
         total_price: '0',
-        payments: '0',
+        payment_plan: '0',
         due_date: format(new Date(), 'yyyy-MM-dd'),
     });
 
@@ -123,7 +123,8 @@ export default function CreateOrder({
 
     const error_count: Record<Exclude<AccordionValue, undefined>, boolean> = {
         client: !!errors.name || !!errors.phone,
-        order: !!errors.total_price || !!errors.payments || !!errors.due_date,
+        order:
+            !!errors.total_price || !!errors.payment_plan || !!errors.due_date,
         products: !!errors.order_details,
         schools: !!errors.classroom_id,
     };
@@ -581,21 +582,21 @@ export default function CreateOrder({
                                 <Label>Cuotas</Label>
                                 <Input
                                     type="number"
-                                    id="payments"
-                                    name="payments"
-                                    value={data.payments}
+                                    id="payment_plan"
+                                    name="payment_plan"
+                                    value={data.payment_plan}
                                     onChange={(e) =>
-                                        setData('payments', e.target.value)
+                                        setData('payment_plan', e.target.value)
                                     }
                                     className="mt-1 block w-full"
                                 />
                                 <InputError
                                     className="mt-2"
-                                    message={errors.payments}
+                                    message={errors.payment_plan}
                                 />
                                 <InputHint
                                     className="mt-2"
-                                    message={`${data.payments} cuotas de ${formatPrice(Number(data.total_price) / (Number(data.payments) || 1))}`}
+                                    message={`${data.payment_plan} cuotas de ${formatPrice(Number(data.total_price) / (Number(data.payment_plan) || 1))}`}
                                 />
                             </div>
 
