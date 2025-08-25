@@ -9,9 +9,9 @@ use App\Models\Order;
 use App\Models\Payment;
 use Illuminate\Http\Request;
 
-class StorePaymentController extends Controller
+class PaymentController extends Controller
 {
-    public function store(Request $request)
+    public function store(Request $request): \Illuminate\Http\RedirectResponse
     {
         $validated = $this->validate($request);
 
@@ -26,7 +26,7 @@ class StorePaymentController extends Controller
         return redirect()->route('orders.show', ['order' => $order->id])->with('message', 'Pago registrado exitosamente.');
     }
 
-    public function update(Request $request, Payment $payment)
+    public function update(Request $request, Payment $payment): \Illuminate\Http\RedirectResponse
     {
         $validated = $this->validate($request);
 
@@ -40,7 +40,10 @@ class StorePaymentController extends Controller
         return redirect()->route('orders.show', ['order' => $payment->order_id])->with('message', 'Pago modificado exitosamente.');
     }
 
-    private function validate(Request $request)
+    /**
+     * @return array{order_id: int, amount: float, type: string}
+     */
+    private function validate(Request $request): array
     {
         return $request->validate([
             'order_id' => 'required|exists:orders,id',

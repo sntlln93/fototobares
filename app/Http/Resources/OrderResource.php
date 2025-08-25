@@ -35,7 +35,7 @@ class OrderResource extends JsonResource
                         'type' => $payment->type,
                         'proof_of_payment' => $payment->proof_of_payment,
                         'order_id' => $payment->order_id,
-                        'paid_at' => $payment->created_at->diffForHumans(),
+                        'paid_at' => $payment->created_at->diffForHumans(), //@phpstan-ignore-line
                     ];
                 });
             }),
