@@ -9,6 +9,13 @@ use Illuminate\Database\Eloquent\Model;
 class Classroom extends Model
 {
     /**
+     * @var array<string, string>
+     */
+    protected $casts = [
+        'is_draft' => 'boolean',
+    ];
+
+    /**
      * @return \Illuminate\Database\Eloquent\Relations\MorphOne<Contact, $this>
      */
     public function teacher()
@@ -22,5 +29,13 @@ class Classroom extends Model
     public function school()
     {
         return $this->belongsTo(School::class);
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<Photo, $this>
+     */
+    public function photos()
+    {
+        return $this->hasMany(Photo::class);
     }
 }

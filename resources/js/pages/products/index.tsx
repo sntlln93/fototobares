@@ -28,7 +28,9 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-export default function Products({ products }: PageProps<Paginated<Product>>) {
+export default function Products({
+    products,
+}: PageProps<{ products: Paginated<Product> }>) {
     const [deleteableProduct, setDeleteableProduct] = useState<Product | null>(
         null,
     );

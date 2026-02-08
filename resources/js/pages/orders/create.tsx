@@ -23,6 +23,7 @@ import AppLayout from '@/layouts/app-layout';
 import { cn, formatPrice } from '@/lib/utils';
 import { BreadcrumbItem } from '@/types';
 import { Head, Link, useForm } from '@inertiajs/react';
+import axios from 'axios';
 import { format } from 'date-fns';
 import {
     AlertCircle,
@@ -35,11 +36,10 @@ import {
     User,
     Users,
 } from 'lucide-react';
-import { FormEvent, FormEventHandler, useState } from 'react';
+import { FormEvent, FormEventHandler, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { AddDetail } from './add-detail';
 import { ProductOrder } from './form';
-
 type SchoolLevel = 'Todos' | 'Jardin' | 'Primaria' | 'Secundaria';
 type AccordionValue = 'schools' | 'products' | 'client' | 'order' | undefined;
 
@@ -83,6 +83,8 @@ export default function CreateOrder({
         order_details: ProductOrder[];
         name: string;
         phone: string;
+        child_name: string;
+        attended_photo_session: boolean | null;
         total_price: string;
         payment_plan: string;
         due_date: string;
@@ -91,10 +93,41 @@ export default function CreateOrder({
         order_details: [],
         name: '',
         phone: '',
+        child_name: '',
+        attended_photo_session: null,
         total_price: '0',
         payment_plan: '0',
         due_date: format(new Date(), 'yyyy-MM-dd'),
     });
+
+    // Load saved data from localStorage on mount
+    useEffect(() => {
+        const savedData = localStorage.getItem('orderFormData');
+        if (savedData) {
+            try {
+                const parsed = JSON.parse(savedData);
+                setData({
+                    classroom_id: parsed.classroom_id ?? 0,
+                    order_details: parsed.order_details ?? [],
+                    total_price: parsed.total_price ?? '0',
+                    payment_plan: parsed.payment_plan ?? '0',
+                    due_date:
+                        parsed.due_date ?? format(new Date(), 'yyyy-MM-dd'),
+                    name: '',
+                    phone: '',
+                    child_name: '',
+                    attended_photo_session: null,
+                });
+                // Also restore school selection
+                if (parsed.selectedSchool) {
+                    setSelectedSchool(parsed.selectedSchool);
+                }
+                toast.info('Datos de pedido anterior cargados');
+            } catch {
+                toast.error('No se pudieron cargar los datos guardados');
+            }
+        }
+    }, [setData, setSelectedSchool]);
 
     const _selectedSchool = schools.find((s) => s.id === selectedSchool);
     const _selectedClassroom = _selectedSchool?.classrooms.find(
@@ -141,7 +174,7 @@ export default function CreateOrder({
         };
     };
 
-    const submit: FormEventHandler = (e) => {
+    const submit = (e: FormEvent, saveAndContinue = false) => {
         e.preventDefault();
 
         post(
@@ -151,9 +184,66 @@ export default function CreateOrder({
             {
                 onSuccess: () => {
                     toast.success('Pedido guardado con éxito');
+                    if (saveAndContinue) {
+                        // Save order data (excluding personal data) to localStorage
+                        localStorage.setItem(
+                            'orderFormData',
+                            JSON.stringify({
+                                classroom_id: data.classroom_id,
+                                order_details: data.order_details,
+                                total_price: data.total_price,
+                                payment_plan: data.payment_plan,
+                                due_date: data.due_date,
+                                selectedSchool: selectedSchool,
+                            }),
+                        );
+                        // Reset personal data
+                        setData({
+                            ...data,
+                            name: '',
+                            phone: '',
+                            child_name: '',
+                            attended_photo_session: null,
+                        });
+                        // Reset to first step
+                        setAccordionValue('schools');
+                        toast.info(
+                            'Datos de pedido guardados. Listo para el siguiente cliente.',
+                        );
+                    } else {
+                        // Clear localStorage on normal save
+                        localStorage.removeItem('orderFormData');
+                    }
                 },
             },
         );
+    };
+
+    const handleSaveAndContinue: FormEventHandler = (e) => {
+        submit(e, true);
+    };
+
+    const handleSaveAsDraft: FormEventHandler = async (e) => {
+        e.preventDefault();
+
+        try {
+            await axios.post(route('drafts.store'), {
+                classroom_id: data.classroom_id,
+                child_name: data.child_name,
+                client_name: data.name,
+                client_phone: data.phone,
+                attended_photo_session: data.attended_photo_session,
+                total_price: data.total_price,
+                payment_plan: data.payment_plan,
+                due_date: data.due_date,
+                products: data.order_details,
+            });
+
+            toast.success('Borrador guardado exitosamente');
+            window.location.href = route('drafts.index');
+        } catch (error) {
+            toast.error('Error al guardar el borrador');
+        }
     };
 
     const handleAddProduct = (id: number) => {
@@ -360,6 +450,68 @@ export default function CreateOrder({
                                     className="mt-2"
                                     message={errors.phone}
                                 />
+                            </div>
+
+                            <div className="mt-3">
+                                <Label>Nombre del niño</Label>
+                                <Input
+                                    placeholder="Ej: Juan"
+                                    type="text"
+                                    id="child_name"
+                                    name="child_name"
+                                    value={data.child_name}
+                                    onChange={(e) =>
+                                        setData('child_name', e.target.value)
+                                    }
+                                    className="mt-1 block w-full"
+                                />
+                                <InputError message={errors.child_name} />
+                            </div>
+
+                            <div className="mt-3">
+                                <Label htmlFor="attended_photo_session">
+                                    ¿Asistió a la sesión de fotos?
+                                </Label>
+                                <div className="mt-2 flex gap-4">
+                                    <label className="flex cursor-pointer items-center">
+                                        <input
+                                            type="radio"
+                                            name="attended_photo_session"
+                                            value="true"
+                                            checked={
+                                                data.attended_photo_session ===
+                                                true
+                                            }
+                                            onChange={() =>
+                                                setData(
+                                                    'attended_photo_session',
+                                                    true,
+                                                )
+                                            }
+                                            className="mr-2"
+                                        />
+                                        Sí
+                                    </label>
+                                    <label className="flex cursor-pointer items-center">
+                                        <input
+                                            type="radio"
+                                            name="attended_photo_session"
+                                            value="false"
+                                            checked={
+                                                data.attended_photo_session ===
+                                                false
+                                            }
+                                            onChange={() =>
+                                                setData(
+                                                    'attended_photo_session',
+                                                    false,
+                                                )
+                                            }
+                                            className="mr-2"
+                                        />
+                                        No
+                                    </label>
+                                </div>
                             </div>
 
                             <div className="mt-6 flex flex-col justify-end gap-3 md:flex-row">
@@ -636,13 +788,25 @@ export default function CreateOrder({
                                 </Button>
 
                                 <Button
+                                    variant="outline"
+                                    disabled={processing}
+                                    onClick={handleSaveAsDraft}
+                                >
+                                    Guardar como borrador
+                                </Button>
+
+                                <Button
                                     variant="secondary"
                                     disabled={processing}
+                                    onClick={submit}
                                 >
                                     Guardar
                                 </Button>
 
-                                <Button disabled={processing}>
+                                <Button
+                                    disabled={processing}
+                                    onClick={handleSaveAndContinue}
+                                >
                                     Guardar y seguir vendiendo
                                 </Button>
                             </div>
