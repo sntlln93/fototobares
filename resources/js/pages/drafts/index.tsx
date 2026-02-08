@@ -119,9 +119,11 @@ export default function DraftsIndex({
                                     </TableCell>
                                     <TableCell>{draft.payment_plan}</TableCell>
                                     <TableCell>
-                                        {draft.attended_photo_session
+                                        {draft.attended_photo_session === true
                                             ? '✓ Sí'
-                                            : '✗ No'}
+                                            : draft.attended_photo_session === false
+                                                ? '✗ No'
+                                                : 'Sin especificar'}
                                     </TableCell>
                                     <TableCell>
                                         {new Date(
