@@ -93,7 +93,7 @@ export default function DraftsIndex({
                                 <TableHead>Escuela (Aula)</TableHead>
                                 <TableHead>Precio</TableHead>
                                 <TableHead>Cuotas</TableHead>
-                                <TableHead>Fotos</TableHead>
+                                <TableHead>Sesión de fotos</TableHead>
                                 <TableHead>Creado</TableHead>
                                 <TableHead>Acciones</TableHead>
                             </TableRow>
@@ -129,9 +129,16 @@ export default function DraftsIndex({
                                         ).toLocaleDateString('es-ES')}
                                     </TableCell>
                                     <TableCell className="flex gap-2">
-                                        <Button size="sm" variant="outline">
+                                        <Link
+                                            href={route('orders.create')}
+                                            as="button"
+                                            className={buttonVariants({
+                                                size: 'sm',
+                                                variant: 'outline',
+                                            })}
+                                        >
                                             Ver
-                                        </Button>
+                                        </Link>
                                         <Button
                                             size="sm"
                                             variant="destructive"
