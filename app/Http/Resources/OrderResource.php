@@ -27,6 +27,7 @@ class OrderResource extends JsonResource
             'client' => $this->client,
             'payment_plan' => $this->payment_plan,
             'total_price' => $this->total_price,
+            'can_edit' => $this->canEdit(),
             'payments' => $this->whenLoaded('payments', function () {
                 return $this->payments->map(function ($payment) {
                     return [
@@ -57,5 +58,17 @@ class OrderResource extends JsonResource
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];
+    }
+
+    private function canEdit(): bool
+    {
+        if ($this->payment_plan <= 0) {
+            return false;
+        }
+
+        $totalPaid = $this->payments()->sum('amount');
+        $firstQuote = $this->total_price / $this->payment_plan;
+
+        return $totalPaid < $firstQuote;
     }
 }
