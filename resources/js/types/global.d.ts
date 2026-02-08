@@ -111,6 +111,13 @@ declare global {
         };
     }
 
+    interface OrderProduct extends Product {
+        product_id: number;
+        note?: string | null;
+        variant?: Record<string, string>;
+        delivered_at?: string | null;
+    }
+
     interface ProductType {
         id: number;
         name: string;
@@ -140,7 +147,7 @@ declare global {
         client: Client;
         classroom: Classroom;
         school: School;
-        products: Product[];
+        products: OrderProduct[];
         payments?: Payment[];
     }
 

@@ -47,11 +47,11 @@ export default function EditOrder({
     const [accordionValue, setAccordionValue] =
         useState<AccordionValue>('client');
 
-    // Transform order data for form
+    // Transform order data for form - preserve existing note and variant from pivot
     const orderDetails = order.products.map((product) => ({
         product_id: product.id,
-        note: '',
-        variant: {},
+        note: product.note || null,
+        variant: product.variant || {},
     }));
 
     const { data, setData, put, processing, errors } = useForm<{
