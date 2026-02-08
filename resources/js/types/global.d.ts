@@ -22,24 +22,22 @@ declare global {
     };
 
     interface Paginated<T> {
-        [k: string]: {
-            data: T[];
-            meta: {
-                current_page: number;
-                from: number;
-                last_page: number;
-                links: PaginatedLink[];
-                path: string;
-                per_page: number;
-                to: number;
-                total: number;
-            };
-            links: {
-                first_page_url: string;
-                last_page_url: string;
-                next_page_url: string | null;
-                prev_page_url: string | null;
-            };
+        data: T[];
+        meta: {
+            current_page: number;
+            from: number;
+            last_page: number;
+            links: PaginatedLink[];
+            path: string;
+            per_page: number;
+            to: number;
+            total: number;
+        };
+        links: {
+            first_page_url: string;
+            last_page_url: string;
+            next_page_url: string | null;
+            prev_page_url: string | null;
         };
     }
 
@@ -113,6 +111,13 @@ declare global {
         };
     }
 
+    interface OrderProduct extends Product {
+        product_id: number;
+        note?: string | null;
+        variant?: Record<string, string>;
+        delivered_at?: string | null;
+    }
+
     interface ProductType {
         id: number;
         name: string;
@@ -137,10 +142,12 @@ declare global {
         total_price: number;
         payment_plan: number;
         due_date: string;
+        child_name?: string;
+        attended_photo_session?: boolean;
         client: Client;
         classroom: Classroom;
         school: School;
-        products: Product[];
+        products: OrderProduct[];
         payments?: Payment[];
     }
 
@@ -181,6 +188,15 @@ declare global {
             color: string;
             dimentions: string;
         };
+    }
+
+    interface Photo {
+        id: number;
+        classroom_id: number;
+        file_path: string;
+        number: number;
+        created_at: string;
+        updated_at: string;
     }
 }
 

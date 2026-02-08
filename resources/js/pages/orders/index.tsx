@@ -28,7 +28,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 export default function Orders({
     orders,
     schools,
-}: PageProps<Paginated<Order> & { schools: School[] }>) {
+}: PageProps<{ orders: Paginated<Order>; schools: School[] }>) {
     const params = new URLSearchParams(window.location.search);
 
     const [comboDropdownOpen, setComboDropdownOpen] = useState(false);

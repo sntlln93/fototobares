@@ -24,13 +24,15 @@ class StoreOrderRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required'],
-            'phone' => ['required'],
+            'name' => ['nullable', 'string'],
+            'phone' => ['nullable', 'string'],
 
             'classroom_id' => ['required', 'exists:classrooms,id'],
             'total_price' => ['required', 'numeric', 'min:1'],
             'payment_plan' => ['required', 'numeric', 'min:1'],
             'due_date' => ['required', 'date_format:Y-m-d'],
+            'child_name' => ['nullable', 'string'],
+            'attended_photo_session' => ['nullable', 'boolean'],
 
             'order_details' => ['required', 'array'],
             'order_details.*.product_id' => ['required', 'integer', 'exists:products,id'],
@@ -49,15 +51,17 @@ class StoreOrderRequest extends FormRequest
      * @param  string|null  $key
      * @param  mixed  $default
      * @return array{
-     *     name: string,
-     *     phone: string,
+     *     name: string|null,
+     *     phone: string|null,
      *     classroom_id: int,
      *     total_price: float,
      *     payment_plan: int,
      *     due_date: string,
+     *     child_name?: string|null,
+     *     attended_photo_session?: bool|null,
      *     order_details: array<int, array{
      *         product_id: int,
-     *         note: string,
+     *         note: string|null,
      *         variant?: array{
      *             orientation?: string,
      *             photo_type?: string,
@@ -70,15 +74,17 @@ class StoreOrderRequest extends FormRequest
     public function validated($key = null, $default = null): array
     {
         /** @var array{
-         *     name: string,
-         *     phone: string,
+         *     name: string|null,
+         *     phone: string|null,
          *     classroom_id: int,
          *     total_price: float,
          *     payment_plan: int,
          *     due_date: string,
+         *     child_name?: string|null,
+         *     attended_photo_session?: bool|null,
          *     order_details: array<int, array{
          *         product_id: int,
-         *         note: string,
+         *         note: string|null,
          *         variant?: array{
          *             orientation?: string,
          *             photo_type?: string,

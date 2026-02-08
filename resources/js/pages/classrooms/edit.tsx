@@ -74,7 +74,6 @@ export function EditClassroom({
                     />
                     <InputError message={errors.phone} className="mt-2" />
                 </div>
-
                 <div className="flex justify-end gap-3">
                     <Button
                         variant="outline"

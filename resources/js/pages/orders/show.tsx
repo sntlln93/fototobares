@@ -1,3 +1,4 @@
+import { buttonVariants } from '@/components/ui/button';
 import {
     Card,
     CardContent,
@@ -6,9 +7,10 @@ import {
     CardTitle,
 } from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
-import { formatPrice } from '@/lib/utils';
+import { cn, formatPrice } from '@/lib/utils';
 import { BreadcrumbItem } from '@/types';
-import { Head } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
+import { Edit2 } from 'lucide-react';
 import { Details } from './details';
 import { PaymentHistory } from './payment-history';
 
@@ -35,7 +37,19 @@ export default function Order({
             <Head title={`Pedido #${order.data.id} - Pagos`} />
 
             <section className="flex flex-col gap-6 px-6 pt-6 lg:flex-row">
-                <Card className="lg:min-w-[400px]">
+                <Card className="relative lg:min-w-[400px]">
+                    <Link
+                        href={route('orders.edit', { order: order.data.id })}
+                        className={cn(
+                            'absolute right-4 top-4',
+                            buttonVariants({
+                                size: 'sm',
+                                variant: 'outline',
+                            }),
+                        )}
+                    >
+                        <Edit2 />
+                    </Link>
                     <CardHeader>
                         <CardDescription>
                             {`${order.data.school.name}

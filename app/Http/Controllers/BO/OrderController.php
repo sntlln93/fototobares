@@ -99,6 +99,8 @@ class OrderController extends Controller
                 'total_price' => $validated['total_price'],
                 'payment_plan' => $validated['payment_plan'],
                 'due_date' => $validated['due_date'],
+                'child_name' => $validated['child_name'] ?? null,
+                'attended_photo_session' => $validated['attended_photo_session'] ?? null,
             ]);
 
             foreach ($validated['order_details'] as $product) {
@@ -119,5 +121,87 @@ class OrderController extends Controller
         return Inertia::render('orders/show', [
             'order' => new OrderResource($order),
         ]);
+    }
+
+    public function edit(Order $order): \Inertia\Response|\Illuminate\Http\RedirectResponse
+    {
+        // Calculate if can edit: allow edit if no payments or first payment not complete
+        $canEdit = true;
+        if ($order->payments()->count() > 0) {
+            $totalPaid = $order->payments()->sum('amount');
+            $firstQuote = $order->total_price / $order->payment_plan;
+            if ($totalPaid >= $firstQuote) {
+                $canEdit = false;
+            }
+        }
+
+        if (! $canEdit) {
+            return back()->withErrors(['order' => 'No se puede editar este pedido. La primera cuota ha sido pagada completamente.']);
+        }
+
+        $schools = School::query()
+            ->with(['classrooms.teacher', 'principal'])
+            ->whereHas('classrooms')
+            ->get();
+
+        $combos = Combo::with(['products'])->get();
+        $products = Product::get();
+
+        return Inertia::render('orders/edit', [
+            'order' => $order->load('client', 'products', 'classroom'),
+            'schools' => $schools,
+            'combos' => $combos,
+            'products' => $products,
+        ]);
+    }
+
+    public function update(StoreOrderRequest $request, Order $order): \Illuminate\Http\RedirectResponse
+    {
+        // Check if can edit
+        $canEdit = true;
+        if ($order->payments()->count() > 0) {
+            $firstPayment = $order->payments()->first();
+            $totalPaid = $order->payments()->sum('amount');
+            $firstQuote = $order->total_price / $order->payment_plan;
+            if ($totalPaid >= $firstQuote) {
+                $canEdit = false;
+            }
+        }
+
+        if (! $canEdit) {
+            return back()->withErrors(['order' => 'No se puede editar este pedido. La primera cuota ha sido pagada completamente.']);
+        }
+
+        $validated = $request->validated();
+
+        DB::transaction(function () use ($order, $validated) {
+            // Update order
+            $order->update([
+                'total_price' => $validated['total_price'],
+                'payment_plan' => $validated['payment_plan'],
+                'due_date' => $validated['due_date'],
+                'child_name' => $validated['child_name'] ?? null,
+                'attended_photo_session' => $validated['attended_photo_session'] ?? null,
+            ]);
+
+            // Update client info
+            $order->client()->update([
+                'name' => $validated['name'],
+                'phone' => $validated['phone'],
+            ]);
+
+            // Update products
+            $order->products()->sync(
+                collect($validated['order_details'])->mapWithKeys(function ($product) {
+                    return [$product['product_id'] => [
+                        'variant' => json_encode($product['variant'] ?? []),
+                        'note' => $product['note'],
+                    ]];
+                })->toArray()
+            );
+        });
+
+        return redirect()->route('orders.show', ['order' => $order->id])
+            ->with('success', 'Pedido actualizado exitosamente');
     }
 }
