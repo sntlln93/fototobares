@@ -128,7 +128,6 @@ class OrderController extends Controller
         // Calculate if can edit: allow edit if no payments or first payment not complete
         $canEdit = true;
         if ($order->payments()->count() > 0) {
-            $firstPayment = $order->payments()->first();
             $totalPaid = $order->payments()->sum('amount');
             $firstQuote = $order->total_price / $order->payment_plan;
             if ($totalPaid >= $firstQuote) {
@@ -137,7 +136,7 @@ class OrderController extends Controller
         }
 
         if (! $canEdit) {
-            return back()->withErrors('No se puede editar este pedido. La primera cuota ha sido pagada completamente.');
+            return back()->withErrors(['order' => 'No se puede editar este pedido. La primera cuota ha sido pagada completamente.']);
         }
 
         $schools = School::query()
@@ -170,7 +169,7 @@ class OrderController extends Controller
         }
 
         if (! $canEdit) {
-            return back()->withErrors('No se puede editar este pedido. La primera cuota ha sido pagada completamente.');
+            return back()->withErrors(['order' => 'No se puede editar este pedido. La primera cuota ha sido pagada completamente.']);
         }
 
         $validated = $request->validated();

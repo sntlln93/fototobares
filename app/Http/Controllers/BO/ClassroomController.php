@@ -36,7 +36,7 @@ class ClassroomController extends Controller
             ->get();
 
         if (count($orders) > 0) {
-            return back()->withErrors('No se pueden eliminar cursos que tengan pedidos registrados');
+            return back()->withErrors(['classroom' => 'No se pueden eliminar cursos que tengan pedidos registrados']);
         }
 
         DB::transaction(function () use ($classroom) {
@@ -62,10 +62,13 @@ class ClassroomController extends Controller
                 'is_draft' => $validated['is_draft'] ?? false,
             ]);
 
-            $classroom->teacher()->update([
-                'name' => $validated['teacher'],
-                'phone' => $validated['phone'],
-            ]);
+            // Only update teacher if data is provided
+            if ($validated['teacher'] !== null || $validated['phone'] !== null) {
+                $classroom->teacher()->update([
+                    'name' => $validated['teacher'],
+                    'phone' => $validated['phone'],
+                ]);
+            }
         });
 
         return redirect(to: route('schools.show', [
@@ -90,11 +93,14 @@ class ClassroomController extends Controller
                 'is_draft' => $validated['is_draft'] ?? false,
             ]);
 
-            $classroom->teacher()->create([
-                'name' => $validated['teacher'],
-                'phone' => $validated['phone'],
-                'role' => ContactRole::Teacher,
-            ]);
+            // Only create teacher contact if data is provided
+            if ($validated['teacher'] !== null || $validated['phone'] !== null) {
+                $classroom->teacher()->create([
+                    'name' => $validated['teacher'],
+                    'phone' => $validated['phone'],
+                    'role' => ContactRole::Teacher,
+                ]);
+            }
         });
 
         return redirect(to: route('schools.show', [

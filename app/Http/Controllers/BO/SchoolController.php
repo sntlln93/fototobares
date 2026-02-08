@@ -121,7 +121,7 @@ class SchoolController extends Controller
             ->get();
 
         if (count($orders) > 0) {
-            return back()->withErrors('No se pueden eliminar escuelas que tengan pedidos registrados');
+            return back()->withErrors(['school' => 'No se pueden eliminar escuelas que tengan pedidos registrados']);
         }
 
         DB::transaction(function () use ($school) {
