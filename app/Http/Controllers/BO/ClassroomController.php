@@ -6,13 +6,27 @@ namespace App\Http\Controllers\BO;
 
 use App\Enums\ContactRole;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\OrderResource;
 use App\Models\Classroom;
 use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Inertia\Inertia;
 
 class ClassroomController extends Controller
 {
+    public function show(Classroom $classroom): \Inertia\Response
+    {
+        $orders = Order::where('classroom_id', $classroom->id)
+            ->with('client', 'products.type')
+            ->paginate(20);
+
+        return Inertia::render('classrooms/show', [
+            'classroom' => $classroom->load('teacher', 'school'),
+            'orders' => OrderResource::collection($orders),
+        ]);
+    }
+
     public function destroy(Classroom $classroom): \Illuminate\Http\RedirectResponse
     {
         $school_id = $classroom->school_id;
@@ -22,7 +36,7 @@ class ClassroomController extends Controller
             ->get();
 
         if (count($orders) > 0) {
-            return back()->withErrors('No se pueden eliminar cursos que tengan pedidos registrados');
+            return back()->withErrors(['classroom' => 'No se pueden eliminar cursos que tengan pedidos registrados']);
         }
 
         DB::transaction(function () use ($classroom) {
@@ -37,8 +51,8 @@ class ClassroomController extends Controller
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'min:1', 'max:10'],
-            'teacher' => ['required', 'string', 'min:4', 'max:30'],
-            'phone' => ['required', 'numeric'],
+            'teacher' => ['nullable', 'string', 'min:4', 'max:30'],
+            'phone' => ['nullable', 'numeric'],
         ]);
 
         DB::transaction(function () use ($classroom, $validated) {
@@ -46,10 +60,13 @@ class ClassroomController extends Controller
                 'name' => $validated['name'],
             ]);
 
-            $classroom->teacher()->update([
-                'name' => $validated['teacher'],
-                'phone' => $validated['phone'],
-            ]);
+            // Only update teacher if data is provided
+            if ($validated['teacher'] !== null || $validated['phone'] !== null) {
+                $classroom->teacher()->update([
+                    'name' => $validated['teacher'],
+                    'phone' => $validated['phone'],
+                ]);
+            }
         });
 
         return redirect(to: route('schools.show', [
@@ -62,8 +79,8 @@ class ClassroomController extends Controller
         $validated = $request->validate([
             'name' => ['required', 'string', 'min:1', 'max:10'],
             'school_id' => ['required', 'exists:schools,id'],
-            'teacher' => ['required', 'string', 'min:4', 'max:30'],
-            'phone' => ['required', 'numeric'],
+            'teacher' => ['nullable', 'string', 'min:4', 'max:30'],
+            'phone' => ['nullable', 'numeric'],
         ]);
 
         DB::transaction(function () use ($validated) {
@@ -72,11 +89,14 @@ class ClassroomController extends Controller
                 'school_id' => $validated['school_id'],
             ]);
 
-            $classroom->teacher()->create([
-                'name' => $validated['teacher'],
-                'phone' => $validated['phone'],
-                'role' => ContactRole::Teacher,
-            ]);
+            // Only create teacher contact if data is provided
+            if ($validated['teacher'] !== null || $validated['phone'] !== null) {
+                $classroom->teacher()->create([
+                    'name' => $validated['teacher'],
+                    'phone' => $validated['phone'],
+                    'role' => ContactRole::Teacher,
+                ]);
+            }
         });
 
         return redirect(to: route('schools.show', [

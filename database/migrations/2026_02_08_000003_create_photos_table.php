@@ -15,8 +15,11 @@ return new class extends Migration
     {
         Schema::create('photos', function (Blueprint $table) {
             $table->id();
-            $table->string('uri');
+            $table->foreignId('classroom_id')->constrained()->cascadeOnDelete();
+            $table->string('file_path');
+            $table->integer('number')->comment('Sequential number within classroom');
             $table->timestamps();
+            $table->unique(['classroom_id', 'number']);
         });
     }
 

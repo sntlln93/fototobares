@@ -173,7 +173,21 @@ export default function School({
                                 </TableCell>
                                 <TableCell>{classroom.name}</TableCell>
                                 <TableCell>{classroom.teacher?.name}</TableCell>
-                                <TableCell></TableCell>
+                                <TableCell>
+                                    <Link
+                                        href={route('classrooms.show', {
+                                            classroom: classroom.id,
+                                        })}
+                                        className={cn(
+                                            buttonVariants({
+                                                size: 'sm',
+                                                variant: 'outline',
+                                            }),
+                                        )}
+                                    >
+                                        Ver alumnos
+                                    </Link>
+                                </TableCell>
 
                                 <TableCell className="flex gap-2">
                                     <Button

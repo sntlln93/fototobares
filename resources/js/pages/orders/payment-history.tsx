@@ -89,26 +89,26 @@ function PaymentItem({
     onEdit: CallableFunction;
 }) {
     return (
-        <div className="flex items-center justify-between border-b border-gray-200 py-4 last:border-0">
+        <div className="flex items-center justify-between border-b border-gray-200 py-4 last:border-0 dark:border-gray-700">
             <div className="flex items-center space-x-4">
                 <div>
-                    <div className="font-semibold text-black">
+                    <div className="font-semibold text-black dark:text-white">
                         {capitalize(payment.type)}
                     </div>
-                    <div className="text-sm text-gray-500">
+                    <div className="text-sm text-gray-500 dark:text-gray-400">
                         {payment.paid_at}
                     </div>
                 </div>
             </div>
 
             <div className="flex items-center gap-2">
-                <div className="text-xl font-bold text-black">
+                <div className="text-xl font-bold text-black dark:text-white">
                     {formatPrice(payment.amount)}
                 </div>
 
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <EllipsisVertical className="h-5 w-5 text-gray-400" />
+                        <EllipsisVertical className="h-5 w-5 text-gray-400 dark:text-gray-600" />
                     </DropdownMenuTrigger>
                     <DropdownMenuContent>
                         <DropdownMenuItem onClick={() => onEdit(payment)}>

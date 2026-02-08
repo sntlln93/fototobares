@@ -10,6 +10,7 @@ class Order extends Model
 {
     protected $casts = [
         'due_date' => 'datetime:Y-m-d',
+        'attended_photo_session' => 'boolean',
     ];
 
     /**

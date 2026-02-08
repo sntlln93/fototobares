@@ -23,4 +23,12 @@ class Classroom extends Model
     {
         return $this->belongsTo(School::class);
     }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<Photo, $this>
+     */
+    public function photos()
+    {
+        return $this->hasMany(Photo::class);
+    }
 }

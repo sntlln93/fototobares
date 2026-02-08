@@ -27,7 +27,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 export default function Combos({
     combos,
-}: PageProps<Paginated<Combo & { products: Product[] }>>) {
+}: PageProps<{ combos: Paginated<Combo & { products: Product[] }> }>) {
     const [deleteableCombo, setDeleteableCombo] = useState<Combo | null>(null);
     return (
         <AppLayout breadcrumbs={breadcrumbs}>

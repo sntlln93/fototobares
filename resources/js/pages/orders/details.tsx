@@ -32,18 +32,36 @@ export function Details({ products }: { products: Product[] }) {
 
 function DetailItem({ product }: { product: Product }) {
     return (
-        <div key={product.id} className="flex items-center gap-4">
-            <div className="rounded bg-gray-200 p-2">
+        <div
+            key={product.id}
+            className="flex items-start gap-4 rounded-lg border border-gray-200 p-3 dark:border-gray-700"
+        >
+            <div className="rounded bg-gray-200 p-2 dark:bg-gray-700">
                 <ProductIcon
                     type={product.product_type_id}
-                    className="h-6 w-6 text-gray-500"
+                    className="h-6 w-6 text-gray-500 dark:text-gray-400"
                 />
             </div>
-            <div>
-                <p className="text-sm font-medium">{product.name}</p>
-                <p className="text-sm text-gray-600">
+            <div className="flex-1">
+                <p className="text-sm font-medium text-black dark:text-white">
+                    {product.name}
+                </p>
+                <p className="text-xs text-gray-600 dark:text-gray-400">
                     {capitalize(product.type.name)}
                 </p>
+                <div className="mt-2 flex flex-wrap gap-2 text-xs">
+                    <span className="rounded bg-gray-100 px-2 py-1 text-gray-700 dark:bg-gray-800 dark:text-gray-300">
+                        ${product.unit_price / 100}
+                    </span>
+                    <span className="rounded bg-blue-100 px-2 py-1 text-blue-700 dark:bg-blue-900 dark:text-blue-200">
+                        {product.max_payments} cuotas
+                    </span>
+                    {product.financed_price && (
+                        <span className="rounded bg-green-100 px-2 py-1 text-green-700 dark:bg-green-900 dark:text-green-200">
+                            ${product.financed_price / 100} financiado
+                        </span>
+                    )}
+                </div>
             </div>
         </div>
     );

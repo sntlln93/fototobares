@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Settings\PasswordController;
+use App\Http\Controllers\Settings\ReleaseNotesController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -15,4 +16,6 @@ Route::middleware('auth')->group(function () {
     Route::get('settings/appearance', function () {
         return Inertia::render('settings/appearance');
     })->name('appearance');
+
+    Route::get('settings/release-notes', [ReleaseNotesController::class, 'show'])->name('release-notes');
 });
