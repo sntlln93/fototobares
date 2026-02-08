@@ -15,12 +15,13 @@ return new class extends Migration
     {
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
+            $table->string('child_name')->nullable();
+            $table->boolean('attended_photo_session')->nullable();
             $table->foreignId('client_id')
                 ->constrained();
 
             $table->foreignId('classroom_id')
                 ->constrained();
-
             $table->integer('total_price');
             $table->integer('payment_plan');
             $table->date('due_date');

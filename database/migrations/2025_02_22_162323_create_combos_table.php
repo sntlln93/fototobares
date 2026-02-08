@@ -19,6 +19,7 @@ return new class extends Migration
             $table->integer('suggested_price');
             $table->integer('suggested_max_payments');
             $table->integer('suggested_financed_price')->nullable();
+            $table->softDeletes()->after('suggested_financed_price');
             $table->timestamps();
         });
     }
