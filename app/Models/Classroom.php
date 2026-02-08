@@ -9,13 +9,6 @@ use Illuminate\Database\Eloquent\Model;
 class Classroom extends Model
 {
     /**
-     * @var array<string, string>
-     */
-    protected $casts = [
-        'is_draft' => 'boolean',
-    ];
-
-    /**
      * @return \Illuminate\Database\Eloquent\Relations\MorphOne<Contact, $this>
      */
     public function teacher()

@@ -53,13 +53,11 @@ class ClassroomController extends Controller
             'name' => ['required', 'string', 'min:1', 'max:10'],
             'teacher' => ['nullable', 'string', 'min:4', 'max:30'],
             'phone' => ['nullable', 'numeric'],
-            'is_draft' => ['boolean'],
         ]);
 
         DB::transaction(function () use ($classroom, $validated) {
             $classroom->update([
                 'name' => $validated['name'],
-                'is_draft' => $validated['is_draft'] ?? false,
             ]);
 
             // Only update teacher if data is provided
@@ -83,14 +81,12 @@ class ClassroomController extends Controller
             'school_id' => ['required', 'exists:schools,id'],
             'teacher' => ['nullable', 'string', 'min:4', 'max:30'],
             'phone' => ['nullable', 'numeric'],
-            'is_draft' => ['boolean'],
         ]);
 
         DB::transaction(function () use ($validated) {
             $classroom = Classroom::create([
                 'name' => $validated['name'],
                 'school_id' => $validated['school_id'],
-                'is_draft' => $validated['is_draft'] ?? false,
             ]);
 
             // Only create teacher contact if data is provided

@@ -2,7 +2,6 @@ import InputError from '@/components/input-error';
 import InputHint from '@/components/input-hint';
 import { Modal } from '@/components/modal';
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useForm } from '@inertiajs/react';
@@ -21,7 +20,6 @@ export function EditClassroom({
         name: classroom.name,
         teacher: classroom.teacher?.name ?? '',
         phone: classroom.teacher?.phone ?? '',
-        is_draft: classroom.is_draft ?? false,
     });
 
     const submit: FormEventHandler = (e) => {
@@ -76,22 +74,6 @@ export function EditClassroom({
                     />
                     <InputError message={errors.phone} className="mt-2" />
                 </div>
-                <div className="flex items-center gap-2 py-4">
-                    <Checkbox
-                        id="is_draft"
-                        checked={data.is_draft}
-                        onCheckedChange={(checked) =>
-                            setData('is_draft', checked === true)
-                        }
-                    />
-                    <Label
-                        htmlFor="is_draft"
-                        className="cursor-pointer font-normal"
-                    >
-                        Marcar como borrador
-                    </Label>
-                </div>
-
                 <div className="flex justify-end gap-3">
                     <Button
                         variant="outline"
