@@ -48,24 +48,4 @@ class OrderDraftController extends Controller
 
         return back()->with('success', 'Borrador eliminado');
     }
-
-    public function convertToDraft(Request $request): \Illuminate\Http\RedirectResponse
-    {
-        $validated = $request->validate([
-            'classroom_id' => ['required', 'exists:classrooms,id'],
-            'child_name' => ['nullable', 'string'],
-            'client_name' => ['nullable', 'string'],
-            'client_phone' => ['nullable', 'string'],
-            'attended_photo_session' => ['nullable', 'boolean'],
-            'total_price' => ['nullable', 'numeric'],
-            'payment_plan' => ['nullable', 'numeric'],
-            'due_date' => ['nullable', 'date_format:Y-m-d'],
-            'products' => ['nullable', 'array'],
-        ]);
-
-        OrderDraft::create($validated);
-
-        return redirect()->route('drafts.index')
-            ->with('success', 'Borrador de pedido guardado exitosamente');
-    }
 }
