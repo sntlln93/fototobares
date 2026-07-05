@@ -204,4 +204,16 @@ class OrderController extends Controller
         return redirect()->route('orders.show', ['order' => $order->id])
             ->with('success', 'Pedido actualizado exitosamente');
     }
+
+    public function destroy(Order $order): \Illuminate\Http\RedirectResponse
+    {
+        if ($order->payments()->exists()) {
+            return back()->withErrors(['order' => 'No se puede eliminar un pedido con pagos registrados.']);
+        }
+
+        $order->delete();
+
+        return redirect()->route('orders.index')
+            ->with('success', 'Pedido eliminado exitosamente');
+    }
 }

@@ -145,6 +145,7 @@ declare global {
         child_name?: string;
         attended_photo_session?: boolean;
         can_edit?: boolean;
+        can_delete?: boolean;
         client: Client;
         classroom: Classroom;
         school: School;

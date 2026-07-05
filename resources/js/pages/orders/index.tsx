@@ -15,8 +15,9 @@ import { onSort } from '@/lib/services/filter';
 import { cn, formatPrice } from '@/lib/utils';
 import { BreadcrumbItem } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
-import { ArrowUpDown, Eye, School } from 'lucide-react';
+import { ArrowUpDown, Eye, School, Trash } from 'lucide-react';
 import { useState } from 'react';
+import { DeleteOrderConfirmation } from './partials/delete-confirmation';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -35,10 +36,19 @@ export default function Orders({
     const [selectedSchool] = useState<number | null>(
         params.get('school_id') ? Number(params.get('school_id')!) : null,
     );
+    const [deleteableOrder, setDeleteableOrder] = useState<Order | null>(null);
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Productos" />
+            <Head title="Pedidos" />
+
+            {deleteableOrder && (
+                <DeleteOrderConfirmation
+                    order={deleteableOrder}
+                    show={Boolean(deleteableOrder)}
+                    onClose={() => setDeleteableOrder(null)}
+                />
+            )}
 
             <section className="p-6">
                 <div className="mb-4 flex gap-4">
@@ -75,7 +85,7 @@ export default function Orders({
                                 <div className="flex items-center gap-2">
                                     <button
                                         onClick={() =>
-                                            onSort('id', 'products.index')
+                                            onSort('id', 'orders.index')
                                         }
                                     >
                                         <ArrowUpDown className="h-4 w-4" />
@@ -83,26 +93,15 @@ export default function Orders({
                                     #
                                 </div>
                             </TableHead>
-                            <TableHead>
-                                <div className="flex items-center gap-2">
-                                    <button
-                                        onClick={() =>
-                                            onSort('name', 'products.index')
-                                        }
-                                    >
-                                        <ArrowUpDown className="h-4 w-4" />
-                                    </button>
-                                    Cliente
-                                </div>
-                            </TableHead>
+                            <TableHead>Cliente</TableHead>
                             <TableHead>Productos</TableHead>
                             <TableHead>
                                 <div className="flex items-center gap-2">
                                     <button
                                         onClick={() =>
                                             onSort(
-                                                'unit_price',
-                                                'products.index',
+                                                'total_price',
+                                                'orders.index',
                                             )
                                         }
                                     >
@@ -162,6 +161,21 @@ export default function Orders({
                                     >
                                         <Eye />
                                     </Link>
+                                    <Button
+                                        size="sm"
+                                        variant="outline"
+                                        disabled={!order.can_delete}
+                                        title={
+                                            order.can_delete
+                                                ? 'Eliminar pedido'
+                                                : 'No se puede eliminar un pedido con pagos registrados'
+                                        }
+                                        onClick={() =>
+                                            setDeleteableOrder(order)
+                                        }
+                                    >
+                                        <Trash />
+                                    </Button>
                                 </TableCell>
                             </TableRow>
                         ))}

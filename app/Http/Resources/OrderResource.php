@@ -28,6 +28,7 @@ class OrderResource extends JsonResource
             'payment_plan' => $this->payment_plan,
             'total_price' => $this->total_price,
             'can_edit' => $this->canEdit(),
+            'can_delete' => $this->payments()->doesntExist(),
             'payments' => $this->whenLoaded('payments', function () {
                 return $this->payments->map(function ($payment) {
                     return [
