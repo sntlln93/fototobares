@@ -31,12 +31,24 @@ class PhotoController extends Controller
             'photo' => ['required', 'image', 'max:5120'], // 5MB
         ]);
 
-        // Get the next number in sequence
-        /** @var int|null $lastNumber */
-        $lastNumber = Photo::where('classroom_id', $classroom->id)
-            ->max('number');
+        // Parse the number from the filename
+        $originalFilename = $validated['photo']->getClientOriginalName();
 
-        $nextNumber = ($lastNumber ?? 0) + 1;
+        // Extract number from filename (e.g., "001.jpg" -> 1, "photo_042.png" -> 42)
+        if (preg_match('/(\d+)/', $originalFilename, $matches)) {
+            $photoNumber = (int) $matches[1];
+        } else {
+            return back()->withErrors(['photo' => 'El nombre del archivo debe contener un número (ej: 001.jpg, foto_025.png)']);
+        }
+
+        // Check if this number already exists for this classroom
+        $existingPhoto = Photo::where('classroom_id', $classroom->id)
+            ->where('number', $photoNumber)
+            ->first();
+
+        if ($existingPhoto) {
+            return back()->withErrors(['photo' => "Ya existe una foto con el número {$photoNumber} en este curso"]);
+        }
 
         // Store the photo
         $path = $validated['photo']->store("photos/classroom-{$classroom->id}", 'public');
@@ -45,10 +57,10 @@ class PhotoController extends Controller
         Photo::create([
             'classroom_id' => $classroom->id,
             'file_path' => $path,
-            'number' => $nextNumber,
+            'number' => $photoNumber,
         ]);
 
-        return back()->with('success', "Foto #{$nextNumber} subida correctamente");
+        return back()->with('success', "Foto #{$photoNumber} subida correctamente");
     }
 
     public function destroy(Photo $photo): \Illuminate\Http\RedirectResponse

@@ -38,18 +38,36 @@ export default function Order({
 
             <section className="flex flex-col gap-6 px-6 pt-6 lg:flex-row">
                 <Card className="relative lg:min-w-[400px]">
-                    <Link
-                        href={route('orders.edit', { order: order.data.id })}
-                        className={cn(
-                            'absolute right-4 top-4',
-                            buttonVariants({
-                                size: 'sm',
-                                variant: 'outline',
-                            }),
-                        )}
-                    >
-                        <Edit2 />
-                    </Link>
+                    {order.data.can_edit ? (
+                        <Link
+                            href={route('orders.edit', {
+                                order: order.data.id,
+                            })}
+                            className={cn(
+                                'absolute right-4 top-4',
+                                buttonVariants({
+                                    size: 'sm',
+                                    variant: 'outline',
+                                }),
+                            )}
+                        >
+                            <Edit2 />
+                        </Link>
+                    ) : (
+                        <span
+                            className={cn(
+                                'absolute right-4 top-4 opacity-60',
+                                buttonVariants({
+                                    size: 'sm',
+                                    variant: 'outline',
+                                }),
+                            )}
+                            aria-disabled="true"
+                            title="La edición se bloquea cuando la primera cuota está pagada"
+                        >
+                            <Edit2 />
+                        </span>
+                    )}
                     <CardHeader>
                         <CardDescription>
                             {`${order.data.school.name}
@@ -69,6 +87,12 @@ export default function Order({
                         <CardDescription>
                             Primer vencimiento: {order.data.due_date}
                         </CardDescription>
+                        {!order.data.can_edit && (
+                            <CardDescription className="text-amber-600">
+                                La edición se bloquea cuando la primera cuota
+                                está pagada.
+                            </CardDescription>
+                        )}
                     </CardContent>
                 </Card>
 

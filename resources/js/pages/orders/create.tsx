@@ -179,7 +179,11 @@ export default function CreateOrder({
 
         post(
             route('orders.store', {
-                _query: { redirectTo: '/' },
+                _query: {
+                    redirectTo: route(
+                        saveAndContinue ? 'orders.create' : 'orders.index',
+                    ),
+                },
             }),
             {
                 onSuccess: () => {

@@ -25,6 +25,7 @@ return new class extends Migration
             $table->integer('total_price');
             $table->integer('payment_plan');
             $table->date('due_date');
+            $table->softDeletes();
             $table->timestamps();
         });
     }
