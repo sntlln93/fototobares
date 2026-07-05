@@ -33,7 +33,7 @@ class PhotoController extends Controller
 
         // Parse the number from the filename
         $originalFilename = $validated['photo']->getClientOriginalName();
-        
+
         // Extract number from filename (e.g., "001.jpg" -> 1, "photo_042.png" -> 42)
         if (preg_match('/(\d+)/', $originalFilename, $matches)) {
             $photoNumber = (int) $matches[1];
