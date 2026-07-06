@@ -12,6 +12,10 @@ use Tests\TestCase;
 uses(TestCase::class, RefreshDatabase::class)
     ->beforeEach(function () {
         $this->withoutVite();
+
+        // Pages live in js/pages (lowercase); Inertia's default is js/Pages,
+        // which case-sensitive filesystems (CI) fail to find
+        config()->set('inertia.testing.page_paths', [resource_path('js/pages')]);
     })
     ->in('Feature');
 
