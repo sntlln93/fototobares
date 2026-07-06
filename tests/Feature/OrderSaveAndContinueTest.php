@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature;
 
+use App\Enums\UserRole;
 use App\Models\Classroom;
 use App\Models\Product;
 use App\Models\School;
@@ -31,6 +32,11 @@ class OrderSaveAndContinueTest extends TestCase
             'email' => 'tester@example.com',
             'password' => 'password',
         ]);
+
+        // orders.store requiere rol de ventas (master/administración/oficina)
+        $this->user->roles()->attach(
+            DB::table('roles')->where('name', UserRole::Admin->value)->value('id'),
+        );
 
         $school = School::create([
             'name' => 'Escuela Test',

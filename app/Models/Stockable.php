@@ -15,4 +15,12 @@ class Stockable extends Model
     {
         return $this->belongsToMany(Product::class);
     }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<StockMovement, $this>
+     */
+    public function movements()
+    {
+        return $this->hasMany(StockMovement::class);
+    }
 }

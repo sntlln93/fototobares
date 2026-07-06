@@ -1,4 +1,5 @@
 import InputError from '@/components/input-error';
+import InputHint from '@/components/input-hint';
 import { Modal } from '@/components/modal';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -21,27 +22,32 @@ export function CreatePaymentModal({
     orderId,
     show,
     onClose,
+    initialAmount,
 }: {
     orderId: Order['id'];
     show: boolean;
     onClose: CallableFunction;
+    initialAmount?: number;
 }) {
     const { post, data, setData, processing, errors } = useForm<{
         amount: number;
         type: (typeof PAYMENT_TYPES)[number];
         order_id: Order['id'];
+        proof_of_payment: File | null;
     }>({
-        amount: 0,
+        amount: initialAmount ?? 0,
         type: PAYMENT_TYPES[0],
         order_id: orderId,
+        proof_of_payment: null,
     });
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
 
-        post(route('payments.store'));
-
-        onClose();
+        post(route('payments.store'), {
+            forceFormData: true,
+            onSuccess: () => onClose(),
+        });
     };
 
     return (
@@ -89,7 +95,31 @@ export function CreatePaymentModal({
                             ))}
                         </SelectContent>
                     </Select>
-                    <InputError message={errors.amount} />
+                    <InputError message={errors.type} />
+                </div>
+
+                <div className="mt-2">
+                    <Label htmlFor="proof_of_payment">
+                        Comprobante de transferencia (opcional)
+                    </Label>
+                    <InputHint
+                        className="text-xs"
+                        message="Imagen o PDF de hasta 5MB (MercadoPago, banco, etc.)"
+                    />
+                    <Input
+                        id="proof_of_payment"
+                        type="file"
+                        name="proof_of_payment"
+                        accept="image/jpeg,image/png,image/webp,application/pdf"
+                        onChange={(event) =>
+                            setData(
+                                'proof_of_payment',
+                                event.target.files?.[0] ?? null,
+                            )
+                        }
+                        className="mt-1 block w-full"
+                    />
+                    <InputError message={errors.proof_of_payment} />
                 </div>
 
                 <div className="mt-6 grid grid-cols-[1fr_1fr] gap-2">

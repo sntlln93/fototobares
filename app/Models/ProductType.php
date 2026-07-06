@@ -15,4 +15,12 @@ class ProductType extends Model
     {
         return $this->hasMany(Product::class);
     }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<ProductionStatus, $this>
+     */
+    public function productionStatuses()
+    {
+        return $this->hasMany(ProductionStatus::class)->orderBy('position');
+    }
 }

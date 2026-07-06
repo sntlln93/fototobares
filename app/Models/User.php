@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\UserRole;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class User extends Authenticatable
@@ -27,5 +28,31 @@ class User extends Authenticatable
     public function roles()
     {
         return $this->belongsToMany(Role::class);
+    }
+
+    /**
+     * @return list<string>
+     */
+    public function roleNames(): array
+    {
+        $this->loadMissing('roles');
+
+        /** @var list<string> $names */
+        $names = $this->roles->pluck('name')->values()->all();
+
+        return $names;
+    }
+
+    public function hasAnyRole(UserRole ...$roles): bool
+    {
+        $names = $this->roleNames();
+
+        foreach ($roles as $role) {
+            if (in_array($role->value, $names, true)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
