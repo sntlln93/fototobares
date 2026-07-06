@@ -38,7 +38,7 @@
         "tailwindcss": "^3.2.1",
         "typescript": "~5.5.4",
         "vite": "^5.0",
-        "vitest": "^4.1.9"
+        "vitest": "^3.2.6"
     },
     "dependencies": {
         "@radix-ui/react-accordion": "^1.2.3",
