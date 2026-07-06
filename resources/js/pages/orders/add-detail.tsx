@@ -16,11 +16,14 @@ export function AddDetail({
     products,
     show,
     onClose,
+    initialValues,
 }: {
     addProducts: (products: ProductOrder[]) => void;
     products: SelectableProduct[];
     show: boolean;
     onClose: CallableFunction;
+    /** Existing values (aligned with `products`) when editing an added product */
+    initialValues?: ProductOrder[];
 }) {
     const [productData, setProductData] = useState<{
         orientation: ProductData<ProductOrientation>[];
@@ -28,12 +31,44 @@ export function AddDetail({
         background: ProductData<string>[];
         color: ProductData<string>[];
         note: ProductData<string>[];
-    }>({
-        orientation: [],
-        photoType: [],
-        background: [],
-        color: [],
-        note: [],
+    }>(() => {
+        const initial = {
+            orientation: [] as ProductData<ProductOrientation>[],
+            photoType: [] as ProductData<ProductPhotoType>[],
+            background: [] as ProductData<string>[],
+            color: [] as ProductData<string>[],
+            note: [] as ProductData<string>[],
+        };
+
+        initialValues?.forEach((value) => {
+            if (value.variant) {
+                initial.orientation.push({
+                    product_id: value.product_id,
+                    value: value.variant.orientation,
+                });
+                initial.photoType.push({
+                    product_id: value.product_id,
+                    value: value.variant.photo_type,
+                });
+                initial.background.push({
+                    product_id: value.product_id,
+                    value: value.variant.background,
+                });
+                initial.color.push({
+                    product_id: value.product_id,
+                    value: value.variant.color,
+                });
+            }
+
+            if (value.note) {
+                initial.note.push({
+                    product_id: value.product_id,
+                    value: value.note,
+                });
+            }
+        });
+
+        return initial;
     });
 
     const [errors, setErrors] = useState<{

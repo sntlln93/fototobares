@@ -18,6 +18,7 @@ declare global {
     > = T & {
         auth: {
             user: User;
+            roles: string[];
         };
     };
 
@@ -113,9 +114,24 @@ declare global {
 
     interface OrderProduct extends Product {
         product_id: number;
+        order_detail_id: number;
         note?: string | null;
         variant?: Record<string, string>;
         delivered_at?: string | null;
+        production_status?: string | null;
+        production_status_id?: number | null;
+        priority?: boolean | null;
+        recycled_to?: 'stock' | 'reciclaje' | null;
+    }
+
+    interface ProductionStatus {
+        id: number;
+        name: string;
+        position: number;
+    }
+
+    interface ProductTypeWithStatuses extends ProductType {
+        statuses: ProductionStatus[];
     }
 
     interface ProductType {
@@ -134,6 +150,14 @@ declare global {
         suggested_max_payments: number;
     }
 
+    type OrderStatus =
+        | 'pendiente'
+        | 'en producción'
+        | 'terminado'
+        | 'entregado parcial'
+        | 'entregado'
+        | 'cancelado';
+
     interface Order {
         id: number;
         notes: string;
@@ -144,6 +168,12 @@ declare global {
         due_date: string;
         child_name?: string;
         attended_photo_session?: boolean;
+        photo_number?: number | null;
+        photo_url?: string | null;
+        cancelled_at?: string | null;
+        status?: OrderStatus | null;
+        paid_total?: number;
+        balance?: number;
         can_edit?: boolean;
         can_delete?: boolean;
         client: Client;
@@ -158,8 +188,9 @@ declare global {
         order_id: number;
         amount: number;
         type: string;
-        proof_of_payment: string;
+        proof_of_payment: string | null;
         paid_at: string;
+        paid_on?: string;
     }
 
     interface Classroom {

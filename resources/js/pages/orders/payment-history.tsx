@@ -12,31 +12,42 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { downloadPaymentReceipt } from '@/lib/receipt';
 import { capitalize, formatPrice } from '@/lib/utils';
-import { Edit, EllipsisVertical } from 'lucide-react';
+import { Edit, EllipsisVertical, FileDown, Paperclip } from 'lucide-react';
 import { useState } from 'react';
 import { CreatePaymentModal } from './payments/create-payment-modal';
 import { EditPaymentModal } from './payments/edit-payment-modal';
 
 export function PaymentHistory({
-    orderId,
+    order,
     payments,
+    showCreatePayment,
+    setShowCreatePayment,
+    initialAmount,
+    canRegister = true,
 }: {
-    orderId: Order['id'];
+    order: Order;
     payments: Payment[];
+    showCreatePayment: boolean;
+    setShowCreatePayment: (show: boolean) => void;
+    initialAmount?: number | null;
+    canRegister?: boolean;
 }) {
-    const [showCreatePayment, setShowCreatePayment] = useState(false);
     const [showEditPayment, setShowEditPayment] = useState<Payment | null>(
         null,
     );
 
     return (
         <>
-            <CreatePaymentModal
-                orderId={orderId}
-                show={showCreatePayment}
-                onClose={() => setShowCreatePayment(false)}
-            />
+            {showCreatePayment && (
+                <CreatePaymentModal
+                    orderId={order.id}
+                    show={showCreatePayment}
+                    initialAmount={initialAmount ?? undefined}
+                    onClose={() => setShowCreatePayment(false)}
+                />
+            )}
 
             {showEditPayment && (
                 <EditPaymentModal
@@ -50,15 +61,17 @@ export function PaymentHistory({
                 <CardHeader>
                     <CardTitle className="flex items-center justify-between text-xl">
                         <span>Historial de pagos</span>
-                        <div className="flex gap-1">
-                            <Button
-                                size={'sm'}
-                                className={'text-xs font-bold uppercase'}
-                                onClick={() => setShowCreatePayment(true)}
-                            >
-                                Registrar pago
-                            </Button>
-                        </div>
+                        {canRegister && (
+                            <div className="flex gap-1">
+                                <Button
+                                    size={'sm'}
+                                    className={'text-xs font-bold uppercase'}
+                                    onClick={() => setShowCreatePayment(true)}
+                                >
+                                    Registrar pago
+                                </Button>
+                            </div>
+                        )}
                     </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -67,6 +80,7 @@ export function PaymentHistory({
                             <PaymentItem
                                 key={payment.id}
                                 payment={payment}
+                                order={order}
                                 onEdit={setShowEditPayment}
                             />
                         ))
@@ -83,17 +97,29 @@ export function PaymentHistory({
 
 function PaymentItem({
     payment,
+    order,
     onEdit,
 }: {
     payment: Payment;
+    order: Order;
     onEdit: CallableFunction;
 }) {
     return (
         <div className="flex items-center justify-between border-b border-gray-200 py-4 last:border-0 dark:border-gray-700">
             <div className="flex items-center space-x-4">
                 <div>
-                    <div className="font-semibold text-black dark:text-white">
+                    <div className="flex items-center gap-1 font-semibold text-black dark:text-white">
                         {capitalize(payment.type)}
+                        {payment.proof_of_payment && (
+                            <a
+                                href={payment.proof_of_payment}
+                                target="_blank"
+                                rel="noreferrer"
+                                title="Ver comprobante de transferencia adjunto"
+                            >
+                                <Paperclip className="h-4 w-4 text-gray-400 hover:text-gray-600" />
+                            </a>
+                        )}
                     </div>
                     <div className="text-sm text-gray-500 dark:text-gray-400">
                         {payment.paid_at}
@@ -105,6 +131,15 @@ function PaymentItem({
                 <div className="text-xl font-bold text-black dark:text-white">
                     {formatPrice(payment.amount)}
                 </div>
+
+                <Button
+                    size="icon"
+                    variant="ghost"
+                    title="Descargar comprobante de Fototobares (PDF)"
+                    onClick={() => downloadPaymentReceipt({ payment, order })}
+                >
+                    <FileDown className="h-5 w-5" />
+                </Button>
 
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
