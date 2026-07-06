@@ -10,8 +10,10 @@ use App\Http\Resources\OrderResource;
 use App\Models\Client;
 use App\Models\Combo;
 use App\Models\Order;
+use App\Models\OrderDraft;
 use App\Models\Product;
 use App\Models\School;
+use App\Services\StockService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
@@ -55,7 +57,7 @@ class OrderController extends Controller
         ]);
     }
 
-    public function create(): \Inertia\Response
+    public function create(Request $request): \Inertia\Response
     {
         $schools = School::query()
             ->with(['classrooms.teacher', 'principal'])
@@ -72,11 +74,18 @@ class OrderController extends Controller
             })->unique(),
         ];
 
+        $draft = null;
+
+        if ($request->filled('draft')) {
+            $draft = OrderDraft::with('classroom')->find($request->query('draft'));
+        }
+
         return Inertia::render('orders/create', [
             'schoolLevels' => $schoolLevels,
             'schools' => $schools,
             'combos' => $combos,
             'products' => $products,
+            'draft' => $draft,
         ]);
     }
 
@@ -93,6 +102,21 @@ class OrderController extends Controller
                 'phone' => $validated['phone'],
             ]);
 
+            $attended = $validated['attended_photo_session'] ?? null;
+
+            // Photos are numbered by classroom following the order in which
+            // orders are taken: assign the next photo number automatically,
+            // unless the child did not attend the photo session.
+            $photoNumber = null;
+
+            if ($attended !== false) {
+                $maxPhotoNumber = Order::withTrashed()
+                    ->where('classroom_id', $validated['classroom_id'])
+                    ->max('photo_number');
+
+                $photoNumber = (is_numeric($maxPhotoNumber) ? (int) $maxPhotoNumber : 0) + 1;
+            }
+
             $order = Order::create([
                 'client_id' => $client->id,
                 'classroom_id' => $validated['classroom_id'],
@@ -100,7 +124,8 @@ class OrderController extends Controller
                 'payment_plan' => $validated['payment_plan'],
                 'due_date' => $validated['due_date'],
                 'child_name' => $validated['child_name'] ?? null,
-                'attended_photo_session' => $validated['attended_photo_session'] ?? null,
+                'attended_photo_session' => $attended,
+                'photo_number' => $photoNumber,
             ]);
 
             foreach ($validated['order_details'] as $product) {
@@ -109,6 +134,10 @@ class OrderController extends Controller
                     'note' => $product['note'],
                 ]);
             }
+
+            if (isset($validated['draft_id'])) {
+                OrderDraft::query()->whereKey($validated['draft_id'])->delete();
+            }
         });
 
         return redirect($redirect_to);
@@ -116,7 +145,7 @@ class OrderController extends Controller
 
     public function show(Order $order): \Inertia\Response
     {
-        $order->load('client', 'products.type', 'payments');
+        $order->load('client', 'products.type', 'payments', 'classroom.school', 'details.productionStatus');
 
         return Inertia::render('orders/show', [
             'order' => new OrderResource($order),
@@ -125,6 +154,10 @@ class OrderController extends Controller
 
     public function edit(Order $order): \Inertia\Response|\Illuminate\Http\RedirectResponse
     {
+        if ($order->cancelled_at !== null) {
+            return back()->withErrors(['order' => 'No se puede editar un pedido cancelado.']);
+        }
+
         // Calculate if can edit: allow edit if no payments or first payment not complete
         $canEdit = true;
         if ($order->payments()->count() > 0) {
@@ -157,6 +190,10 @@ class OrderController extends Controller
 
     public function update(StoreOrderRequest $request, Order $order): \Illuminate\Http\RedirectResponse
     {
+        if ($order->cancelled_at !== null) {
+            return back()->withErrors(['order' => 'No se puede editar un pedido cancelado.']);
+        }
+
         // Check if can edit
         $canEdit = true;
         if ($order->payments()->count() > 0) {
@@ -215,5 +252,53 @@ class OrderController extends Controller
 
         return redirect()->route('orders.index')
             ->with('success', 'Pedido eliminado exitosamente');
+    }
+
+    /**
+     * Cancel an order: each product goes back to stock (its supplies are
+     * returned) or to the recycling bin, chosen per product.
+     */
+    public function cancel(Request $request, Order $order, StockService $stockService): \Illuminate\Http\RedirectResponse
+    {
+        if ($order->cancelled_at !== null) {
+            return back()->withErrors(['order' => 'El pedido ya está cancelado.']);
+        }
+
+        $validated = $request->validate([
+            'destinations' => ['required', 'array', 'min:1'],
+            'destinations.*.detail_id' => ['required', 'integer'],
+            'destinations.*.destination' => ['required', 'in:stock,reciclaje'],
+        ]);
+
+        $details = $order->details()->get()->keyBy('id');
+
+        foreach ($validated['destinations'] as $destination) {
+            if (! $details->has($destination['detail_id'])) {
+                return back()->withErrors(['destinations' => 'Uno de los productos no pertenece a este pedido.']);
+            }
+        }
+
+        /** @var \App\Models\User|null $user */
+        $user = $request->user();
+
+        DB::transaction(function () use ($order, $validated, $details, $stockService, $user) {
+            foreach ($validated['destinations'] as $destination) {
+                /** @var \App\Models\OrderDetail $detail */
+                $detail = $details->get($destination['detail_id']);
+
+                $detail->recycled_to = $destination['destination'];
+                $detail->save();
+
+                if ($destination['destination'] === 'stock') {
+                    $stockService->returnForDetail($detail, $user);
+                }
+            }
+
+            $order->cancelled_at = now();
+            $order->save();
+        });
+
+        return redirect()->route('orders.show', ['order' => $order->id])
+            ->with('success', 'Pedido cancelado');
     }
 }

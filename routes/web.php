@@ -4,42 +4,62 @@ declare(strict_types=1);
 
 use App\Http\Controllers\BO\ClassroomController;
 use App\Http\Controllers\BO\ComboController;
+use App\Http\Controllers\BO\DashboardController;
+use App\Http\Controllers\BO\DeliveryController;
 use App\Http\Controllers\BO\OrderController;
 use App\Http\Controllers\BO\OrderDraftController;
 use App\Http\Controllers\BO\PaymentController;
 use App\Http\Controllers\BO\PhotoController;
 use App\Http\Controllers\BO\ProductController;
+use App\Http\Controllers\BO\RecyclingController;
 use App\Http\Controllers\BO\SchoolController;
 use App\Http\Controllers\BO\StockController;
+use App\Http\Controllers\BO\StockMovementController;
+use App\Http\Controllers\BO\TrackingController;
+use App\Http\Controllers\BO\UserController;
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
 
-Route::get('/dashboard', function () {
-    return Inertia::render('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/dashboard', [DashboardController::class, 'index'])
+    ->middleware(['auth', 'verified'])
+    ->name('dashboard');
 
-Route::resource('products', ProductController::class)->middleware(['auth']);
-Route::resource('combos', ComboController::class)->middleware(['auth']);
-Route::resource('orders', OrderController::class)->middleware(['auth']);
-Route::resource('drafts', OrderDraftController::class)->only(['index', 'store', 'destroy'])->middleware(['auth']);
-Route::resource('schools', SchoolController::class)->middleware(['auth']);
+// Día a día de ventas: gerencia, administración y oficina
+Route::middleware(['auth', 'role:master,administración,oficina'])->group(function () {
+    Route::resource('products', ProductController::class);
+    Route::resource('combos', ComboController::class);
+    Route::resource('orders', OrderController::class);
+    Route::post('/orders/{order}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
+    Route::put('/orders/{order}/delivery', [DeliveryController::class, 'update'])->name('orders.delivery');
+    Route::resource('drafts', OrderDraftController::class)->only(['index', 'store', 'destroy']);
+    Route::resource('schools', SchoolController::class);
+    Route::resource('classrooms', ClassroomController::class)->only(['destroy', 'update', 'store', 'show']);
 
-Route::get('/tracking', function () {
-    return Inertia::render('tracking.index');
-})->middleware(['auth', 'verified'])->name('tracking.index');
+    Route::prefix('payments')->group(function () {
+        Route::post('/', [PaymentController::class, 'store'])->name('payments.store');
+        Route::put('/{payment}', [PaymentController::class, 'update'])->name('payments.update');
+    });
+});
 
-Route::resource('stockables', StockController::class)->middleware(['auth']);
-Route::resource('classrooms', ClassroomController::class)->only(['destroy', 'update', 'store', 'show'])->middleware(['auth']);
-Route::middleware(['auth'])->group(function () {
+// Fotos: también accesibles para el rol editor
+Route::middleware(['auth', 'role:master,administración,oficina,editor'])->group(function () {
     Route::get('/classrooms/{classroom}/photos', [PhotoController::class, 'index'])->name('photos.index');
     Route::post('/classrooms/{classroom}/photos', [PhotoController::class, 'store'])->name('photos.store');
     Route::delete('/photos/{photo}', [PhotoController::class, 'destroy'])->name('photos.destroy');
 });
 
-Route::group(['prefix' => 'payments'], function () {
-    Route::post('/', [PaymentController::class, 'store'])->name('payments.store');
-    Route::put('/{payment}', [PaymentController::class, 'update'])->name('payments.update');
-})->middleware(['auth']);
+// Producción y stock: también accesibles para el rol taller
+Route::middleware(['auth', 'role:master,administración,oficina,taller'])->group(function () {
+    Route::get('/tracking', [TrackingController::class, 'index'])->name('tracking.index');
+    Route::post('/tracking/batch', [TrackingController::class, 'batchUpdate'])->name('tracking.batch');
+    Route::resource('stockables', StockController::class);
+    Route::get('/stock-movements', [StockMovementController::class, 'index'])->name('stock-movements.index');
+    Route::get('/recycling', [RecyclingController::class, 'index'])->name('recycling.index');
+});
+
+// Gestión de usuarios: solo gerencia
+Route::middleware(['auth', 'role:master'])->group(function () {
+    Route::resource('users', UserController::class)->except(['show']);
+});
 
 require __DIR__.'/auth.php';
 require __DIR__.'/settings.php';

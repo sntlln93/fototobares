@@ -31,11 +31,11 @@ class ClassroomController extends Controller
     {
         $school_id = $classroom->school_id;
 
-        $orders = Order::query()
-            ->where('id', $classroom->id)
-            ->get();
+        $hasOrders = Order::withTrashed()
+            ->where('classroom_id', $classroom->id)
+            ->exists();
 
-        if (count($orders) > 0) {
+        if ($hasOrders) {
             return back()->withErrors(['classroom' => 'No se pueden eliminar cursos que tengan pedidos registrados']);
         }
 
