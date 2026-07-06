@@ -15,6 +15,9 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Payment extends Model
 {
+    /** @use \Illuminate\Database\Eloquent\Factories\HasFactory<\Database\Factories\PaymentFactory> */
+    use \Illuminate\Database\Eloquent\Factories\HasFactory;
+
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<Order, $this>
      */

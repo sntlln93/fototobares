@@ -8,6 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class Stockable extends Model
 {
+    /** @use \Illuminate\Database\Eloquent\Factories\HasFactory<\Database\Factories\StockableFactory> */
+    use \Illuminate\Database\Eloquent\Factories\HasFactory;
+
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany<Product, $this>
      */
