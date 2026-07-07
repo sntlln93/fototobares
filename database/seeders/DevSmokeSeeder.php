@@ -44,16 +44,16 @@ class DevSmokeSeeder extends Seeder
             'photo_number' => 1,
         ]);
         $order1->products()->attach($mural->id, [
-            'variant' => json_encode([
+            'variant' => [
                 'orientation' => 'vertical',
                 'photo_type' => 'individual',
                 'background' => 'blue',
                 'color' => 'brown',
-            ]),
+            ],
             'note' => 'Martina - egresados 2026',
         ]);
         $order1->products()->attach($taza->id, [
-            'variant' => json_encode([]),
+            'variant' => [],
             'note' => 'Taza con nombre',
         ]);
         $order1->payments()->create(['amount' => 16000, 'type' => 'efectivo']);
@@ -70,7 +70,7 @@ class DevSmokeSeeder extends Seeder
             'photo_number' => 2,
         ]);
         $order2->products()->attach($taza->id, [
-            'variant' => json_encode([]),
+            'variant' => [],
             'note' => 'Taza de Pedro',
         ]);
     }
