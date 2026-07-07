@@ -116,11 +116,11 @@ class SchoolController extends Controller
     public function destroy(School $school): \Illuminate\Http\RedirectResponse
     {
         $classrooms = $school->classrooms->pluck('id');
-        $orders = Order::query()
-            ->whereIn('id', $classrooms)
-            ->get();
+        $hasOrders = Order::withTrashed()
+            ->whereIn('classroom_id', $classrooms)
+            ->exists();
 
-        if (count($orders) > 0) {
+        if ($hasOrders) {
             return back()->withErrors(['school' => 'No se pueden eliminar escuelas que tengan pedidos registrados']);
         }
 

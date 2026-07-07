@@ -40,6 +40,16 @@ import { FormEvent, FormEventHandler, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { AddDetail } from './add-detail';
 import { ProductOrder } from './form';
+import {
+    DraftProp,
+    OrderFormData,
+    clearSavedForm,
+    persistSavedForm,
+    removeDetailAt,
+    replaceDetailAt,
+    resetPersonalData,
+    resolveInitialOrderForm,
+} from './form-state';
 type SchoolLevel = 'Todos' | 'Jardin' | 'Primaria' | 'Secundaria';
 type AccordionValue = 'schools' | 'products' | 'client' | 'order' | undefined;
 
@@ -59,13 +69,19 @@ export default function CreateOrder({
     combos,
     schools,
     products,
+    draft,
 }: PageProps<{
     schoolLevels: SchoolLevel[];
     combos: Array<Combo & { products: Product[] }>;
     schools: Array<School & { classrooms: Classroom[] }>;
     products: Product[];
+    draft?: DraftProp | null;
 }>) {
-    const [selectedSchool, setSelectedSchool] = useState<number>(0);
+    const [initial] = useState(() => resolveInitialOrderForm(draft));
+
+    const [selectedSchool, setSelectedSchool] = useState<number>(
+        initial.selectedSchool,
+    );
     const [levelFilter, setLevelFilter] = useState<SchoolLevel>('Todos');
 
     const [comboDropdownOpen, setComboDropdownOpen] = useState(false);
@@ -78,56 +94,17 @@ export default function CreateOrder({
         (Product & { combo_id?: number })[] | null
     >(null);
 
-    const { data, setData, post, processing, errors, clearErrors } = useForm<{
-        classroom_id: number;
-        order_details: ProductOrder[];
-        name: string;
-        phone: string;
-        child_name: string;
-        attended_photo_session: boolean | null;
-        total_price: string;
-        payment_plan: string;
-        due_date: string;
-    }>({
-        classroom_id: 0,
-        order_details: [],
-        name: '',
-        phone: '',
-        child_name: '',
-        attended_photo_session: null,
-        total_price: '0',
-        payment_plan: '0',
-        due_date: format(new Date(), 'yyyy-MM-dd'),
-    });
+    const [editingIndex, setEditingIndex] = useState<number | null>(null);
 
-    // Load saved data from localStorage on mount
+    const { data, setData, post, processing, errors, clearErrors } =
+        useForm<OrderFormData>(initial.form);
+
     useEffect(() => {
-        const savedData = localStorage.getItem('orderFormData');
-        if (savedData) {
-            try {
-                const parsed = JSON.parse(savedData);
-                setData({
-                    classroom_id: parsed.classroom_id ?? 0,
-                    order_details: parsed.order_details ?? [],
-                    total_price: parsed.total_price ?? '0',
-                    payment_plan: parsed.payment_plan ?? '0',
-                    due_date:
-                        parsed.due_date ?? format(new Date(), 'yyyy-MM-dd'),
-                    name: '',
-                    phone: '',
-                    child_name: '',
-                    attended_photo_session: null,
-                });
-                // Also restore school selection
-                if (parsed.selectedSchool) {
-                    setSelectedSchool(parsed.selectedSchool);
-                }
-                toast.info('Datos de pedido anterior cargados');
-            } catch {
-                toast.error('No se pudieron cargar los datos guardados');
-            }
+        if (initial.message) {
+            toast.info(initial.message);
         }
-    }, [setData, setSelectedSchool]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     const _selectedSchool = schools.find((s) => s.id === selectedSchool);
     const _selectedClassroom = _selectedSchool?.classrooms.find(
@@ -179,40 +156,25 @@ export default function CreateOrder({
 
         post(
             route('orders.store', {
-                _query: { redirectTo: '/' },
+                _query: {
+                    redirectTo: route(
+                        saveAndContinue ? 'orders.create' : 'orders.index',
+                    ),
+                },
             }),
             {
                 onSuccess: () => {
                     toast.success('Pedido guardado con éxito');
                     if (saveAndContinue) {
-                        // Save order data (excluding personal data) to localStorage
-                        localStorage.setItem(
-                            'orderFormData',
-                            JSON.stringify({
-                                classroom_id: data.classroom_id,
-                                order_details: data.order_details,
-                                total_price: data.total_price,
-                                payment_plan: data.payment_plan,
-                                due_date: data.due_date,
-                                selectedSchool: selectedSchool,
-                            }),
-                        );
-                        // Reset personal data
-                        setData({
-                            ...data,
-                            name: '',
-                            phone: '',
-                            child_name: '',
-                            attended_photo_session: null,
-                        });
+                        persistSavedForm(data, selectedSchool);
+                        setData(resetPersonalData(data));
                         // Reset to first step
                         setAccordionValue('schools');
                         toast.info(
                             'Datos de pedido guardados. Listo para el siguiente cliente.',
                         );
                     } else {
-                        // Clear localStorage on normal save
-                        localStorage.removeItem('orderFormData');
+                        clearSavedForm();
                     }
                 },
             },
@@ -260,8 +222,37 @@ export default function CreateOrder({
         setOpenAddModal(combo.products.map((p) => ({ ...p, combo_id: id })));
     };
 
-    const setProductsOrder = (productsOrder: ProductOrder[]) =>
+    const setProductsOrder = (productsOrder: ProductOrder[]) => {
+        if (editingIndex !== null) {
+            setData(
+                'order_details',
+                replaceDetailAt(
+                    data.order_details,
+                    editingIndex,
+                    productsOrder,
+                ),
+            );
+            setEditingIndex(null);
+            return;
+        }
+
         setData('order_details', [...data.order_details, ...productsOrder]);
+    };
+
+    const handleEditProduct = (index: number) => {
+        const selected = data.order_details[index];
+        const product = products.find((p) => p.id === selected.product_id);
+
+        if (!product) return;
+
+        setEditingIndex(index);
+        setOpenAddModal([{ ...product, combo_id: selected.combo_id }]);
+    };
+
+    const handleRemoveProduct = (index: number) => {
+        setData('order_details', removeDetailAt(data.order_details, index));
+        toast.info('Producto quitado. Recordá revisar el precio final.');
+    };
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -270,8 +261,16 @@ export default function CreateOrder({
                 <AddDetail
                     addProducts={setProductsOrder}
                     products={openAddModal}
+                    initialValues={
+                        editingIndex !== null
+                            ? [data.order_details[editingIndex]]
+                            : undefined
+                    }
                     show={Boolean(openAddModal)}
-                    onClose={() => setOpenAddModal(null)}
+                    onClose={() => {
+                        setOpenAddModal(null);
+                        setEditingIndex(null);
+                    }}
                 />
             ) : undefined}
 
@@ -583,7 +582,7 @@ export default function CreateOrder({
                             </Combobox>
 
                             <ul className="my-2 gap-4">
-                                {data.order_details.map((selected) => {
+                                {data.order_details.map((selected, index) => {
                                     const product = products.find(
                                         (p) => p.id === selected.product_id,
                                     )!;
@@ -593,7 +592,7 @@ export default function CreateOrder({
                                     return (
                                         <li
                                             className="flex items-center justify-between rounded-md border border-input bg-background px-4 py-2"
-                                            key={`${product.id}${combo ? combo.id : ''}`}
+                                            key={`${product.id}-${combo ? combo.id : ''}-${index}`}
                                         >
                                             <div className="flex flex-col gap-2">
                                                 <span>
@@ -663,18 +662,25 @@ export default function CreateOrder({
                                                 <Button
                                                     variant="warning"
                                                     size="icon"
-                                                    disabled={
-                                                        product.product_type_id !==
-                                                        1
-                                                    }
+                                                    title="Editar variantes y notas"
+                                                    onClick={(e) => {
+                                                        e.preventDefault();
+                                                        handleEditProduct(
+                                                            index,
+                                                        );
+                                                    }}
                                                 >
                                                     <Edit className="h-4 w-4" />
                                                 </Button>
                                                 <Button
                                                     variant="destructive"
                                                     size="icon"
+                                                    title="Quitar del pedido"
                                                     onClick={(e) => {
                                                         e.preventDefault();
+                                                        handleRemoveProduct(
+                                                            index,
+                                                        );
                                                     }}
                                                 >
                                                     <Trash className="h-4 w-4" />

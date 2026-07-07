@@ -8,6 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class OrderDraft extends Model
 {
+    /** @use \Illuminate\Database\Eloquent\Factories\HasFactory<\Database\Factories\OrderDraftFactory> */
+    use \Illuminate\Database\Eloquent\Factories\HasFactory;
+
     protected $casts = [
         'products' => 'array',
         'due_date' => 'datetime:Y-m-d',
