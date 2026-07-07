@@ -7,9 +7,15 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { capitalize, getColorEs } from '@/lib/utils';
 import { useState } from 'react';
+import {
+    DetailFormData,
+    DetailFormErrors,
+    buildProductOrders,
+    initialDetailFormData,
+    resolveVariants,
+    validateDetailForm,
+} from './detail-form';
 import { ProductOrder, SelectableProduct } from './form';
-
-type ProductData<T> = { product_id: number; value: T };
 
 export function AddDetail({
     addProducts,
@@ -25,61 +31,11 @@ export function AddDetail({
     /** Existing values (aligned with `products`) when editing an added product */
     initialValues?: ProductOrder[];
 }) {
-    const [productData, setProductData] = useState<{
-        orientation: ProductData<ProductOrientation>[];
-        photoType: ProductData<ProductPhotoType>[];
-        background: ProductData<string>[];
-        color: ProductData<string>[];
-        note: ProductData<string>[];
-    }>(() => {
-        const initial = {
-            orientation: [] as ProductData<ProductOrientation>[],
-            photoType: [] as ProductData<ProductPhotoType>[],
-            background: [] as ProductData<string>[],
-            color: [] as ProductData<string>[],
-            note: [] as ProductData<string>[],
-        };
+    const [productData, setProductData] = useState<DetailFormData>(() =>
+        initialDetailFormData(initialValues),
+    );
 
-        initialValues?.forEach((value) => {
-            if (value.variant) {
-                initial.orientation.push({
-                    product_id: value.product_id,
-                    value: value.variant.orientation,
-                });
-                initial.photoType.push({
-                    product_id: value.product_id,
-                    value: value.variant.photo_type,
-                });
-                initial.background.push({
-                    product_id: value.product_id,
-                    value: value.variant.background,
-                });
-                initial.color.push({
-                    product_id: value.product_id,
-                    value: value.variant.color,
-                });
-            }
-
-            if (value.note) {
-                initial.note.push({
-                    product_id: value.product_id,
-                    value: value.note,
-                });
-            }
-        });
-
-        return initial;
-    });
-
-    const [errors, setErrors] = useState<{
-        [productId: number]: {
-            orientation?: string;
-            photoType?: string;
-            background?: string;
-            color?: string;
-            note?: string;
-        };
-    }>({});
+    const [errors, setErrors] = useState<DetailFormErrors>({});
 
     const [currentStep, setCurrentStep] = useState<number>(0);
 
@@ -133,99 +89,15 @@ export function AddDetail({
     };
 
     const handleAddProduct = () => {
-        const newErrors: {
-            [productId: number]: Partial<
-                Record<keyof typeof productData, string>
-            >;
-        } = {};
-        let hasErrors = 0;
-
-        products.forEach((product) => {
-            const productId = product.id;
-
-            const productErrors: Partial<
-                Record<keyof typeof productData, string>
-            > = {};
-
-            if (product.product_type_id !== 1) {
-                return;
-            }
-
-            if (
-                !productData.orientation.some(
-                    (item) => item.product_id === productId,
-                )
-            ) {
-                productErrors.orientation = 'Debes elegir una opción';
-            }
-
-            if (
-                !productData.photoType.some(
-                    (item) => item.product_id === productId,
-                )
-            ) {
-                productErrors.photoType = 'Debes elegir una opción';
-            }
-
-            if (
-                !productData.background.some(
-                    (item) => item.product_id === productId,
-                )
-            ) {
-                productErrors.background = 'Debes elegir una opción';
-            }
-
-            if (
-                !productData.color.some((item) => item.product_id === productId)
-            ) {
-                productErrors.color = 'Debes elegir una opción';
-            }
-
-            if (
-                !productData.note.some((item) => item.product_id === productId)
-            ) {
-                productErrors.note =
-                    'Este campo es requerido cuando el producto es un mural';
-            }
-
-            if (Object.keys(productErrors).length > 0) {
-                newErrors[productId] = productErrors;
-                hasErrors++;
-            }
-        });
+        const newErrors = validateDetailForm(products, productData);
 
         setErrors(newErrors);
 
-        if (hasErrors > 0) {
+        if (Object.keys(newErrors).length > 0) {
             return;
         }
 
-        const productOrders: ProductOrder[] = products.map((product) => ({
-            combo_id: product.combo_id,
-            product_id: product.id,
-            variant:
-                product.product_type_id === 1
-                    ? {
-                          orientation: productData.orientation.find(
-                              (item) => item.product_id === product.id,
-                          )!.value!,
-                          photo_type: productData.photoType.find(
-                              (item) => item.product_id === product.id,
-                          )!.value!,
-                          background: productData.background.find(
-                              (item) => item.product_id === product.id,
-                          )!.value!,
-                          color: productData.color.find(
-                              (item) => item.product_id === product.id,
-                          )!.value!,
-                      }
-                    : undefined,
-            note:
-                productData.note.find((item) => item.product_id === product.id)
-                    ?.value || '',
-        }));
-
-        addProducts(productOrders);
+        addProducts(buildProductOrders(products, productData));
         onClose();
     };
 
@@ -241,14 +113,8 @@ export function AddDetail({
         }
     };
 
-    const getVariants = (step: typeof currentStep) => {
-        const variants =
-            products[step].pivot?.variants ?? products[step].variants;
-
-        return typeof variants === 'string'
-            ? (JSON.parse(variants) as typeof variants)
-            : variants;
-    };
+    const getVariants = (step: typeof currentStep) =>
+        resolveVariants(products[step]);
 
     return (
         <Modal show={show} onClose={onClose}>

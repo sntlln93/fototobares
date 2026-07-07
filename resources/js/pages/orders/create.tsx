@@ -43,6 +43,11 @@ import { ProductOrder } from './form';
 import {
     DraftProp,
     OrderFormData,
+    clearSavedForm,
+    persistSavedForm,
+    removeDetailAt,
+    replaceDetailAt,
+    resetPersonalData,
     resolveInitialOrderForm,
 } from './form-state';
 type SchoolLevel = 'Todos' | 'Jardin' | 'Primaria' | 'Secundaria';
@@ -161,35 +166,15 @@ export default function CreateOrder({
                 onSuccess: () => {
                     toast.success('Pedido guardado con éxito');
                     if (saveAndContinue) {
-                        // Save order data (excluding personal data) to localStorage
-                        localStorage.setItem(
-                            'orderFormData',
-                            JSON.stringify({
-                                classroom_id: data.classroom_id,
-                                order_details: data.order_details,
-                                total_price: data.total_price,
-                                payment_plan: data.payment_plan,
-                                due_date: data.due_date,
-                                selectedSchool: selectedSchool,
-                            }),
-                        );
-                        // Reset personal data
-                        setData({
-                            ...data,
-                            name: '',
-                            phone: '',
-                            child_name: '',
-                            attended_photo_session: null,
-                            draft_id: null,
-                        });
+                        persistSavedForm(data, selectedSchool);
+                        setData(resetPersonalData(data));
                         // Reset to first step
                         setAccordionValue('schools');
                         toast.info(
                             'Datos de pedido guardados. Listo para el siguiente cliente.',
                         );
                     } else {
-                        // Clear localStorage on normal save
-                        localStorage.removeItem('orderFormData');
+                        clearSavedForm();
                     }
                 },
             },
@@ -239,9 +224,14 @@ export default function CreateOrder({
 
     const setProductsOrder = (productsOrder: ProductOrder[]) => {
         if (editingIndex !== null) {
-            const next = [...data.order_details];
-            next.splice(editingIndex, 1, ...productsOrder);
-            setData('order_details', next);
+            setData(
+                'order_details',
+                replaceDetailAt(
+                    data.order_details,
+                    editingIndex,
+                    productsOrder,
+                ),
+            );
             setEditingIndex(null);
             return;
         }
@@ -260,10 +250,7 @@ export default function CreateOrder({
     };
 
     const handleRemoveProduct = (index: number) => {
-        setData(
-            'order_details',
-            data.order_details.filter((_, i) => i !== index),
-        );
+        setData('order_details', removeDetailAt(data.order_details, index));
         toast.info('Producto quitado. Recordá revisar el precio final.');
     };
 

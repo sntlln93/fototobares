@@ -79,6 +79,59 @@ export const readSavedForm = (): {
 };
 
 /**
+ * Persists the order data for "save and keep selling", excluding the
+ * client's personal data on purpose.
+ */
+export const persistSavedForm = (
+    form: OrderFormData,
+    selectedSchool: number,
+): void => {
+    localStorage.setItem(
+        'orderFormData',
+        JSON.stringify({
+            classroom_id: form.classroom_id,
+            order_details: form.order_details,
+            total_price: form.total_price,
+            payment_plan: form.payment_plan,
+            due_date: form.due_date,
+            selectedSchool,
+        }),
+    );
+};
+
+export const clearSavedForm = (): void => {
+    localStorage.removeItem('orderFormData');
+};
+
+/**
+ * Blank slate for the next client, keeping the order data.
+ */
+export const resetPersonalData = (form: OrderFormData): OrderFormData => ({
+    ...form,
+    name: '',
+    phone: '',
+    child_name: '',
+    attended_photo_session: null,
+    draft_id: null,
+});
+
+export const removeDetailAt = (
+    details: ProductOrder[],
+    index: number,
+): ProductOrder[] => details.filter((_, i) => i !== index);
+
+export const replaceDetailAt = (
+    details: ProductOrder[],
+    index: number,
+    replacements: ProductOrder[],
+): ProductOrder[] => {
+    const next = [...details];
+    next.splice(index, 1, ...replacements);
+
+    return next;
+};
+
+/**
  * Initial values for the order form: a draft ("Ver" in borradores) wins
  * over localStorage. Must be resolved before useForm: setting them with
  * setData in an effect gets lost.
