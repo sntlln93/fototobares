@@ -2,8 +2,13 @@ import { format } from 'date-fns';
 import { beforeEach, describe, expect, it } from 'vitest';
 import {
     DraftProp,
+    clearSavedForm,
     emptyForm,
+    persistSavedForm,
     readSavedForm,
+    removeDetailAt,
+    replaceDetailAt,
+    resetPersonalData,
     resolveInitialOrderForm,
 } from './form-state';
 
@@ -143,5 +148,117 @@ describe('resolveInitialOrderForm', () => {
         expect(initial.form.classroom_id).toBe(3);
         expect(initial.selectedSchool).toBe(9);
         expect(initial.message).toBe('Datos de pedido anterior cargados');
+    });
+});
+
+describe('persistSavedForm', () => {
+    const filledForm = () => ({
+        ...emptyForm(),
+        classroom_id: 3,
+        order_details: [{ product_id: 5, note: 'nota' }],
+        total_price: '12000',
+        payment_plan: '2',
+        due_date: '2026-09-01',
+        name: 'Carla López',
+        phone: '3804000003',
+        child_name: 'Luca',
+        attended_photo_session: true,
+        draft_id: 7,
+    });
+
+    it('persists only the order data, never the personal data', () => {
+        persistSavedForm(filledForm(), 9);
+
+        const stored = JSON.parse(localStorage.getItem('orderFormData')!);
+
+        expect(stored).toEqual({
+            classroom_id: 3,
+            order_details: [{ product_id: 5, note: 'nota' }],
+            total_price: '12000',
+            payment_plan: '2',
+            due_date: '2026-09-01',
+            selectedSchool: 9,
+        });
+    });
+
+    it('round-trips through readSavedForm', () => {
+        persistSavedForm(filledForm(), 9);
+
+        const saved = readSavedForm();
+
+        expect(saved?.form.order_details).toEqual([
+            { product_id: 5, note: 'nota' },
+        ]);
+        expect(saved?.form.name).toBe('');
+        expect(saved?.selectedSchool).toBe(9);
+    });
+
+    it('clearSavedForm removes the persisted data', () => {
+        persistSavedForm(filledForm(), 9);
+
+        clearSavedForm();
+
+        expect(readSavedForm()).toBeNull();
+    });
+});
+
+describe('resetPersonalData', () => {
+    it('blanks the client fields and keeps the order fields', () => {
+        const reset = resetPersonalData({
+            ...emptyForm(),
+            classroom_id: 3,
+            order_details: [{ product_id: 5, note: 'nota' }],
+            total_price: '12000',
+            name: 'Carla López',
+            phone: '3804000003',
+            child_name: 'Luca',
+            attended_photo_session: true,
+            draft_id: 7,
+        });
+
+        expect(reset).toMatchObject({
+            classroom_id: 3,
+            order_details: [{ product_id: 5, note: 'nota' }],
+            total_price: '12000',
+            name: '',
+            phone: '',
+            child_name: '',
+            attended_photo_session: null,
+            draft_id: null,
+        });
+    });
+});
+
+describe('order details editing', () => {
+    const details = () => [
+        { product_id: 1, note: 'a' },
+        { product_id: 2, note: 'b' },
+        { product_id: 3, note: 'c' },
+    ];
+
+    it('removes the detail at the given index only', () => {
+        expect(removeDetailAt(details(), 1)).toEqual([
+            { product_id: 1, note: 'a' },
+            { product_id: 3, note: 'c' },
+        ]);
+    });
+
+    it('replaces the detail at the given index', () => {
+        expect(
+            replaceDetailAt(details(), 1, [{ product_id: 9, note: 'z' }]),
+        ).toEqual([
+            { product_id: 1, note: 'a' },
+            { product_id: 9, note: 'z' },
+            { product_id: 3, note: 'c' },
+        ]);
+    });
+
+    it('does not mutate the original array', () => {
+        const original = details();
+
+        removeDetailAt(original, 0);
+        replaceDetailAt(original, 0, []);
+
+        expect(original).toHaveLength(3);
     });
 });
