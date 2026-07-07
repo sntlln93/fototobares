@@ -33,6 +33,7 @@ class StoreOrderRequest extends FormRequest
             'due_date' => ['required', 'date_format:Y-m-d'],
             'child_name' => ['nullable', 'string'],
             'attended_photo_session' => ['nullable', 'boolean'],
+            'draft_id' => ['nullable', 'integer', 'exists:order_drafts,id'],
 
             'order_details' => ['required', 'array'],
             'order_details.*.product_id' => ['required', 'integer', 'exists:products,id'],
@@ -59,6 +60,7 @@ class StoreOrderRequest extends FormRequest
      *     due_date: string,
      *     child_name?: string|null,
      *     attended_photo_session?: bool|null,
+     *     draft_id?: int|null,
      *     order_details: array<int, array{
      *         product_id: int,
      *         note: string|null,
@@ -82,6 +84,7 @@ class StoreOrderRequest extends FormRequest
          *     due_date: string,
          *     child_name?: string|null,
          *     attended_photo_session?: bool|null,
+         *     draft_id?: int|null,
          *     order_details: array<int, array{
          *         product_id: int,
          *         note: string|null,

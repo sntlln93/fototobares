@@ -1,3 +1,4 @@
+import { Badge } from '@/components/ui/badge';
 import {
     Card,
     CardContent,
@@ -8,7 +9,7 @@ import {
 import { capitalize } from '@/lib/utils';
 import { ProductIcon } from '../products/partials/product-icon';
 
-export function Details({ products }: { products: Product[] }) {
+export function Details({ products }: { products: OrderProduct[] }) {
     return (
         <Card className="lg:min-w-[400px]">
             <CardHeader>
@@ -30,7 +31,7 @@ export function Details({ products }: { products: Product[] }) {
     );
 }
 
-function DetailItem({ product }: { product: Product }) {
+function DetailItem({ product }: { product: OrderProduct }) {
     return (
         <div
             key={product.id}
@@ -59,6 +60,28 @@ function DetailItem({ product }: { product: Product }) {
                     {product.financed_price && (
                         <span className="rounded bg-green-100 px-2 py-1 text-green-700 dark:bg-green-900 dark:text-green-200">
                             ${product.financed_price / 100} financiado
+                        </span>
+                    )}
+                </div>
+                <div className="mt-2 flex flex-wrap gap-1">
+                    {product.recycled_to ? (
+                        <Badge variant="destructive">
+                            {product.recycled_to === 'stock'
+                                ? 'Devuelto a stock'
+                                : 'En reciclaje'}
+                        </Badge>
+                    ) : product.delivered_at ? (
+                        <Badge className="bg-green-600 hover:bg-green-600">
+                            Entregado
+                        </Badge>
+                    ) : (
+                        <Badge variant="outline">
+                            {product.production_status ?? 'Sin empezar'}
+                        </Badge>
+                    )}
+                    {product.note && (
+                        <span className="w-full text-xs text-gray-500">
+                            Nota: {product.note}
                         </span>
                     )}
                 </div>

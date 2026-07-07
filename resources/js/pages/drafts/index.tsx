@@ -121,9 +121,10 @@ export default function DraftsIndex({
                                     <TableCell>
                                         {draft.attended_photo_session === true
                                             ? '✓ Sí'
-                                            : draft.attended_photo_session === false
-                                                ? '✗ No'
-                                                : 'Sin especificar'}
+                                            : draft.attended_photo_session ===
+                                                false
+                                              ? '✗ No'
+                                              : 'Sin especificar'}
                                     </TableCell>
                                     <TableCell>
                                         {new Date(
@@ -132,7 +133,9 @@ export default function DraftsIndex({
                                     </TableCell>
                                     <TableCell className="flex gap-2">
                                         <Link
-                                            href={route('orders.create')}
+                                            href={route('orders.create', {
+                                                draft: draft.id,
+                                            })}
                                             as="button"
                                             className={buttonVariants({
                                                 size: 'sm',

@@ -16,6 +16,9 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Photo extends Model
 {
+    /** @use \Illuminate\Database\Eloquent\Factories\HasFactory<\Database\Factories\PhotoFactory> */
+    use \Illuminate\Database\Eloquent\Factories\HasFactory;
+
     /**
      * @var list<string>
      */

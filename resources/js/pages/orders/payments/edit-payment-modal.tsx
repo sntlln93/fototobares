@@ -1,4 +1,5 @@
 import InputError from '@/components/input-error';
+import InputHint from '@/components/input-hint';
 import { Modal } from '@/components/modal';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -26,18 +27,28 @@ export function EditPaymentModal({
     show: boolean;
     onClose: CallableFunction;
 }) {
-    const { put, data, setData, processing, errors } = useForm({
+    const { post, data, setData, processing, errors } = useForm<{
+        amount: number;
+        type: string;
+        order_id: number;
+        proof_of_payment: File | null;
+        _method: 'put';
+    }>({
         amount: payment.amount,
         type: payment.type,
         order_id: payment.order_id,
+        proof_of_payment: null,
+        _method: 'put',
     });
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
 
-        put(route('payments.update', payment.id));
-
-        onClose();
+        // Method spoofing: multipart/form-data does not work with PUT
+        post(route('payments.update', payment.id), {
+            forceFormData: true,
+            onSuccess: () => onClose(),
+        });
     };
 
     return (
@@ -85,7 +96,35 @@ export function EditPaymentModal({
                             ))}
                         </SelectContent>
                     </Select>
-                    <InputError message={errors.amount} />
+                    <InputError message={errors.type} />
+                </div>
+
+                <div className="mt-2">
+                    <Label htmlFor="proof_of_payment">
+                        Comprobante de transferencia (opcional)
+                    </Label>
+                    <InputHint
+                        className="text-xs"
+                        message={
+                            payment.proof_of_payment
+                                ? 'Si adjuntás un archivo nuevo, reemplaza al actual'
+                                : 'Imagen o PDF de hasta 5MB (MercadoPago, banco, etc.)'
+                        }
+                    />
+                    <Input
+                        id="proof_of_payment"
+                        type="file"
+                        name="proof_of_payment"
+                        accept="image/jpeg,image/png,image/webp,application/pdf"
+                        onChange={(event) =>
+                            setData(
+                                'proof_of_payment',
+                                event.target.files?.[0] ?? null,
+                            )
+                        }
+                        className="mt-1 block w-full"
+                    />
+                    <InputError message={errors.proof_of_payment} />
                 </div>
 
                 <div className="mt-6 grid grid-cols-[1fr_1fr] gap-2">

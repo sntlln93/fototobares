@@ -14,7 +14,7 @@ import AppLayout from '@/layouts/app-layout';
 import { onSort } from '@/lib/services/filter';
 import { BreadcrumbItem } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
-import { ArrowUpDown, Diff, Edit2, Plus, Trash } from 'lucide-react';
+import { ArrowUpDown, Diff, Edit2, History, Plus, Trash } from 'lucide-react';
 import { useState } from 'react';
 import { AlterStockForm } from './partials/alter-stock-form';
 import { DeleteStockableConfirmation } from './partials/delete-confirmation';
@@ -59,14 +59,24 @@ export default function Stockables({
                 <div className="mb-4 flex justify-between">
                     <Searchbar indexRoute="stockables.index" />
 
-                    <Button asChild>
-                        <Link href={route('stockables.create')}>
-                            <Plus />
-                            <span className="sr-only md:inline-block">
-                                Agregar stockeable
-                            </span>
-                        </Link>
-                    </Button>
+                    <div className="flex gap-2">
+                        <Button variant="outline" asChild>
+                            <Link href={route('stock-movements.index')}>
+                                <History />
+                                <span className="sr-only md:inline-block">
+                                    Movimientos
+                                </span>
+                            </Link>
+                        </Button>
+                        <Button asChild>
+                            <Link href={route('stockables.create')}>
+                                <Plus />
+                                <span className="sr-only md:inline-block">
+                                    Agregar stockeable
+                                </span>
+                            </Link>
+                        </Button>
+                    </div>
                 </div>
                 <Table>
                     <TableHeader>

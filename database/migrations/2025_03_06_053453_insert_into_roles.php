@@ -18,7 +18,7 @@ return new class extends Migration
             ['name' => 'master', 'created_at' => $created_at],
             ['name' => 'administración', 'created_at' => $created_at],
             ['name' => 'oficina', 'created_at' => $created_at],
-            ['name' => 'edición', 'created_at' => $created_at],
+            ['name' => 'editor', 'created_at' => $created_at],
             ['name' => 'taller', 'created_at' => $created_at],
         ];
 
