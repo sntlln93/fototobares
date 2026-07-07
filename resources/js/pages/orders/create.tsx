@@ -77,7 +77,12 @@ export default function CreateOrder({
     products: Product[];
     draft?: DraftProp | null;
 }>) {
-    const [initial] = useState(() => resolveInitialOrderForm(draft));
+    const [initial] = useState(() =>
+        resolveInitialOrderForm(
+            draft,
+            products.map((product) => product.id),
+        ),
+    );
 
     const [selectedSchool, setSelectedSchool] = useState<number>(
         initial.selectedSchool,
@@ -102,6 +107,12 @@ export default function CreateOrder({
     useEffect(() => {
         if (initial.message) {
             toast.info(initial.message);
+        }
+
+        if (initial.droppedProducts > 0) {
+            toast.warning(
+                `Se quitaron ${initial.droppedProducts} producto(s) del pedido recuperado porque ya no existen. Revisá el precio final.`,
+            );
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
@@ -585,10 +596,15 @@ export default function CreateOrder({
                                 {data.order_details.map((selected, index) => {
                                     const product = products.find(
                                         (p) => p.id === selected.product_id,
-                                    )!;
+                                    );
                                     const combo = combos.find(
                                         (c) => c.id === selected.combo_id,
                                     );
+
+                                    // The product may have been deleted since
+                                    // the detail was added or restored
+                                    if (!product) return null;
+
                                     return (
                                         <li
                                             className="flex items-center justify-between rounded-md border border-input bg-background px-4 py-2"
