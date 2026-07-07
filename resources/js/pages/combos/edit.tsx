@@ -6,7 +6,7 @@ import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { FormEventHandler, useEffect, useState } from 'react';
-import { FormData, SelectedProduct } from './form';
+import { FormData, SelectedProduct, upsertSelectedProduct } from './form';
 import { AddProduct } from './partials/add-product';
 import { ComboProducts } from './partials/combo-products';
 
@@ -31,6 +31,9 @@ export default function EditCombo({
     const [addProduct, setAddProduct] = useState<number | null>(null);
     const [showAddMuralProduct, setShowAddMuralProduct] =
         useState<Product | null>(null);
+    const [editingVariants, setEditingVariants] = useState<
+        SelectedProduct['variants'] | null
+    >(null);
 
     const { data, setData, put, processing, errors, setError } =
         useForm<FormData>({
@@ -58,7 +61,8 @@ export default function EditCombo({
 
         if (!product) return;
 
-        if (product.product_type_id !== 1) {
+        // Products without configurable variants are added directly
+        if (product.product_type_id !== 1 || !product.variants) {
             setData('products', [
                 ...data.products,
                 {
@@ -67,10 +71,23 @@ export default function EditCombo({
                 },
             ]);
         } else {
-            setShowAddMuralProduct(products.find((p) => p.id === addProduct)!);
+            setShowAddMuralProduct(product);
         }
+
+        // Reset so the same product can be re-added after being removed
+        setAddProduct(null);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [addProduct]);
+
+    const openEditProductModal = (id: number) => {
+        const product = products.find((p) => p.id === id);
+        const selected = data.products.find((p) => p.id === id);
+
+        if (!product || !selected) return;
+
+        setEditingVariants(selected.variants ?? null);
+        setShowAddMuralProduct(product);
+    };
 
     const updateQuantity = (id: number, value: number) => {
         const updatableProduct = data.products.find(
@@ -107,11 +124,18 @@ export default function EditCombo({
             {showAddMuralProduct ? (
                 <AddProduct
                     addProduct={(product: SelectedProduct) => {
-                        setData('products', [...data.products, product]);
+                        setData(
+                            'products',
+                            upsertSelectedProduct(data.products, product),
+                        );
                     }}
                     product={showAddMuralProduct}
+                    initialVariants={editingVariants}
                     show={Boolean(showAddMuralProduct)}
-                    onClose={() => setShowAddMuralProduct(null)}
+                    onClose={() => {
+                        setShowAddMuralProduct(null);
+                        setEditingVariants(null);
+                    }}
                 />
             ) : undefined}
 
@@ -181,6 +205,7 @@ export default function EditCombo({
                         selectedProducts={data.products}
                         products={products}
                         openAddProductModal={setAddProduct}
+                        openEditProductModal={openEditProductModal}
                         updateQuantity={updateQuantity}
                     >
                         <InputError

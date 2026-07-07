@@ -11,20 +11,27 @@ export function AddProduct({
     product,
     show,
     onClose,
+    initialVariants,
 }: {
     addProduct: (product: SelectedProduct) => void;
     product: Product;
     show: boolean;
     onClose: CallableFunction;
+    /** Existing selection when editing a product already in the combo */
+    initialVariants?: SelectedProduct['variants'] | null;
 }) {
     const [orientations, setOrientations] = useState<Set<ProductOrientation>>(
-        new Set(),
+        new Set(initialVariants?.orientations ?? []),
     );
     const [photoTypes, setPhotoTypes] = useState<Set<ProductPhotoType>>(
-        new Set(),
+        new Set(initialVariants?.photo_types ?? []),
     );
-    const [backgrounds, setBackgrounds] = useState<Set<string>>(new Set());
-    const [colors, setColors] = useState<Set<string>>(new Set());
+    const [backgrounds, setBackgrounds] = useState<Set<string>>(
+        new Set(initialVariants?.backgrounds ?? []),
+    );
+    const [colors, setColors] = useState<Set<string>>(
+        new Set(initialVariants?.colors ?? []),
+    );
 
     const [errors, setErrors] = useState<{
         orientations?: string;
@@ -140,7 +147,7 @@ export function AddProduct({
                 orientations: Array.from(orientations),
                 backgrounds: Array.from(backgrounds),
                 colors: Array.from(colors) as Color[],
-                dimentions: product.variants.dimentions,
+                dimentions: product.variants?.dimentions ?? '',
             },
         };
 
@@ -152,8 +159,11 @@ export function AddProduct({
         <Modal show={show} onClose={onClose}>
             <div className="p-6">
                 <h2 className="text-lg font-medium text-gray-900 dark:text-gray-100">
-                    Agregar {product.name} ({product.variants.dimentions}) al
-                    combo
+                    {initialVariants ? 'Editar' : 'Agregar'} {product.name}
+                    {product.variants?.dimentions
+                        ? ` (${product.variants.dimentions})`
+                        : ''}{' '}
+                    {initialVariants ? 'del' : 'al'} combo
                 </h2>
 
                 <div className="mt-6">
@@ -161,21 +171,23 @@ export function AddProduct({
                         <legend className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                             Orientaciones disponibles para este producto
                         </legend>
-                        {product.variants.orientations.map((orientation) => (
-                            <label
-                                className="flex items-center"
-                                key={orientation}
-                            >
-                                <Checkbox
-                                    value={orientation}
-                                    checked={orientations.has(orientation)}
-                                    onChange={handleSetOrientations}
-                                />
-                                <span className="ms-2 text-sm text-gray-600 dark:text-gray-400">
-                                    {orientation}
-                                </span>
-                            </label>
-                        ))}
+                        {(product.variants?.orientations ?? []).map(
+                            (orientation) => (
+                                <label
+                                    className="flex items-center"
+                                    key={orientation}
+                                >
+                                    <Checkbox
+                                        value={orientation}
+                                        checked={orientations.has(orientation)}
+                                        onChange={handleSetOrientations}
+                                    />
+                                    <span className="ms-2 text-sm text-gray-600 dark:text-gray-400">
+                                        {orientation}
+                                    </span>
+                                </label>
+                            ),
+                        )}
                     </fieldset>
                     <InputError
                         message={errors?.orientations}
@@ -188,21 +200,23 @@ export function AddProduct({
                         <legend className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                             Tipo de foto
                         </legend>
-                        {product.variants.photo_types.map((photoType) => (
-                            <label
-                                className="flex items-center"
-                                key={photoType}
-                            >
-                                <Checkbox
-                                    value={photoType}
-                                    checked={photoTypes.has(photoType)}
-                                    onChange={handleSetPhotoTypes}
-                                />
-                                <span className="ms-2 text-sm text-gray-600 dark:text-gray-400">
-                                    {photoType}
-                                </span>
-                            </label>
-                        ))}
+                        {(product.variants?.photo_types ?? []).map(
+                            (photoType) => (
+                                <label
+                                    className="flex items-center"
+                                    key={photoType}
+                                >
+                                    <Checkbox
+                                        value={photoType}
+                                        checked={photoTypes.has(photoType)}
+                                        onChange={handleSetPhotoTypes}
+                                    />
+                                    <span className="ms-2 text-sm text-gray-600 dark:text-gray-400">
+                                        {photoType}
+                                    </span>
+                                </label>
+                            ),
+                        )}
                     </fieldset>
                     <InputError message={errors?.photoTypes} className="mt-2" />
                 </div>
@@ -212,21 +226,23 @@ export function AddProduct({
                         <legend className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                             Fondos disponibles para este combo
                         </legend>
-                        {product.variants.backgrounds.map((background) => (
-                            <label
-                                className="flex items-center"
-                                key={background}
-                            >
-                                <Checkbox
-                                    value={background}
-                                    checked={backgrounds.has(background)}
-                                    onChange={handleSetBackgrounds}
-                                />
-                                <span className="ms-2 text-sm text-gray-600 dark:text-gray-400">
-                                    {background}
-                                </span>
-                            </label>
-                        ))}
+                        {(product.variants?.backgrounds ?? []).map(
+                            (background) => (
+                                <label
+                                    className="flex items-center"
+                                    key={background}
+                                >
+                                    <Checkbox
+                                        value={background}
+                                        checked={backgrounds.has(background)}
+                                        onChange={handleSetBackgrounds}
+                                    />
+                                    <span className="ms-2 text-sm text-gray-600 dark:text-gray-400">
+                                        {background}
+                                    </span>
+                                </label>
+                            ),
+                        )}
                     </fieldset>
                     <InputError
                         message={errors?.backgrounds}
@@ -239,7 +255,7 @@ export function AddProduct({
                         <legend className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                             Colores disponibles para este combo
                         </legend>
-                        {product.variants.colors.map((color) => (
+                        {(product.variants?.colors ?? []).map((color) => (
                             <label className="flex items-center" key={color}>
                                 <Checkbox
                                     value={color}
