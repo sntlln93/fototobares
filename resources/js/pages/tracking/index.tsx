@@ -29,6 +29,7 @@ import { Head, router } from '@inertiajs/react';
 import { ArrowRight, Flame, Search } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { toast } from 'sonner';
+import { nextStatusFor, toggleGroup, toggleId } from './selection';
 
 type TrackingDetail = {
     id: number;
@@ -109,22 +110,13 @@ export default function Tracking({
     };
 
     const toggle = (id: number) => {
-        setSelected((prev) =>
-            prev.includes(id)
-                ? prev.filter((item) => item !== id)
-                : [...prev, id],
-        );
+        setSelected((prev) => toggleId(prev, id));
     };
 
-    const toggleGroup = (items: TrackingDetail[]) => {
+    const toggleGroupItems = (items: TrackingDetail[]) => {
         const ids = items.map((item) => item.id);
-        const allSelected = ids.every((id) => selected.includes(id));
 
-        setSelected((prev) =>
-            allSelected
-                ? prev.filter((id) => !ids.includes(id))
-                : [...new Set([...prev, ...ids])],
-        );
+        setSelected((prev) => toggleGroup(prev, ids));
     };
 
     const applyStatus = (
@@ -264,7 +256,7 @@ export default function Tracking({
                             items={items}
                             selected={selected}
                             onToggle={toggle}
-                            onToggleGroup={() => toggleGroup(items)}
+                            onToggleGroup={() => toggleGroupItems(items)}
                             onApplyStatus={applyStatus}
                         />
                     ))
@@ -302,8 +294,8 @@ function ProductTypeGroup({
     const allSelected =
         items.length > 0 && selectedInGroup.length === items.length;
 
-    const nextStatusFor = (detail: TrackingDetail) =>
-        type.statuses.find((status) => status.position === detail.position + 1);
+    const nextStatus = (detail: TrackingDetail) =>
+        nextStatusFor(type.statuses, detail.position);
 
     return (
         <div className="rounded-xl border border-input">
@@ -377,7 +369,7 @@ function ProductTypeGroup({
                 </TableHeader>
                 <TableBody>
                     {items.map((detail) => {
-                        const next = nextStatusFor(detail);
+                        const next = nextStatus(detail);
 
                         return (
                             <TableRow

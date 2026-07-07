@@ -4,10 +4,14 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 
 class OrderDetail extends Pivot
 {
+    /** @use HasFactory<\Database\Factories\OrderDetailFactory> */
+    use HasFactory;
+
     public $incrementing = true;
 
     protected $table = 'order_details';

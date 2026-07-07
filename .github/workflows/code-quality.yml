@@ -80,3 +80,6 @@ jobs:
 
       - name: 🛠️ TypeScript checks
         run: npx tsc --noEmit
+
+      - name: 🧪 Vitest
+        run: npm run test
