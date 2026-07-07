@@ -5,7 +5,11 @@ import {
     Users,
 } from 'lucide-react';
 
-export function ProductDesign({ variants }: { variants: Product['variants'] }) {
+export function ProductDesign({
+    variants,
+}: {
+    variants: NonNullable<Product['variants']>;
+}) {
     return (
         <div className="flex gap-1">
             {variants.photo_types?.length > 0 &&

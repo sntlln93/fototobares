@@ -83,6 +83,18 @@ export const validateDetailForm = (
 
         const productErrors: Partial<Record<keyof DetailFormData, string>> = {};
 
+        // A mural without configured variants offers nothing to pick:
+        // only the printed note can be required
+        if (!product.variants) {
+            if (!hasValue(data.note, product.id)) {
+                productErrors.note =
+                    'Este campo es requerido cuando el producto es un mural';
+                errors[product.id] = productErrors;
+            }
+
+            return;
+        }
+
         if (!hasValue(data.orientation, product.id)) {
             productErrors.orientation = 'Debes elegir una opción';
         }
@@ -127,7 +139,8 @@ export const buildProductOrders = (
         combo_id: product.combo_id,
         product_id: product.id,
         variant:
-            product.product_type_id === MURAL_PRODUCT_TYPE_ID
+            product.product_type_id === MURAL_PRODUCT_TYPE_ID &&
+            product.variants
                 ? {
                       orientation: valueFor(data.orientation, product.id)!,
                       photo_type: valueFor(data.photoType, product.id)!,

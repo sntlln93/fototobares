@@ -11,7 +11,14 @@ const mural = {
     id: 1,
     product_type_id: 1,
     name: 'Mural clásico',
-} as SelectableProduct;
+    variants: {
+        photo_types: ['individual', 'grupo'],
+        orientations: ['vertical', 'horizontal'],
+        backgrounds: ['blue'],
+        colors: ['brown'],
+        dimentions: '30x40',
+    },
+} as unknown as SelectableProduct;
 
 const taza = {
     id: 2,
@@ -63,6 +70,23 @@ describe('validateDetailForm', () => {
         expect(errors).toEqual({});
     });
 
+    it('requires only the note for a mural without configured variants', () => {
+        const bareMural = {
+            ...mural,
+            variants: undefined,
+        } as SelectableProduct;
+
+        const errors = validateDetailForm([bareMural], initialDetailFormData());
+
+        expect(Object.keys(errors[1])).toEqual(['note']);
+
+        const withNote = initialDetailFormData([
+            { product_id: 1, note: 'Martina' },
+        ]);
+
+        expect(validateDetailForm([bareMural], withNote)).toEqual({});
+    });
+
     it('validates each product independently', () => {
         const secondMural = { ...mural, id: 9 } as SelectableProduct;
 
@@ -94,6 +118,21 @@ describe('buildProductOrders', () => {
                 note: 'Martina',
             },
         ]);
+    });
+
+    it('builds a mural without configured variants without a variant payload', () => {
+        const bareMural = {
+            ...mural,
+            variants: undefined,
+        } as SelectableProduct;
+
+        const orders = buildProductOrders(
+            [bareMural],
+            initialDetailFormData([{ product_id: 1, note: 'Martina' }]),
+        );
+
+        expect(orders[0].variant).toBeUndefined();
+        expect(orders[0].note).toBe('Martina');
     });
 
     it('builds non-mural details without a variant and keeps the combo id', () => {

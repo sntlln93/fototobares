@@ -176,9 +176,9 @@ export default function Products({
                                     )}
                                 </TableCell>
                                 <TableCell>
-                                    {product.variants?.backgrounds?.length >
-                                        0 &&
-                                        product.variants.backgrounds.map(
+                                    {(product.variants?.backgrounds ?? [])
+                                        .length > 0 &&
+                                        product.variants?.backgrounds.map(
                                             (background) => (
                                                 <Badge
                                                     variant="secondary"
@@ -190,15 +190,18 @@ export default function Products({
                                         )}
                                 </TableCell>
                                 <TableCell>
-                                    {product.variants?.colors?.length > 0 &&
-                                        product.variants.colors.map((color) => (
-                                            <Badge
-                                                variant="secondary"
-                                                key={color}
-                                            >
-                                                {getColorEs(color)}
-                                            </Badge>
-                                        ))}
+                                    {(product.variants?.colors ?? []).length >
+                                        0 &&
+                                        product.variants?.colors.map(
+                                            (color) => (
+                                                <Badge
+                                                    variant="secondary"
+                                                    key={color}
+                                                >
+                                                    {getColorEs(color)}
+                                                </Badge>
+                                            ),
+                                        )}
                                 </TableCell>
                                 <TableCell className="flex gap-2">
                                     <Link
