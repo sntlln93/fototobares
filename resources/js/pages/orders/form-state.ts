@@ -32,6 +32,8 @@ export type InitialOrderForm = {
     form: OrderFormData;
     selectedSchool: number;
     message: string | null;
+    /** Restored details dropped because their product no longer exists */
+    droppedProducts: number;
 };
 
 export const emptyForm = (): OrderFormData => ({
@@ -132,19 +134,44 @@ export const replaceDetailAt = (
 };
 
 /**
+ * Drops restored details whose product no longer exists (deleted product,
+ * or a re-seeded database): rendering them would crash the page.
+ */
+const keepExistingProducts = (
+    details: ProductOrder[],
+    validProductIds?: number[],
+): { details: ProductOrder[]; dropped: number } => {
+    if (!validProductIds) {
+        return { details, dropped: 0 };
+    }
+
+    const kept = details.filter((detail) =>
+        validProductIds.includes(detail.product_id),
+    );
+
+    return { details: kept, dropped: details.length - kept.length };
+};
+
+/**
  * Initial values for the order form: a draft ("Ver" in borradores) wins
  * over localStorage. Must be resolved before useForm: setting them with
  * setData in an effect gets lost.
  */
 export const resolveInitialOrderForm = (
     draft?: DraftProp | null,
+    validProductIds?: number[],
 ): InitialOrderForm => {
     if (draft) {
+        const { details, dropped } = keepExistingProducts(
+            draft.products ?? [],
+            validProductIds,
+        );
+
         return {
             form: {
                 ...emptyForm(),
                 classroom_id: draft.classroom_id,
-                order_details: draft.products ?? [],
+                order_details: details,
                 total_price: String(draft.total_price ?? 0),
                 payment_plan: String(draft.payment_plan ?? 0),
                 due_date:
@@ -158,17 +185,30 @@ export const resolveInitialOrderForm = (
             },
             selectedSchool: draft.classroom.school_id,
             message: `Borrador #${draft.id} cargado`,
+            droppedProducts: dropped,
         };
     }
 
     const saved = readSavedForm();
 
     if (saved) {
+        const { details, dropped } = keepExistingProducts(
+            saved.form.order_details,
+            validProductIds,
+        );
+
         return {
             ...saved,
+            form: { ...saved.form, order_details: details },
             message: 'Datos de pedido anterior cargados',
+            droppedProducts: dropped,
         };
     }
 
-    return { form: emptyForm(), selectedSchool: 0, message: null };
+    return {
+        form: emptyForm(),
+        selectedSchool: 0,
+        message: null,
+        droppedProducts: 0,
+    };
 };

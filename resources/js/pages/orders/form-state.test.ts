@@ -149,6 +149,52 @@ describe('resolveInitialOrderForm', () => {
         expect(initial.selectedSchool).toBe(9);
         expect(initial.message).toBe('Datos de pedido anterior cargados');
     });
+
+    it('drops saved details whose product no longer exists', () => {
+        localStorage.setItem(
+            'orderFormData',
+            JSON.stringify({
+                classroom_id: 3,
+                selectedSchool: 9,
+                order_details: [
+                    { product_id: 5, note: 'vigente' },
+                    { product_id: 99, note: 'ya no existe' },
+                ],
+            }),
+        );
+
+        const initial = resolveInitialOrderForm(null, [5, 6]);
+
+        expect(initial.form.order_details).toEqual([
+            { product_id: 5, note: 'vigente' },
+        ]);
+        expect(initial.droppedProducts).toBe(1);
+    });
+
+    it('drops draft details whose product no longer exists', () => {
+        const initial = resolveInitialOrderForm(
+            {
+                ...draft,
+                products: [
+                    { product_id: 5, note: 'vigente' },
+                    { product_id: 99, note: 'ya no existe' },
+                ],
+            },
+            [5],
+        );
+
+        expect(initial.form.order_details).toEqual([
+            { product_id: 5, note: 'vigente' },
+        ]);
+        expect(initial.droppedProducts).toBe(1);
+    });
+
+    it('keeps every detail when no product list is provided', () => {
+        const initial = resolveInitialOrderForm(draft);
+
+        expect(initial.form.order_details).toHaveLength(1);
+        expect(initial.droppedProducts).toBe(0);
+    });
 });
 
 describe('persistSavedForm', () => {
