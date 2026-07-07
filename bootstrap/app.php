@@ -25,9 +25,12 @@ return Application::configure(basePath: dirname(__DIR__))
         );
     })
     ->withMiddleware(function (Middleware $middleware) {
+        // AddLinkHeadersForPreloadedAssets is intentionally NOT appended: its
+        // Link header grows with every Vite chunk and overflowed nginx's
+        // fastcgi_buffer_size (4k) on /orders/create, causing 502s. The Vite
+        // blade directive already emits modulepreload tags in the HTML.
         $middleware->web(append: [
             \App\Http\Middleware\HandleInertiaRequests::class,
-            \Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets::class,
         ]);
 
         $middleware->alias([
