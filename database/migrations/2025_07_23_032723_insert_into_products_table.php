@@ -97,6 +97,8 @@ return new class extends Migration
                 'max_payments' => 4,
                 'unit_price' => 28000,
                 'product_type_id' => $product_types->firstWhere('name', 'mural')->id,
+                // Murals must carry variants: the UI renders their pickers
+                'variants' => $variants,
             ],
             [
                 'name' => 'Foto 15x21',
