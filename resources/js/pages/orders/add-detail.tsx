@@ -116,6 +116,9 @@ export function AddDetail({
     const getVariants = (step: typeof currentStep) =>
         resolveVariants(products[step]);
 
+    // Narrowed once so TypeScript knows the variants exist inside the block
+    const currentVariants = getVariants(currentStep);
+
     return (
         <Modal show={show} onClose={onClose}>
             <div className="p-6" key={products[currentStep].id}>
@@ -127,7 +130,8 @@ export function AddDetail({
                     Agregando {currentStep + 1} de {products.length} productos
                 </h3>
 
-                {products[currentStep].product_type_id === 1 ? (
+                {products[currentStep].product_type_id === 1 &&
+                currentVariants ? (
                     <>
                         <div className="mt-2">
                             <fieldset>
@@ -135,7 +139,7 @@ export function AddDetail({
                                     Orientaciones disponibles para este producto
                                 </legend>
                                 <div className="mt-1 flex flex-wrap gap-4">
-                                    {getVariants(currentStep).orientations.map(
+                                    {currentVariants.orientations.map(
                                         (orientation) => (
                                             <label
                                                 className="flex items-center"
@@ -185,7 +189,7 @@ export function AddDetail({
                                     Tipo de foto
                                 </legend>
                                 <div className="mt-1 flex flex-wrap gap-4">
-                                    {getVariants(currentStep).photo_types.map(
+                                    {currentVariants.photo_types.map(
                                         (photoType) => (
                                             <label
                                                 className="flex items-center"
@@ -235,7 +239,7 @@ export function AddDetail({
                                     este combo
                                 </legend>
                                 <div className="mt-1 flex flex-wrap gap-4">
-                                    {getVariants(currentStep).backgrounds.map(
+                                    {currentVariants.backgrounds.map(
                                         (background) => (
                                             <label
                                                 className="flex items-center"
@@ -284,38 +288,34 @@ export function AddDetail({
                                     este combo
                                 </legend>
                                 <div className="mt-1 flex flex-wrap gap-4">
-                                    {getVariants(currentStep).colors.map(
-                                        (color) => (
-                                            <label
-                                                className="flex items-center"
-                                                key={color}
-                                            >
-                                                <Checkbox
-                                                    value={color}
-                                                    checked={
-                                                        getProductValue(
-                                                            products[
-                                                                currentStep
-                                                            ].id,
-                                                            'color',
-                                                        ) === color
-                                                    }
-                                                    onChange={(e) =>
-                                                        updateProductData(
-                                                            'color',
-                                                            products[
-                                                                currentStep
-                                                            ].id,
-                                                            e.target.value,
-                                                        )
-                                                    }
-                                                />
-                                                <span className="ms-2 text-sm text-gray-600 dark:text-gray-400">
-                                                    {getColorEs(color)}
-                                                </span>
-                                            </label>
-                                        ),
-                                    )}
+                                    {currentVariants.colors.map((color) => (
+                                        <label
+                                            className="flex items-center"
+                                            key={color}
+                                        >
+                                            <Checkbox
+                                                value={color}
+                                                checked={
+                                                    getProductValue(
+                                                        products[currentStep]
+                                                            .id,
+                                                        'color',
+                                                    ) === color
+                                                }
+                                                onChange={(e) =>
+                                                    updateProductData(
+                                                        'color',
+                                                        products[currentStep]
+                                                            .id,
+                                                        e.target.value,
+                                                    )
+                                                }
+                                            />
+                                            <span className="ms-2 text-sm text-gray-600 dark:text-gray-400">
+                                                {getColorEs(color)}
+                                            </span>
+                                        </label>
+                                    ))}
                                 </div>
                             </fieldset>
                             <InputError

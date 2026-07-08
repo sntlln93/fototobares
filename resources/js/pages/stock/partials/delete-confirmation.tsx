@@ -2,6 +2,7 @@ import {
     AlertDialog,
     AlertDialogAction,
     AlertDialogCancel,
+    AlertDialogContent,
     AlertDialogDescription,
     AlertDialogFooter,
     AlertDialogHeader,
@@ -9,7 +10,6 @@ import {
 } from '@/components/ui/alert-dialog';
 import { buttonVariants } from '@/components/ui/button';
 import { useForm } from '@inertiajs/react';
-import { AlertDialogContent } from '@radix-ui/react-alert-dialog';
 
 export function DeleteStockableConfirmation({
     stockable,
@@ -23,7 +23,7 @@ export function DeleteStockableConfirmation({
     const { delete: destroy, processing } = useForm();
 
     const onDestroy = () => {
-        destroy(route('stockables.update', { stockable: stockable.id }), {
+        destroy(route('stockables.destroy', { stockable: stockable.id }), {
             onFinish: () => onClose(),
         });
     };

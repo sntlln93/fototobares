@@ -22,10 +22,12 @@ export function ComboProducts({
     selectedProducts,
     products,
     openAddProductModal,
+    openEditProductModal,
     updateQuantity,
 }: PropsWithChildren<{
     updateQuantity: (id: number, value: number) => void;
     openAddProductModal: (id: number) => void;
+    openEditProductModal: (id: number) => void;
     products: Product[];
     selectedProducts: SelectedProduct[];
 }>) {
@@ -43,7 +45,10 @@ export function ComboProducts({
 
             <ul className="my-2 gap-4">
                 {selectedProducts.map((selected) => {
-                    const product = products.find((p) => p.id === selected.id)!;
+                    const product = products.find((p) => p.id === selected.id);
+
+                    // The product may have been deleted since it was added
+                    if (!product) return null;
 
                     return (
                         <li
@@ -52,40 +57,41 @@ export function ComboProducts({
                         >
                             <div className="flex gap-1">
                                 {`${selected.quantity}x ${product.name}`}
-                                {product.product_type_id === 1 && (
-                                    <>
-                                        <Badge
-                                            variant="outline"
-                                            className="gap-1 rounded-lg"
-                                        >
-                                            {product.variants.colors.map(
-                                                (color) => (
-                                                    <Square
-                                                        key={color}
-                                                        className="h-4 w-4"
-                                                        style={{
-                                                            fill: color,
-                                                        }}
-                                                    />
-                                                ),
-                                            )}
-                                        </Badge>
-                                        <Badge
-                                            variant="outline"
-                                            className="rounded-lg"
-                                        >
-                                            <User className="h-4 w-4" />
-                                            <Users className="h-4 w-4" />
-                                        </Badge>
-                                        <Badge
-                                            variant="outline"
-                                            className="rounded-lg"
-                                        >
-                                            <RectangleHorizontal className="h-4 w-4" />
-                                            <RectangleVertical className="h-4 w-4" />
-                                        </Badge>
-                                    </>
-                                )}
+                                {product.product_type_id === 1 &&
+                                    product.variants && (
+                                        <>
+                                            <Badge
+                                                variant="outline"
+                                                className="gap-1 rounded-lg"
+                                            >
+                                                {product.variants.colors.map(
+                                                    (color) => (
+                                                        <Square
+                                                            key={color}
+                                                            className="h-4 w-4"
+                                                            style={{
+                                                                fill: color,
+                                                            }}
+                                                        />
+                                                    ),
+                                                )}
+                                            </Badge>
+                                            <Badge
+                                                variant="outline"
+                                                className="rounded-lg"
+                                            >
+                                                <User className="h-4 w-4" />
+                                                <Users className="h-4 w-4" />
+                                            </Badge>
+                                            <Badge
+                                                variant="outline"
+                                                className="rounded-lg"
+                                            >
+                                                <RectangleHorizontal className="h-4 w-4" />
+                                                <RectangleVertical className="h-4 w-4" />
+                                            </Badge>
+                                        </>
+                                    )}
                             </div>
                             <div className="flex gap-1">
                                 <Button
@@ -110,9 +116,18 @@ export function ComboProducts({
                                     <Plus className="h-4 w-4" />
                                 </Button>
                                 <Button
+                                    type="button"
                                     variant="warning"
                                     size="icon"
-                                    disabled={product.product_type_id !== 1}
+                                    title="Editar variantes"
+                                    disabled={
+                                        product.product_type_id !== 1 ||
+                                        !product.variants
+                                    }
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        openEditProductModal(selected.id);
+                                    }}
                                 >
                                     <Edit className="h-4 w-4" />
                                 </Button>

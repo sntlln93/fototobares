@@ -23,6 +23,6 @@ class Combo extends Model
         return $this->belongsToMany(Product::class)
             ->using(ComboProduct::class)
             ->as('pivot')
-            ->withPivot(['variants']);
+            ->withPivot(['variants', 'quantity']);
     }
 }
