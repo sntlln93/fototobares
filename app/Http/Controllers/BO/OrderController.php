@@ -130,7 +130,7 @@ class OrderController extends Controller
 
             foreach ($validated['order_details'] as $product) {
                 $order->products()->attach($product['product_id'], [
-                    'variant' => json_encode($product['variant'] ?? []),
+                    'variant' => $product['variant'] ?? [],
                     'note' => $product['note'],
                 ]);
             }
@@ -231,7 +231,7 @@ class OrderController extends Controller
             $order->products()->sync(
                 collect($validated['order_details'])->mapWithKeys(function ($product) {
                     return [$product['product_id'] => [
-                        'variant' => json_encode($product['variant'] ?? []),
+                        'variant' => $product['variant'] ?? [],
                         'note' => $product['note'],
                     ]];
                 })->toArray()

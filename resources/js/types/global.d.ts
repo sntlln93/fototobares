@@ -103,13 +103,14 @@ declare global {
         max_payments: number;
         product_type_id: number;
         type: ProductType;
-        variants: {
+        /** Nullable in the database: murals without variants exist */
+        variants?: {
             photo_types: ProductPhotoType[];
             orientations: ProductOrientation[];
             backgrounds: string[];
             colors: Color[];
             dimentions: string;
-        };
+        } | null;
     }
 
     interface OrderProduct extends Product {

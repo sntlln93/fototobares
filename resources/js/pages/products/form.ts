@@ -1,3 +1,5 @@
+export type ProductVariants = NonNullable<Product['variants']>;
+
 export type FormData = Pick<Product, 'name' | 'product_type_id'> & {
     unit_price: string;
     max_payments: string;
@@ -10,26 +12,26 @@ export type FormData = Pick<Product, 'name' | 'product_type_id'> & {
     };
 };
 
-export const orientations: Product['variants']['orientations'] = [
+export const orientations: ProductVariants['orientations'] = [
     'vertical',
     'horizontal',
 ];
 
 export const colors: Color[] = ['white', 'black', 'blue', 'pink'];
 
-export const backgrounds: Product['variants']['backgrounds'] = [
+export const backgrounds: ProductVariants['backgrounds'] = [
     'white',
     'black',
     'blue',
     'pink',
 ];
 
-export const photo_types: Product['variants']['photo_types'] = [
+export const photo_types: ProductVariants['photo_types'] = [
     'individual',
     'grupo',
 ];
 
-export const default_variants: Product['variants'] = {
+export const default_variants: ProductVariants = {
     dimentions: '',
     photo_types: ['grupo'],
     orientations: ['vertical'],
