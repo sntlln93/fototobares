@@ -14,8 +14,15 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { downloadPaymentReceipt } from '@/lib/receipt';
 import { capitalize, formatPrice } from '@/lib/utils';
-import { Edit, EllipsisVertical, FileDown, Paperclip } from 'lucide-react';
+import {
+    Edit,
+    EllipsisVertical,
+    ImageDown,
+    Paperclip,
+    Share2,
+} from 'lucide-react';
 import { useState } from 'react';
+import { useShareReceipt } from './hooks/use-share-receipt';
 import { CreatePaymentModal } from './payments/create-payment-modal';
 import { EditPaymentModal } from './payments/edit-payment-modal';
 
@@ -104,6 +111,8 @@ function PaymentItem({
     order: Order;
     onEdit: CallableFunction;
 }) {
+    const { share, sharing } = useShareReceipt();
+
     return (
         <div className="flex items-center justify-between border-b border-gray-200 py-4 last:border-0 dark:border-gray-700">
             <div className="flex items-center space-x-4">
@@ -135,10 +144,22 @@ function PaymentItem({
                 <Button
                     size="icon"
                     variant="ghost"
-                    title="Descargar comprobante de Fototobares (PDF)"
-                    onClick={() => downloadPaymentReceipt({ payment, order })}
+                    title="Descargar comprobante de Fototobares (imagen)"
+                    onClick={() =>
+                        void downloadPaymentReceipt({ payment, order })
+                    }
                 >
-                    <FileDown className="h-5 w-5" />
+                    <ImageDown className="h-5 w-5" />
+                </Button>
+
+                <Button
+                    size="icon"
+                    variant="ghost"
+                    title="Compartir comprobante por WhatsApp"
+                    disabled={sharing}
+                    onClick={() => void share({ payment, order })}
+                >
+                    <Share2 className="h-5 w-5" />
                 </Button>
 
                 <DropdownMenu>
