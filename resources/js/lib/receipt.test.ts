@@ -1,38 +1,5 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { downloadPaymentReceipt } from './receipt';
-
-const pdf = vi.hoisted(() => ({
-    texts: [] as string[],
-    saved: [] as string[],
-}));
-
-vi.mock('jspdf', () => ({
-    jsPDF: class {
-        internal = { pageSize: { getWidth: () => 148 } };
-
-        setFont() {}
-
-        setFontSize() {}
-
-        setDrawColor() {}
-
-        setFillColor() {}
-
-        setTextColor() {}
-
-        line() {}
-
-        rect() {}
-
-        text(value: string | string[]) {
-            pdf.texts.push(String(value));
-        }
-
-        save(filename: string) {
-            pdf.saved.push(filename);
-        }
-    },
-}));
+import { describe, expect, it } from 'vitest';
+import { receiptContent, receiptShareText } from './receipt';
 
 const order = {
     id: 3,
@@ -54,43 +21,56 @@ const payment = {
     proof_of_payment: null,
 } as Payment;
 
-beforeEach(() => {
-    pdf.texts.length = 0;
-    pdf.saved.length = 0;
-});
+describe('receiptContent', () => {
+    it('describes the receipt with the payment and order data', () => {
+        const content = receiptContent({ payment, order });
 
-describe('downloadPaymentReceipt', () => {
-    it('renders the receipt data and downloads it with a descriptive name', () => {
-        downloadPaymentReceipt({ payment, order });
+        expect(content.title).toBe('Fototobares');
+        expect(content.subtitle).toBe('Comprobante de pago N° 12');
+        expect(content.rows).toContainEqual(['Cliente', 'Carla López']);
+        expect(content.rows).toContainEqual(['Pedido', '#3']);
+        expect(content.rows).toContainEqual(['Escuela', 'Escuela Test (a 5)']);
+        expect(content.rows).toContainEqual(['Niño/a', 'Luca']);
+        expect(content.rows).toContainEqual(['Fecha', '06/07/2026']);
+        expect(content.fileName).toBe('comprobante-pago-12-pedido-3.png');
+    });
 
-        const content = pdf.texts.join('\n');
+    it('omits the child row when the order has no child name', () => {
+        const content = receiptContent({
+            payment,
+            order: { ...order, child_name: undefined } as Order,
+        });
 
-        expect(content).toContain('Fototobares');
-        expect(content).toContain('Comprobante de pago N° 12');
-        expect(content).toContain('Carla López');
-        expect(content).toContain('#3');
-        expect(content).toContain('Escuela Test (a 5)');
-        expect(content).toContain('Luca');
-        expect(content).toContain('06/07/2026');
-        expect(pdf.saved).toEqual(['comprobante-pago-12-pedido-3.pdf']);
+        expect(content.rows.map(([label]) => label)).not.toContain('Niño/a');
     });
 
     it('shows the pending balance when the order is not fully paid', () => {
-        downloadPaymentReceipt({ payment, order });
+        const content = receiptContent({ payment, order });
 
-        const balanceLine = pdf.texts.find((text) =>
-            text.startsWith('Saldo pendiente:'),
-        );
-
-        expect(balanceLine).toContain('7.000');
+        expect(content.balance.pending).toBe(true);
+        expect(content.balance.text).toContain('7.000');
     });
 
     it('reports no pending balance when the order is fully paid', () => {
-        downloadPaymentReceipt({
+        const content = receiptContent({
             payment,
             order: { ...order, paid_total: 12000 } as Order,
         });
 
-        expect(pdf.texts).toContain('Pedido cancelado (sin saldo pendiente)');
+        expect(content.balance.pending).toBe(false);
+        expect(content.balance.text).toBe(
+            'Pedido cancelado (sin saldo pendiente)',
+        );
+    });
+});
+
+describe('receiptShareText', () => {
+    it('builds the WhatsApp message with the receipt summary', () => {
+        const text = receiptShareText({ payment, order });
+
+        expect(text).toContain('Comprobante de pago N° 12 — Fototobares');
+        expect(text).toContain('Cliente: Carla López');
+        expect(text).toContain('Importe abonado: ');
+        expect(text).toContain('Saldo pendiente: ');
     });
 });
