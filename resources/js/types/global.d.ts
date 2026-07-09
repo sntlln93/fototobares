@@ -131,10 +131,6 @@ declare global {
         position: number;
     }
 
-    interface ProductTypeWithStatuses extends ProductType {
-        statuses: ProductionStatus[];
-    }
-
     interface ProductType {
         id: number;
         name: string;

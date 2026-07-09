@@ -34,7 +34,7 @@ class UpdateProductionStatusRequest extends FormRequest
                 'string',
                 'max:50',
                 Rule::unique('production_statuses')
-                    ->where('product_type_id', $status->product_type_id)
+                    ->where('product_id', $status->product_id)
                     ->ignore($status->id),
             ],
         ];
@@ -46,7 +46,7 @@ class UpdateProductionStatusRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'name.unique' => 'Ya existe una etapa con ese nombre para este tipo de producto.',
+            'name.unique' => 'Ya existe una etapa con ese nombre para este producto.',
         ];
     }
 }

@@ -53,7 +53,8 @@ export function DeleteStatusConfirmation({
 
                 <AlertDialogDescription>
                     Las etapas siguientes se reordenan automáticamente. No se
-                    puede eliminar una etapa con productos en producción.
+                    puede eliminar una etapa con productos en producción o con
+                    insumos configurados.
                 </AlertDialogDescription>
 
                 <AlertDialogFooter>

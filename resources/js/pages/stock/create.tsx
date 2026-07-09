@@ -1,4 +1,3 @@
-import { Checkbox } from '@/components/checkbox';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input as TextInput } from '@/components/ui/input';
@@ -27,23 +26,16 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-export default function CreateStockable({
-    products,
-}: PageProps<{ products: Product[] }>) {
+export default function CreateStockable() {
     const { data, setData, post, processing, errors } = useForm<FormData>({
         name: '',
         quantity: '0',
         alert_at: '0',
         unit: 'Unidad',
-        products: [],
     });
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
-        setData(
-            'products',
-            data.products.filter((p) => p > 0),
-        );
 
         post(route('stockables.store'));
     };
@@ -126,36 +118,17 @@ export default function CreateStockable({
                     <InputError message={errors.unit} className="mt-2" />
                 </div>
 
-                <div className="mt-6">
-                    <fieldset>
-                        <legend className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                            Productos que usan este insumo
-                        </legend>
-                        {products.map((product) => (
-                            <label
-                                className="flex items-center"
-                                key={product.id}
-                            >
-                                <Checkbox
-                                    name={product.name}
-                                    onChange={(e) => {
-                                        if (e.target.checked) {
-                                            setData('products', [
-                                                ...data.products,
-                                                product.id,
-                                            ]);
-                                        }
-                                    }}
-                                />
-                                <span className="ms-2 text-sm text-gray-600 dark:text-gray-400">
-                                    {product.name}
-                                </span>
-                            </label>
-                        ))}
-
-                        <InputError message={errors.products} />
-                    </fieldset>
-                </div>
+                <p className="mt-6 text-sm text-gray-500">
+                    Qué producto consume este insumo (y en qué etapa) se
+                    configura en la pantalla{' '}
+                    <Link
+                        href={route('production-statuses.index')}
+                        className="underline underline-offset-2"
+                    >
+                        Etapas de producción
+                    </Link>
+                    .
+                </p>
 
                 <div className="mt-6 flex justify-end gap-3">
                     <Button variant="outline" asChild>

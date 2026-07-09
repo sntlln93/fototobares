@@ -11,11 +11,23 @@ class ProductionStatus extends Model
     public $timestamps = false;
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<ProductType, $this>
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<Product, $this>
      */
-    public function productType()
+    public function product()
     {
-        return $this->belongsTo(ProductType::class);
+        return $this->belongsTo(Product::class);
+    }
+
+    /**
+     * Stockables consumed when a detail reaches this stage.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany<Stockable, $this>
+     */
+    public function stockables()
+    {
+        return $this->belongsToMany(Stockable::class)
+            ->withPivot('quantity')
+            ->withTimestamps();
     }
 
     /**

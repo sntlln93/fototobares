@@ -25,13 +25,13 @@ class StoreProductionStatusRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'product_type_id' => ['required', 'integer', 'exists:product_types,id'],
+            'product_id' => ['required', 'integer', 'exists:products,id'],
             'name' => [
                 'required',
                 'string',
                 'max:50',
                 Rule::unique('production_statuses')
-                    ->where('product_type_id', $this->integer('product_type_id')),
+                    ->where('product_id', $this->integer('product_id')),
             ],
         ];
     }
@@ -42,7 +42,7 @@ class StoreProductionStatusRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'name.unique' => 'Ya existe una etapa con ese nombre para este tipo de producto.',
+            'name.unique' => 'Ya existe una etapa con ese nombre para este producto.',
         ];
     }
 }

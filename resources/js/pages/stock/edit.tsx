@@ -1,4 +1,3 @@
-import { Checkbox } from '@/components/checkbox';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input as TextInput } from '@/components/ui/input';
@@ -17,11 +16,9 @@ import { FormEventHandler } from 'react';
 import { FormData } from './form';
 
 export default function EditStockable({
-    products,
     stockable,
 }: PageProps<{
-    products: Product[];
-    stockable: Stockable & { products: Product[] };
+    stockable: Stockable;
 }>) {
     const breadcrumbs: BreadcrumbItem[] = [
         {
@@ -39,7 +36,6 @@ export default function EditStockable({
         quantity: String(stockable.quantity),
         alert_at: String(stockable.alert_at),
         unit: stockable.unit,
-        products: stockable.products.map((p) => p.id),
     });
 
     const submit: FormEventHandler = (e) => {
@@ -124,42 +120,17 @@ export default function EditStockable({
                     <InputError message={errors.unit} className="mt-2" />
                 </div>
 
-                <div className="mt-6">
-                    <fieldset>
-                        <legend className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                            Productos que usan este insumo
-                        </legend>
-                        {products.map((product) => (
-                            <label
-                                className="flex items-center"
-                                key={product.id}
-                            >
-                                <Checkbox
-                                    checked={data.products.includes(product.id)}
-                                    name={product.name}
-                                    onChange={(e) => {
-                                        if (e.target.checked) {
-                                            setData('products', [
-                                                ...data.products,
-                                                product.id,
-                                            ]);
-                                        } else {
-                                            setData(
-                                                'products',
-                                                data.products.filter(
-                                                    (id) => id !== product.id,
-                                                ),
-                                            );
-                                        }
-                                    }}
-                                />
-                                <span className="ms-2 text-sm text-gray-600 dark:text-gray-400">
-                                    {product.name}
-                                </span>
-                            </label>
-                        ))}
-                    </fieldset>
-                </div>
+                <p className="mt-6 text-sm text-gray-500">
+                    Qué producto consume este insumo (y en qué etapa) se
+                    configura en la pantalla{' '}
+                    <Link
+                        href={route('production-statuses.index')}
+                        className="underline underline-offset-2"
+                    >
+                        Etapas de producción
+                    </Link>
+                    .
+                </p>
 
                 <div className="mt-6 flex justify-end gap-3">
                     <Button variant="outline" asChild>

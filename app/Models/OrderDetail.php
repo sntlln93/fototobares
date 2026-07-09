@@ -20,7 +20,6 @@ class OrderDetail extends Pivot
         'variant' => 'array',
         'priority' => 'boolean',
         'status_updated_at' => 'datetime',
-        'stock_deducted_at' => 'datetime',
         'delivered_at' => 'datetime',
     ];
 

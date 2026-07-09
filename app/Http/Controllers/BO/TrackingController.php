@@ -6,6 +6,7 @@ namespace App\Http\Controllers\BO;
 
 use App\Http\Controllers\Controller;
 use App\Models\OrderDetail;
+use App\Models\Product;
 use App\Models\ProductionStatus;
 use App\Models\ProductType;
 use App\Models\School;
@@ -65,7 +66,10 @@ class TrackingController extends Controller
             ->limit(500)
             ->get();
 
-        $productTypes = ProductType::with('productionStatuses')->get();
+        $products = Product::query()
+            ->whereIn('id', $details->pluck('product_id')->unique())
+            ->with('type', 'productionStatuses')
+            ->get();
 
         $schools = School::query()->whereHas('classrooms')->get();
 
@@ -96,15 +100,17 @@ class TrackingController extends Controller
                     'status_updated_at' => $detail->status_updated_at?->diffForHumans(),
                 ];
             }),
-            'productTypes' => $productTypes->map(fn (ProductType $type) => [
-                'id' => $type->id,
-                'name' => $type->name,
-                'statuses' => $type->productionStatuses->map(fn (ProductionStatus $status) => [
+            'products' => $products->map(fn (Product $product) => [
+                'id' => $product->id,
+                'name' => $product->name,
+                'type' => $product->type?->name,
+                'statuses' => $product->productionStatuses->map(fn (ProductionStatus $status) => [
                     'id' => $status->id,
                     'name' => $status->name,
                     'position' => $status->position,
                 ]),
             ]),
+            'productTypes' => ProductType::query()->get(['id', 'name']),
             'schools' => $schools->map(fn (School $school) => [
                 'id' => $school->id,
                 'name' => $school->name,
@@ -134,12 +140,12 @@ class TrackingController extends Controller
             ->get();
 
         $mismatched = $details->first(
-            fn (OrderDetail $detail) => $detail->product?->product_type_id !== $status->product_type_id
+            fn (OrderDetail $detail) => $detail->product_id !== $status->product_id
         );
 
         if ($mismatched !== null) {
             return back()->withErrors([
-                'detail_ids' => 'Todos los productos seleccionados deben ser del mismo tipo que el estado elegido.',
+                'detail_ids' => 'La etapa elegida no pertenece al producto de todos los seleccionados.',
             ]);
         }
 
@@ -158,10 +164,9 @@ class TrackingController extends Controller
                 }
 
                 $detail->save();
+                $detail->setRelation('productionStatus', $status);
 
-                if ($status->position >= 2) {
-                    $stockService->deductForDetail($detail, $user);
-                }
+                $stockService->deductForDetail($detail, $user);
             }
         });
 

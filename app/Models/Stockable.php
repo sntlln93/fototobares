@@ -12,11 +12,15 @@ class Stockable extends Model
     use \Illuminate\Database\Eloquent\Factories\HasFactory;
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany<Product, $this>
+     * Stages that consume this stockable, with the consumed quantity.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany<ProductionStatus, $this>
      */
-    public function products()
+    public function productionStatuses()
     {
-        return $this->belongsToMany(Product::class);
+        return $this->belongsToMany(ProductionStatus::class)
+            ->withPivot('quantity')
+            ->withTimestamps();
     }
 
     /**

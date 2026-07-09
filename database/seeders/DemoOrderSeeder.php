@@ -50,19 +50,20 @@ class DemoOrderSeeder extends Seeder
         $this->addDetail($order, $medalla, null, 'Valentina');
         $order->payments()->create(['amount' => 10000, 'type' => 'efectivo']);
 
-        // 2. In production: mural printed (stock deducted), transfer payment
+        // 2. In production: boards glued (2 MDF boards deducted at
+        // "Pegado"), transfer payment
         $order = $this->makeOrder($sextoA, 'Bruno Díaz', '3804000002', 'Thiago', 2, 56000, 4, 20);
         $detail = $this->addDetail($order, $clasico, $this->muralVariant('horizontal', 'black'), 'Thiago - egresados 2026');
-        $this->setStatus($detail, $clasico, 2, hoursAgo: 30);
+        $this->setStatus($detail, $clasico, 3, hoursAgo: 30);
         $this->addDetail($order, $carpeta, null, 'Thiago');
         $order->payments()->create(['amount' => 20000, 'type' => 'transferencia']);
 
-        // 3. Priority: the mural reached "Impreso" and was sent back to
-        // the first stage (stock stays deducted)
+        // 3. Priority: the mural reached "Corte de moldura" (one strip
+        // deducted) and was sent back to "Impreso" (stock stays deducted)
         $order = $this->makeOrder($sextoA, 'Carla Medina', '3804000003', 'Lola', 3, 40000, 4, 25);
         $detail = $this->addDetail($order, $molduraFina, $this->muralVariant('vertical', 'black'), 'Lola - egresados 2026');
-        $this->setStatus($detail, $molduraFina, 2, hoursAgo: 48);
-        $this->setStatus($detail, $molduraFina, 1, priority: true, hoursAgo: 2);
+        $this->setStatus($detail, $molduraFina, 3, hoursAgo: 48);
+        $this->setStatus($detail, $molduraFina, 2, priority: true, hoursAgo: 2);
 
         // 4. Finished and fully paid: ready to deliver with no warning
         $order = $this->makeOrder($sextoA, 'Diego Farías', '3804000004', 'Benjamín', 4, 12000, 1, 10);
@@ -70,10 +71,11 @@ class DemoOrderSeeder extends Seeder
         $this->setStatus($detail, $taza, 4, hoursAgo: 5);
         $order->payments()->create(['amount' => 12000, 'type' => 'efectivo']);
 
-        // 5. Partially delivered: mural handed over, the rest in progress
+        // 5. Partially delivered: mural handed over (its whole chain
+        // consumed: strip + board + bag), the rest in progress
         $order = $this->makeOrder($sextoA, 'Elena Paz', '3804000005', 'Mora', 5, 52000, 4, 15);
         $detail = $this->addDetail($order, $molduraFina, $this->muralVariant('horizontal', 'pink'), 'Mora - egresados 2026');
-        $this->setStatus($detail, $molduraFina, 6, hoursAgo: 72);
+        $this->setStatus($detail, $molduraFina, 7, hoursAgo: 72);
         $detail->delivered_at = now()->subDays(2);
         $detail->save();
         $detail = $this->addDetail($order, $carpeta, null, 'Mora');
@@ -89,11 +91,11 @@ class DemoOrderSeeder extends Seeder
         $detail->save();
         $order->payments()->create(['amount' => 6000, 'type' => 'efectivo']);
 
-        // 7. Cancelled: produced mural returned to stock (movements
-        // -1/+1), medalla sent to recycling; keeps a payment on record
+        // 7. Cancelled: the glued mural returned its MDF board to stock
+        // (movements -1/+1), medalla sent to recycling; keeps a payment
         $order = $this->makeOrder($sextoA, 'Gimena Vera', '3804000007', 'Emma', 7, 54000, 4, 18);
         $detail = $this->addDetail($order, $molduraAncha, $this->muralVariant('vertical', 'black'), 'Emma - egresados 2026');
-        $this->setStatus($detail, $molduraAncha, 2, hoursAgo: 60);
+        $this->setStatus($detail, $molduraAncha, 4, hoursAgo: 60);
         $this->stock->returnForDetail($detail, $this->master);
         $detail->recycled_to = 'stock';
         $detail->save();
@@ -167,11 +169,11 @@ class DemoOrderSeeder extends Seeder
 
     /**
      * Moves a detail to the given stage mirroring the tracking flow:
-     * reaching position >= 2 deducts stock (idempotent).
+     * the service deducts whatever the reached stages consume.
      */
     private function setStatus(OrderDetail $detail, Product $product, int $position, bool $priority = false, int $hoursAgo = 0): void
     {
-        $status = ProductionStatus::where('product_type_id', $product->product_type_id)
+        $status = ProductionStatus::where('product_id', $product->id)
             ->where('position', $position)
             ->firstOrFail();
 
@@ -179,10 +181,9 @@ class DemoOrderSeeder extends Seeder
         $detail->status_updated_at = now()->subHours($hoursAgo);
         $detail->priority = $priority;
         $detail->save();
+        $detail->setRelation('productionStatus', $status);
 
-        if ($position >= 2) {
-            $this->stock->deductForDetail($detail, $this->master);
-        }
+        $this->stock->deductForDetail($detail, $this->master);
     }
 
     /**

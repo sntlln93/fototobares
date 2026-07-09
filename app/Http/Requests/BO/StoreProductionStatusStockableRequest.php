@@ -8,7 +8,7 @@ use App\Models\ProductionStatus;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Validator;
 
-class ReorderProductionStatusesRequest extends FormRequest
+class StoreProductionStatusStockableRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -26,14 +26,14 @@ class ReorderProductionStatusesRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'product_id' => ['required', 'integer', 'exists:products,id'],
-            'ordered_ids' => ['required', 'array', 'min:1'],
-            'ordered_ids.*' => ['required', 'integer', 'distinct'],
+            'stockable_id' => ['required', 'integer', 'exists:stockables,id'],
+            'quantity' => ['required', 'integer', 'min:1'],
         ];
     }
 
     /**
-     * The reorder must include every stage of the product, and nothing else.
+     * A stockable can be consumed by at most one stage of a product,
+     * so the deduction stays idempotent per (detail, stockable).
      *
      * @return array<int, callable>
      */
@@ -45,23 +45,20 @@ class ReorderProductionStatusesRequest extends FormRequest
                     return;
                 }
 
-                $currentIds = ProductionStatus::query()
-                    ->where('product_id', $this->integer('product_id'))
-                    ->pluck('id')
-                    ->sort()
-                    ->values()
-                    ->all();
+                /** @var ProductionStatus $status */
+                $status = $this->route('productionStatus');
 
-                $orderedIds = collect($this->array('ordered_ids'))
-                    ->map(fn ($id) => intval($id))
-                    ->sort()
-                    ->values()
-                    ->all();
+                $conflict = ProductionStatus::query()
+                    ->where('product_id', $status->product_id)
+                    ->whereKeyNot($status->id)
+                    ->whereHas('stockables', fn ($query) => $query
+                        ->where('stockables.id', $this->integer('stockable_id')))
+                    ->first();
 
-                if ($currentIds !== $orderedIds) {
+                if ($conflict !== null) {
                     $validator->errors()->add(
-                        'ordered_ids',
-                        'El orden enviado no coincide con las etapas del producto.',
+                        'stockable_id',
+                        "Este insumo ya se consume en la etapa \"{$conflict->name}\" de este producto.",
                     );
                 }
             },
