@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 use App\Models\Order;
 use App\Models\OrderDetail;
-use App\Models\Product;
 use App\Models\Stockable;
+use App\Services\StockService;
 
 use function Pest\Laravel\post;
 use function Pest\Laravel\put;
@@ -28,23 +28,26 @@ it('cancels the order and stores each product destination', function () {
         ->and($toRecycling->refresh()->recycled_to)->toBe('reciclaje');
 });
 
-it('returns supplies to stock only if they had been deducted', function () {
+it('returns exactly the deducted supplies when sent back to stock', function () {
     actingAsRole();
 
-    $product = Product::factory()->mural()->create();
-    $stockable = Stockable::factory()->create(['quantity' => 9]);
-    $product->stockables()->attach($stockable->id);
+    $product = productWithChain(['Pendiente', 'Corte', 'Embolsado']);
+    $stockable = Stockable::factory()->create(['quantity' => 10]);
+    stageOf($product, 2)->stockables()->attach($stockable->id, ['quantity' => 2]);
 
     $order = Order::factory()->create();
     $deducted = OrderDetail::factory()->create([
         'order_id' => $order->id,
         'product_id' => $product->id,
-        'stock_deducted_at' => now(),
+        'production_status_id' => stageOf($product, 2)->id,
     ]);
+    app(StockService::class)->deductForDetail($deducted);
     $notDeducted = OrderDetail::factory()->create([
         'order_id' => $order->id,
         'product_id' => $product->id,
     ]);
+
+    expect($stockable->refresh()->quantity)->toBe(8);
 
     post(route('orders.cancel', $order), [
         'destinations' => [
@@ -53,9 +56,11 @@ it('returns supplies to stock only if they had been deducted', function () {
         ],
     ]);
 
-    // Only one unit returned: the detail that never started production has nothing to return
+    // The 2 deducted units come back; the detail that never started
+    // production has nothing to return
     expect($stockable->refresh()->quantity)->toBe(10)
-        ->and($stockable->movements()->where('reason', 'devolución por cancelación')->count())->toBe(1);
+        ->and($stockable->movements()->where('reason', 'devolución por cancelación')->count())->toBe(1)
+        ->and($stockable->movements()->where('reason', 'devolución por cancelación')->first()?->quantity)->toBe(2);
 });
 
 it('rejects details that belong to another order', function () {

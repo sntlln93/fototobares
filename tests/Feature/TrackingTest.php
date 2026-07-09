@@ -5,7 +5,6 @@ declare(strict_types=1);
 use App\Enums\UserRole;
 use App\Models\Order;
 use App\Models\OrderDetail;
-use App\Models\Product;
 use App\Models\Stockable;
 use Inertia\Testing\AssertableInertia as Assert;
 
@@ -15,17 +14,17 @@ use function Pest\Laravel\post;
 it('updates the status of a batch of details', function () {
     actingAsRole(UserRole::Worker);
 
-    $product = Product::factory()->mural()->create();
+    $product = productWithChain();
     $details = OrderDetail::factory()->count(2)->create(['product_id' => $product->id]);
 
     post(route('tracking.batch'), [
         'detail_ids' => $details->pluck('id')->all(),
-        'production_status_id' => statusFor('mural', 1)->id,
+        'production_status_id' => stageOf($product, 1)->id,
     ])->assertSessionHasNoErrors();
 
     foreach ($details as $detail) {
         $detail->refresh();
-        expect($detail->production_status_id)->toBe(statusFor('mural', 1)->id)
+        expect($detail->production_status_id)->toBe(stageOf($product, 1)->id)
             ->and($detail->status_updated_at)->not->toBeNull()
             ->and($detail->priority)->toBeFalse();
     }
@@ -34,15 +33,15 @@ it('updates the status of a batch of details', function () {
 it('flags priority when a detail moves backwards and keeps it afterwards', function () {
     actingAsRole(UserRole::Worker);
 
-    $product = Product::factory()->mural()->create();
+    $product = productWithChain();
     $detail = OrderDetail::factory()->create([
         'product_id' => $product->id,
-        'production_status_id' => statusFor('mural', 3)->id,
+        'production_status_id' => stageOf($product, 3)->id,
     ]);
 
     post(route('tracking.batch'), [
         'detail_ids' => [$detail->id],
-        'production_status_id' => statusFor('mural', 1)->id,
+        'production_status_id' => stageOf($product, 1)->id,
     ]);
 
     expect($detail->refresh()->priority)->toBeTrue();
@@ -50,61 +49,119 @@ it('flags priority when a detail moves backwards and keeps it afterwards', funct
     // Moving forward again keeps the priority flag (sticky)
     post(route('tracking.batch'), [
         'detail_ids' => [$detail->id],
-        'production_status_id' => statusFor('mural', 2)->id,
+        'production_status_id' => stageOf($product, 2)->id,
     ]);
 
     expect($detail->refresh()->priority)->toBeTrue();
 });
 
-it('rejects a status that belongs to another product type', function () {
+it('rejects a stage that belongs to another product', function () {
     actingAsRole(UserRole::Worker);
 
-    $taza = Product::factory()->create(); // type: taza
+    $mural = productWithChain();
+    $taza = productWithChain();
     $detail = OrderDetail::factory()->create(['product_id' => $taza->id]);
 
     post(route('tracking.batch'), [
         'detail_ids' => [$detail->id],
-        'production_status_id' => statusFor('mural', 1)->id,
+        'production_status_id' => stageOf($mural, 1)->id,
     ])->assertSessionHasErrors('detail_ids');
 
     expect($detail->refresh()->production_status_id)->toBeNull();
 });
 
-it('deducts stock once when production starts', function () {
+it('deducts the stockables hung from the reached stages', function () {
     actingAsRole(UserRole::Worker);
 
-    $product = Product::factory()->mural()->create();
-    $stockable = Stockable::factory()->create(['quantity' => 10]);
-    $product->stockables()->attach($stockable->id);
+    $product = productWithChain(['Pendiente', 'Corte', 'Embolsado']);
+    $tiras = Stockable::factory()->create(['quantity' => 10]);
+    $bolsas = Stockable::factory()->create(['quantity' => 10]);
+    stageOf($product, 2)->stockables()->attach($tiras->id, ['quantity' => 2]);
+    stageOf($product, 3)->stockables()->attach($bolsas->id, ['quantity' => 1]);
 
     $detail = OrderDetail::factory()->create(['product_id' => $product->id]);
 
-    // Position 1 does not start production: no deduction
+    // The first stage consumes nothing
     post(route('tracking.batch'), [
         'detail_ids' => [$detail->id],
-        'production_status_id' => statusFor('mural', 1)->id,
+        'production_status_id' => stageOf($product, 1)->id,
     ]);
 
-    expect($stockable->refresh()->quantity)->toBe(10);
+    expect($tiras->refresh()->quantity)->toBe(10)
+        ->and($bolsas->refresh()->quantity)->toBe(10);
 
-    // Position 2 starts production: deducts one unit
+    // Reaching "Corte" consumes the configured 2 strips
     post(route('tracking.batch'), [
         'detail_ids' => [$detail->id],
-        'production_status_id' => statusFor('mural', 2)->id,
+        'production_status_id' => stageOf($product, 2)->id,
     ]);
 
-    expect($stockable->refresh()->quantity)->toBe(9)
-        ->and($detail->refresh()->stock_deducted_at)->not->toBeNull();
+    expect($tiras->refresh()->quantity)->toBe(8)
+        ->and($bolsas->refresh()->quantity)->toBe(10);
 
-    // Advancing further does not deduct again
+    // Reaching the last stage consumes the bag but not the strips again
     post(route('tracking.batch'), [
         'detail_ids' => [$detail->id],
-        'production_status_id' => statusFor('mural', 3)->id,
+        'production_status_id' => stageOf($product, 3)->id,
     ]);
 
-    expect($stockable->refresh()->quantity)->toBe(9)
-        ->and($stockable->movements()->count())->toBe(1)
-        ->and($stockable->movements()->first()?->reason)->toBe('producción');
+    expect($tiras->refresh()->quantity)->toBe(8)
+        ->and($bolsas->refresh()->quantity)->toBe(9)
+        ->and($tiras->movements()->count())->toBe(1)
+        ->and($tiras->movements()->first()?->quantity)->toBe(-2);
+});
+
+it('deducts the skipped stages on a batch jump', function () {
+    actingAsRole(UserRole::Worker);
+
+    $product = productWithChain(['Pendiente', 'Corte', 'Embolsado']);
+    $tiras = Stockable::factory()->create(['quantity' => 10]);
+    $bolsas = Stockable::factory()->create(['quantity' => 10]);
+    stageOf($product, 2)->stockables()->attach($tiras->id, ['quantity' => 2]);
+    stageOf($product, 3)->stockables()->attach($bolsas->id, ['quantity' => 1]);
+
+    $detail = OrderDetail::factory()->create(['product_id' => $product->id]);
+
+    // Jumping straight to the last stage consumes everything in between
+    post(route('tracking.batch'), [
+        'detail_ids' => [$detail->id],
+        'production_status_id' => stageOf($product, 3)->id,
+    ]);
+
+    expect($tiras->refresh()->quantity)->toBe(8)
+        ->and($bolsas->refresh()->quantity)->toBe(9);
+});
+
+it('never deducts twice when moving back and forth', function () {
+    actingAsRole(UserRole::Worker);
+
+    $product = productWithChain(['Pendiente', 'Corte', 'Embolsado']);
+    $tiras = Stockable::factory()->create(['quantity' => 10]);
+    stageOf($product, 2)->stockables()->attach($tiras->id, ['quantity' => 2]);
+
+    $detail = OrderDetail::factory()->create(['product_id' => $product->id]);
+
+    post(route('tracking.batch'), [
+        'detail_ids' => [$detail->id],
+        'production_status_id' => stageOf($product, 2)->id,
+    ]);
+
+    // Going back does not return stock...
+    post(route('tracking.batch'), [
+        'detail_ids' => [$detail->id],
+        'production_status_id' => stageOf($product, 1)->id,
+    ]);
+
+    expect($tiras->refresh()->quantity)->toBe(8);
+
+    // ...and reaching the stage again does not deduct twice
+    post(route('tracking.batch'), [
+        'detail_ids' => [$detail->id],
+        'production_status_id' => stageOf($product, 2)->id,
+    ]);
+
+    expect($tiras->refresh()->quantity)->toBe(8)
+        ->and($tiras->movements()->count())->toBe(1);
 });
 
 it('lists only pending details of active orders', function () {
