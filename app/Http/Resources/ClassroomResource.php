@@ -23,6 +23,15 @@ class ClassroomResource extends JsonResource
             'id' => $this->id,
             'name' => strtoupper($this->name),
             'teacher' => new ContactResource($this->teacher),
+            'school' => $this->whenLoaded('school', function () {
+                /** @var \App\Models\School $school */
+                $school = $this->school;
+
+                return [
+                    'id' => $school->id,
+                    'name' => $school->name,
+                ];
+            }),
         ];
     }
 }

@@ -60,7 +60,7 @@ class TrackingController extends Controller
                 return $query->where('production_status_id', $production_status_id);
             })
             ->orderByDesc('priority')
-            ->orderBy('status_updated_at')
+            ->orderBy('order_id')
             ->orderBy('id')
             ->limit(500)
             ->get();

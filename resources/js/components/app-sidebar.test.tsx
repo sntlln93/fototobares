@@ -50,6 +50,7 @@ describe('AppSidebar', () => {
             'Seguimiento',
             'Stockeables',
             'Reciclaje',
+            'Etapas',
             'Usuarios',
         ]) {
             expect(screen.getByText(item)).toBeTruthy();
@@ -73,6 +74,7 @@ describe('AppSidebar', () => {
             'Escuelas',
             'Combos',
             'Productos',
+            'Etapas',
             'Usuarios',
         ]) {
             expect(screen.queryByText(item)).toBeNull();
@@ -83,6 +85,7 @@ describe('AppSidebar', () => {
         renderSidebarAs(['administración']);
 
         expect(screen.getByText('Pedidos')).toBeTruthy();
+        expect(screen.getByText('Etapas')).toBeTruthy();
         expect(screen.queryByText('Usuarios')).toBeNull();
     });
 
