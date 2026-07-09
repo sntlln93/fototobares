@@ -15,7 +15,7 @@ import { onSort } from '@/lib/services/filter';
 import { cn, formatPrice } from '@/lib/utils';
 import { BreadcrumbItem } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
-import { ArrowUpDown, Eye, School, Trash } from 'lucide-react';
+import { ArrowUpDown, Eye, FileText, School, Trash } from 'lucide-react';
 import { useState } from 'react';
 import { DeleteOrderConfirmation } from './partials/delete-confirmation';
 
@@ -77,6 +77,16 @@ export default function Orders({
                             <School />
                         </Button>
                     </Combobox>
+                    <Link
+                        href={route('drafts.index')}
+                        className={cn(
+                            buttonVariants({ variant: 'outline' }),
+                            'ml-auto',
+                        )}
+                    >
+                        <FileText />
+                        Borradores
+                    </Link>
                 </div>
                 <Table>
                     <TableHeader>
