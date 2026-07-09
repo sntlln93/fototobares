@@ -17,4 +17,12 @@ class ProductionStatus extends Model
     {
         return $this->belongsTo(ProductType::class);
     }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<OrderDetail, $this>
+     */
+    public function orderDetails()
+    {
+        return $this->hasMany(OrderDetail::class);
+    }
 }
