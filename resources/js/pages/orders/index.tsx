@@ -51,7 +51,7 @@ export default function Orders({
             )}
 
             <section className="p-6">
-                <div className="mb-4 flex gap-4">
+                <div className="mb-4 flex flex-wrap gap-4">
                     <Searchbar indexRoute="orders.index" />
                     <Combobox
                         items={schools.map((school) => ({
