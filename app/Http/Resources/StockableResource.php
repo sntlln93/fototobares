@@ -21,7 +21,17 @@ class StockableResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'quantity' => $this->quantity,
-            'products' => ProductResource::collection($this->products),
+            // Products consuming this stockable, derived through the
+            // production stages that use it
+            'products' => $this->whenLoaded('productionStatuses', function () {
+                $products = $this->productionStatuses
+                    ->map(fn ($status) => $status->product)
+                    ->filter()
+                    ->unique('id')
+                    ->values();
+
+                return ProductResource::collection($products);
+            }),
             'unit' => $this->unit,
             'alert_at' => $this->alert_at,
         ];

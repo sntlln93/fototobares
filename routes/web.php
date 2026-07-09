@@ -12,6 +12,7 @@ use App\Http\Controllers\BO\PaymentController;
 use App\Http\Controllers\BO\PhotoController;
 use App\Http\Controllers\BO\ProductController;
 use App\Http\Controllers\BO\ProductionStatusController;
+use App\Http\Controllers\BO\ProductionStatusStockableController;
 use App\Http\Controllers\BO\RecyclingController;
 use App\Http\Controllers\BO\SchoolController;
 use App\Http\Controllers\BO\StockController;
@@ -57,13 +58,15 @@ Route::middleware(['auth', 'role:master,administración,oficina,taller'])->group
     Route::get('/recycling', [RecyclingController::class, 'index'])->name('recycling.index');
 });
 
-// Etapas de producción por tipo de producto: solo gerencia
+// Etapas de producción por producto y sus consumos de insumos: solo gerencia
 Route::middleware(['auth', 'role:master,administración'])->group(function () {
     Route::get('/production-statuses', [ProductionStatusController::class, 'index'])->name('production-statuses.index');
     Route::post('/production-statuses', [ProductionStatusController::class, 'store'])->name('production-statuses.store');
     Route::put('/production-statuses/reorder', [ProductionStatusController::class, 'reorder'])->name('production-statuses.reorder');
     Route::put('/production-statuses/{productionStatus}', [ProductionStatusController::class, 'update'])->name('production-statuses.update');
     Route::delete('/production-statuses/{productionStatus}', [ProductionStatusController::class, 'destroy'])->name('production-statuses.destroy');
+    Route::post('/production-statuses/{productionStatus}/stockables', [ProductionStatusStockableController::class, 'store'])->name('production-statuses.stockables.store');
+    Route::delete('/production-statuses/{productionStatus}/stockables/{stockable}', [ProductionStatusStockableController::class, 'destroy'])->name('production-statuses.stockables.destroy');
 });
 
 // Gestión de usuarios: solo gerencia

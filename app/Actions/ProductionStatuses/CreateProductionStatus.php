@@ -9,16 +9,16 @@ use App\Models\ProductionStatus;
 class CreateProductionStatus
 {
     /**
-     * Append a new stage at the end of the product type's chain.
+     * Append a new stage at the end of the product's chain.
      */
-    public function handle(int $productTypeId, string $name): ProductionStatus
+    public function handle(int $productId, string $name): ProductionStatus
     {
         $lastPosition = ProductionStatus::query()
-            ->where('product_type_id', $productTypeId)
+            ->where('product_id', $productId)
             ->max('position');
 
         return ProductionStatus::create([
-            'product_type_id' => $productTypeId,
+            'product_id' => $productId,
             'name' => $name,
             'position' => (is_numeric($lastPosition) ? (int) $lastPosition : 0) + 1,
         ]);

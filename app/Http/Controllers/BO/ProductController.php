@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\BO;
 
+use App\Actions\Products\CreateProduct;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\BO\StoreProductRequest;
 use App\Http\Resources\ProductResource;
@@ -28,11 +29,9 @@ class ProductController extends Controller
         return Inertia::render('products/create', ['product_types' => $types]);
     }
 
-    public function store(StoreProductRequest $request): \Illuminate\Http\RedirectResponse
+    public function store(StoreProductRequest $request, CreateProduct $action): \Illuminate\Http\RedirectResponse
     {
-        $validated = $request->validated();
-
-        Product::create($validated);
+        $action->handle($request->validated());
 
         return redirect()->route('products.index');
     }
@@ -60,7 +59,6 @@ class ProductController extends Controller
     {
         DB::transaction(function () use ($product) {
             $product->combos()->detach();
-            $product->stockables()->detach();
             $product->delete();
         });
 

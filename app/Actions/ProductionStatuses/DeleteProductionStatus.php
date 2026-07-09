@@ -14,17 +14,18 @@ class DeleteProductionStatus
      * Delete an unused stage and close the gap it leaves in the chain.
      *
      * @throws ValidationException when the stage is the only one of its
-     *                             type or has details currently in it
+     *                             product, has details currently in it
+     *                             or consumes stockables
      */
     public function handle(ProductionStatus $status): void
     {
         $siblings = ProductionStatus::query()
-            ->where('product_type_id', $status->product_type_id)
+            ->where('product_id', $status->product_id)
             ->count();
 
         if ($siblings <= 1) {
             throw ValidationException::withMessages([
-                'status' => 'No se puede eliminar la única etapa del tipo de producto.',
+                'status' => 'No se puede eliminar la única etapa del producto.',
             ]);
         }
 
@@ -34,17 +35,23 @@ class DeleteProductionStatus
             ]);
         }
 
+        if ($status->stockables()->exists()) {
+            throw ValidationException::withMessages([
+                'status' => 'No se puede eliminar: esta etapa consume insumos. Quitá esa configuración primero.',
+            ]);
+        }
+
         DB::transaction(function () use ($status) {
             $status->delete();
 
-            $this->compactPositions($status->product_type_id);
+            $this->compactPositions($status->product_id);
         });
     }
 
-    private function compactPositions(int $productTypeId): void
+    private function compactPositions(int $productId): void
     {
         $statuses = ProductionStatus::query()
-            ->where('product_type_id', $productTypeId)
+            ->where('product_id', $productId)
             ->orderBy('position')
             ->get();
 

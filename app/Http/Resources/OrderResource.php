@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Storage;
 class OrderResource extends JsonResource
 {
     /**
-     * Last production position by product type, cached for the request.
+     * Last production position by product, cached for the request.
      *
      * @var array<int, int>|null
      */
@@ -166,7 +166,7 @@ class OrderResource extends JsonResource
                 return false;
             }
 
-            return $status->position === ($lastPositions[$status->product_type_id] ?? null);
+            return $status->position === ($lastPositions[$status->product_id] ?? null);
         });
 
         return $allFinished ? 'terminado' : 'en producción';
@@ -180,9 +180,9 @@ class OrderResource extends JsonResource
         if (self::$lastPositions === null) {
             /** @var array<int, int> $positions */
             $positions = ProductionStatus::query()
-                ->selectRaw('product_type_id, MAX(position) as last_position')
-                ->groupBy('product_type_id')
-                ->pluck('last_position', 'product_type_id')
+                ->selectRaw('product_id, MAX(position) as last_position')
+                ->groupBy('product_id')
+                ->pluck('last_position', 'product_id')
                 ->all();
 
             self::$lastPositions = $positions;
