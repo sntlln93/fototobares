@@ -26,7 +26,6 @@ return new class extends Migration
             $table->foreignId('production_status_id')->nullable()->constrained();
             $table->timestamp('status_updated_at')->nullable();
             $table->boolean('priority')->default(false);
-            $table->timestamp('stock_deducted_at')->nullable();
             $table->string('recycled_to')->nullable();
             $table->timestamp('delivered_at')->nullable();
             $table->timestamps();

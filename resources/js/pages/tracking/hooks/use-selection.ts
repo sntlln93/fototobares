@@ -1,3 +1,5 @@
+import { useState } from 'react';
+
 /**
  * Toggles a single detail in the batch selection.
  */
@@ -7,7 +9,7 @@ export const toggleId = (selected: number[], id: number): number[] =>
         : [...selected, id];
 
 /**
- * Toggles a whole product type group: unselects it when every item is
+ * Toggles a whole product group: unselects it when every item is
  * already selected, selects the missing ones otherwise.
  */
 export const toggleGroup = (
@@ -30,3 +32,18 @@ export const nextStatusFor = (
     position: number,
 ): ProductionStatus | undefined =>
     statuses.find((status) => status.position === position + 1);
+
+/**
+ * Batch selection state for the tracking table.
+ */
+export function useSelection() {
+    const [selected, setSelected] = useState<number[]>([]);
+
+    return {
+        selected,
+        toggle: (id: number) => setSelected((prev) => toggleId(prev, id)),
+        toggleGroupItems: (ids: number[]) =>
+            setSelected((prev) => toggleGroup(prev, ids)),
+        clear: () => setSelected([]),
+    };
+}

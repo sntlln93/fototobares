@@ -11,33 +11,39 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\BO\ReorderProductionStatusesRequest;
 use App\Http\Requests\BO\StoreProductionStatusRequest;
 use App\Http\Requests\BO\UpdateProductionStatusRequest;
-use App\Http\Resources\ProductTypeResource;
+use App\Http\Resources\ProductStagesResource;
+use App\Models\Product;
 use App\Models\ProductionStatus;
-use App\Models\ProductType;
+use App\Models\Stockable;
 use Inertia\Inertia;
 
 class ProductionStatusController extends Controller
 {
     public function index(): \Inertia\Response
     {
-        $types = ProductType::query()
-            ->with(['productionStatuses' => fn ($query) => $query
+        $products = Product::query()
+            ->with(['type', 'productionStatuses' => fn ($query) => $query
                 ->withCount(['orderDetails as details_count'])
-                ->orderBy('position'),
+                ->with('stockables'),
             ])
+            ->orderBy('product_type_id')
+            ->orderBy('name')
             ->get();
 
         return Inertia::render('production-statuses/index', [
-            'productTypes' => ProductTypeResource::collection($types)->resolve(),
+            'products' => ProductStagesResource::collection($products)->resolve(),
+            'stockables' => Stockable::query()
+                ->orderBy('name')
+                ->get(['id', 'name', 'unit']),
         ]);
     }
 
     public function store(StoreProductionStatusRequest $request, CreateProductionStatus $action): \Illuminate\Http\RedirectResponse
     {
-        /** @var array{product_type_id: int, name: string} $validated */
+        /** @var array{product_id: int, name: string} $validated */
         $validated = $request->validated();
 
-        $action->handle($validated['product_type_id'], $validated['name']);
+        $action->handle($validated['product_id'], $validated['name']);
 
         return back()->with('success', "Etapa \"{$validated['name']}\" agregada");
     }
@@ -58,10 +64,10 @@ class ProductionStatusController extends Controller
 
     public function reorder(ReorderProductionStatusesRequest $request, ReorderProductionStatuses $action): \Illuminate\Http\RedirectResponse
     {
-        /** @var array{product_type_id: int, ordered_ids: array<int, int>} $validated */
+        /** @var array{product_id: int, ordered_ids: array<int, int>} $validated */
         $validated = $request->validated();
 
-        $action->handle($validated['product_type_id'], $validated['ordered_ids']);
+        $action->handle($validated['product_id'], $validated['ordered_ids']);
 
         return back()->with('success', 'Orden de etapas actualizado');
     }

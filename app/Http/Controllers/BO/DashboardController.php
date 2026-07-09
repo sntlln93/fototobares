@@ -45,9 +45,9 @@ class DashboardController extends Controller
 
         /** @var array<int, int> $lastPositions */
         $lastPositions = ProductionStatus::query()
-            ->selectRaw('product_type_id, MAX(position) as last_position')
-            ->groupBy('product_type_id')
-            ->pluck('last_position', 'product_type_id')
+            ->selectRaw('product_id, MAX(position) as last_position')
+            ->groupBy('product_id')
+            ->pluck('last_position', 'product_id')
             ->all();
 
         $detailsByStatus = (clone $activeDetails)
@@ -61,7 +61,7 @@ class DashboardController extends Controller
                 /** @var ProductionStatus $status */
                 $status = $detail->productionStatus;
 
-                return $status->position === ($lastPositions[$status->product_type_id] ?? 0)
+                return $status->position === ($lastPositions[$status->product_id] ?? 0)
                     ? 'listo para entregar'
                     : 'en producción';
             })

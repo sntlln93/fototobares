@@ -7,7 +7,6 @@ namespace App\Http\Controllers\BO;
 use App\Enums\Unit;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\StockableResource;
-use App\Models\Product;
 use App\Models\Stockable;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -27,7 +26,7 @@ class StockController extends Controller
         /** @var string sort_order */
         $sort_order = $request->query('sort_order') ?? 'asc';
 
-        $stockables = Stockable::with('products')
+        $stockables = Stockable::with('productionStatuses.product')
             ->when($request->query('search'), function ($q) use ($search) {
                 return $q->where('name', 'like', "%$search%")
                     ->orWhere('unit', 'like', "%$search%")
@@ -43,9 +42,7 @@ class StockController extends Controller
 
     public function create(): \Inertia\Response
     {
-        return Inertia::render('stock/create', [
-            'products' => Product::all(),
-        ]);
+        return Inertia::render('stock/create');
     }
 
     public function store(Request $request): \Illuminate\Http\RedirectResponse
@@ -57,14 +54,7 @@ class StockController extends Controller
             'unit' => ['required'],
         ]);
 
-        $related_products = $request->validate([
-            'products' => ['required', 'sometimes'],
-            'products.*' => ['exists:products,id'],
-        ]);
-
-        Stockable::create($validated)
-            ->products()
-            ->sync($related_products['products']);
+        Stockable::create($validated);
 
         return redirect(route('stockables.index'));
     }
@@ -78,22 +68,7 @@ class StockController extends Controller
             'unit' => ['sometimes', Rule::in(Unit::cases())],
         ]);
 
-        $related_products = $request->validate([
-            'products' => ['required', 'sometimes'],
-            'products.*' => ['exists:products,id'],
-        ]);
-
-        DB::transaction(function () use (
-            $related_products,
-            $validated,
-            $stockable,
-        ) {
-            $stockable->update($validated);
-
-            if (isset($related_products['products'])) {
-                $stockable->products()->sync($related_products['products']);
-            }
-        });
+        $stockable->update($validated);
 
         return redirect(route('stockables.index'));
     }
@@ -101,15 +76,14 @@ class StockController extends Controller
     public function edit(Stockable $stockable): \Inertia\Response
     {
         return Inertia::render('stock/edit', [
-            'products' => Product::all(),
-            'stockable' => $stockable->load('products'),
+            'stockable' => $stockable,
         ]);
     }
 
     public function destroy(Stockable $stockable): \Illuminate\Http\RedirectResponse
     {
         DB::transaction(function () use ($stockable) {
-            $stockable->products()->detach();
+            $stockable->productionStatuses()->detach();
             $stockable->delete();
         });
 

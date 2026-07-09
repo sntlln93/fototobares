@@ -3,8 +3,8 @@
 declare(strict_types=1);
 
 use App\Enums\UserRole;
+use App\Models\Product;
 use App\Models\ProductionStatus;
-use App\Models\ProductType;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -32,12 +32,44 @@ function actingAsRole(UserRole $role = UserRole::Admin): User
 }
 
 /**
- * Production status seeded by the migrations, by product type name and position.
+ * Production status seeded by the migrations, by product name and position.
  */
-function statusFor(string $type, int $position): ProductionStatus
+function statusFor(string $productName, int $position): ProductionStatus
 {
     return ProductionStatus::query()
-        ->where('product_type_id', ProductType::where('name', $type)->firstOrFail()->id)
+        ->where('product_id', Product::where('name', $productName)->firstOrFail()->id)
+        ->where('position', $position)
+        ->firstOrFail();
+}
+
+/**
+ * Create a factory product owning a production chain with the given
+ * stage names.
+ *
+ * @param  array<int, string>  $stages
+ */
+function productWithChain(array $stages = ['Pendiente', 'Impreso', 'Embolsado'], ?Product $product = null): Product
+{
+    $product ??= Product::factory()->create();
+
+    foreach ($stages as $position => $name) {
+        ProductionStatus::create([
+            'product_id' => $product->id,
+            'name' => $name,
+            'position' => $position + 1,
+        ]);
+    }
+
+    return $product;
+}
+
+/**
+ * Stage of a product's chain, by position.
+ */
+function stageOf(Product $product, int $position): ProductionStatus
+{
+    return ProductionStatus::query()
+        ->where('product_id', $product->id)
         ->where('position', $position)
         ->firstOrFail();
 }
