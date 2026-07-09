@@ -6,7 +6,7 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
-import { capitalize } from '@/lib/utils';
+import { capitalize, formatPrice } from '@/lib/utils';
 import { ProductIcon } from '../products/partials/product-icon';
 
 export function Details({ products }: { products: OrderProduct[] }) {
@@ -52,14 +52,14 @@ function DetailItem({ product }: { product: OrderProduct }) {
                 </p>
                 <div className="mt-2 flex flex-wrap gap-2 text-xs">
                     <span className="rounded bg-gray-100 px-2 py-1 text-gray-700 dark:bg-gray-800 dark:text-gray-300">
-                        ${product.unit_price / 100}
+                        {formatPrice(product.unit_price)}
                     </span>
                     <span className="rounded bg-blue-100 px-2 py-1 text-blue-700 dark:bg-blue-900 dark:text-blue-200">
                         {product.max_payments} cuotas
                     </span>
                     {product.financed_price && (
                         <span className="rounded bg-green-100 px-2 py-1 text-green-700 dark:bg-green-900 dark:text-green-200">
-                            ${product.financed_price / 100} financiado
+                            {formatPrice(product.financed_price)} financiado
                         </span>
                     )}
                 </div>
