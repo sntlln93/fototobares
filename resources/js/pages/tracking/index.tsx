@@ -109,7 +109,7 @@ export default function Tracking({
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Seguimiento" />
 
-            <section className="flex flex-col gap-6 p-6">
+            <section className="flex flex-col gap-6 p-4 md:p-6">
                 <TrackingFilters
                     filters={filters}
                     schools={schools}

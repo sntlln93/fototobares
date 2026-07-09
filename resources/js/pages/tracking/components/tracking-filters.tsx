@@ -44,7 +44,7 @@ export function TrackingFilters({
                     placeholder="Niño, cliente o n° de pedido"
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    className="w-64"
+                    className="min-w-0 flex-1 md:w-64 md:flex-none"
                 />
                 <Button type="submit" variant="secondary" size="icon">
                     <Search className="h-4 w-4" />
