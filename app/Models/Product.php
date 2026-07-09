@@ -20,11 +20,11 @@ class Product extends Model
     ];
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany<Stockable, $this>
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<ProductionStatus, $this>
      */
-    public function stockables()
+    public function productionStatuses()
     {
-        return $this->belongsToMany(Stockable::class);
+        return $this->hasMany(ProductionStatus::class)->orderBy('position');
     }
 
     /**

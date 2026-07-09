@@ -15,10 +15,10 @@ return new class extends Migration
     {
         Schema::create('production_statuses', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('product_type_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('product_id')->constrained();
             $table->string('name');
             $table->unsignedInteger('position');
-            $table->unique(['product_type_id', 'position']);
+            $table->unique(['product_id', 'position']);
         });
     }
 
