@@ -16,15 +16,18 @@ it('enforces route access by role', function (UserRole $role, string $routeName,
     'master ve pedidos' => [UserRole::Master, 'orders.index', 200],
     'master ve seguimiento' => [UserRole::Master, 'tracking.index', 200],
     'master ve usuarios' => [UserRole::Master, 'users.index', 200],
+    'master ve etapas' => [UserRole::Master, 'production-statuses.index', 200],
 
     // administración: todo el día a día, sin gestión de usuarios
     'administración ve pedidos' => [UserRole::Admin, 'orders.index', 200],
     'administración ve seguimiento' => [UserRole::Admin, 'tracking.index', 200],
+    'administración ve etapas' => [UserRole::Admin, 'production-statuses.index', 200],
     'administración no ve usuarios' => [UserRole::Admin, 'users.index', 403],
 
-    // oficina: como administración
+    // oficina: como administración, sin configuración de etapas
     'oficina ve pedidos' => [UserRole::Office, 'orders.index', 200],
     'oficina ve stock' => [UserRole::Office, 'stockables.index', 200],
+    'oficina no ve etapas' => [UserRole::Office, 'production-statuses.index', 403],
     'oficina no ve usuarios' => [UserRole::Office, 'users.index', 403],
 
     // taller: solo producción y stock
@@ -34,6 +37,7 @@ it('enforces route access by role', function (UserRole $role, string $routeName,
     'taller ve stock' => [UserRole::Worker, 'stockables.index', 200],
     'taller ve movimientos' => [UserRole::Worker, 'stock-movements.index', 200],
     'taller ve reciclaje' => [UserRole::Worker, 'recycling.index', 200],
+    'taller no ve etapas' => [UserRole::Worker, 'production-statuses.index', 403],
     'taller no ve usuarios' => [UserRole::Worker, 'users.index', 403],
 
     // editor: solo fotos (se prueba aparte, requiere un curso)

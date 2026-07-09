@@ -77,12 +77,19 @@ export function CreatePaymentModal({
                     <Select
                         value={PAYMENT_TYPES.find((type) => type === data.type)}
                         name="type"
-                        onValueChange={(value) =>
-                            setData(
-                                'type',
-                                value as (typeof PAYMENT_TYPES)[number],
-                            )
-                        }
+                        onValueChange={(value) => {
+                            const type =
+                                value as (typeof PAYMENT_TYPES)[number];
+
+                            setData((current) => ({
+                                ...current,
+                                type,
+                                proof_of_payment:
+                                    type === 'transferencia'
+                                        ? current.proof_of_payment
+                                        : null,
+                            }));
+                        }}
                     >
                         <SelectTrigger>
                             <SelectValue />
@@ -98,29 +105,31 @@ export function CreatePaymentModal({
                     <InputError message={errors.type} />
                 </div>
 
-                <div className="mt-2">
-                    <Label htmlFor="proof_of_payment">
-                        Comprobante de transferencia (opcional)
-                    </Label>
-                    <InputHint
-                        className="text-xs"
-                        message="Imagen o PDF de hasta 5MB (MercadoPago, banco, etc.)"
-                    />
-                    <Input
-                        id="proof_of_payment"
-                        type="file"
-                        name="proof_of_payment"
-                        accept="image/jpeg,image/png,image/webp,application/pdf"
-                        onChange={(event) =>
-                            setData(
-                                'proof_of_payment',
-                                event.target.files?.[0] ?? null,
-                            )
-                        }
-                        className="mt-1 block w-full"
-                    />
-                    <InputError message={errors.proof_of_payment} />
-                </div>
+                {data.type === 'transferencia' && (
+                    <div className="mt-2">
+                        <Label htmlFor="proof_of_payment">
+                            Comprobante de transferencia (opcional)
+                        </Label>
+                        <InputHint
+                            className="text-xs"
+                            message="Imagen o PDF de hasta 5MB (MercadoPago, banco, etc.)"
+                        />
+                        <Input
+                            id="proof_of_payment"
+                            type="file"
+                            name="proof_of_payment"
+                            accept="image/jpeg,image/png,image/webp,application/pdf"
+                            onChange={(event) =>
+                                setData(
+                                    'proof_of_payment',
+                                    event.target.files?.[0] ?? null,
+                                )
+                            }
+                            className="mt-1 block w-full"
+                        />
+                        <InputError message={errors.proof_of_payment} />
+                    </div>
+                )}
 
                 <div className="mt-6 grid grid-cols-[1fr_1fr] gap-2">
                     <Button

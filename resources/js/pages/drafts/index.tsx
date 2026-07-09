@@ -31,7 +31,7 @@ export default function DraftsIndex({
         total_price: number;
         payment_plan: number;
         due_date: string;
-        classroom: Classroom & { school: School };
+        classroom: Classroom & { school?: School };
         created_at: string;
     }>;
 }>) {
@@ -111,8 +111,9 @@ export default function DraftsIndex({
                                         {draft.client_name || 'Sin especificar'}
                                     </TableCell>
                                     <TableCell>
-                                        {draft.classroom.school.name} (
-                                        {draft.classroom.name})
+                                        {draft.classroom.school
+                                            ? `${draft.classroom.school.name} (${draft.classroom.name})`
+                                            : draft.classroom.name}
                                     </TableCell>
                                     <TableCell>
                                         {formatPrice(draft.total_price)}

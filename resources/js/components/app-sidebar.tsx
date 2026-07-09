@@ -14,6 +14,7 @@ import { Link, usePage } from '@inertiajs/react';
 import {
     Group,
     Home,
+    ListOrdered,
     Package,
     PackageOpen,
     Recycle,
@@ -27,6 +28,7 @@ import { NavUser } from './nav-user';
 
 const SALES = ['master', 'administración', 'oficina'];
 const PRODUCTION = ['master', 'administración', 'oficina', 'taller'];
+const MANAGEMENT = ['master', 'administración'];
 
 const routeables = [
     { name: 'Dashboard', route: 'dashboard', icon: Home, roles: null },
@@ -56,6 +58,12 @@ const routeables = [
         route: 'recycling.index',
         icon: Recycle,
         roles: PRODUCTION,
+    },
+    {
+        name: 'Etapas',
+        route: 'production-statuses.index',
+        icon: ListOrdered,
+        roles: MANAGEMENT,
     },
     { name: 'Usuarios', route: 'users.index', icon: Users, roles: ['master'] },
 ] as const;
