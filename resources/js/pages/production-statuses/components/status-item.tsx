@@ -87,11 +87,11 @@ export function StatusItem({
     }
 
     return (
-        <div className="flex items-center gap-2 rounded-lg border border-gray-200 p-2 dark:border-gray-700">
+        <div className="flex flex-wrap items-center gap-2 rounded-lg border border-gray-200 p-2 dark:border-gray-700">
             <Badge variant="outline" className="w-8 justify-center">
                 {status.position}
             </Badge>
-            <div className="flex flex-1 flex-col">
+            <div className="flex min-w-32 flex-1 flex-col">
                 <span className="text-sm">{status.name}</span>
                 {consumes && (
                     <span className="text-xs text-gray-500">
@@ -109,57 +109,59 @@ export function StatusItem({
                     {status.details_count} en curso
                 </span>
             )}
-            <Button
-                size="sm"
-                variant="ghost"
-                disabled={isFirst}
-                title="Subir"
-                onClick={onMoveUp}
-            >
-                <ArrowUp className="h-4 w-4" />
-            </Button>
-            <Button
-                size="sm"
-                variant="ghost"
-                disabled={isLast}
-                title="Bajar"
-                onClick={onMoveDown}
-            >
-                <ArrowDown className="h-4 w-4" />
-            </Button>
-            <Button
-                size="sm"
-                variant="ghost"
-                title="Insumos que consume esta etapa"
-                onClick={onEditConsumption}
-            >
-                <Package className="h-4 w-4" />
-            </Button>
-            <Button
-                size="sm"
-                variant="ghost"
-                title="Renombrar"
-                onClick={() => setEditing(true)}
-            >
-                <Pencil className="h-4 w-4" />
-            </Button>
-            <Button
-                size="sm"
-                variant="ghost"
-                disabled={isOnly || inUse || consumes}
-                title={
-                    isOnly
-                        ? 'No se puede eliminar la única etapa'
-                        : inUse
-                          ? 'Hay productos en esta etapa'
-                          : consumes
-                            ? 'Esta etapa consume insumos'
-                            : 'Eliminar'
-                }
-                onClick={onDelete}
-            >
-                <Trash2 className="h-4 w-4" />
-            </Button>
+            <div className="ml-auto flex items-center">
+                <Button
+                    size="sm"
+                    variant="ghost"
+                    disabled={isFirst}
+                    title="Subir"
+                    onClick={onMoveUp}
+                >
+                    <ArrowUp className="h-4 w-4" />
+                </Button>
+                <Button
+                    size="sm"
+                    variant="ghost"
+                    disabled={isLast}
+                    title="Bajar"
+                    onClick={onMoveDown}
+                >
+                    <ArrowDown className="h-4 w-4" />
+                </Button>
+                <Button
+                    size="sm"
+                    variant="ghost"
+                    title="Insumos que consume esta etapa"
+                    onClick={onEditConsumption}
+                >
+                    <Package className="h-4 w-4" />
+                </Button>
+                <Button
+                    size="sm"
+                    variant="ghost"
+                    title="Renombrar"
+                    onClick={() => setEditing(true)}
+                >
+                    <Pencil className="h-4 w-4" />
+                </Button>
+                <Button
+                    size="sm"
+                    variant="ghost"
+                    disabled={isOnly || inUse || consumes}
+                    title={
+                        isOnly
+                            ? 'No se puede eliminar la única etapa'
+                            : inUse
+                              ? 'Hay productos en esta etapa'
+                              : consumes
+                                ? 'Esta etapa consume insumos'
+                                : 'Eliminar'
+                    }
+                    onClick={onDelete}
+                >
+                    <Trash2 className="h-4 w-4" />
+                </Button>
+            </div>
         </div>
     );
 }

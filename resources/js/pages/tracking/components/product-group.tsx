@@ -17,6 +17,7 @@ import {
 import { capitalize } from '@/lib/utils';
 import { useState } from 'react';
 import { nextStatusFor } from '../hooks/use-selection';
+import { DetailCard } from './detail-card';
 import { DetailRow } from './detail-row';
 
 export type TrackingDetail = {
@@ -79,7 +80,7 @@ export function ProductGroup({
     return (
         <div className="rounded-xl border border-input">
             <header className="flex flex-col gap-3 border-b border-input p-4 md:flex-row md:items-center md:justify-between">
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                     <h2 className="text-lg font-semibold">{product.name}</h2>
                     {product.type && (
                         <Badge variant="outline">
@@ -94,7 +95,7 @@ export function ProductGroup({
 
                 <div className="flex items-center gap-2">
                     <Select value={batchStatus} onValueChange={setBatchStatus}>
-                        <SelectTrigger className="w-48">
+                        <SelectTrigger className="min-w-0 flex-1 md:w-48 md:flex-none">
                             <SelectValue placeholder="Cambiar estado a..." />
                         </SelectTrigger>
                         <SelectContent>
@@ -128,43 +129,70 @@ export function ProductGroup({
                 </div>
             </header>
 
-            <Table>
-                <TableHeader>
-                    <TableRow>
-                        <TableHead className="w-[40px]">
-                            <input
-                                type="checkbox"
-                                aria-label="Seleccionar todos"
-                                checked={allSelected}
-                                onChange={onToggleGroup}
-                                className="h-4 w-4 cursor-pointer"
+            <div className="md:hidden">
+                <label className="flex items-center gap-3 border-b border-input p-4">
+                    <input
+                        type="checkbox"
+                        aria-label="Seleccionar todos"
+                        checked={allSelected}
+                        onChange={onToggleGroup}
+                        className="h-5 w-5 cursor-pointer"
+                    />
+                    <span className="text-sm text-gray-500">
+                        Seleccionar todos
+                    </span>
+                </label>
+                {items.map((detail) => (
+                    <DetailCard
+                        key={detail.id}
+                        detail={detail}
+                        next={nextStatusFor(product.statuses, detail.position)}
+                        checked={selected.includes(detail.id)}
+                        onToggle={() => onToggle(detail.id)}
+                        onApplyStatus={onApplyStatus}
+                    />
+                ))}
+            </div>
+
+            <div className="hidden md:block">
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead className="w-[40px]">
+                                <input
+                                    type="checkbox"
+                                    aria-label="Seleccionar todos"
+                                    checked={allSelected}
+                                    onChange={onToggleGroup}
+                                    className="h-4 w-4 cursor-pointer"
+                                />
+                            </TableHead>
+                            <TableHead>Pedido</TableHead>
+                            <TableHead>Niño / Cliente</TableHead>
+                            <TableHead>Escuela (Aula)</TableHead>
+                            <TableHead>Producto</TableHead>
+                            <TableHead>Notas</TableHead>
+                            <TableHead>Estado</TableHead>
+                            <TableHead>Acciones</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {items.map((detail) => (
+                            <DetailRow
+                                key={detail.id}
+                                detail={detail}
+                                next={nextStatusFor(
+                                    product.statuses,
+                                    detail.position,
+                                )}
+                                checked={selected.includes(detail.id)}
+                                onToggle={() => onToggle(detail.id)}
+                                onApplyStatus={onApplyStatus}
                             />
-                        </TableHead>
-                        <TableHead>Pedido</TableHead>
-                        <TableHead>Niño / Cliente</TableHead>
-                        <TableHead>Escuela (Aula)</TableHead>
-                        <TableHead>Producto</TableHead>
-                        <TableHead>Notas</TableHead>
-                        <TableHead>Estado</TableHead>
-                        <TableHead>Acciones</TableHead>
-                    </TableRow>
-                </TableHeader>
-                <TableBody>
-                    {items.map((detail) => (
-                        <DetailRow
-                            key={detail.id}
-                            detail={detail}
-                            next={nextStatusFor(
-                                product.statuses,
-                                detail.position,
-                            )}
-                            checked={selected.includes(detail.id)}
-                            onToggle={() => onToggle(detail.id)}
-                            onApplyStatus={onApplyStatus}
-                        />
-                    ))}
-                </TableBody>
-            </Table>
+                        ))}
+                    </TableBody>
+                </Table>
+            </div>
         </div>
     );
 }
