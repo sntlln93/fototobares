@@ -252,7 +252,15 @@ export default function CreateOrder({
 
     const handleEditProduct = (index: number) => {
         const selected = data.order_details[index];
-        const product = products.find((p) => p.id === selected.product_id);
+        // Combo items must keep the pivot-restricted variants, not the
+        // full catalog ones
+        const combo =
+            selected.combo_id !== undefined
+                ? combos.find((c) => c.id === selected.combo_id)
+                : undefined;
+        const product =
+            combo?.products.find((p) => p.id === selected.product_id) ??
+            products.find((p) => p.id === selected.product_id);
 
         if (!product) return;
 

@@ -79,6 +79,9 @@ class OrderResource extends JsonResource
                     'name' => $product->name,
                     'type' => $product->type,
                     'product_type_id' => $product->product_type_id,
+                    'unit_price' => $product->unit_price,
+                    'financed_price' => $product->financed_price,
+                    'max_payments' => $product->max_payments,
                     'product_id' => $product->pivot->product_id, //@phpstan-ignore-line
                     'note' => $product->pivot->note,  // @phpstan-ignore-line
                     'variant' => $product->pivot->variant,  // @phpstan-ignore-line
