@@ -5,12 +5,14 @@
         "build": "tsc && vite build",
         "dev": "vite",
         "lint": "eslint resources/js --ext .js,.jsx,.ts,.tsx --ignore-path .gitignore --fix",
-        "format": "prettier --write \"resources/{js,css}/**/*.{js,jsx,ts,tsx,css}\"",
-        "test": "vitest run"
+        "format": "prettier --write \"resources/{js,css}/**/*.{js,jsx,ts,tsx,css}\" \"e2e/**/*.ts\" \"playwright.config.ts\"",
+        "test": "vitest run",
+        "test:e2e": "playwright test"
     },
     "devDependencies": {
         "@headlessui/react": "^2.0.0",
         "@inertiajs/react": "^1.0.0",
+        "@playwright/test": "^1.61.1",
         "@tailwindcss/forms": "^0.5.3",
         "@testing-library/react": "^16.3.2",
         "@types/node": "^22.20.0",
