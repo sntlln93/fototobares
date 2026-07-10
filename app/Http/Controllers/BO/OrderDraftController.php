@@ -14,7 +14,7 @@ class OrderDraftController extends Controller
 {
     public function index(): \Inertia\Response
     {
-        $drafts = OrderDraft::with('classroom.school')
+        $drafts = OrderDraft::with('classroom.school', 'classroom.teacher')
             ->latest()
             ->paginate(20);
 
