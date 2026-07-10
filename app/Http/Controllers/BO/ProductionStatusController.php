@@ -15,11 +15,13 @@ use App\Http\Resources\ProductStagesResource;
 use App\Models\Product;
 use App\Models\ProductionStatus;
 use App\Models\Stockable;
+use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class ProductionStatusController extends Controller
 {
-    public function index(): \Inertia\Response
+    public function index(): Response
     {
         $products = Product::query()
             ->with(['type', 'productionStatuses' => fn ($query) => $query
@@ -38,7 +40,7 @@ class ProductionStatusController extends Controller
         ]);
     }
 
-    public function store(StoreProductionStatusRequest $request, CreateProductionStatus $action): \Illuminate\Http\RedirectResponse
+    public function store(StoreProductionStatusRequest $request, CreateProductionStatus $action): RedirectResponse
     {
         /** @var array{product_id: int, name: string} $validated */
         $validated = $request->validated();
@@ -48,21 +50,21 @@ class ProductionStatusController extends Controller
         return back()->with('success', "Etapa \"{$validated['name']}\" agregada");
     }
 
-    public function update(UpdateProductionStatusRequest $request, ProductionStatus $productionStatus): \Illuminate\Http\RedirectResponse
+    public function update(UpdateProductionStatusRequest $request, ProductionStatus $productionStatus): RedirectResponse
     {
         $productionStatus->update($request->validated());
 
         return back()->with('success', 'Etapa renombrada');
     }
 
-    public function destroy(ProductionStatus $productionStatus, DeleteProductionStatus $action): \Illuminate\Http\RedirectResponse
+    public function destroy(ProductionStatus $productionStatus, DeleteProductionStatus $action): RedirectResponse
     {
         $action->handle($productionStatus);
 
         return back()->with('success', "Etapa \"{$productionStatus->name}\" eliminada");
     }
 
-    public function reorder(ReorderProductionStatusesRequest $request, ReorderProductionStatuses $action): \Illuminate\Http\RedirectResponse
+    public function reorder(ReorderProductionStatusesRequest $request, ReorderProductionStatuses $action): RedirectResponse
     {
         /** @var array{product_id: int, ordered_ids: array<int, int>} $validated */
         $validated = $request->validated();

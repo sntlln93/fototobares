@@ -4,14 +4,17 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Attributes\WithoutTimestamps;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
+#[WithoutTimestamps]
 class ProductionStatus extends Model
 {
-    public $timestamps = false;
-
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<Product, $this>
+     * @return BelongsTo<Product, $this>
      */
     public function product()
     {
@@ -21,7 +24,7 @@ class ProductionStatus extends Model
     /**
      * Stockables consumed when a detail reaches this stage.
      *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany<Stockable, $this>
+     * @return BelongsToMany<Stockable, $this>
      */
     public function stockables()
     {
@@ -31,7 +34,7 @@ class ProductionStatus extends Model
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany<OrderDetail, $this>
+     * @return HasMany<OrderDetail, $this>
      */
     public function orderDetails()
     {

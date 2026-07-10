@@ -18,7 +18,7 @@ export function DeleteComboConfirmation({
 }: {
     combo: Combo;
     show: boolean;
-    onClose: CallableFunction;
+    onClose: () => void;
 }) {
     const { delete: destroy, processing } = useForm();
 

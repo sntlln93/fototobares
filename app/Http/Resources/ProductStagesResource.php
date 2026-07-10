@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Resources;
 
+use App\Models\Product;
 use App\Models\ProductionStatus;
 use App\Models\Stockable;
 use Illuminate\Http\Request;
@@ -13,7 +14,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
  * A product with its production chain and the stockables each stage
  * consumes, for the stages management screen.
  *
- * @mixin \App\Models\Product
+ * @mixin Product
  */
 class ProductStagesResource extends JsonResource
 {

@@ -79,7 +79,7 @@ export default function Order({
                                 order: data.id,
                             })}
                             className={cn(
-                                'absolute right-4 top-4',
+                                'absolute top-4 right-4',
                                 buttonVariants({
                                     size: 'sm',
                                     variant: 'outline',
@@ -91,7 +91,7 @@ export default function Order({
                     ) : (
                         <span
                             className={cn(
-                                'absolute right-4 top-4 opacity-60',
+                                'absolute top-4 right-4 opacity-60',
                                 buttonVariants({
                                     size: 'sm',
                                     variant: 'outline',

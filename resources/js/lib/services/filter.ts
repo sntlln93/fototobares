@@ -11,7 +11,7 @@ export function onSearch(searchTerm: string, indexRoute: string) {
     router.get(route(indexRoute), query);
 }
 
-export function onSort<T = string>(sort_by: T, indexRoute: string) {
+export function onSort(sort_by: string, indexRoute: string) {
     const sort_order =
         route().queryParams.sort_order === 'desc' ? 'asc' : 'desc';
 

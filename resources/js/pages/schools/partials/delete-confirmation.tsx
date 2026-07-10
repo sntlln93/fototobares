@@ -18,7 +18,7 @@ export function DeleteSchoolConfirmation({
 }: {
     school: School;
     show: boolean;
-    onClose: CallableFunction;
+    onClose: () => void;
 }) {
     const { delete: destroy, processing } = useForm();
 

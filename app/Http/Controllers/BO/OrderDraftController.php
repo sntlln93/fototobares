@@ -7,12 +7,14 @@ namespace App\Http\Controllers\BO;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\OrderDraftResource;
 use App\Models\OrderDraft;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class OrderDraftController extends Controller
 {
-    public function index(): \Inertia\Response
+    public function index(): Response
     {
         $drafts = OrderDraft::with('classroom.school', 'classroom.teacher')
             ->latest()
@@ -23,7 +25,7 @@ class OrderDraftController extends Controller
         ]);
     }
 
-    public function store(Request $request): \Illuminate\Http\RedirectResponse
+    public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
             'classroom_id' => ['required', 'exists:classrooms,id'],
@@ -42,7 +44,7 @@ class OrderDraftController extends Controller
         return back()->with('success', 'Borrador guardado exitosamente');
     }
 
-    public function destroy(OrderDraft $draft): \Illuminate\Http\RedirectResponse
+    public function destroy(OrderDraft $draft): RedirectResponse
     {
         $draft->delete();
 

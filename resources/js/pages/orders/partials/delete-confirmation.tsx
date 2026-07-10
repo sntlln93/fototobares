@@ -18,7 +18,7 @@ export function DeleteOrderConfirmation({
 }: {
     order: Order;
     show: boolean;
-    onClose: CallableFunction;
+    onClose: () => void;
 }) {
     const { delete: destroy, processing } = useForm();
 

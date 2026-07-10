@@ -8,15 +8,17 @@ use App\Http\Controllers\Controller;
 use App\Models\Role;
 use App\Models\School;
 use App\Models\User;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class UserController extends Controller
 {
-    public function index(): \Inertia\Response
+    public function index(): Response
     {
         $users = User::with('roles')->orderBy('name')->get();
 
@@ -30,14 +32,14 @@ class UserController extends Controller
         ]);
     }
 
-    public function create(): \Inertia\Response
+    public function create(): Response
     {
         return Inertia::render('users/create', [
             'roles' => Role::all(['id', 'name']),
         ]);
     }
 
-    public function store(Request $request): \Illuminate\Http\RedirectResponse
+    public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
@@ -60,7 +62,7 @@ class UserController extends Controller
         return redirect()->route('users.index')->with('success', 'Usuario creado exitosamente');
     }
 
-    public function edit(User $user): \Inertia\Response
+    public function edit(User $user): Response
     {
         $user->load('roles');
 
@@ -75,7 +77,7 @@ class UserController extends Controller
         ]);
     }
 
-    public function update(Request $request, User $user): \Illuminate\Http\RedirectResponse
+    public function update(Request $request, User $user): RedirectResponse
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
@@ -98,7 +100,7 @@ class UserController extends Controller
         return redirect()->route('users.index')->with('success', 'Usuario actualizado exitosamente');
     }
 
-    public function destroy(Request $request, User $user): \Illuminate\Http\RedirectResponse
+    public function destroy(Request $request, User $user): RedirectResponse
     {
         if ($request->user()?->id === $user->id) {
             return back()->withErrors(['user' => 'No podés eliminar tu propio usuario.']);

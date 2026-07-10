@@ -4,14 +4,18 @@ declare(strict_types=1);
 
 namespace App\Http\Resources;
 
+use App\Models\Classroom;
+use App\Models\Order;
 use App\Models\OrderDetail;
+use App\Models\Payment;
 use App\Models\ProductionStatus;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 
 /**
- * @mixin \App\Models\Order
+ * @mixin Order
  */
 class OrderResource extends JsonResource
 {
@@ -29,10 +33,10 @@ class OrderResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        /** @var \App\Models\Classroom $classroom */
+        /** @var Classroom $classroom */
         $classroom = $this->classroom;
 
-        /** @var \Illuminate\Support\Collection<int|string, OrderDetail> $details */
+        /** @var Collection<int|string, OrderDetail> $details */
         $details = $this->relationLoaded('details')
             ? $this->details->keyBy('id')
             : collect();
@@ -64,8 +68,8 @@ class OrderResource extends JsonResource
                             ? Storage::url($payment->proof_of_payment)
                             : null,
                         'order_id' => $payment->order_id,
-                        'paid_at' => $payment->created_at->diffForHumans(), //@phpstan-ignore-line
-                        'paid_on' => $payment->created_at->format('d/m/Y'), //@phpstan-ignore-line
+                        'paid_at' => $payment->created_at->diffForHumans(), // @phpstan-ignore-line
+                        'paid_on' => $payment->created_at->format('d/m/Y'), // @phpstan-ignore-line
                     ];
                 });
             }),
@@ -75,14 +79,14 @@ class OrderResource extends JsonResource
 
                 return [
                     'id' => $product->id,
-                    'order_detail_id' => $product->pivot->id, //@phpstan-ignore-line
+                    'order_detail_id' => $product->pivot->id, // @phpstan-ignore-line
                     'name' => $product->name,
                     'type' => $product->type,
                     'product_type_id' => $product->product_type_id,
                     'unit_price' => $product->unit_price,
                     'financed_price' => $product->financed_price,
                     'max_payments' => $product->max_payments,
-                    'product_id' => $product->pivot->product_id, //@phpstan-ignore-line
+                    'product_id' => $product->pivot->product_id, // @phpstan-ignore-line
                     'note' => $product->pivot->note,  // @phpstan-ignore-line
                     'variant' => $product->pivot->variant,  // @phpstan-ignore-line
                     'delivered_at' => $product->pivot->delivered_at,  // @phpstan-ignore-line
@@ -103,7 +107,7 @@ class OrderResource extends JsonResource
     private function sumPayments(): int
     {
         return $this->payments->reduce(
-            fn (int $carry, \App\Models\Payment $payment) => $carry + $payment->amount,
+            fn (int $carry, Payment $payment) => $carry + $payment->amount,
             0,
         );
     }
@@ -125,7 +129,7 @@ class OrderResource extends JsonResource
     }
 
     /**
-     * @param  \Illuminate\Support\Collection<int|string, OrderDetail>  $details
+     * @param  Collection<int|string, OrderDetail>  $details
      */
     private function aggregateStatus($details): ?string
     {
