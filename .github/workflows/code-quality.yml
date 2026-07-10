@@ -3,6 +3,9 @@ name: Code Quality Checks
 on:
   pull_request:
     branches: [develop, main]
+  # Pushes to the long-lived branches keep the README badges reporting
+  push:
+    branches: [develop, main]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
