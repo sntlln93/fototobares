@@ -1,0 +1,7 @@
+{
+    "type": "module",
+    "private": true,
+    "dependencies": {
+        "puppeteer-core": "^24.0.0"
+    }
+}

@@ -23,7 +23,10 @@ yarn-error.log
 .DS_Store
 .editorconfig
 nohup.out
-/.claude
+# .claude: only skills are tracked; local settings and working docs stay out
+/.claude/*
+!/.claude/skills
+/.claude/skills/verify/scripts/node_modules
 /coverage
 /test-results
 /playwright-report
