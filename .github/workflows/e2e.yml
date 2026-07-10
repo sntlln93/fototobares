@@ -41,43 +41,21 @@ jobs:
       - name: 📥 Clone repo
         uses: actions/checkout@v4
 
-      - name: ⚙️ PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.4'
-          tools: composer:v2
-          coverage: none
-
-      - name: 📂 Composer cache directory
-        id: composer-cache
-        run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
-
-      - name: ♻️ Composer cache
-        uses: actions/cache@v4
-        with:
-          path: ${{ steps.composer-cache.outputs.dir }}
-          key: ${{ runner.os }}-composer-${{ hashFiles('composer.lock') }}
-          restore-keys: ${{ runner.os }}-composer-
-
-      - name: 📦 Composer install
-        run: composer install --no-interaction --prefer-dist --optimize-autoloader
+      - name: ⚙️ PHP + composer
+        uses: ./.github/actions/setup-php
 
       - name: ⚡ Setup Laravel
         run: |
           cp .env.example .env
           php artisan key:generate
 
-      - name: ⚙️ Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-          cache: 'npm'
+      - name: ⚙️ Node.js + npm
+        uses: ./.github/actions/setup-node
 
-      - name: 📦 npm install
-        run: npm ci
-
+      # `vite build` directly: the `build` script also runs the root tsc,
+      # which ci_frontend already enforces in parallel
       - name: 🏗️ Build assets
-        run: npm run build
+        run: npx vite build
 
       - name: ♻️ Playwright browser cache
         uses: actions/cache@v4
@@ -86,8 +64,9 @@ jobs:
           key: ${{ runner.os }}-playwright-${{ hashFiles('package-lock.json') }}
           restore-keys: ${{ runner.os }}-playwright-
 
+      # No --with-deps: ubuntu-latest already ships the Chromium system deps
       - name: 🌐 Playwright browsers
-        run: npx playwright install --with-deps chromium
+        run: npx playwright install chromium
 
       - name: 🛠️ Type-check specs
         run: npx tsc -p e2e --noEmit
