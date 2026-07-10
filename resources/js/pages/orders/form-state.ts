@@ -50,70 +50,19 @@ export const emptyForm = (): OrderFormData => ({
 });
 
 /**
- * Restores the "save and keep selling" data persisted in localStorage.
- * Personal data is intentionally left blank.
+ * Blank slate for the next client of a continuous sale ("guardar y seguir
+ * vendiendo"): keeps the school and the payment terms, clears the client
+ * and the products (detail notes carry the previous child's name), and
+ * zeroes the price so re-adding a combo doesn't sum over the old total.
  */
-export const readSavedForm = (): {
-    form: OrderFormData;
-    selectedSchool: number;
-} | null => {
-    const savedData = localStorage.getItem('orderFormData');
-
-    if (!savedData) return null;
-
-    try {
-        const parsed = JSON.parse(savedData);
-
-        return {
-            form: {
-                ...emptyForm(),
-                classroom_id: parsed.classroom_id ?? 0,
-                order_details: parsed.order_details ?? [],
-                total_price: parsed.total_price ?? '0',
-                payment_plan: parsed.payment_plan ?? '0',
-                due_date: parsed.due_date ?? format(new Date(), 'yyyy-MM-dd'),
-            },
-            selectedSchool: parsed.selectedSchool ?? 0,
-        };
-    } catch {
-        return null;
-    }
-};
-
-/**
- * Persists the order data for "save and keep selling", excluding the
- * client's personal data on purpose.
- */
-export const persistSavedForm = (
-    form: OrderFormData,
-    selectedSchool: number,
-): void => {
-    localStorage.setItem(
-        'orderFormData',
-        JSON.stringify({
-            classroom_id: form.classroom_id,
-            order_details: form.order_details,
-            total_price: form.total_price,
-            payment_plan: form.payment_plan,
-            due_date: form.due_date,
-            selectedSchool,
-        }),
-    );
-};
-
-export const clearSavedForm = (): void => {
-    localStorage.removeItem('orderFormData');
-};
-
-/**
- * Blank slate for the next client, keeping the order data.
- */
-export const resetPersonalData = (form: OrderFormData): OrderFormData => ({
+export const resetForNextClient = (form: OrderFormData): OrderFormData => ({
     ...form,
     name: '',
     phone: '',
     child_name: '',
     attended_photo_session: null,
+    order_details: [],
+    total_price: '0',
     draft_id: null,
 });
 
@@ -153,9 +102,12 @@ const keepExistingProducts = (
 };
 
 /**
- * Initial values for the order form: a draft ("Ver" in borradores) wins
- * over localStorage. Must be resolved before useForm: setting them with
- * setData in an effect gets lost.
+ * Initial values for the order form: a draft ("Ver" in borradores) fills
+ * the form, any other entry starts blank. Continuous selling never gets
+ * here: Inertia preserves the component state through the POST redirect
+ * (no remount), so that reset happens in memory via resetForNextClient.
+ * Must be resolved before useForm: setting them with setData in an
+ * effect gets lost.
  */
 export const resolveInitialOrderForm = (
     draft?: DraftProp | null,
@@ -185,22 +137,6 @@ export const resolveInitialOrderForm = (
             },
             selectedSchool: draft.classroom.school_id,
             message: `Borrador #${draft.id} cargado`,
-            droppedProducts: dropped,
-        };
-    }
-
-    const saved = readSavedForm();
-
-    if (saved) {
-        const { details, dropped } = keepExistingProducts(
-            saved.form.order_details,
-            validProductIds,
-        );
-
-        return {
-            ...saved,
-            form: { ...saved.form, order_details: details },
-            message: 'Datos de pedido anterior cargados',
             droppedProducts: dropped,
         };
     }
