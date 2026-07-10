@@ -38,7 +38,7 @@ export function ComboProducts({
         openAddProductModal(Number(id));
     };
     return (
-        <div className="w-[100%]">
+        <div className="w-full">
             <Label htmlFor="suggested_max_payments">
                 Productos del combo ({selectedProducts.length})
             </Label>

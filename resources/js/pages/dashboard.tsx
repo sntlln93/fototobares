@@ -164,7 +164,7 @@ export default function Dashboard({
                                             <span>{stockable.name}</span>
                                             <Badge
                                                 variant="destructive"
-                                                className="min-w-0 max-w-full"
+                                                className="max-w-full min-w-0"
                                             >
                                                 <span className="truncate">
                                                     {`${stockable.quantity} (${stockable.unit}) — alerta en ${stockable.alert_at}`}
