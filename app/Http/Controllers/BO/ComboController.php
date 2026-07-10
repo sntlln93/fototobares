@@ -10,13 +10,15 @@ use App\Http\Resources\ComboResource;
 use App\Http\Resources\EditableComboResource;
 use App\Models\Combo;
 use App\Models\Product;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class ComboController extends Controller
 {
-    public function index(): \Inertia\Response
+    public function index(): Response
     {
         $combos = Combo::with('products')->paginate(20);
 
@@ -25,7 +27,7 @@ class ComboController extends Controller
         ]);
     }
 
-    public function create(): \Inertia\Response
+    public function create(): Response
     {
         $products = Product::all();
 
@@ -34,7 +36,7 @@ class ComboController extends Controller
         ]);
     }
 
-    public function store(StoreComboRequest $request): \Illuminate\Http\RedirectResponse
+    public function store(StoreComboRequest $request): RedirectResponse
     {
         $validated = $request->validated();
 
@@ -56,7 +58,7 @@ class ComboController extends Controller
         return redirect()->route('combos.index');
     }
 
-    public function edit(Combo $combo): \Inertia\Response
+    public function edit(Combo $combo): Response
     {
         $products = Product::all();
 
@@ -66,7 +68,7 @@ class ComboController extends Controller
         ]);
     }
 
-    public function update(StoreComboRequest $request, Combo $combo): \Illuminate\Http\RedirectResponse
+    public function update(StoreComboRequest $request, Combo $combo): RedirectResponse
     {
         $validated = $request->validated();
 
@@ -88,7 +90,7 @@ class ComboController extends Controller
         return redirect()->route('combos.index');
     }
 
-    public function destroy(Combo $combo): \Illuminate\Http\RedirectResponse
+    public function destroy(Combo $combo): RedirectResponse
     {
         DB::transaction(function () use ($combo) {
             $combo->products()->detach();

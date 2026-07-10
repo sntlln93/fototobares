@@ -4,16 +4,21 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Database\Factories\SchoolFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
 
 class School extends Model
 {
-    /** @use HasFactory<\Database\Factories\SchoolFactory> */
+    /** @use HasFactory<SchoolFactory> */
     use HasFactory;
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany<Classroom, $this>
+     * @return HasMany<Classroom, $this>
      */
     public function classrooms()
     {
@@ -21,7 +26,7 @@ class School extends Model
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\MorphOne<Contact, $this>
+     * @return MorphOne<Contact, $this>
      */
     public function principal()
     {
@@ -29,7 +34,7 @@ class School extends Model
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\MorphOne<Address, $this>
+     * @return MorphOne<Address, $this>
      */
     public function address()
     {
@@ -37,7 +42,7 @@ class School extends Model
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasManyThrough<Contact, Classroom, $this>
+     * @return HasManyThrough<Contact, Classroom, $this>
      */
     public function teachers()
     {
@@ -46,7 +51,7 @@ class School extends Model
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<User, $this>
+     * @return BelongsTo<User, $this>
      */
     public function user()
     {

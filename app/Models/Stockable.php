@@ -4,17 +4,21 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Database\Factories\StockableFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Stockable extends Model
 {
-    /** @use \Illuminate\Database\Eloquent\Factories\HasFactory<\Database\Factories\StockableFactory> */
-    use \Illuminate\Database\Eloquent\Factories\HasFactory;
+    /** @use HasFactory<StockableFactory> */
+    use HasFactory;
 
     /**
      * Stages that consume this stockable, with the consumed quantity.
      *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany<ProductionStatus, $this>
+     * @return BelongsToMany<ProductionStatus, $this>
      */
     public function productionStatuses()
     {
@@ -24,7 +28,7 @@ class Stockable extends Model
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany<StockMovement, $this>
+     * @return HasMany<StockMovement, $this>
      */
     public function movements()
     {

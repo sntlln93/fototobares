@@ -5,11 +5,12 @@ declare(strict_types=1);
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class StockMovement extends Model
 {
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<Stockable, $this>
+     * @return BelongsTo<Stockable, $this>
      */
     public function stockable()
     {
@@ -17,7 +18,7 @@ class StockMovement extends Model
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<OrderDetail, $this>
+     * @return BelongsTo<OrderDetail, $this>
      */
     public function orderDetail()
     {
@@ -25,7 +26,7 @@ class StockMovement extends Model
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<User, $this>
+     * @return BelongsTo<User, $this>
      */
     public function user()
     {

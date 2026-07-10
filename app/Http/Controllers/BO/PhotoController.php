@@ -7,13 +7,15 @@ namespace App\Http\Controllers\BO;
 use App\Http\Controllers\Controller;
 use App\Models\Classroom;
 use App\Models\Photo;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class PhotoController extends Controller
 {
-    public function index(Classroom $classroom): \Inertia\Response
+    public function index(Classroom $classroom): Response
     {
         $photos = Photo::where('classroom_id', $classroom->id)
             ->orderBy('number')
@@ -25,7 +27,7 @@ class PhotoController extends Controller
         ]);
     }
 
-    public function store(Request $request, Classroom $classroom): \Illuminate\Http\RedirectResponse
+    public function store(Request $request, Classroom $classroom): RedirectResponse
     {
         $validated = $request->validate([
             'photo' => ['required', 'image', 'max:5120'], // 5MB
@@ -63,7 +65,7 @@ class PhotoController extends Controller
         return back()->with('success', "Foto #{$photoNumber} subida correctamente");
     }
 
-    public function destroy(Photo $photo): \Illuminate\Http\RedirectResponse
+    public function destroy(Photo $photo): RedirectResponse
     {
         $classroomId = $photo->classroom_id;
 

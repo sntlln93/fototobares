@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace App\Http\Resources;
 
+use App\Models\Classroom;
+use App\Models\School;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
- * @mixin \App\Models\Classroom
+ * @mixin Classroom
  */
 class ClassroomResource extends JsonResource
 {
@@ -24,7 +26,7 @@ class ClassroomResource extends JsonResource
             'name' => strtoupper($this->name),
             'teacher' => new ContactResource($this->teacher),
             'school' => $this->whenLoaded('school', function () {
-                /** @var \App\Models\School $school */
+                /** @var School $school */
                 $school = $this->school;
 
                 return [

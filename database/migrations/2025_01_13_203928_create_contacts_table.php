@@ -17,7 +17,7 @@ return new class extends Migration
             $table->id();
             $table->string('name')->nullable();
             $table->string('phone')->nullable();
-            $table->string('role'); //teacher, principal and customer?
+            $table->string('role'); // teacher, principal and customer?
             $table->string('contactable_id');
             $table->string('contactable_type');
             $table->timestamps();

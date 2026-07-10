@@ -4,16 +4,20 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Database\Factories\ClassroomFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
 
 class Classroom extends Model
 {
-    /** @use HasFactory<\Database\Factories\ClassroomFactory> */
+    /** @use HasFactory<ClassroomFactory> */
     use HasFactory;
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\MorphOne<Contact, $this>
+     * @return MorphOne<Contact, $this>
      */
     public function teacher()
     {
@@ -21,7 +25,7 @@ class Classroom extends Model
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<School, $this>
+     * @return BelongsTo<School, $this>
      */
     public function school()
     {
@@ -29,7 +33,7 @@ class Classroom extends Model
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany<Photo, $this>
+     * @return HasMany<Photo, $this>
      */
     public function photos()
     {

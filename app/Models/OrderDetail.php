@@ -4,27 +4,23 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Database\Factories\OrderDetailFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 
 class OrderDetail extends Pivot
 {
-    /** @use HasFactory<\Database\Factories\OrderDetailFactory> */
+    /** @use HasFactory<OrderDetailFactory> */
     use HasFactory;
-
-    public $incrementing = true;
 
     protected $table = 'order_details';
 
-    protected $casts = [
-        'variant' => 'array',
-        'priority' => 'boolean',
-        'status_updated_at' => 'datetime',
-        'delivered_at' => 'datetime',
-    ];
+    public $incrementing = true;
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<Order, $this>
+     * @return BelongsTo<Order, $this>
      */
     public function order()
     {
@@ -32,7 +28,7 @@ class OrderDetail extends Pivot
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<Product, $this>
+     * @return BelongsTo<Product, $this>
      */
     public function product()
     {
@@ -40,7 +36,7 @@ class OrderDetail extends Pivot
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<ProductionStatus, $this>
+     * @return BelongsTo<ProductionStatus, $this>
      */
     public function productionStatus()
     {
@@ -48,10 +44,17 @@ class OrderDetail extends Pivot
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany<StockMovement, $this>
+     * @return HasMany<StockMovement, $this>
      */
     public function stockMovements()
     {
         return $this->hasMany(StockMovement::class);
     }
+
+    protected $casts = [
+        'variant' => 'array',
+        'priority' => 'boolean',
+        'status_updated_at' => 'datetime',
+        'delivered_at' => 'datetime',
+    ];
 }

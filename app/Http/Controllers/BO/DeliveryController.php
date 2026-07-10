@@ -6,6 +6,7 @@ namespace App\Http\Controllers\BO;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -15,7 +16,7 @@ class DeliveryController extends Controller
      * Mark (or unmark) order details as delivered.
      * The "not fully paid" warning is confirmed client-side and can be ignored.
      */
-    public function update(Request $request, Order $order): \Illuminate\Http\RedirectResponse
+    public function update(Request $request, Order $order): RedirectResponse
     {
         $validated = $request->validate([
             'detail_ids' => ['required', 'array', 'min:1'],

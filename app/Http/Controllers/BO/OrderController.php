@@ -10,17 +10,21 @@ use App\Http\Resources\OrderResource;
 use App\Models\Client;
 use App\Models\Combo;
 use App\Models\Order;
+use App\Models\OrderDetail;
 use App\Models\OrderDraft;
 use App\Models\Product;
 use App\Models\School;
+use App\Models\User;
 use App\Services\StockService;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class OrderController extends Controller
 {
-    public function index(Request $request): \Inertia\Response
+    public function index(Request $request): Response
     {
         /** @var 'id' search */
         $search = $request->query('search');
@@ -57,7 +61,7 @@ class OrderController extends Controller
         ]);
     }
 
-    public function create(Request $request): \Inertia\Response
+    public function create(Request $request): Response
     {
         $schools = School::query()
             ->with(['classrooms.teacher', 'principal'])
@@ -89,7 +93,7 @@ class OrderController extends Controller
         ]);
     }
 
-    public function store(StoreOrderRequest $request): \Illuminate\Http\RedirectResponse
+    public function store(StoreOrderRequest $request): RedirectResponse
     {
         $validated = $request->validated();
 
@@ -143,7 +147,7 @@ class OrderController extends Controller
         return redirect($redirect_to);
     }
 
-    public function show(Order $order): \Inertia\Response
+    public function show(Order $order): Response
     {
         $order->load('client', 'products.type', 'payments', 'classroom.school', 'details.productionStatus');
 
@@ -152,7 +156,7 @@ class OrderController extends Controller
         ]);
     }
 
-    public function edit(Order $order): \Inertia\Response|\Illuminate\Http\RedirectResponse
+    public function edit(Order $order): Response|RedirectResponse
     {
         if ($order->cancelled_at !== null) {
             return back()->withErrors(['order' => 'No se puede editar un pedido cancelado.']);
@@ -188,7 +192,7 @@ class OrderController extends Controller
         ]);
     }
 
-    public function update(StoreOrderRequest $request, Order $order): \Illuminate\Http\RedirectResponse
+    public function update(StoreOrderRequest $request, Order $order): RedirectResponse
     {
         if ($order->cancelled_at !== null) {
             return back()->withErrors(['order' => 'No se puede editar un pedido cancelado.']);
@@ -242,7 +246,7 @@ class OrderController extends Controller
             ->with('success', 'Pedido actualizado exitosamente');
     }
 
-    public function destroy(Order $order): \Illuminate\Http\RedirectResponse
+    public function destroy(Order $order): RedirectResponse
     {
         if ($order->payments()->exists()) {
             return back()->withErrors(['order' => 'No se puede eliminar un pedido con pagos registrados.']);
@@ -258,7 +262,7 @@ class OrderController extends Controller
      * Cancel an order: each product goes back to stock (its supplies are
      * returned) or to the recycling bin, chosen per product.
      */
-    public function cancel(Request $request, Order $order, StockService $stockService): \Illuminate\Http\RedirectResponse
+    public function cancel(Request $request, Order $order, StockService $stockService): RedirectResponse
     {
         if ($order->cancelled_at !== null) {
             return back()->withErrors(['order' => 'El pedido ya está cancelado.']);
@@ -278,12 +282,12 @@ class OrderController extends Controller
             }
         }
 
-        /** @var \App\Models\User|null $user */
+        /** @var User|null $user */
         $user = $request->user();
 
         DB::transaction(function () use ($order, $validated, $details, $stockService, $user) {
             foreach ($validated['destinations'] as $destination) {
-                /** @var \App\Models\OrderDetail $detail */
+                /** @var OrderDetail $detail */
                 $detail = $details->get($destination['detail_id']);
 
                 $detail->recycled_to = $destination['destination'];
