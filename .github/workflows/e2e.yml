@@ -1,0 +1,107 @@
+name: E2E Tests
+
+on:
+  pull_request:
+    branches: [develop, main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: password
+          MYSQL_DATABASE: testing
+        ports:
+          - 3306:3306
+        options: >-
+          --tmpfs /var/lib/mysql
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -ppassword"
+          --health-interval=2s
+          --health-timeout=5s
+          --health-retries=15
+
+    env:
+      DB_CONNECTION: mysql
+      DB_HOST: 127.0.0.1
+      DB_PORT: 3306
+      DB_DATABASE: testing
+      DB_USERNAME: root
+      DB_PASSWORD: password
+      # Assertions match the Spanish UI, but .env.example ships APP_LOCALE=en
+      APP_LOCALE: es
+
+    steps:
+      - name: 📥 Clone repo
+        uses: actions/checkout@v4
+
+      - name: ⚙️ PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          tools: composer:v2
+          coverage: none
+
+      - name: 📂 Composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
+
+      - name: ♻️ Composer cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: 📦 Composer install
+        run: composer install --no-interaction --prefer-dist --optimize-autoloader
+
+      - name: ⚡ Setup Laravel
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+
+      - name: ⚙️ Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: 📦 npm install
+        run: npm ci
+
+      - name: 🏗️ Build assets
+        run: npm run build
+
+      - name: ♻️ Playwright browser cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('package-lock.json') }}
+          restore-keys: ${{ runner.os }}-playwright-
+
+      - name: 🌐 Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: 🛠️ Type-check specs
+        run: npx tsc -p e2e --noEmit
+
+      - name: 🧪 E2E tests
+        env:
+          E2E_BASE_URL: http://127.0.0.1:8000
+          E2E_ARTISAN: php artisan
+        run: npx playwright test
+
+      - name: 📤 Upload traces on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-results
+          path: test-results/
+          retention-days: 7
