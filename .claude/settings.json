@@ -20,7 +20,9 @@
       "Bash(./vendor/bin/sail artisan route:list)",
       "Bash(./vendor/bin/sail artisan route:list *)",
       "Bash(./vendor/bin/sail composer analyse)",
-      "Bash(./vendor/bin/sail composer analyse *)"
+      "Bash(./vendor/bin/sail composer analyse *)",
+      "Bash(bash .claude/skills/validate-code/scripts/validate-code.sh)",
+      "Bash(bash .claude/skills/validate-code/scripts/validate-code.sh *)"
     ]
   }
 }
