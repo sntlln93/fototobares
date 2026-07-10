@@ -18,7 +18,7 @@ export function DeleteProductConfirmation({
 }: {
     product: Product;
     show: boolean;
-    onClose: CallableFunction;
+    onClose: () => void;
 }) {
     const { delete: destroy, processing } = useForm();
 

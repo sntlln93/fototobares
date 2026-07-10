@@ -16,7 +16,7 @@ export function Modal({
     show: boolean;
     maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | '2xl';
     closeable?: boolean;
-    onClose: CallableFunction;
+    onClose: () => void;
 }>) {
     const close = () => {
         if (closeable) {

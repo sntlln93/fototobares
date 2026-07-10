@@ -26,7 +26,7 @@ export function CreatePaymentModal({
 }: {
     orderId: Order['id'];
     show: boolean;
-    onClose: CallableFunction;
+    onClose: () => void;
     initialAmount?: number;
 }) {
     const { post, data, setData, processing, errors } = useForm<{

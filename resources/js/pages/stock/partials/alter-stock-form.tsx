@@ -33,7 +33,7 @@ export function AlterStockForm({
 }: {
     stockable: Stockable;
     show: boolean;
-    onClose: CallableFunction;
+    onClose: () => void;
 }) {
     const [activeForm, setActiveForm] = useState<
         'subtract_quantity' | 'add_quantity' | 'new_quantity'

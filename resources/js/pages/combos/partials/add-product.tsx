@@ -16,7 +16,7 @@ export function AddProduct({
     addProduct: (product: SelectedProduct) => void;
     product: Product;
     show: boolean;
-    onClose: CallableFunction;
+    onClose: () => void;
     /** Existing selection when editing a product already in the combo */
     initialVariants?: SelectedProduct['variants'] | null;
 }) {

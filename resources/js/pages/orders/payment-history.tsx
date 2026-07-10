@@ -109,7 +109,7 @@ function PaymentItem({
 }: {
     payment: Payment;
     order: Order;
-    onEdit: CallableFunction;
+    onEdit: (payment: Payment) => void;
 }) {
     const { share, sharing } = useShareReceipt();
 

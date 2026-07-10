@@ -25,7 +25,7 @@ export function EditPaymentModal({
 }: {
     payment: Payment;
     show: boolean;
-    onClose: CallableFunction;
+    onClose: () => void;
 }) {
     const { post, data, setData, processing, errors } = useForm<{
         amount: number;

@@ -19,7 +19,7 @@ export function DeleteStatusConfirmation({
 }: {
     status: ProductionStatus;
     show: boolean;
-    onClose: CallableFunction;
+    onClose: () => void;
 }) {
     const { delete: destroy, processing } = useForm();
 
