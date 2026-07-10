@@ -89,7 +89,7 @@ export function DetailCard({
                     </span>
                 )}
                 {detail.note && (
-                    <span className="text-xs italic text-gray-500">
+                    <span className="text-xs text-gray-500 italic">
                         {detail.note}
                     </span>
                 )}

@@ -6,6 +6,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 /**
  * @property-read string $full_address
@@ -13,7 +14,7 @@ use Illuminate\Database\Eloquent\Model;
 class Address extends Model
 {
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\MorphTo<Model, $this>
+     * @return MorphTo<Model, $this>
      */
     public function addressable()
     {
@@ -21,7 +22,7 @@ class Address extends Model
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Casts\Attribute<string, never>
+     * @return Attribute<string, never>
      */
     protected function fullAddress(): Attribute
     {

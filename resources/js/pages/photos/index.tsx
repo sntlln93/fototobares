@@ -157,7 +157,7 @@ export default function PhotoIndex({
                                                 alt={`Foto #${photo.number}`}
                                                 className="h-full w-full object-cover"
                                             />
-                                            <div className="absolute left-2 top-2 rounded-full bg-blue-600 px-3 py-1 text-sm font-semibold text-white">
+                                            <div className="absolute top-2 left-2 rounded-full bg-blue-600 px-3 py-1 text-sm font-semibold text-white">
                                                 #{photo.number}
                                             </div>
                                         </div>

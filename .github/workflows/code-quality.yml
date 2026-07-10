@@ -3,38 +3,24 @@ name: Code Quality Checks
 on:
   pull_request:
     branches: [develop, main]
+  # Pushes to the long-lived branches keep the README badges reporting
+  push:
+    branches: [develop, main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  ci_backend:
+  quality_backend:
     runs-on: ubuntu-latest
-
-    services:
-      mysql:
-        image: mysql:8.0
-        env:
-          MYSQL_ROOT_PASSWORD: password
-          MYSQL_DATABASE: testing
-        ports:
-          - 3306:3306
-        options: >-
-          --health-cmd="mysqladmin ping -h 127.0.0.1 -ppassword"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=5
 
     steps:
       - name: 📥 Clone repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
-      - name: ⚙️ PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.4'
-          tools: composer:v2
-          coverage: xdebug
-
-      - name: 📦 Install dependencies
-        run: composer install --no-interaction --prefer-dist --optimize-autoloader
+      - name: ⚙️ PHP + composer
+        uses: ./.github/actions/setup-php
 
       - name: ⚡ Setup Laravel
         run: |
@@ -47,30 +33,15 @@ jobs:
       - name: 🧹 PhpStan
         run: vendor/bin/phpstan analyse
 
-      - name: 🧪 Tests
-        env:
-          DB_CONNECTION: mysql
-          DB_HOST: 127.0.0.1
-          DB_PORT: 3306
-          DB_USERNAME: root
-          DB_PASSWORD: password
-        run: php artisan test
-
-  ci_frontend:
+  quality_frontend:
     runs-on: ubuntu-latest
 
     steps:
       - name: 📥 Clone repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
-      - name: ⚙️ Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-          cache: 'npm'
-
-      - name: 📦 Install dependencies
-        run: npm ci
+      - name: ⚙️ Node.js + npm
+        uses: ./.github/actions/setup-node
 
       - name: ✨ Prettier
         run: npm run format -- --check
@@ -80,6 +51,3 @@ jobs:
 
       - name: 🛠️ TypeScript checks
         run: npx tsc --noEmit
-
-      - name: 🧪 Vitest
-        run: npm run test

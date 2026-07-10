@@ -12,13 +12,15 @@ use App\Http\Resources\SchoolResource;
 use App\Models\Order;
 use App\Models\School;
 use App\Models\User;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class SchoolController extends Controller
 {
-    public function index(Request $request): \Inertia\Response
+    public function index(Request $request): Response
     {
         /** @var string search */
         $search = $request->query('search');
@@ -26,8 +28,7 @@ class SchoolController extends Controller
         /** @var string sort_by */
         $sort_by = $request->query('sort_by') ?? 'id';
 
-        /** @var string sort_order */
-        $sort_order = $request->query('sort_order') ?? 'asc';
+        $sort_order = $request->query('sort_order') === 'desc' ? 'desc' : 'asc';
 
         $schools = School::with(['principal', 'classrooms.teacher', 'address', 'user'])
             ->when($search, function ($q) use ($search) {
@@ -45,7 +46,7 @@ class SchoolController extends Controller
         ]);
     }
 
-    public function create(): \Inertia\Response
+    public function create(): Response
     {
         $users = User::query()
             ->whereHas('roles', function ($q) {
@@ -57,7 +58,7 @@ class SchoolController extends Controller
         ]);
     }
 
-    public function store(StoreSchoolRequest $request): \Illuminate\Http\RedirectResponse
+    public function store(StoreSchoolRequest $request): RedirectResponse
     {
         $validated = $request->validated();
 
@@ -77,7 +78,7 @@ class SchoolController extends Controller
         return redirect(route('schools.index'));
     }
 
-    public function edit(School $school): \Inertia\Response
+    public function edit(School $school): Response
     {
         $users = User::query()
             ->whereHas('roles', function ($q) {
@@ -90,7 +91,7 @@ class SchoolController extends Controller
         ]);
     }
 
-    public function update(School $school, StoreSchoolRequest $request): \Illuminate\Http\RedirectResponse
+    public function update(School $school, StoreSchoolRequest $request): RedirectResponse
     {
         $validated = $request->validated();
 
@@ -113,7 +114,7 @@ class SchoolController extends Controller
 
     }
 
-    public function destroy(School $school): \Illuminate\Http\RedirectResponse
+    public function destroy(School $school): RedirectResponse
     {
         $classrooms = $school->classrooms->pluck('id');
         $hasOrders = Order::withTrashed()
@@ -136,9 +137,9 @@ class SchoolController extends Controller
         return redirect(route('schools.index'));
     }
 
-    public function show(School $school): \Inertia\Response
+    public function show(School $school): Response
     {
-        return inertia::render('schools/show')->with([
+        return Inertia::render('schools/show')->with([
             'school' => new SchoolResource($school->load([
                 'classrooms.teacher',
                 'principal',

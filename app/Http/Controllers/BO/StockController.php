@@ -8,14 +8,16 @@ use App\Enums\Unit;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\StockableResource;
 use App\Models\Stockable;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class StockController extends Controller
 {
-    public function index(Request $request): \Inertia\Response
+    public function index(Request $request): Response
     {
         /** @var string search */
         $search = $request->query('search');
@@ -23,8 +25,7 @@ class StockController extends Controller
         /** @var string sort_by */
         $sort_by = $request->query('sort_by') ?? 'id';
 
-        /** @var string sort_order */
-        $sort_order = $request->query('sort_order') ?? 'asc';
+        $sort_order = $request->query('sort_order') === 'desc' ? 'desc' : 'asc';
 
         $stockables = Stockable::with('productionStatuses.product')
             ->when($request->query('search'), function ($q) use ($search) {
@@ -40,12 +41,12 @@ class StockController extends Controller
         ]);
     }
 
-    public function create(): \Inertia\Response
+    public function create(): Response
     {
         return Inertia::render('stock/create');
     }
 
-    public function store(Request $request): \Illuminate\Http\RedirectResponse
+    public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'min: 4'],
@@ -59,7 +60,7 @@ class StockController extends Controller
         return redirect(route('stockables.index'));
     }
 
-    public function update(Request $request, Stockable $stockable): \Illuminate\Http\RedirectResponse
+    public function update(Request $request, Stockable $stockable): RedirectResponse
     {
         $validated = $request->validate([
             'name' => ['sometimes', 'string', 'min: 4'],
@@ -73,14 +74,14 @@ class StockController extends Controller
         return redirect(route('stockables.index'));
     }
 
-    public function edit(Stockable $stockable): \Inertia\Response
+    public function edit(Stockable $stockable): Response
     {
         return Inertia::render('stock/edit', [
             'stockable' => $stockable,
         ]);
     }
 
-    public function destroy(Stockable $stockable): \Illuminate\Http\RedirectResponse
+    public function destroy(Stockable $stockable): RedirectResponse
     {
         DB::transaction(function () use ($stockable) {
             $stockable->productionStatuses()->detach();

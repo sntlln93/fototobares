@@ -39,7 +39,7 @@ const useCsrfAutoRefresh = () => {
             if (isCsrfTokenExpired()) {
                 try {
                     await axios.get('/sanctum/csrf-cookie'); // Refresh CSRF token
-                } catch (error) {
+                } catch {
                     window.location.reload();
                 }
             }

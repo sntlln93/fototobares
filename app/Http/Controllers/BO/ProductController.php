@@ -10,33 +10,35 @@ use App\Http\Requests\BO\StoreProductRequest;
 use App\Http\Resources\ProductResource;
 use App\Models\Product;
 use App\Models\ProductType;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class ProductController extends Controller
 {
-    public function index(): \Inertia\Response
+    public function index(): Response
     {
         return Inertia::render('products/index', [
             'products' => ProductResource::collection(Product::paginate(20)),
         ]);
     }
 
-    public function create(): \Inertia\Response
+    public function create(): Response
     {
         $types = ProductType::orderBy('name')->get();
 
         return Inertia::render('products/create', ['product_types' => $types]);
     }
 
-    public function store(StoreProductRequest $request, CreateProduct $action): \Illuminate\Http\RedirectResponse
+    public function store(StoreProductRequest $request, CreateProduct $action): RedirectResponse
     {
         $action->handle($request->validated());
 
         return redirect()->route('products.index');
     }
 
-    public function edit(Product $product): \Inertia\Response
+    public function edit(Product $product): Response
     {
         $types = ProductType::orderBy('name')->get();
 
@@ -46,7 +48,7 @@ class ProductController extends Controller
         ]);
     }
 
-    public function update(StoreProductRequest $request, Product $product): \Illuminate\Http\RedirectResponse
+    public function update(StoreProductRequest $request, Product $product): RedirectResponse
     {
         $validated = $request->validated();
 
@@ -55,7 +57,7 @@ class ProductController extends Controller
         return redirect()->route('products.index');
     }
 
-    public function destroy(Product $product): \Illuminate\Http\RedirectResponse
+    public function destroy(Product $product): RedirectResponse
     {
         DB::transaction(function () use ($product) {
             $product->combos()->detach();

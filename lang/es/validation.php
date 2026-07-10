@@ -199,13 +199,13 @@ return [
         'classroom_id' => 'curso',
         'unit_price' => 'precio unitario',
 
-        //product
+        // product
         'variants.dimentions' => 'medidas',
         'variants.colors' => 'colores',
         'variants.photo_types' => 'tipos de foto',
         'variants.orientations' => 'orientaciones',
 
-        //School
+        // School
         'school' => 'escuela',
         'school.level' => 'nivel',
         'school.user_id' => 'encargado',
@@ -219,7 +219,7 @@ return [
         'address.neighborhood' => 'barrio',
         'address.city' => 'localidad',
 
-        //Stockable
+        // Stockable
         'alert_at' => 'alerta',
     ],
 ];

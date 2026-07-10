@@ -5,19 +5,23 @@ declare(strict_types=1);
 namespace App\Http\Controllers\BO;
 
 use App\Http\Controllers\Controller;
+use App\Models\Order;
 use App\Models\OrderDetail;
 use App\Models\Product;
 use App\Models\ProductionStatus;
 use App\Models\ProductType;
 use App\Models\School;
+use App\Models\User;
 use App\Services\StockService;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class TrackingController extends Controller
 {
-    public function index(Request $request): \Inertia\Response
+    public function index(Request $request): Response
     {
         /** @var string|null $search */
         $search = $request->query('search');
@@ -75,7 +79,7 @@ class TrackingController extends Controller
 
         return Inertia::render('tracking/index', [
             'details' => $details->map(function (OrderDetail $detail) {
-                /** @var \App\Models\Order $order */
+                /** @var Order $order */
                 $order = $detail->order;
 
                 return [
@@ -124,7 +128,7 @@ class TrackingController extends Controller
         ]);
     }
 
-    public function batchUpdate(Request $request, StockService $stockService): \Illuminate\Http\RedirectResponse
+    public function batchUpdate(Request $request, StockService $stockService): RedirectResponse
     {
         $validated = $request->validate([
             'detail_ids' => ['required', 'array', 'min:1'],
@@ -149,14 +153,14 @@ class TrackingController extends Controller
             ]);
         }
 
-        /** @var \App\Models\User $user */
+        /** @var User $user */
         $user = $request->user();
 
         DB::transaction(function () use ($details, $status, $user, $stockService) {
             foreach ($details as $detail) {
                 $previousPosition = $detail->productionStatus->position ?? 0;
 
-                $detail->production_status_id = $status->id;
+                $detail->productionStatus()->associate($status);
                 $detail->status_updated_at = now();
 
                 if ($status->position < $previousPosition) {

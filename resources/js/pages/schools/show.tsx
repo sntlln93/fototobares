@@ -97,7 +97,7 @@ export default function School({
                             school: school.data.id,
                         })}
                         className={cn(
-                            'absolute right-4 top-4',
+                            'absolute top-4 right-4',
                             buttonVariants({
                                 size: 'sm',
                                 variant: 'warning',

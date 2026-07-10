@@ -27,7 +27,7 @@ export function AddDetail({
     addProducts: (products: ProductOrder[]) => void;
     products: SelectableProduct[];
     show: boolean;
-    onClose: CallableFunction;
+    onClose: () => void;
     /** Existing values (aligned with `products`) when editing an added product */
     initialValues?: ProductOrder[];
 }) {

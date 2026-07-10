@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Models\Product;
 use App\Models\ProductType;
 use Illuminate\Database\Migrations\Migration;
 
@@ -124,7 +125,7 @@ return new class extends Migration
         ];
 
         foreach ($products as $product) {
-            \App\Models\Product::create($product);
+            Product::create($product);
         }
     }
 };

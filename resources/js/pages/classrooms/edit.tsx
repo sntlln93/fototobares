@@ -14,7 +14,7 @@ export function EditClassroom({
 }: {
     classroom: Classroom & { teacher?: Teacher };
     show: boolean;
-    onClose: CallableFunction;
+    onClose: () => void;
 }) {
     const { put, data, setData, processing, errors } = useForm({
         name: classroom.name,

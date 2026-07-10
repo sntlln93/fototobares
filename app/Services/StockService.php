@@ -9,6 +9,7 @@ use App\Models\ProductionStatus;
 use App\Models\Stockable;
 use App\Models\StockMovement;
 use App\Models\User;
+use Illuminate\Support\Collection;
 
 class StockService
 {
@@ -28,7 +29,7 @@ class StockService
             return;
         }
 
-        /** @var \Illuminate\Support\Collection<int, Stockable> $consumed */
+        /** @var Collection<int, Stockable> $consumed */
         $consumed = ProductionStatus::query()
             ->where('product_id', $detail->product_id)
             ->where('position', '<=', $position)

@@ -16,17 +16,17 @@ return new class extends Migration
 
         $roles = [
             [
-                'role_id' => 2, //administración
-                'user_id' => 1, //agustin@fototobares.com
+                'role_id' => 2, // administración
+                'user_id' => 1, // agustin@fototobares.com
                 'created_at' => $created_at,
             ],
             [
-                'role_id' => 1, //master
-                'user_id' => 2, //sntlln.93@gmail.com
+                'role_id' => 1, // master
+                'user_id' => 2, // sntlln.93@gmail.com
                 'created_at' => $created_at,
             ], [
-                'role_id' => 2, //administración
-                'user_id' => 3, //gabriela@fototobares.com
+                'role_id' => 2, // administración
+                'user_id' => 3, // gabriela@fototobares.com
                 'created_at' => $created_at,
             ],
         ];

@@ -7,12 +7,14 @@ namespace App\Http\Controllers\BO;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\Payment;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
 class PaymentController extends Controller
 {
-    public function store(Request $request): \Illuminate\Http\RedirectResponse
+    public function store(Request $request): RedirectResponse
     {
         $validated = $this->validatePayment($request);
 
@@ -24,7 +26,7 @@ class PaymentController extends Controller
 
         $proof = $request->file('proof_of_payment');
 
-        if ($proof instanceof \Illuminate\Http\UploadedFile) {
+        if ($proof instanceof UploadedFile) {
             $validated['proof_of_payment'] = $proof->store('proofs', 'public');
         }
 
@@ -34,13 +36,13 @@ class PaymentController extends Controller
         return redirect()->route('orders.show', ['order' => $order->id])->with('message', 'Pago registrado exitosamente.');
     }
 
-    public function update(Request $request, Payment $payment): \Illuminate\Http\RedirectResponse
+    public function update(Request $request, Payment $payment): RedirectResponse
     {
         $validated = $this->validatePayment($request);
 
         $proof = $request->file('proof_of_payment');
 
-        if ($proof instanceof \Illuminate\Http\UploadedFile) {
+        if ($proof instanceof UploadedFile) {
             if ($payment->proof_of_payment !== null) {
                 Storage::disk('public')->delete($payment->proof_of_payment);
             }

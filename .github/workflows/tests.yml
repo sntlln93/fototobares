@@ -1,0 +1,147 @@
+name: Tests
+
+on:
+  pull_request:
+    branches: [develop, main]
+  # Pushes to the long-lived branches keep the README badges reporting
+  push:
+    branches: [develop, main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tests_backend:
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: password
+          MYSQL_DATABASE: testing
+        ports:
+          - 3306:3306
+        options: >-
+          --tmpfs /var/lib/mysql
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -ppassword"
+          --health-interval=2s
+          --health-timeout=5s
+          --health-retries=15
+
+    steps:
+      - name: 📥 Clone repo
+        uses: actions/checkout@v7
+
+      - name: ⚙️ PHP + composer
+        uses: ./.github/actions/setup-php
+
+      - name: ⚡ Setup Laravel
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+
+      - name: 🧪 Pest
+        env:
+          DB_CONNECTION: mysql
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
+          DB_USERNAME: root
+          DB_PASSWORD: password
+        run: php artisan test
+
+  tests_frontend:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Clone repo
+        uses: actions/checkout@v7
+
+      - name: ⚙️ Node.js + npm
+        uses: ./.github/actions/setup-node
+
+      - name: 🧪 Vitest
+        run: npm run test
+
+  e2e:
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: password
+          MYSQL_DATABASE: testing
+        ports:
+          - 3306:3306
+        options: >-
+          --tmpfs /var/lib/mysql
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -ppassword"
+          --health-interval=2s
+          --health-timeout=5s
+          --health-retries=15
+
+    env:
+      DB_CONNECTION: mysql
+      DB_HOST: 127.0.0.1
+      DB_PORT: 3306
+      DB_DATABASE: testing
+      DB_USERNAME: root
+      DB_PASSWORD: password
+      # Assertions match the Spanish UI, but .env.example ships APP_LOCALE=en
+      APP_LOCALE: es
+
+    steps:
+      - name: 📥 Clone repo
+        uses: actions/checkout@v7
+
+      - name: ⚙️ PHP + composer
+        uses: ./.github/actions/setup-php
+
+      - name: ⚡ Setup Laravel
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+
+      - name: ⚙️ Node.js + npm
+        uses: ./.github/actions/setup-node
+
+      # `vite build` directly: the `build` script also runs the root tsc,
+      # which quality_frontend already enforces in parallel
+      - name: 🏗️ Build assets
+        run: npx vite build
+
+      - name: ♻️ Playwright browser cache
+        uses: actions/cache@v6
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('package-lock.json') }}
+          restore-keys: ${{ runner.os }}-playwright-
+
+      # No --with-deps: ubuntu-latest already ships the Chromium system deps
+      - name: 🌐 Playwright browsers
+        run: npx playwright install chromium
+
+      - name: 🛠️ Type-check specs
+        run: npx tsc -p e2e --noEmit
+
+      # Sessions live in the database, so the app 500s (and Playwright's
+      # webServer never reports ready) until the tables exist. The global
+      # setup reseeds again once the server is up.
+      - name: 🗄️ Prepare database
+        run: php artisan migrate:fresh --seed
+
+      - name: 🧪 E2E tests
+        env:
+          E2E_BASE_URL: http://127.0.0.1:8000
+          E2E_ARTISAN: php artisan
+        run: npx playwright test
+
+      - name: 📤 Upload traces on failure
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-results
+          path: test-results/
+          retention-days: 7

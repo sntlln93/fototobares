@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace App\Http\Controllers\BO;
 
 use App\Http\Controllers\Controller;
+use App\Models\Order;
 use App\Models\OrderDetail;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class RecyclingController extends Controller
 {
-    public function index(): \Inertia\Response
+    public function index(): Response
     {
         $details = OrderDetail::query()
             ->with('product.type', 'productionStatus', 'order.client', 'order.classroom.school')
@@ -20,7 +22,7 @@ class RecyclingController extends Controller
 
         return Inertia::render('recycling/index', [
             'items' => $details->through(function (OrderDetail $detail) {
-                /** @var \App\Models\Order $order */
+                /** @var Order $order */
                 $order = $detail->order;
 
                 return [

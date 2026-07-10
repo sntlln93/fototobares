@@ -7,10 +7,11 @@ namespace App\Http\Controllers\BO;
 use App\Http\Controllers\Controller;
 use App\Models\StockMovement;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class StockMovementController extends Controller
 {
-    public function index(): \Inertia\Response
+    public function index(): Response
     {
         $movements = StockMovement::query()
             ->with('stockable', 'user', 'orderDetail.order.client', 'orderDetail.product')

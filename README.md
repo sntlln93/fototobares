@@ -1,66 +1,68 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Fototobares
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+[![Code Quality Checks](https://github.com/sntlln93/fototobares/actions/workflows/code-quality.yml/badge.svg?branch=develop)](https://github.com/sntlln93/fototobares/actions/workflows/code-quality.yml)
+[![Tests](https://github.com/sntlln93/fototobares/actions/workflows/tests.yml/badge.svg?branch=develop)](https://github.com/sntlln93/fototobares/actions/workflows/tests.yml)
 
-## About Laravel
+Sistema de gestión para un estudio de fotografía escolar: ventas y pedidos
+por escuela/curso, cobros en cuotas con comprobantes compartibles por
+WhatsApp, producción por etapas con consumo de insumos, stock, entregas
+parciales, cancelaciones con reciclaje y asignación de fotos por número.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Stack
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- **Backend**: Laravel 13 (PHP 8.5), MySQL 8.
+- **Frontend**: Inertia 3 + React 19 + TypeScript, Tailwind 4 + shadcn/ui, Vite 8.
+- **Entorno de desarrollo**: [Laravel Sail](https://laravel.com/docs/sail)
+  (no hace falta PHP ni MySQL locales).
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Desarrollo
 
-## Learning Laravel
+```bash
+# primera vez (instala vendor/ sin PHP local)
+docker run --rm -v "$(pwd)":/var/www/html -w /var/www/html \
+    laravelsail/php85-composer:latest composer install
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+cp .env.example .env
+./vendor/bin/sail up -d
+./vendor/bin/sail artisan key:generate
+./vendor/bin/sail artisan migrate:fresh --seed   # deja la app navegable con datos demo
+./vendor/bin/sail npm ci
+./vendor/bin/sail npm run build                  # o `npm run dev` para HMR
+```
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+La app queda en <http://localhost>. Usuario demo: `agustin@fototobares.com` /
+`contraseña` (hay un usuario por rol: oficina, editor y taller, mismo
+password).
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+> **npm siempre por Sail**: el node del contenedor es el soportado; un node
+> local viejo rompe vitest/rollup. La excepción es Playwright, que corre en el
+> host.
 
-## Laravel Sponsors
+## Tests
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+```bash
+./vendor/bin/sail php ./vendor/bin/pest   # backend (Feature)
+./vendor/bin/sail npm run test            # frontend (Vitest)
+npm run test:e2e                          # e2e (Playwright, host; resetea la DB de dev)
+```
 
-### Premium Partners
+La suite e2e resetea la base (`migrate:fresh --seed`) al arrancar y necesita
+Sail levantado. Primera vez: `npx playwright install chromium`.
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+## CI
 
-## Contributing
+Dos workflows corren en cada PR y en cada push a `develop`/`main`:
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+- **Code Quality Checks**: `quality_backend` (Pint + PhpStan) y
+  `quality_frontend` (Prettier + ESLint + tsc).
+- **Tests**: `tests_backend` (Pest), `tests_frontend` (Vitest) y `e2e`
+  (Playwright contra `php artisan serve`).
 
-## Code of Conduct
+Los cinco checks son requeridos para mergear. El setup compartido vive en
+`.github/actions/`.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## Flujo de trabajo
 
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+- PRs a `develop` con squash; releases `develop → main` con merge commit.
+- El merge a `main` deploya automáticamente (dokploy).
+- Convención de commits: `<type>(<scope>): <description>` (ver `CLAUDE.md`).

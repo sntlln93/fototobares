@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace App\Http\Resources;
 
+use App\Models\Combo;
+use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
- * @mixin \App\Models\Combo
+ * @mixin Combo
  */
 class EditableComboResource extends JsonResource
 {
@@ -24,7 +26,7 @@ class EditableComboResource extends JsonResource
             'name' => $this->name,
             'suggested_price' => $this->suggested_price,
             'suggested_max_payments' => $this->suggested_max_payments,
-            'products' => $this->products->map(function (\App\Models\Product $p) {
+            'products' => $this->products->map(function (Product $p) {
                 return [
                     'id' => $p->id,
                     /* @phpstan-ignore-next-line */

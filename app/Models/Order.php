@@ -4,8 +4,12 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Database\Factories\OrderFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -13,19 +17,13 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class Order extends Model
 {
-    /** @use HasFactory<\Database\Factories\OrderFactory> */
+    /** @use HasFactory<OrderFactory> */
     use HasFactory;
 
     use SoftDeletes;
 
-    protected $casts = [
-        'due_date' => 'datetime:Y-m-d',
-        'attended_photo_session' => 'boolean',
-        'cancelled_at' => 'datetime',
-    ];
-
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<Client, $this>
+     * @return BelongsTo<Client, $this>
      */
     public function client()
     {
@@ -33,7 +31,7 @@ class Order extends Model
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany<Product, $this>
+     * @return BelongsToMany<Product, $this, OrderDetail>
      */
     public function products()
     {
@@ -44,7 +42,7 @@ class Order extends Model
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany<OrderDetail, $this>
+     * @return HasMany<OrderDetail, $this>
      */
     public function details()
     {
@@ -52,7 +50,7 @@ class Order extends Model
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<Classroom, $this>
+     * @return BelongsTo<Classroom, $this>
      */
     public function classroom()
     {
@@ -60,7 +58,7 @@ class Order extends Model
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany<Payment, $this>
+     * @return HasMany<Payment, $this>
      */
     public function payments()
     {
@@ -91,4 +89,10 @@ class Order extends Model
             ->where('number', $this->photo_number)
             ->first();
     }
+
+    protected $casts = [
+        'due_date' => 'datetime:Y-m-d',
+        'attended_photo_session' => 'boolean',
+        'cancelled_at' => 'datetime',
+    ];
 }

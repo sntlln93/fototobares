@@ -43,11 +43,9 @@ import { ProductOrder } from './form';
 import {
     DraftProp,
     OrderFormData,
-    clearSavedForm,
-    persistSavedForm,
     removeDetailAt,
     replaceDetailAt,
-    resetPersonalData,
+    resetForNextClient,
     resolveInitialOrderForm,
 } from './form-state';
 type SchoolLevel = 'Todos' | 'Jardin' | 'Primaria' | 'Secundaria';
@@ -177,15 +175,11 @@ export default function CreateOrder({
                 onSuccess: () => {
                     toast.success('Pedido guardado con éxito');
                     if (saveAndContinue) {
-                        persistSavedForm(data, selectedSchool);
-                        setData(resetPersonalData(data));
-                        // Reset to first step
-                        setAccordionValue('schools');
+                        setData(resetForNextClient(data));
+                        setAccordionValue('client');
                         toast.info(
-                            'Datos de pedido guardados. Listo para el siguiente cliente.',
+                            'Se conservaron la escuela, las cuotas y el vencimiento. Cargá el cliente y los productos.',
                         );
-                    } else {
-                        clearSavedForm();
                     }
                 },
             },
@@ -214,7 +208,7 @@ export default function CreateOrder({
 
             toast.success('Borrador guardado exitosamente');
             window.location.href = route('drafts.index');
-        } catch (error) {
+        } catch {
             toast.error('Error al guardar el borrador');
         }
     };

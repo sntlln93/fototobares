@@ -2,13 +2,10 @@ import { format } from 'date-fns';
 import { beforeEach, describe, expect, it } from 'vitest';
 import {
     DraftProp,
-    clearSavedForm,
     emptyForm,
-    persistSavedForm,
-    readSavedForm,
     removeDetailAt,
     replaceDetailAt,
-    resetPersonalData,
+    resetForNextClient,
     resolveInitialOrderForm,
 } from './form-state';
 
@@ -47,58 +44,23 @@ describe('emptyForm', () => {
     });
 });
 
-describe('readSavedForm', () => {
-    it('returns null when nothing was saved', () => {
-        expect(readSavedForm()).toBeNull();
+describe('resolveInitialOrderForm', () => {
+    it('starts empty without a draft', () => {
+        const initial = resolveInitialOrderForm(null);
+
+        expect(initial.form).toEqual(emptyForm());
+        expect(initial.selectedSchool).toBe(0);
+        expect(initial.message).toBeNull();
     });
 
-    it('returns null on corrupted JSON', () => {
-        localStorage.setItem('orderFormData', '{not json');
-
-        expect(readSavedForm()).toBeNull();
-    });
-
-    it('restores the saved order data leaving personal data blank', () => {
+    // Regression for #101: "guardar y seguir vendiendo" used to persist
+    // the order in localStorage and every fresh visit restored it.
+    it('ignores the legacy localStorage key', () => {
         localStorage.setItem(
             'orderFormData',
-            JSON.stringify({
-                classroom_id: 3,
-                order_details: [{ product_id: 5, note: 'nota' }],
-                total_price: '12000',
-                payment_plan: '2',
-                due_date: '2026-09-01',
-                selectedSchool: 9,
-            }),
+            JSON.stringify({ classroom_id: 3, selectedSchool: 9 }),
         );
 
-        const saved = readSavedForm();
-
-        expect(saved?.selectedSchool).toBe(9);
-        expect(saved?.form).toMatchObject({
-            classroom_id: 3,
-            order_details: [{ product_id: 5, note: 'nota' }],
-            total_price: '12000',
-            payment_plan: '2',
-            due_date: '2026-09-01',
-            name: '',
-            phone: '',
-            child_name: '',
-        });
-    });
-
-    it('fills defaults for missing keys', () => {
-        localStorage.setItem('orderFormData', JSON.stringify({}));
-
-        const saved = readSavedForm();
-
-        expect(saved?.form.classroom_id).toBe(0);
-        expect(saved?.form.order_details).toEqual([]);
-        expect(saved?.selectedSchool).toBe(0);
-    });
-});
-
-describe('resolveInitialOrderForm', () => {
-    it('starts empty without a draft or saved data', () => {
         const initial = resolveInitialOrderForm(null);
 
         expect(initial.form).toEqual(emptyForm());
@@ -123,52 +85,6 @@ describe('resolveInitialOrderForm', () => {
         });
         expect(initial.selectedSchool).toBe(9);
         expect(initial.message).toBe('Borrador #7 cargado');
-    });
-
-    it('prefers the draft over saved data', () => {
-        localStorage.setItem(
-            'orderFormData',
-            JSON.stringify({ classroom_id: 99, selectedSchool: 99 }),
-        );
-
-        const initial = resolveInitialOrderForm(draft);
-
-        expect(initial.form.classroom_id).toBe(3);
-        expect(initial.selectedSchool).toBe(9);
-    });
-
-    it('falls back to saved data without a draft', () => {
-        localStorage.setItem(
-            'orderFormData',
-            JSON.stringify({ classroom_id: 3, selectedSchool: 9 }),
-        );
-
-        const initial = resolveInitialOrderForm(null);
-
-        expect(initial.form.classroom_id).toBe(3);
-        expect(initial.selectedSchool).toBe(9);
-        expect(initial.message).toBe('Datos de pedido anterior cargados');
-    });
-
-    it('drops saved details whose product no longer exists', () => {
-        localStorage.setItem(
-            'orderFormData',
-            JSON.stringify({
-                classroom_id: 3,
-                selectedSchool: 9,
-                order_details: [
-                    { product_id: 5, note: 'vigente' },
-                    { product_id: 99, note: 'ya no existe' },
-                ],
-            }),
-        );
-
-        const initial = resolveInitialOrderForm(null, [5, 6]);
-
-        expect(initial.form.order_details).toEqual([
-            { product_id: 5, note: 'vigente' },
-        ]);
-        expect(initial.droppedProducts).toBe(1);
     });
 
     it('drops draft details whose product no longer exists', () => {
@@ -197,64 +113,15 @@ describe('resolveInitialOrderForm', () => {
     });
 });
 
-describe('persistSavedForm', () => {
-    const filledForm = () => ({
-        ...emptyForm(),
-        classroom_id: 3,
-        order_details: [{ product_id: 5, note: 'nota' }],
-        total_price: '12000',
-        payment_plan: '2',
-        due_date: '2026-09-01',
-        name: 'Carla López',
-        phone: '3804000003',
-        child_name: 'Luca',
-        attended_photo_session: true,
-        draft_id: 7,
-    });
-
-    it('persists only the order data, never the personal data', () => {
-        persistSavedForm(filledForm(), 9);
-
-        const stored = JSON.parse(localStorage.getItem('orderFormData')!);
-
-        expect(stored).toEqual({
+describe('resetForNextClient', () => {
+    it('blanks client, products and price, keeps school and payment terms', () => {
+        const reset = resetForNextClient({
+            ...emptyForm(),
             classroom_id: 3,
-            order_details: [{ product_id: 5, note: 'nota' }],
+            order_details: [{ product_id: 5, note: 'Taza de Luca' }],
             total_price: '12000',
             payment_plan: '2',
             due_date: '2026-09-01',
-            selectedSchool: 9,
-        });
-    });
-
-    it('round-trips through readSavedForm', () => {
-        persistSavedForm(filledForm(), 9);
-
-        const saved = readSavedForm();
-
-        expect(saved?.form.order_details).toEqual([
-            { product_id: 5, note: 'nota' },
-        ]);
-        expect(saved?.form.name).toBe('');
-        expect(saved?.selectedSchool).toBe(9);
-    });
-
-    it('clearSavedForm removes the persisted data', () => {
-        persistSavedForm(filledForm(), 9);
-
-        clearSavedForm();
-
-        expect(readSavedForm()).toBeNull();
-    });
-});
-
-describe('resetPersonalData', () => {
-    it('blanks the client fields and keeps the order fields', () => {
-        const reset = resetPersonalData({
-            ...emptyForm(),
-            classroom_id: 3,
-            order_details: [{ product_id: 5, note: 'nota' }],
-            total_price: '12000',
             name: 'Carla López',
             phone: '3804000003',
             child_name: 'Luca',
@@ -262,10 +129,12 @@ describe('resetPersonalData', () => {
             draft_id: 7,
         });
 
-        expect(reset).toMatchObject({
+        expect(reset).toEqual({
             classroom_id: 3,
-            order_details: [{ product_id: 5, note: 'nota' }],
-            total_price: '12000',
+            order_details: [],
+            total_price: '0',
+            payment_plan: '2',
+            due_date: '2026-09-01',
             name: '',
             phone: '',
             child_name: '',

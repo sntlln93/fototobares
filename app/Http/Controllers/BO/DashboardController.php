@@ -11,10 +11,11 @@ use App\Models\Payment;
 use App\Models\ProductionStatus;
 use App\Models\Stockable;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class DashboardController extends Controller
 {
-    public function index(): \Inertia\Response
+    public function index(): Response
     {
         $startOfMonth = now()->startOfMonth();
 

@@ -44,7 +44,7 @@ export function DatePicker({ placeholder, date, setDate }: DatePickerProps) {
                         setDate(day);
                         setIsCalendarOpen(false);
                     }}
-                    initialFocus
+                    autoFocus
                 />
             </PopoverContent>
         </Popover>

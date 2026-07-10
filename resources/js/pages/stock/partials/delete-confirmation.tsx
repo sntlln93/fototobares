@@ -18,7 +18,7 @@ export function DeleteStockableConfirmation({
 }: {
     stockable: Stockable;
     show: boolean;
-    onClose: CallableFunction;
+    onClose: () => void;
 }) {
     const { delete: destroy, processing } = useForm();
 

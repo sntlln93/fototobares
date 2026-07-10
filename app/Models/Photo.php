@@ -4,42 +4,43 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Database\Factories\PhotoFactory;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 
 /**
  * @property int $id
  * @property int $classroom_id
  * @property string $file_path
  * @property int $number
- * @property \Illuminate\Support\Carbon $created_at
- * @property \Illuminate\Support\Carbon $updated_at
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  */
+#[Fillable([
+    'classroom_id',
+    'file_path',
+    'number',
+])]
 class Photo extends Model
 {
-    /** @use \Illuminate\Database\Eloquent\Factories\HasFactory<\Database\Factories\PhotoFactory> */
-    use \Illuminate\Database\Eloquent\Factories\HasFactory;
+    /** @use HasFactory<PhotoFactory> */
+    use HasFactory;
 
     /**
-     * @var list<string>
-     */
-    protected $fillable = [
-        'classroom_id',
-        'file_path',
-        'number',
-    ];
-
-    /**
-     * @var array<string, string>
-     */
-    protected $casts = [
-        'number' => 'integer',
-    ];
-
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<Classroom, $this>
+     * @return BelongsTo<Classroom, $this>
      */
     public function classroom()
     {
         return $this->belongsTo(Classroom::class);
     }
+
+    /**
+     * @return array<string, string>
+     */
+    protected $casts = [
+        'number' => 'integer',
+    ];
 }

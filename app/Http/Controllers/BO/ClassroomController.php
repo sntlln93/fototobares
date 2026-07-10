@@ -9,13 +9,15 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\OrderResource;
 use App\Models\Classroom;
 use App\Models\Order;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class ClassroomController extends Controller
 {
-    public function show(Classroom $classroom): \Inertia\Response
+    public function show(Classroom $classroom): Response
     {
         $orders = Order::where('classroom_id', $classroom->id)
             ->with('client', 'products.type', 'classroom.school')
@@ -27,7 +29,7 @@ class ClassroomController extends Controller
         ]);
     }
 
-    public function destroy(Classroom $classroom): \Illuminate\Http\RedirectResponse
+    public function destroy(Classroom $classroom): RedirectResponse
     {
         $school_id = $classroom->school_id;
 
@@ -47,7 +49,7 @@ class ClassroomController extends Controller
         return redirect()->route('schools.show', ['school' => $school_id]);
     }
 
-    public function update(Request $request, Classroom $classroom): \Illuminate\Http\RedirectResponse
+    public function update(Request $request, Classroom $classroom): RedirectResponse
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'min:1', 'max:10'],
@@ -74,7 +76,7 @@ class ClassroomController extends Controller
         ]));
     }
 
-    public function store(Request $request): \Illuminate\Http\RedirectResponse
+    public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'min:1', 'max:10'],

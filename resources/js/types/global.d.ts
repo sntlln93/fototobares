@@ -9,7 +9,6 @@ declare global {
         axios: AxiosInstance;
     }
 
-    /* eslint-disable no-var */
     var route: typeof ziggyRoute;
 
     /* api */
@@ -64,8 +63,8 @@ declare global {
         role: ContactRole;
     }
 
-    interface Principal extends Contact {}
-    interface Teacher extends Contact {}
+    type Principal = Contact;
+    type Teacher = Contact;
 
     interface Classroom {
         id: number;

@@ -7,7 +7,6 @@ import {
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { Head, router } from '@inertiajs/react';
-import { useMemo } from 'react';
 import { toast } from 'sonner';
 import {
     ProductGroup,
@@ -39,16 +38,12 @@ export default function Tracking({
 }>) {
     const { selected, toggle, toggleGroupItems, clear } = useSelection();
 
-    const groups = useMemo(() => {
-        return products
-            .map((product) => ({
-                product,
-                items: details.filter(
-                    (detail) => detail.product_id === product.id,
-                ),
-            }))
-            .filter((group) => group.items.length > 0);
-    }, [details, products]);
+    const groups = products
+        .map((product) => ({
+            product,
+            items: details.filter((detail) => detail.product_id === product.id),
+        }))
+        .filter((group) => group.items.length > 0);
 
     const applyFilters = (
         overrides: Partial<Filters> & { search?: string },
