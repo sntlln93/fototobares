@@ -100,7 +100,7 @@ export default function Dashboard({
                     />
                 </div>
 
-                <div className="grid gap-6 xl:grid-cols-2">
+                <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
                     <Card>
                         <CardHeader>
                             <CardTitle className="text-xl">
@@ -159,13 +159,16 @@ export default function Dashboard({
                                     {stockAlerts.map((stockable) => (
                                         <li
                                             key={stockable.id}
-                                            className="flex items-center justify-between rounded-md border border-input px-3 py-2 text-sm"
+                                            className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 rounded-md border border-input px-3 py-2 text-sm"
                                         >
                                             <span>{stockable.name}</span>
-                                            <Badge variant="destructive">
-                                                {stockable.quantity} (
-                                                {stockable.unit}) — alerta en{' '}
-                                                {stockable.alert_at}
+                                            <Badge
+                                                variant="destructive"
+                                                className="min-w-0 max-w-full"
+                                            >
+                                                <span className="truncate">
+                                                    {`${stockable.quantity} (${stockable.unit}) — alerta en ${stockable.alert_at}`}
+                                                </span>
                                             </Badge>
                                         </li>
                                     ))}
