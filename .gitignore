@@ -26,8 +26,10 @@ nohup.out
 # .claude: only skills are tracked; local settings and working docs stay out
 /.claude/*
 !/.claude/skills
-/.claude/skills/verify/scripts/node_modules
+!/.claude/settings.json
 /coverage
 /test-results
 /playwright-report
 /e2e/.auth
+# throwaway browser-verification specs (see the verify skill)
+/e2e/verify
