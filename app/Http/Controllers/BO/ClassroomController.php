@@ -18,7 +18,7 @@ class ClassroomController extends Controller
     public function show(Classroom $classroom): \Inertia\Response
     {
         $orders = Order::where('classroom_id', $classroom->id)
-            ->with('client', 'products.type')
+            ->with('client', 'products.type', 'classroom.school')
             ->paginate(20);
 
         return Inertia::render('classrooms/show', [
