@@ -92,6 +92,12 @@ jobs:
       - name: 🛠️ Type-check specs
         run: npx tsc -p e2e --noEmit
 
+      # Sessions live in the database, so the app 500s (and Playwright's
+      # webServer never reports ready) until the tables exist. The global
+      # setup reseeds again once the server is up.
+      - name: 🗄️ Prepare database
+        run: php artisan migrate:fresh --seed
+
       - name: 🧪 E2E tests
         env:
           E2E_BASE_URL: http://127.0.0.1:8000
