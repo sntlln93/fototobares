@@ -71,6 +71,7 @@ export default function EditCombo({
                 },
             ]);
         } else {
+            // eslint-disable-next-line react-hooks/set-state-in-effect -- state-as-event flow; superseded by the #96/#97 combo redesign
             setShowAddMuralProduct(product);
         }
 

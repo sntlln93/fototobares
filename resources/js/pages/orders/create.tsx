@@ -208,7 +208,7 @@ export default function CreateOrder({
 
             toast.success('Borrador guardado exitosamente');
             window.location.href = route('drafts.index');
-        } catch (error) {
+        } catch {
             toast.error('Error al guardar el borrador');
         }
     };
