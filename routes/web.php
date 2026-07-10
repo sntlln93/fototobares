@@ -27,8 +27,8 @@ Route::get('/dashboard', [DashboardController::class, 'index'])
 
 // Día a día de ventas: gerencia, administración y oficina
 Route::middleware(['auth', 'role:master,administración,oficina'])->group(function () {
-    Route::resource('products', ProductController::class);
-    Route::resource('combos', ComboController::class);
+    Route::resource('products', ProductController::class)->except(['show']);
+    Route::resource('combos', ComboController::class)->except(['show']);
     Route::resource('orders', OrderController::class);
     Route::post('/orders/{order}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
     Route::put('/orders/{order}/delivery', [DeliveryController::class, 'update'])->name('orders.delivery');
@@ -53,7 +53,7 @@ Route::middleware(['auth', 'role:master,administración,oficina,editor'])->group
 Route::middleware(['auth', 'role:master,administración,oficina,taller'])->group(function () {
     Route::get('/tracking', [TrackingController::class, 'index'])->name('tracking.index');
     Route::post('/tracking/batch', [TrackingController::class, 'batchUpdate'])->name('tracking.batch');
-    Route::resource('stockables', StockController::class);
+    Route::resource('stockables', StockController::class)->except(['show']);
     Route::get('/stock-movements', [StockMovementController::class, 'index'])->name('stock-movements.index');
     Route::get('/recycling', [RecyclingController::class, 'index'])->name('recycling.index');
 });
