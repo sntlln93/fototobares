@@ -10,7 +10,7 @@ parciales, cancelaciones con reciclaje y asignación de fotos por número.
 
 ## Stack
 
-- **Backend**: Laravel 13 (PHP 8.5), MySQL 8.
+- **Backend**: Laravel 13 (PHP 8.4), MySQL 8.
 - **Frontend**: Inertia 3 + React 19 + TypeScript, Tailwind 4 + shadcn/ui, Vite 8.
 - **Entorno de desarrollo**: [Laravel Sail](https://laravel.com/docs/sail)
   (no hace falta PHP ni MySQL locales).
@@ -20,7 +20,7 @@ parciales, cancelaciones con reciclaje y asignación de fotos por número.
 ```bash
 # primera vez (instala vendor/ sin PHP local)
 docker run --rm -v "$(pwd)":/var/www/html -w /var/www/html \
-    laravelsail/php85-composer:latest composer install
+    laravelsail/php84-composer:latest composer install
 
 cp .env.example .env
 ./vendor/bin/sail up -d
