@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Fototobares: management system for a school photography studio — orders by school/classroom, installment payments with WhatsApp-shareable receipts, staged production with stock consumption, partial deliveries, cancellations with recycling, photo-to-child assignment by number.
 
-- Stack: Laravel 13 (PHP 8.5) + MySQL 8, Inertia 3 + React 19 + TypeScript, Tailwind 4 + shadcn/ui, Vite 8. The React Compiler is enabled (`vite.config.js`) — do not hand-add `useMemo`/`useCallback`/`memo`; let the compiler memoize. `eslint-plugin-react-hooks` enforces its rules in CI.
+- Stack: Laravel 13 (PHP 8.4) + MySQL 8, Inertia 3 + React 19 + TypeScript, Tailwind 4 + shadcn/ui, Vite 8. The React Compiler is enabled (`vite.config.js`) — do not hand-add `useMemo`/`useCallback`/`memo`; let the compiler memoize. `eslint-plugin-react-hooks` enforces its rules in CI.
 - Language split: code, branches, commits and code comments in **English**; UI copy and GitHub PRs/issues/comments always in **Spanish**.
 - There is no real production yet: migrations are edited in-place and re-run with `migrate:fresh --seed` instead of adding new migration files; bug fixes may be folded into redesigns.
 
