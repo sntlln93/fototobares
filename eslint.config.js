@@ -48,4 +48,37 @@ export default tseslint.config(
             'no-console': 'error',
         },
     },
+    // Structural limits from CLAUDE.md (#81): every file stays under 250 lines
+    // so heavy logic moves into hooks and sub-components. Vendored shadcn
+    // primitives and tests are exempt.
+    {
+        files: ['resources/js/**/*.{ts,tsx}'],
+        ignores: [
+            'resources/js/components/ui/**',
+            'resources/js/**/*.test.{ts,tsx}',
+            'resources/js/**/tests/**',
+        ],
+        rules: {
+            'max-lines': [
+                'error',
+                { max: 250, skipBlankLines: false, skipComments: false },
+            ],
+        },
+    },
+    // Components stay presentational and under 150 lines; business logic lives
+    // in hooks (`.ts`), which the file-length limit above already bounds.
+    {
+        files: ['resources/js/**/*.tsx'],
+        ignores: [
+            'resources/js/components/ui/**',
+            'resources/js/**/*.test.tsx',
+            'resources/js/**/tests/**',
+        ],
+        rules: {
+            'max-lines-per-function': [
+                'error',
+                { max: 150, skipBlankLines: true, skipComments: true },
+            ],
+        },
+    },
 );
