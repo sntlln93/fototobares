@@ -5,20 +5,23 @@ declare(strict_types=1);
 namespace App\Http\Controllers\BO;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\BO\StorePaymentRequest;
 use App\Models\Order;
 use App\Models\Payment;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
 class PaymentController extends Controller
 {
-    public function store(Request $request): RedirectResponse
+    public function store(StorePaymentRequest $request): RedirectResponse
     {
-        $validated = $this->validatePayment($request);
+        $validated = $request->validated();
 
-        $order = Order::findOrFail($validated['order_id']);
+        /** @var int $orderId */
+        $orderId = $validated['order_id'];
+
+        $order = Order::findOrFail($orderId);
 
         if ($order->cancelled_at !== null) {
             return back()->withErrors(['order_id' => 'No se pueden registrar pagos de un pedido cancelado.']);
@@ -36,9 +39,9 @@ class PaymentController extends Controller
         return redirect()->route('orders.show', ['order' => $order->id])->with('message', 'Pago registrado exitosamente.');
     }
 
-    public function update(Request $request, Payment $payment): RedirectResponse
+    public function update(StorePaymentRequest $request, Payment $payment): RedirectResponse
     {
-        $validated = $this->validatePayment($request);
+        $validated = $request->validated();
 
         $proof = $request->file('proof_of_payment');
 
@@ -54,18 +57,5 @@ class PaymentController extends Controller
         $payment->update($validated);
 
         return redirect()->route('orders.show', ['order' => $payment->order_id])->with('message', 'Pago modificado exitosamente.');
-    }
-
-    /**
-     * @return array{order_id: int, amount: float, type: string, proof_of_payment?: mixed}
-     */
-    private function validatePayment(Request $request): array
-    {
-        return $request->validate([
-            'order_id' => 'required|exists:orders,id',
-            'amount' => 'required|numeric|min:1',
-            'type' => 'required|string|max:255',
-            'proof_of_payment' => 'nullable|file|mimes:jpg,jpeg,png,webp,pdf|max:5120',
-        ]);
     }
 }

@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\BO;
 
-use App\Enums\Unit;
+use App\Actions\Stock\DeleteStockable;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\BO\StoreStockableRequest;
+use App\Http\Requests\BO\UpdateStockableRequest;
 use App\Http\Resources\StockableResource;
 use App\Models\Stockable;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -46,30 +46,16 @@ class StockController extends Controller
         return Inertia::render('stock/create');
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(StoreStockableRequest $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'min: 4'],
-            'quantity' => ['required', 'numeric', 'min:1'],
-            'alert_at' => ['required', 'numeric', 'min:1'],
-            'unit' => ['required'],
-        ]);
-
-        Stockable::create($validated);
+        Stockable::create($request->validated());
 
         return redirect(route('stockables.index'));
     }
 
-    public function update(Request $request, Stockable $stockable): RedirectResponse
+    public function update(UpdateStockableRequest $request, Stockable $stockable): RedirectResponse
     {
-        $validated = $request->validate([
-            'name' => ['sometimes', 'string', 'min: 4'],
-            'quantity' => ['sometimes', 'numeric', 'min:1'],
-            'alert_at' => ['sometimes', 'numeric', 'min:1'],
-            'unit' => ['sometimes', Rule::in(Unit::cases())],
-        ]);
-
-        $stockable->update($validated);
+        $stockable->update($request->validated());
 
         return redirect(route('stockables.index'));
     }
@@ -81,12 +67,9 @@ class StockController extends Controller
         ]);
     }
 
-    public function destroy(Stockable $stockable): RedirectResponse
+    public function destroy(Stockable $stockable, DeleteStockable $action): RedirectResponse
     {
-        DB::transaction(function () use ($stockable) {
-            $stockable->productionStatuses()->detach();
-            $stockable->delete();
-        });
+        $action->handle(['stockable' => $stockable]);
 
         return redirect(route('stockables.index'));
     }

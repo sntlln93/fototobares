@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\BO;
 
-use App\Enums\ContactRole;
+use App\Actions\Schools\CreateSchool;
+use App\Actions\Schools\DeleteSchool;
+use App\Actions\Schools\UpdateSchool;
 use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreSchoolRequest;
@@ -14,7 +16,6 @@ use App\Models\School;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -58,22 +59,9 @@ class SchoolController extends Controller
         ]);
     }
 
-    public function store(StoreSchoolRequest $request): RedirectResponse
+    public function store(StoreSchoolRequest $request, CreateSchool $action): RedirectResponse
     {
-        $validated = $request->validated();
-
-        DB::transaction(function () use ($validated) {
-            $school = School::create($validated['school']);
-
-            if (isset($validated['principal'])) {
-                $school->principal()->create([
-                    ...$validated['principal'],
-                    'role' => ContactRole::Principal,
-                ]);
-            }
-
-            $school->address()->create($validated['address']);
-        });
+        $action->handle($request->validated());
 
         return redirect(route('schools.index'));
     }
@@ -91,30 +79,14 @@ class SchoolController extends Controller
         ]);
     }
 
-    public function update(School $school, StoreSchoolRequest $request): RedirectResponse
+    public function update(School $school, StoreSchoolRequest $request, UpdateSchool $action): RedirectResponse
     {
-        $validated = $request->validated();
-
-        DB::transaction(function () use ($validated, $school) {
-            $school->update($validated['school']);
-
-            if (isset($validated['principal']) && ! $school->principal) {
-                $school->principal()->create([
-                    ...$validated['principal'],
-                    'role' => ContactRole::Principal,
-                ]);
-            } elseif (isset($validated['principal']) && $school->principal) {
-                $school->principal()->update($validated['principal']);
-            }
-
-            $school->address()->update($validated['address']);
-        });
+        $action->handle(['school' => $school, 'data' => $request->validated()]);
 
         return redirect(route('schools.index'));
-
     }
 
-    public function destroy(School $school): RedirectResponse
+    public function destroy(School $school, DeleteSchool $action): RedirectResponse
     {
         $classrooms = $school->classrooms->pluck('id');
         $hasOrders = Order::withTrashed()
@@ -125,14 +97,7 @@ class SchoolController extends Controller
             return back()->withErrors(['school' => 'No se pueden eliminar escuelas que tengan pedidos registrados']);
         }
 
-        DB::transaction(function () use ($school) {
-            $school->address()->delete();
-            $school->principal()->delete();
-
-            $school->teachers()->delete();
-            $school->classrooms()->delete();
-            $school->delete();
-        });
+        $action->handle(['school' => $school]);
 
         return redirect(route('schools.index'));
     }

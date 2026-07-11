@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace App\Http\Controllers\BO;
 
 use App\Actions\Products\CreateProduct;
+use App\Actions\Products\DeleteProduct;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\BO\StoreProductRequest;
 use App\Http\Resources\ProductResource;
 use App\Models\Product;
 use App\Models\ProductType;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -57,12 +57,9 @@ class ProductController extends Controller
         return redirect()->route('products.index');
     }
 
-    public function destroy(Product $product): RedirectResponse
+    public function destroy(Product $product, DeleteProduct $action): RedirectResponse
     {
-        DB::transaction(function () use ($product) {
-            $product->combos()->detach();
-            $product->delete();
-        });
+        $action->handle(['product' => $product]);
 
         return redirect()->route('products.index');
     }

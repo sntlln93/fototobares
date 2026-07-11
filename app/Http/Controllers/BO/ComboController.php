@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\BO;
 
+use App\Actions\Combos\DeleteCombo;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\BO\StoreComboRequest;
 use App\Http\Resources\ComboResource;
@@ -12,7 +13,6 @@ use App\Models\Combo;
 use App\Models\Product;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -90,12 +90,9 @@ class ComboController extends Controller
         return redirect()->route('combos.index');
     }
 
-    public function destroy(Combo $combo): RedirectResponse
+    public function destroy(Combo $combo, DeleteCombo $action): RedirectResponse
     {
-        DB::transaction(function () use ($combo) {
-            $combo->products()->detach();
-            $combo->delete();
-        });
+        $action->handle(['combo' => $combo]);
 
         return redirect()->route('combos.index');
     }

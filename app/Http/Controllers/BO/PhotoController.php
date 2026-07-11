@@ -5,10 +5,11 @@ declare(strict_types=1);
 namespace App\Http\Controllers\BO;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\BO\StorePhotoRequest;
 use App\Models\Classroom;
 use App\Models\Photo;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -27,23 +28,19 @@ class PhotoController extends Controller
         ]);
     }
 
-    public function store(Request $request, Classroom $classroom): RedirectResponse
+    public function store(StorePhotoRequest $request, Classroom $classroom): RedirectResponse
     {
-        $validated = $request->validate([
-            'photo' => ['required', 'image', 'max:5120'], // 5MB
-        ]);
-
-        // Parse the number from the filename
-        $originalFilename = $validated['photo']->getClientOriginalName();
+        /** @var UploadedFile $photo */
+        $photo = $request->file('photo');
 
         // Extract number from filename (e.g., "001.jpg" -> 1, "photo_042.png" -> 42)
-        if (preg_match('/(\d+)/', $originalFilename, $matches)) {
-            $photoNumber = (int) $matches[1];
-        } else {
+        if (! preg_match('/(\d+)/', $photo->getClientOriginalName(), $matches)) {
             return back()->withErrors(['photo' => 'El nombre del archivo debe contener un número (ej: 001.jpg, foto_025.png)']);
         }
 
-        // Check if this number already exists for this classroom
+        $photoNumber = (int) $matches[1];
+
+        // Reject a number already used in this classroom
         $existingPhoto = Photo::where('classroom_id', $classroom->id)
             ->where('number', $photoNumber)
             ->first();
@@ -52,10 +49,8 @@ class PhotoController extends Controller
             return back()->withErrors(['photo' => "Ya existe una foto con el número {$photoNumber} en este curso"]);
         }
 
-        // Store the photo
-        $path = $validated['photo']->store("photos/classroom-{$classroom->id}", 'public');
+        $path = $photo->store("photos/classroom-{$classroom->id}", 'public');
 
-        // Create photo record
         Photo::create([
             'classroom_id' => $classroom->id,
             'file_path' => $path,
