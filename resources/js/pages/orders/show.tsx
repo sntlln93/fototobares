@@ -2,10 +2,10 @@ import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
 import { useState } from 'react';
+import { CancelOrderModal } from './components/cancel-order-modal';
 import { OrderInfoCard } from './components/order-info-card';
 import { DeliveryCard } from './delivery';
 import { Details } from './details';
-import { CancelOrderModal } from './partials/cancel-order-modal';
 import { PaymentHistory } from './payment-history';
 
 export default function Order({
