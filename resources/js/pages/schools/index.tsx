@@ -16,7 +16,7 @@ import { BreadcrumbItem } from '@/types';
 import { Head, Link } from '@inertiajs/react';
 import { ArrowUpDown, Edit2, Eye, Plus, Trash } from 'lucide-react';
 import { useState } from 'react';
-import { DeleteSchoolConfirmation } from './partials/delete-confirmation';
+import { DeleteSchoolConfirmation } from './components/delete-confirmation';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
