@@ -1,11 +1,11 @@
 import { Badge } from '@/components/ui/badge';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { TableCell, TableRow } from '@/components/ui/table';
+import { ProductIcon } from '@/features/product-icon';
 import { formatPrice, getColorEs } from '@/lib/utils';
 import { Link } from '@inertiajs/react';
 import { Edit2, Trash } from 'lucide-react';
-import { ProductDesign } from '../partials/product-design';
-import { ProductIcon } from '../partials/product-icon';
+import { ProductDesign } from './product-design';
 
 export function ProductRow({
     product,
