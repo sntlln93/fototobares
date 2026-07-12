@@ -55,7 +55,7 @@ export default function Combos({
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead className="w-[100px]">
+                            <TableHead className="w-25">
                                 <div className="flex items-center gap-2">
                                     <button
                                         onClick={() =>

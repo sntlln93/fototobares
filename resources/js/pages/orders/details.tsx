@@ -11,7 +11,7 @@ import { ProductIcon } from '../products/partials/product-icon';
 
 export function Details({ products }: { products: OrderProduct[] }) {
     return (
-        <Card className="lg:min-w-[400px]">
+        <Card className="lg:min-w-100">
             <CardHeader>
                 <CardTitle className="text-xl">Detalle</CardTitle>
             </CardHeader>

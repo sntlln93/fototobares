@@ -89,7 +89,7 @@ export function DeliveryCard({
     };
 
     return (
-        <Card className="lg:min-w-[400px]">
+        <Card className="lg:min-w-100">
             {pendingDelivery && (
                 <Modal
                     show={Boolean(pendingDelivery)}

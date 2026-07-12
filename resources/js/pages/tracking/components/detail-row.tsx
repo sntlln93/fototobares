@@ -72,9 +72,7 @@ export function DetailRow({
                     )}
                 </div>
             </TableCell>
-            <TableCell className="max-w-[200px] truncate">
-                {detail.note}
-            </TableCell>
+            <TableCell className="max-w-50 truncate">{detail.note}</TableCell>
             <TableCell>
                 <div className="flex items-center gap-1">
                     {detail.priority && (

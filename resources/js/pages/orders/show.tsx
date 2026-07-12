@@ -72,7 +72,7 @@ export default function Order({
             )}
 
             <section className="flex flex-col gap-6 px-6 py-6 lg:flex-row lg:flex-wrap">
-                <Card className="relative lg:min-w-[400px]">
+                <Card className="relative lg:min-w-100">
                     {data.can_edit ? (
                         <Link
                             href={route('orders.edit', {

@@ -61,9 +61,7 @@ export default function StockMovements({
                         <Table>
                             <TableHeader>
                                 <TableRow>
-                                    <TableHead className="w-[80px]">
-                                        #
-                                    </TableHead>
+                                    <TableHead className="w-20">#</TableHead>
                                     <TableHead>Insumo</TableHead>
                                     <TableHead>Cantidad</TableHead>
                                     <TableHead>Motivo</TableHead>

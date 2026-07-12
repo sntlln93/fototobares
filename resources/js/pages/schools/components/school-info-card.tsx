@@ -13,7 +13,7 @@ import { type SchoolShowData } from '../hooks/use-school-show';
 export function SchoolInfoCard({ school }: { school: SchoolShowData }) {
     return (
         <section className="px-6 pt-6">
-            <Card className="relative max-w-[425px]">
+            <Card className="relative max-w-106.25">
                 <Link
                     href={route('schools.edit', {
                         school: school.id,

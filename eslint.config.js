@@ -2,6 +2,7 @@ import js from '@eslint/js';
 import prettierRecommended from 'eslint-plugin-prettier/recommended';
 import react from 'eslint-plugin-react';
 import reactHooks from 'eslint-plugin-react-hooks';
+import tailwindCanonical from 'eslint-plugin-tailwind-canonical-classes';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
@@ -78,6 +79,21 @@ export default tseslint.config(
             'max-lines-per-function': [
                 'error',
                 { max: 150, skipBlankLines: true, skipComments: true },
+            ],
+        },
+    },
+    // Enforce canonical Tailwind class names via Tailwind v4's canonicalization
+    // API. Vendored shadcn primitives are exempt so upstream updates don't drift.
+    {
+        files: ['resources/js/**/*.{ts,tsx}'],
+        ignores: ['resources/js/components/ui/**'],
+        plugins: {
+            'tailwind-canonical-classes': tailwindCanonical,
+        },
+        rules: {
+            'tailwind-canonical-classes/tailwind-canonical-classes': [
+                'error',
+                { cssPath: './resources/css/app.css' },
             ],
         },
     },

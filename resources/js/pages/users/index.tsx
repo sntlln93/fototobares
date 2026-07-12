@@ -59,7 +59,7 @@ export default function Users({ users }: PageProps<{ users: UserRow[] }>) {
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead className="w-[100px]">#</TableHead>
+                            <TableHead className="w-25">#</TableHead>
                             <TableHead>Nombre</TableHead>
                             <TableHead>Email</TableHead>
                             <TableHead>Roles</TableHead>

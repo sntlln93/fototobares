@@ -6,7 +6,7 @@ export function ProductsTableHeader() {
     return (
         <TableHeader>
             <TableRow>
-                <TableHead className="w-[100px]">
+                <TableHead className="w-25">
                     <div className="flex items-center gap-2">
                         <button onClick={() => onSort('id', 'products.index')}>
                             <ArrowUpDown className="h-4 w-4" />
