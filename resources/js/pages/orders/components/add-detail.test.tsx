@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
+import { SelectableProduct } from '../form';
 import { AddDetail } from './add-detail';
-import { SelectableProduct } from './form';
 
 const mural = {
     id: 1,

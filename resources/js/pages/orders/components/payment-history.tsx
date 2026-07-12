@@ -22,9 +22,9 @@ import {
     Share2,
 } from 'lucide-react';
 import { useState } from 'react';
-import { useShareReceipt } from './hooks/use-share-receipt';
-import { CreatePaymentModal } from './payments/create-payment-modal';
-import { EditPaymentModal } from './payments/edit-payment-modal';
+import { useShareReceipt } from '../hooks/use-share-receipt';
+import { CreatePaymentModal } from './create-payment-modal';
+import { EditPaymentModal } from './edit-payment-modal';
 
 export function PaymentHistory({
     order,

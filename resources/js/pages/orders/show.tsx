@@ -3,10 +3,10 @@ import { BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
 import { useState } from 'react';
 import { CancelOrderModal } from './components/cancel-order-modal';
+import { DeliveryCard } from './components/delivery';
+import { Details } from './components/details';
 import { OrderInfoCard } from './components/order-info-card';
-import { DeliveryCard } from './delivery';
-import { Details } from './details';
-import { PaymentHistory } from './payment-history';
+import { PaymentHistory } from './components/payment-history';
 
 export default function Order({
     order,
