@@ -1,4 +1,3 @@
-import { Checkbox } from '@/components/checkbox';
 import InputError from '@/components/input-error';
 import InputHint from '@/components/input-hint';
 import { Modal } from '@/components/modal';
@@ -6,16 +5,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { capitalize, getColorEs } from '@/lib/utils';
-import { useState } from 'react';
-import {
-    DetailFormData,
-    DetailFormErrors,
-    buildProductOrders,
-    initialDetailFormData,
-    resolveVariants,
-    validateDetailForm,
-} from './detail-form';
+import { DetailVariantField } from './components/detail-variant-field';
 import { ProductOrder, SelectableProduct } from './form';
+import { useAddDetail } from './hooks/use-add-detail';
 
 export function AddDetail({
     addProducts,
@@ -31,300 +23,98 @@ export function AddDetail({
     /** Existing values (aligned with `products`) when editing an added product */
     initialValues?: ProductOrder[];
 }) {
-    const [productData, setProductData] = useState<DetailFormData>(() =>
-        initialDetailFormData(initialValues),
-    );
+    const {
+        errors,
+        currentStep,
+        getProductValue,
+        updateProductData,
+        handleAddProduct,
+        handleNextStep,
+        handlePreviousStep,
+        getVariants,
+    } = useAddDetail({ products, addProducts, onClose, initialValues });
 
-    const [errors, setErrors] = useState<DetailFormErrors>({});
-
-    const [currentStep, setCurrentStep] = useState<number>(0);
-
-    const getProductValue = <K extends keyof typeof productData>(
-        productId: number,
-        key: K,
-    ) => productData[key].find((item) => item.product_id === productId)?.value;
-
-    const updateProductData = <K extends keyof typeof productData>(
-        key: K,
-        productId: number,
-        value: (typeof productData)[K][number]['value'],
-    ) => {
-        setProductData((prev) => {
-            const exists = prev[key].some(
-                (item) => item.product_id === productId,
-            );
-
-            const updatedData = {
-                ...prev,
-                [key]: exists
-                    ? prev[key].map((item) =>
-                          item.product_id === productId
-                              ? { ...item, value }
-                              : item,
-                      )
-                    : [...prev[key], { product_id: productId, value }],
-            };
-
-            // Reset error if the new value is non-falsy
-            if (value) {
-                setErrors((prevErrors) => {
-                    if (!prevErrors[productId]) return prevErrors;
-
-                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                    const { [key]: _, ...remainingErrors } =
-                        prevErrors[productId];
-
-                    return Object.keys(remainingErrors).length > 0
-                        ? { ...prevErrors, [productId]: remainingErrors }
-                        : Object.fromEntries(
-                              Object.entries(prevErrors).filter(
-                                  ([id]) => Number(id) !== productId,
-                              ),
-                          );
-                });
-            }
-
-            return updatedData;
-        });
-    };
-
-    const handleAddProduct = () => {
-        const newErrors = validateDetailForm(products, productData);
-
-        setErrors(newErrors);
-
-        if (Object.keys(newErrors).length > 0) {
-            return;
-        }
-
-        addProducts(buildProductOrders(products, productData));
-        onClose();
-    };
-
-    const handleNextStep = () => {
-        if (currentStep < products.length - 1) {
-            setCurrentStep(currentStep + 1);
-        }
-    };
-
-    const handlePreviousStep = () => {
-        if (currentStep > 0) {
-            setCurrentStep(currentStep - 1);
-        }
-    };
-
-    const getVariants = (step: typeof currentStep) =>
-        resolveVariants(products[step]);
-
+    const product = products[currentStep];
     // Narrowed once so TypeScript knows the variants exist inside the block
     const currentVariants = getVariants(currentStep);
 
     return (
         <Modal show={show} onClose={onClose}>
-            <div className="p-6" key={products[currentStep].id}>
+            <div className="p-6" key={product.id}>
                 <h2 className="text-lg font-medium text-gray-900 dark:text-gray-100">
-                    Agregar {products[currentStep].name} al pedido
+                    Agregar {product.name} al pedido
                 </h2>
 
                 <h3 className="text-md font-medium text-gray-500 dark:text-gray-100">
                     Agregando {currentStep + 1} de {products.length} productos
                 </h3>
 
-                {products[currentStep].product_type_id === 1 &&
-                currentVariants ? (
+                {product.product_type_id === 1 && currentVariants ? (
                     <>
-                        <div className="mt-2">
-                            <fieldset>
-                                <legend className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                    Orientaciones disponibles para este producto
-                                </legend>
-                                <div className="mt-1 flex flex-wrap gap-4">
-                                    {currentVariants.orientations.map(
-                                        (orientation) => (
-                                            <label
-                                                className="flex items-center"
-                                                key={orientation}
-                                            >
-                                                <Checkbox
-                                                    value={orientation}
-                                                    checked={
-                                                        getProductValue(
-                                                            products[
-                                                                currentStep
-                                                            ].id,
-                                                            'orientation',
-                                                        ) === orientation
-                                                    }
-                                                    onChange={(e) =>
-                                                        updateProductData(
-                                                            'orientation',
-                                                            products[
-                                                                currentStep
-                                                            ].id,
-                                                            e.target
-                                                                .value as ProductOrientation,
-                                                        )
-                                                    }
-                                                />
-                                                <span className="ms-2 text-sm text-gray-600 dark:text-gray-400">
-                                                    {capitalize(orientation)}
-                                                </span>
-                                            </label>
-                                        ),
-                                    )}
-                                </div>
-                            </fieldset>
-                            <InputError
-                                message={
-                                    errors[products[currentStep].id]
-                                        ?.orientation
-                                }
-                                className="mt-2"
-                            />
-                        </div>
+                        <DetailVariantField
+                            legend="Orientaciones disponibles para este producto"
+                            options={currentVariants.orientations}
+                            selectedValue={getProductValue(
+                                product.id,
+                                'orientation',
+                            )}
+                            onSelect={(value) =>
+                                updateProductData(
+                                    'orientation',
+                                    product.id,
+                                    value as ProductOrientation,
+                                )
+                            }
+                            renderLabel={capitalize}
+                            error={errors[product.id]?.orientation}
+                        />
 
-                        <div className="mt-2">
-                            <fieldset>
-                                <legend className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                    Tipo de foto
-                                </legend>
-                                <div className="mt-1 flex flex-wrap gap-4">
-                                    {currentVariants.photo_types.map(
-                                        (photoType) => (
-                                            <label
-                                                className="flex items-center"
-                                                key={photoType}
-                                            >
-                                                <Checkbox
-                                                    value={photoType}
-                                                    checked={
-                                                        getProductValue(
-                                                            products[
-                                                                currentStep
-                                                            ].id,
-                                                            'photoType',
-                                                        ) === photoType
-                                                    }
-                                                    onChange={(e) =>
-                                                        updateProductData(
-                                                            'photoType',
-                                                            products[
-                                                                currentStep
-                                                            ].id,
-                                                            e.target
-                                                                .value as ProductPhotoType,
-                                                        )
-                                                    }
-                                                />
-                                                <span className="ms-2 text-sm text-gray-600 dark:text-gray-400">
-                                                    {capitalize(photoType)}
-                                                </span>
-                                            </label>
-                                        ),
-                                    )}
-                                </div>
-                            </fieldset>
-                            <InputError
-                                message={
-                                    errors[products[currentStep].id]?.photoType
-                                }
-                                className="mt-2"
-                            />
-                        </div>
+                        <DetailVariantField
+                            legend="Tipo de foto"
+                            options={currentVariants.photo_types}
+                            selectedValue={getProductValue(
+                                product.id,
+                                'photoType',
+                            )}
+                            onSelect={(value) =>
+                                updateProductData(
+                                    'photoType',
+                                    product.id,
+                                    value as ProductPhotoType,
+                                )
+                            }
+                            renderLabel={capitalize}
+                            error={errors[product.id]?.photoType}
+                        />
 
-                        <div className="mt-2">
-                            <fieldset>
-                                <legend className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                    Fondos disponibles para este producto en
-                                    este combo
-                                </legend>
-                                <div className="mt-1 flex flex-wrap gap-4">
-                                    {currentVariants.backgrounds.map(
-                                        (background) => (
-                                            <label
-                                                className="flex items-center"
-                                                key={background}
-                                            >
-                                                <Checkbox
-                                                    value={background}
-                                                    checked={
-                                                        getProductValue(
-                                                            products[
-                                                                currentStep
-                                                            ].id,
-                                                            'background',
-                                                        ) === background
-                                                    }
-                                                    onChange={(e) =>
-                                                        updateProductData(
-                                                            'background',
-                                                            products[
-                                                                currentStep
-                                                            ].id,
-                                                            e.target.value,
-                                                        )
-                                                    }
-                                                />
-                                                <span className="ms-2 text-sm text-gray-600 dark:text-gray-400">
-                                                    {getColorEs(background)}
-                                                </span>
-                                            </label>
-                                        ),
-                                    )}
-                                </div>
-                            </fieldset>
-                            <InputError
-                                message={
-                                    errors[products[currentStep].id]?.background
-                                }
-                                className="mt-2"
-                            />
-                        </div>
+                        <DetailVariantField
+                            legend="Fondos disponibles para este producto en este combo"
+                            options={currentVariants.backgrounds}
+                            selectedValue={getProductValue(
+                                product.id,
+                                'background',
+                            )}
+                            onSelect={(value) =>
+                                updateProductData(
+                                    'background',
+                                    product.id,
+                                    value,
+                                )
+                            }
+                            renderLabel={getColorEs}
+                            error={errors[product.id]?.background}
+                        />
 
-                        <div className="mt-2">
-                            <fieldset>
-                                <legend className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                    Colores disponibles para este producto en
-                                    este combo
-                                </legend>
-                                <div className="mt-1 flex flex-wrap gap-4">
-                                    {currentVariants.colors.map((color) => (
-                                        <label
-                                            className="flex items-center"
-                                            key={color}
-                                        >
-                                            <Checkbox
-                                                value={color}
-                                                checked={
-                                                    getProductValue(
-                                                        products[currentStep]
-                                                            .id,
-                                                        'color',
-                                                    ) === color
-                                                }
-                                                onChange={(e) =>
-                                                    updateProductData(
-                                                        'color',
-                                                        products[currentStep]
-                                                            .id,
-                                                        e.target.value,
-                                                    )
-                                                }
-                                            />
-                                            <span className="ms-2 text-sm text-gray-600 dark:text-gray-400">
-                                                {getColorEs(color)}
-                                            </span>
-                                        </label>
-                                    ))}
-                                </div>
-                            </fieldset>
-                            <InputError
-                                message={
-                                    errors[products[currentStep].id]?.color
-                                }
-                                className="mt-2"
-                            />
-                        </div>
+                        <DetailVariantField
+                            legend="Colores disponibles para este producto en este combo"
+                            options={currentVariants.colors}
+                            selectedValue={getProductValue(product.id, 'color')}
+                            onSelect={(value) =>
+                                updateProductData('color', product.id, value)
+                            }
+                            renderLabel={getColorEs}
+                            error={errors[product.id]?.color}
+                        />
                     </>
                 ) : undefined}
 
@@ -339,21 +129,18 @@ export function AddDetail({
                         id="note"
                         type="text"
                         name="note"
-                        value={
-                            getProductValue(products[currentStep].id, 'note') ??
-                            ''
-                        }
+                        value={getProductValue(product.id, 'note') ?? ''}
                         onChange={(e) =>
                             updateProductData(
                                 'note',
-                                products[currentStep].id,
+                                product.id,
                                 e.target.value,
                             )
                         }
                         className="mt-1 block w-full"
                     />
                     <InputError
-                        message={errors[products[currentStep].id]?.note}
+                        message={errors[product.id]?.note}
                         className="mt-2"
                     />
                 </div>

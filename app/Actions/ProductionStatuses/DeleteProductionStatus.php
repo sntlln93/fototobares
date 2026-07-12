@@ -4,21 +4,27 @@ declare(strict_types=1);
 
 namespace App\Actions\ProductionStatuses;
 
+use App\Contracts\ActionContract;
 use App\Models\ProductionStatus;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
-class DeleteProductionStatus
+class DeleteProductionStatus implements ActionContract
 {
     /**
      * Delete an unused stage and close the gap it leaves in the chain.
+     *
+     * @param  array<string, mixed>  $params  {status: ProductionStatus}
      *
      * @throws ValidationException when the stage is the only one of its
      *                             product, has details currently in it
      *                             or consumes stockables
      */
-    public function handle(ProductionStatus $status): void
+    public function handle(array $params): void
     {
+        /** @var ProductionStatus $status */
+        $status = $params['status'];
+
         $siblings = ProductionStatus::query()
             ->where('product_id', $status->product_id)
             ->count();

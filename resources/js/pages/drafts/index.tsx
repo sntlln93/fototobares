@@ -87,7 +87,7 @@ export default function DraftsIndex({
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead className="w-[100px]">#</TableHead>
+                                <TableHead className="w-25">#</TableHead>
                                 <TableHead>Nombre Niño</TableHead>
                                 <TableHead>Cliente</TableHead>
                                 <TableHead>Escuela (Aula)</TableHead>

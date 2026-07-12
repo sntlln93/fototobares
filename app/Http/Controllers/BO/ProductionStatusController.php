@@ -45,7 +45,7 @@ class ProductionStatusController extends Controller
         /** @var array{product_id: int, name: string} $validated */
         $validated = $request->validated();
 
-        $action->handle($validated['product_id'], $validated['name']);
+        $action->handle($validated);
 
         return back()->with('success', "Etapa \"{$validated['name']}\" agregada");
     }
@@ -59,7 +59,7 @@ class ProductionStatusController extends Controller
 
     public function destroy(ProductionStatus $productionStatus, DeleteProductionStatus $action): RedirectResponse
     {
-        $action->handle($productionStatus);
+        $action->handle(['status' => $productionStatus]);
 
         return back()->with('success', "Etapa \"{$productionStatus->name}\" eliminada");
     }
@@ -69,7 +69,7 @@ class ProductionStatusController extends Controller
         /** @var array{product_id: int, ordered_ids: array<int, int>} $validated */
         $validated = $request->validated();
 
-        $action->handle($validated['product_id'], $validated['ordered_ids']);
+        $action->handle($validated);
 
         return back()->with('success', 'Orden de etapas actualizado');
     }

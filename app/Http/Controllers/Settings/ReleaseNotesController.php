@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Settings;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\File;
 use Inertia\Inertia;
 use Inertia\Response;
 
-class ReleaseNotesController
+class ReleaseNotesController extends Controller
 {
     public function show(): Response
     {

@@ -42,6 +42,11 @@ jobs:
           cp .env.example .env
           php artisan key:generate
 
+      # Architecture violations are static (no DB) and cheap, so they run
+      # first as a fast-fail gate before the slower feature suite.
+      - name: 🏛️ Arch tests
+        run: php artisan test --testsuite=Arch
+
       - name: 🧪 Pest
         env:
           DB_CONNECTION: mysql

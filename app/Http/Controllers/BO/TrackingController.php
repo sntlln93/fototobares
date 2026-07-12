@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\BO;
 
+use App\Actions\Tracking\MoveDetailsToStage;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\BO\BatchUpdateTrackingRequest;
 use App\Models\Order;
 use App\Models\OrderDetail;
 use App\Models\Product;
@@ -12,10 +14,8 @@ use App\Models\ProductionStatus;
 use App\Models\ProductType;
 use App\Models\School;
 use App\Models\User;
-use App\Services\StockService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -128,53 +128,27 @@ class TrackingController extends Controller
         ]);
     }
 
-    public function batchUpdate(Request $request, StockService $stockService): RedirectResponse
+    public function batchUpdate(BatchUpdateTrackingRequest $request, MoveDetailsToStage $action): RedirectResponse
     {
-        $validated = $request->validate([
-            'detail_ids' => ['required', 'array', 'min:1'],
-            'detail_ids.*' => ['required', 'integer', 'exists:order_details,id'],
-            'production_status_id' => ['required', 'integer', 'exists:production_statuses,id'],
-        ]);
+        $validated = $request->validated();
+
+        /** @var array<int, int> $detailIds */
+        $detailIds = $validated['detail_ids'];
+
+        /** @var int $statusId */
+        $statusId = $validated['production_status_id'];
 
         /** @var ProductionStatus $status */
-        $status = ProductionStatus::findOrFail($validated['production_status_id']);
+        $status = ProductionStatus::findOrFail($statusId);
 
-        $details = OrderDetail::with('product', 'productionStatus')
-            ->whereIn('id', $validated['detail_ids'])
-            ->get();
-
-        $mismatched = $details->first(
-            fn (OrderDetail $detail) => $detail->product_id !== $status->product_id
-        );
-
-        if ($mismatched !== null) {
-            return back()->withErrors([
-                'detail_ids' => 'La etapa elegida no pertenece al producto de todos los seleccionados.',
-            ]);
-        }
-
-        /** @var User $user */
+        /** @var User|null $user */
         $user = $request->user();
 
-        DB::transaction(function () use ($details, $status, $user, $stockService) {
-            foreach ($details as $detail) {
-                $previousPosition = $detail->productionStatus->position ?? 0;
-
-                $detail->productionStatus()->associate($status);
-                $detail->status_updated_at = now();
-
-                if ($status->position < $previousPosition) {
-                    $detail->priority = true;
-                }
-
-                $detail->save();
-                $detail->setRelation('productionStatus', $status);
-
-                $stockService->deductForDetail($detail, $user);
-            }
-        });
-
-        $count = $details->count();
+        $count = $action->handle([
+            'detail_ids' => $detailIds,
+            'status' => $status,
+            'user' => $user,
+        ]);
 
         return back()->with('success', "$count producto(s) actualizados a \"{$status->name}\"");
     }

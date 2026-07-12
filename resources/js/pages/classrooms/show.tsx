@@ -46,7 +46,7 @@ export default function ClassroomShow({
             <Head title={`${classroom.name} - Alumnos`} />
 
             <section className="px-6 pt-6">
-                <Card className="relative max-w-[425px]">
+                <Card className="relative max-w-106.25">
                     <Link
                         href={route('schools.show', {
                             school: classroom.school.id,
@@ -100,7 +100,7 @@ export default function ClassroomShow({
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead className="w-[100px]">#</TableHead>
+                                <TableHead className="w-25">#</TableHead>
                                 <TableHead>Nombre del Niño</TableHead>
                                 <TableHead>Cliente</TableHead>
                                 <TableHead>Teléfono</TableHead>

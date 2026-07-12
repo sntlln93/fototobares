@@ -64,7 +64,7 @@ export function PaymentHistory({
                 />
             )}
 
-            <Card className="lg:min-w-[400px]">
+            <Card className="lg:min-w-100">
                 <CardHeader>
                     <CardTitle className="flex items-center justify-between text-xl">
                         <span>Historial de pagos</span>

@@ -16,7 +16,7 @@ import { BreadcrumbItem } from '@/types';
 import { Head, Link } from '@inertiajs/react';
 import { ArrowUpDown, Edit2, Plus, Trash } from 'lucide-react';
 import { useState } from 'react';
-import { DeleteComboConfirmation } from './partials/delete-confirmation';
+import { DeleteComboConfirmation } from './components/delete-confirmation';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -55,7 +55,7 @@ export default function Combos({
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead className="w-[100px]">
+                            <TableHead className="w-25">
                                 <div className="flex items-center gap-2">
                                     <button
                                         onClick={() =>

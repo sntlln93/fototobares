@@ -158,7 +158,7 @@ export function ProductGroup({
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead className="w-[40px]">
+                            <TableHead className="w-10">
                                 <input
                                     type="checkbox"
                                     aria-label="Seleccionar todos"
