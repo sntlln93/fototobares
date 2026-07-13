@@ -42,7 +42,16 @@ const combo = {
     id: 4,
     name: 'Combo escolar',
     suggested_price: 15000,
+    default_payments: 3,
     products: [comboMural, taza],
+} as unknown as Combo & { products: Product[] };
+
+const otherCombo = {
+    id: 5,
+    name: 'Combo premium',
+    suggested_price: 20000,
+    default_payments: 4,
+    products: [taza],
 } as unknown as Combo & { products: Product[] };
 
 const setup = (details: ProductOrder[] = []) => {
@@ -58,7 +67,7 @@ const setup = (details: ProductOrder[] = []) => {
             setData:
                 setData as unknown as InertiaFormProps<OrderFormData>['setData'],
             products: [mural, taza, portarretrato],
-            combos: [combo],
+            combos: [combo, otherCombo],
         }),
     );
 
@@ -89,6 +98,27 @@ describe('useOrderProducts', () => {
             { ...comboMural, combo_id: 4 },
             { ...taza, combo_id: 4 },
         ]);
+    });
+
+    it('seeds the installments with the default of the first combo added', () => {
+        const { result, setData } = setup();
+
+        act(() => result.current.handleAddCombo(4));
+
+        expect(setData).toHaveBeenCalledWith('payment_plan', '3');
+    });
+
+    it('keeps the installments when a second combo is added', () => {
+        const { result, setData } = setup([
+            { product_id: 2, combo_id: 4, note: '' },
+        ]);
+
+        act(() => result.current.handleAddCombo(5));
+
+        expect(setData).not.toHaveBeenCalledWith(
+            'payment_plan',
+            expect.anything(),
+        );
     });
 
     it('appends the configured products to the order details', () => {

@@ -61,7 +61,7 @@ const combos = [
         id: 2,
         name: 'Combo escolar',
         suggested_price: 5000,
-        suggested_max_payments: 3,
+        default_payments: 3,
         products: [taza, mural],
     } as Combo & { products: Product[] },
 ];

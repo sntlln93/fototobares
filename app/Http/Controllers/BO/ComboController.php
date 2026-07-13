@@ -43,7 +43,7 @@ class ComboController extends Controller
         $combo = Combo::create([
             'name' => $validated['name'],
             'suggested_price' => $validated['suggested_price'],
-            'suggested_max_payments' => $validated['suggested_max_payments'],
+            'default_payments' => $validated['default_payments'],
         ]);
 
         $combo->products()->attach($this->pivotData($validated['products']));
@@ -68,7 +68,7 @@ class ComboController extends Controller
         $combo->update([
             'name' => $validated['name'],
             'suggested_price' => $validated['suggested_price'],
-            'suggested_max_payments' => $validated['suggested_max_payments'],
+            'default_payments' => $validated['default_payments'],
         ]);
 
         $combo->products()->sync($this->pivotData($validated['products']));

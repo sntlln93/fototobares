@@ -23,7 +23,7 @@ export default function CreateCombo({
         initialData: {
             name: '',
             suggested_price: '0',
-            suggested_max_payments: '0',
+            default_payments: '0',
             products: [],
         },
         onSubmit: (form) => form.post(route('combos.store')),

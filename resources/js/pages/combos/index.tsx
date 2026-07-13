@@ -91,7 +91,7 @@ export default function Combos({
                                     Precio
                                 </div>
                             </TableHead>
-                            <TableHead>Cuotas máximas</TableHead>
+                            <TableHead>Cuotas por defecto</TableHead>
                             <TableHead>Productos</TableHead>
                             <TableHead>Acciones</TableHead>
                         </TableRow>
@@ -108,9 +108,7 @@ export default function Combos({
                                 <TableCell>
                                     {formatPrice(combo.suggested_price)}
                                 </TableCell>
-                                <TableCell>
-                                    {combo.suggested_max_payments}
-                                </TableCell>
+                                <TableCell>{combo.default_payments}</TableCell>
                                 <TableCell>
                                     {`${combo.products.length} productos`}
                                 </TableCell>

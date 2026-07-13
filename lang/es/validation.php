@@ -191,7 +191,7 @@ return [
         'products' => 'productos',
         'suggested_price' => 'precio',
         'subtract_value' => 'valor de resta',
-        'suggested_max_payments' => 'cantidad máxima de cuotas',
+        'default_payments' => 'cuotas por defecto',
         'max_payments' => 'cantidad máxima de cuotas',
         'payment_plan' => 'cuotas',
         'paid_on' => 'fecha de pago',

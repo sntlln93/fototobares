@@ -31,9 +31,7 @@ export function ComboProducts({
 
     return (
         <div className="w-full">
-            <Label htmlFor="suggested_max_payments">
-                Productos del combo ({selectedProducts.length})
-            </Label>
+            <Label>Productos del combo ({selectedProducts.length})</Label>
 
             <ul className="my-2 gap-4">
                 {selectedProducts.map((selected) => {

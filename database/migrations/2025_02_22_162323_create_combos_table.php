@@ -17,8 +17,9 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->integer('suggested_price');
-            $table->integer('suggested_max_payments');
-            $table->integer('suggested_financed_price')->nullable();
+            // Seeds the order's installments when the combo is added; the
+            // seller can still change them
+            $table->integer('default_payments');
             $table->softDeletes();
             $table->timestamps();
         });

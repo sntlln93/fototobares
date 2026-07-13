@@ -16,7 +16,7 @@ it('opens the edit page exposing pivot quantity and variants', function () {
     $combo = Combo::create([
         'name' => 'Combo test',
         'suggested_price' => 64000,
-        'suggested_max_payments' => 4,
+        'default_payments' => 4,
     ]);
 
     $combo->products()->attach($product->id, [
@@ -46,7 +46,7 @@ it('stores variants encoded once and returns them as an array', function () {
     \Pest\Laravel\post(route('combos.store'), [
         'name' => 'Combo roundtrip',
         'suggested_price' => 64000,
-        'suggested_max_payments' => 4,
+        'default_payments' => 4,
         'products' => [
             [
                 'id' => $product->id,
@@ -75,7 +75,7 @@ it('updates a combo keeping quantities', function () {
     $combo = Combo::create([
         'name' => 'Combo test',
         'suggested_price' => 64000,
-        'suggested_max_payments' => 4,
+        'default_payments' => 4,
     ]);
 
     $combo->products()->attach($product->id, ['quantity' => 1, 'subtract_value' => 0]);
@@ -83,7 +83,7 @@ it('updates a combo keeping quantities', function () {
     \Pest\Laravel\put(route('combos.update', $combo), [
         'name' => 'Combo renombrado',
         'suggested_price' => 70000,
-        'suggested_max_payments' => 4,
+        'default_payments' => 4,
         'products' => [
             ['id' => $product->id, 'quantity' => 3, 'subtract_value' => 5000],
         ],
@@ -102,7 +102,7 @@ it('requires a subtract value for every product of the combo', function () {
     \Pest\Laravel\post(route('combos.store'), [
         'name' => 'Combo sin resta',
         'suggested_price' => 64000,
-        'suggested_max_payments' => 4,
+        'default_payments' => 4,
         'products' => [
             ['id' => $product->id, 'quantity' => 1],
         ],
@@ -117,7 +117,7 @@ it('rejects a negative subtract value', function () {
     \Pest\Laravel\post(route('combos.store'), [
         'name' => 'Combo resta negativa',
         'suggested_price' => 64000,
-        'suggested_max_payments' => 4,
+        'default_payments' => 4,
         'products' => [
             ['id' => $product->id, 'quantity' => 1, 'subtract_value' => -1],
         ],

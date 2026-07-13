@@ -39,6 +39,17 @@ export function useOrderProducts({
             'total_price',
             String(Number(data.total_price) + Number(combo.suggested_price)),
         );
+
+        // The first combo of the order seeds the installments; a second one
+        // must not overwrite the number the seller already agreed on
+        const hasCombo = data.order_details.some(
+            (detail) => detail.combo_id !== undefined,
+        );
+
+        if (!hasCombo) {
+            setData('payment_plan', String(combo.default_payments));
+        }
+
         setOpenAddModal(combo.products.map((p) => ({ ...p, combo_id: id })));
     };
 

@@ -24,8 +24,7 @@ return new class extends Migration
 
         $combo1 = Combo::create([
             'name' => 'Combo 1 (M.A)',
-            'suggested_financed_price' => 64000,
-            'suggested_max_payments' => 4,
+            'default_payments' => 4,
             'suggested_price' => 60000,
         ]);
 
@@ -37,8 +36,7 @@ return new class extends Migration
 
         $combo2 = Combo::create([
             'name' => 'Combo 2 (CLA)',
-            'suggested_financed_price' => 60000,
-            'suggested_max_payments' => 4,
+            'default_payments' => 4,
             'suggested_price' => 56000,
         ]);
 
@@ -50,8 +48,7 @@ return new class extends Migration
 
         $combo3 = Combo::create([
             'name' => 'Combo 3 (M.F)',
-            'suggested_financed_price' => 56000,
-            'suggested_max_payments' => 4,
+            'default_payments' => 4,
             'suggested_price' => 52000,
         ]);
 
@@ -63,8 +60,7 @@ return new class extends Migration
 
         $combo4 = Combo::create([
             'name' => 'Combo 3 (M.F) con taza',
-            'suggested_financed_price' => 68000,
-            'suggested_max_payments' => 4,
+            'default_payments' => 4,
             'suggested_price' => 64000,
         ]);
 

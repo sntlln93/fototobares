@@ -1,6 +1,6 @@
 export type FormData = Pick<Combo, 'name'> & {
     products: SelectedProduct[];
-    suggested_max_payments: string;
+    default_payments: string;
     suggested_price: string;
 };
 
