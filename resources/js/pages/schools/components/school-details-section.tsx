@@ -74,7 +74,7 @@ export function SchoolDetailsSection({
                             <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="Jardin">Jardín</SelectItem>
+                            <SelectItem value="Jardín">Jardín</SelectItem>
                             <SelectItem value="Primaria">Primaria</SelectItem>
                             <SelectItem value="Secundaria">
                                 Secundaria
