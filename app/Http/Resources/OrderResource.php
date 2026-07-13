@@ -64,9 +64,7 @@ class OrderResource extends JsonResource
                         'id' => $payment->id,
                         'amount' => $payment->amount,
                         'type' => $payment->type,
-                        'proof_of_payment' => $payment->proof_of_payment !== null
-                            ? Storage::url($payment->proof_of_payment)
-                            : null,
+                        'transaction_number' => $payment->transaction_number,
                         'order_id' => $payment->order_id,
                         'paid_at' => $payment->created_at->diffForHumans(), // @phpstan-ignore-line
                         'paid_on' => $payment->created_at->format('d/m/Y'), // @phpstan-ignore-line

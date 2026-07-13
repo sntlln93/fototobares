@@ -14,13 +14,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { downloadPaymentReceipt } from '@/lib/receipt';
 import { capitalize, formatPrice } from '@/lib/utils';
-import {
-    Edit,
-    EllipsisVertical,
-    ImageDown,
-    Paperclip,
-    Share2,
-} from 'lucide-react';
+import { Edit, EllipsisVertical, ImageDown, Share2 } from 'lucide-react';
 import { useState } from 'react';
 import { useShareReceipt } from '../hooks/use-share-receipt';
 import { CreatePaymentModal } from './create-payment-modal';
@@ -117,19 +111,17 @@ function PaymentItem({
         <div className="flex items-center justify-between border-b border-gray-200 py-4 last:border-0 dark:border-gray-700">
             <div className="flex items-center space-x-4">
                 <div>
-                    <div className="flex items-center gap-1 font-semibold text-black dark:text-white">
+                    <div className="font-semibold text-black dark:text-white">
                         {capitalize(payment.type)}
-                        {payment.proof_of_payment && (
-                            <a
-                                href={payment.proof_of_payment}
-                                target="_blank"
-                                rel="noreferrer"
-                                title="Ver comprobante de transferencia adjunto"
-                            >
-                                <Paperclip className="h-4 w-4 text-gray-400 hover:text-gray-600" />
-                            </a>
-                        )}
                     </div>
+                    {payment.transaction_number && (
+                        <div
+                            className="text-xs text-gray-500 dark:text-gray-400"
+                            title="Número de transacción"
+                        >
+                            N° {payment.transaction_number}
+                        </div>
+                    )}
                     <div className="text-sm text-gray-500 dark:text-gray-400">
                         {payment.paid_at}
                     </div>

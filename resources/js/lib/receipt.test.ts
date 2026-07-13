@@ -18,7 +18,7 @@ const payment = {
     type: 'transferencia',
     paid_at: 'hace 2 días',
     paid_on: '06/07/2026',
-    proof_of_payment: null,
+    transaction_number: null,
 } as Payment;
 
 describe('receiptContent', () => {

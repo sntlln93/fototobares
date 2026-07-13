@@ -9,8 +9,6 @@ use App\Http\Requests\BO\StorePaymentRequest;
 use App\Models\Order;
 use App\Models\Payment;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Storage;
 
 class PaymentController extends Controller
 {
@@ -27,12 +25,6 @@ class PaymentController extends Controller
             return back()->withErrors(['order_id' => 'No se pueden registrar pagos de un pedido cancelado.']);
         }
 
-        $proof = $request->file('proof_of_payment');
-
-        if ($proof instanceof UploadedFile) {
-            $validated['proof_of_payment'] = $proof->store('proofs', 'public');
-        }
-
         unset($validated['order_id']);
         $order->payments()->create($validated);
 
@@ -42,16 +34,6 @@ class PaymentController extends Controller
     public function update(StorePaymentRequest $request, Payment $payment): RedirectResponse
     {
         $validated = $request->validated();
-
-        $proof = $request->file('proof_of_payment');
-
-        if ($proof instanceof UploadedFile) {
-            if ($payment->proof_of_payment !== null) {
-                Storage::disk('public')->delete($payment->proof_of_payment);
-            }
-
-            $validated['proof_of_payment'] = $proof->store('proofs', 'public');
-        }
 
         unset($validated['order_id']);
         $payment->update($validated);

@@ -56,7 +56,7 @@ class DemoOrderSeeder extends Seeder
         $detail = $this->addDetail($order, $clasico, $this->muralVariant('horizontal', 'black'), 'Thiago - egresados 2026');
         $this->setStatus($detail, $clasico, 3, hoursAgo: 30);
         $this->addDetail($order, $carpeta, null, 'Thiago');
-        $order->payments()->create(['amount' => 20000, 'type' => 'transferencia']);
+        $order->payments()->create(['amount' => 20000, 'type' => 'transferencia', 'transaction_number' => 'MP73920184652']);
 
         // 3. Priority: the mural reached "Corte de moldura" (one strip
         // deducted) and was sent back to "Impreso" (stock stays deducted)
@@ -81,7 +81,7 @@ class DemoOrderSeeder extends Seeder
         $detail = $this->addDetail($order, $carpeta, null, 'Mora');
         $this->setStatus($detail, $carpeta, 3, hoursAgo: 24);
         $this->addDetail($order, $medalla, null, 'Mora');
-        $order->payments()->create(['amount' => 26000, 'type' => 'transferencia']);
+        $order->payments()->create(['amount' => 26000, 'type' => 'transferencia', 'transaction_number' => 'BNA48210937566']);
 
         // 6. Fully delivered and paid: gone from /tracking
         $order = $this->makeOrder($sextoA, 'Facundo Ríos', '3804000006', 'Ciro', 6, 6000, 1, 5);
