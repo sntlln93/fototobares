@@ -17,6 +17,7 @@ it('registers a cash payment without a transaction number', function () {
         'order_id' => $order->id,
         'amount' => 5000,
         'type' => 'efectivo',
+        'paid_on' => now()->toDateString(),
     ])->assertSessionHasNoErrors();
 
     $payment = $order->payments()->first();
@@ -35,6 +36,7 @@ it('registers a transfer payment with its transaction number', function () {
         'amount' => 5000,
         'type' => 'transferencia',
         'transaction_number' => 'MP12345678',
+        'paid_on' => now()->toDateString(),
     ])->assertSessionHasNoErrors();
 
     expect($order->payments()->first()?->transaction_number)->toBe('MP12345678');
@@ -49,6 +51,7 @@ it('requires the transaction number on transfer payments', function () {
         'order_id' => $order->id,
         'amount' => 5000,
         'type' => 'transferencia',
+        'paid_on' => now()->toDateString(),
     ])->assertSessionHasErrors([
         'transaction_number' => 'El número de transacción es obligatorio para pagos por transferencia.',
     ]);
@@ -66,6 +69,7 @@ it('rejects a non-alphanumeric transaction number', function (string $invalid) {
         'amount' => 5000,
         'type' => 'transferencia',
         'transaction_number' => $invalid,
+        'paid_on' => now()->toDateString(),
     ])->assertSessionHasErrors([
         'transaction_number' => 'El número de transacción sólo puede contener letras y números.',
     ]);
@@ -86,6 +90,7 @@ it('rejects a duplicate transaction number pointing to the order that has it', f
         'amount' => 5000,
         'type' => 'transferencia',
         'transaction_number' => 'MP12345678',
+        'paid_on' => now()->toDateString(),
     ])->assertSessionHasErrors([
         'transaction_number' => "El número de transacción ya está registrado en el pedido #{$existing->order_id}.",
     ]);
@@ -108,6 +113,7 @@ it('detects duplicate transaction numbers regardless of case', function () {
         'amount' => 5000,
         'type' => 'transferencia',
         'transaction_number' => 'mp12345678',
+        'paid_on' => now()->toDateString(),
     ])->assertSessionHasErrors('transaction_number');
 });
 
@@ -121,6 +127,7 @@ it('ignores the transaction number sent with a cash payment', function () {
         'amount' => 5000,
         'type' => 'efectivo',
         'transaction_number' => 'MP12345678',
+        'paid_on' => now()->toDateString(),
     ])->assertSessionHasNoErrors();
 
     expect($order->payments()->first()?->transaction_number)->toBeNull();
@@ -139,6 +146,7 @@ it('lets a payment keep its own transaction number on update', function () {
         'amount' => 7000,
         'type' => 'transferencia',
         'transaction_number' => 'MP12345678',
+        'paid_on' => $payment->paid_on->format('Y-m-d'),
     ])->assertSessionHasNoErrors();
 
     $payment->refresh();
@@ -165,6 +173,7 @@ it('rejects reusing another payment transaction number on update', function () {
         'amount' => $payment->amount,
         'type' => 'transferencia',
         'transaction_number' => 'MP12345678',
+        'paid_on' => $payment->paid_on->format('Y-m-d'),
     ])->assertSessionHasErrors([
         'transaction_number' => "El número de transacción ya está registrado en el pedido #{$existing->order_id}.",
     ]);
@@ -184,6 +193,7 @@ it('clears the transaction number when a transfer becomes a cash payment', funct
         'order_id' => $payment->order_id,
         'amount' => $payment->amount,
         'type' => 'efectivo',
+        'paid_on' => $payment->paid_on->format('Y-m-d'),
     ])->assertSessionHasNoErrors();
 
     expect($payment->refresh()->transaction_number)->toBeNull();

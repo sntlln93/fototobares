@@ -33,6 +33,7 @@ class StorePaymentRequest extends FormRequest
             'order_id' => ['required', 'exists:orders,id'],
             'amount' => ['required', 'numeric', 'min:1'],
             'type' => ['required', 'string', 'max:255'],
+            'paid_on' => ['required', 'date_format:Y-m-d', 'before_or_equal:today'],
             'transaction_number' => [
                 'required_if:type,transferencia',
                 'nullable',

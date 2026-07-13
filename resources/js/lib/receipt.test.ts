@@ -16,8 +16,7 @@ const payment = {
     order_id: 3,
     amount: 5000,
     type: 'transferencia',
-    paid_at: 'hace 2 días',
-    paid_on: '06/07/2026',
+    paid_on: '2026-07-06',
     transaction_number: null,
 } as Payment;
 

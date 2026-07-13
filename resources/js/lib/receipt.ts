@@ -1,4 +1,4 @@
-import { formatPrice } from '@/lib/utils';
+import { formatDate, formatPrice } from '@/lib/utils';
 
 type ReceiptInput = {
     payment: Payment;
@@ -32,7 +32,7 @@ export function receiptContent({
         title: 'Fototobares',
         subtitle: `Comprobante de pago N° ${payment.id}`,
         rows: [
-            ['Fecha', payment.paid_on ?? payment.paid_at],
+            ['Fecha', formatDate(payment.paid_on)],
             ['Cliente', order.client.name],
             ['Pedido', `#${order.id}`],
             ['Escuela', `${order.school.name} (${order.classroom.name})`],

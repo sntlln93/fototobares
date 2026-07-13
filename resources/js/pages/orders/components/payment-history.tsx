@@ -13,7 +13,7 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { downloadPaymentReceipt } from '@/lib/receipt';
-import { capitalize, formatPrice } from '@/lib/utils';
+import { capitalize, formatDate, formatPrice } from '@/lib/utils';
 import { Edit, EllipsisVertical, ImageDown, Share2 } from 'lucide-react';
 import { useState } from 'react';
 import { useShareReceipt } from '../hooks/use-share-receipt';
@@ -123,7 +123,7 @@ function PaymentItem({
                         </div>
                     )}
                     <div className="text-sm text-gray-500 dark:text-gray-400">
-                        {payment.paid_at}
+                        {formatDate(payment.paid_on)}
                     </div>
                 </div>
             </div>

@@ -185,8 +185,7 @@ declare global {
         amount: number;
         type: string;
         transaction_number: string | null;
-        paid_at: string;
-        paid_on?: string;
+        paid_on: string;
     }
 
     interface Classroom {
