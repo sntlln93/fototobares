@@ -1,3 +1,4 @@
+import AppLogoIcon from '@/components/app-logo-icon';
 import { Icon } from '@/components/icon';
 import { Button } from '@/components/ui/button';
 import {
@@ -9,7 +10,6 @@ import {
 } from '@/components/ui/sheet';
 import { Link } from '@inertiajs/react';
 import { Menu } from 'lucide-react';
-import AppLogoIcon from '../app-logo-icon';
 import { mainNavItems, rightNavItems } from './nav-items';
 
 export function MobileNav() {
