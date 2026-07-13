@@ -1,4 +1,5 @@
-import { readdirSync, statSync } from 'node:fs';
+/// <reference types="node" />
+import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { dirname, join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
@@ -33,6 +34,15 @@ function subDirs(dir: string): string[] {
     );
 }
 
+/** All .ts/.tsx file paths under `root`, recursively. */
+function allFiles(root: string): string[] {
+    return readdirSync(root).flatMap((name) => {
+        const full = join(root, name);
+        if (statSync(full).isDirectory()) return allFiles(full);
+        return /\.tsx?$/.test(name) ? [full] : [];
+    });
+}
+
 describe('frontend architecture', () => {
     it('has no legacy partials/ folders', () => {
         const offenders = allDirs(jsDir).filter(
@@ -57,6 +67,33 @@ describe('frontend architecture', () => {
         expect(
             offenders,
             `Non-standard module subfolders (allowed: components, hooks, tests): ${offenders.join(', ')}`,
+        ).toEqual([]);
+    });
+
+    it("no module imports another module's internals", () => {
+        // A page module may depend on another module's public surface (its root
+        // files), but not reach into its components/ or hooks/. Cross-module
+        // coupling is written with the @/ alias, which is what we scan for.
+        const importRe = /from\s+['"]([^'"]+)['"]/g;
+        const internalRe = /^@\/pages\/([^/]+)\/(?:components|hooks)\b/;
+
+        const offenders = subDirs(pagesDir).flatMap((module) =>
+            allFiles(join(pagesDir, module)).flatMap((file) => {
+                const src = readFileSync(file, 'utf8');
+                const hits: string[] = [];
+                for (const [, spec] of src.matchAll(importRe)) {
+                    const match = spec.match(internalRe);
+                    if (match && match[1] !== module) {
+                        hits.push(`${relative(jsDir, file)} -> ${spec}`);
+                    }
+                }
+                return hits;
+            }),
+        );
+
+        expect(
+            offenders,
+            `Cross-module imports of another module's internals: ${offenders.join(', ')}`,
         ).toEqual([]);
     });
 });
