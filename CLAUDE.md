@@ -55,6 +55,8 @@ Underlying tools if you need one directly: `sail composer pint` / `sail composer
 - Never create commits or push without explicit approval. Never push directly to `develop`.
 - Use the `prepare-commit` skill to structure commit messages before requesting approval.
 - Never mention the agent in commits, comments or project messages.
+- Never use `git add .` or `git add -A`. Always add to staging by explicitly naming the file.
+- Never stage unrelated changes. Stage only the files required for the requested work.
 - Read and modify any file inside this repository without asking; never read or modify files outside it without approval.
 - Refactor first: check whether the structure needs cleanup before adding a feature, and do that refactor as an isolated step.
 - On GitHub issues: ignore label `deferred`, prioritize label `bug`.
