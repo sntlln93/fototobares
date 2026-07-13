@@ -6,6 +6,7 @@ import { CancelOrderModal } from './components/cancel-order-modal';
 import { DeliveryCard } from './components/delivery';
 import { Details } from './components/details';
 import { OrderInfoCard } from './components/order-info-card';
+import { OrderNotes } from './components/order-notes';
 import { PaymentHistory } from './components/payment-history';
 
 export default function Order({
@@ -75,6 +76,8 @@ export default function Order({
                     initialAmount={paymentInitialAmount}
                     canRegister={!isCancelled}
                 />
+
+                <OrderNotes order={data} notes={data.notes || []} />
             </section>
         </AppLayout>
     );
