@@ -190,6 +190,7 @@ return [
         'unit' => 'unidad',
         'products' => 'productos',
         'suggested_price' => 'precio',
+        'subtract_value' => 'valor de resta',
         'suggested_max_payments' => 'cantidad máxima de cuotas',
         'max_payments' => 'cantidad máxima de cuotas',
         'payment_plan' => 'cuotas',

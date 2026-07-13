@@ -97,6 +97,8 @@ export function useAddProduct({
         const selectedProduct = {
             id: product.id,
             quantity: 1,
+            // Kept by upsertSelectedProduct when editing an existing product
+            subtract_value: 0,
             variants: {
                 photo_types: Array.from(photoTypes),
                 orientations: Array.from(orientations),

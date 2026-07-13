@@ -21,6 +21,7 @@ it('opens the edit page exposing pivot quantity and variants', function () {
 
     $combo->products()->attach($product->id, [
         'quantity' => 2,
+        'subtract_value' => 2000,
         'variants' => ['orientations' => ['vertical']],
     ]);
 
@@ -30,6 +31,7 @@ it('opens the edit page exposing pivot quantity and variants', function () {
         fn (Assert $page) => $page
             ->component('combos/edit')
             ->where('combo.data.products.0.quantity', 2)
+            ->where('combo.data.products.0.subtract_value', 2000)
             ->where('combo.data.products.0.variants.orientations.0', 'vertical'),
     );
 });
@@ -49,6 +51,7 @@ it('stores variants encoded once and returns them as an array', function () {
             [
                 'id' => $product->id,
                 'quantity' => 1,
+                'subtract_value' => 0,
                 'variants' => ['orientations' => ['horizontal']],
             ],
         ],
@@ -75,17 +78,48 @@ it('updates a combo keeping quantities', function () {
         'suggested_max_payments' => 4,
     ]);
 
-    $combo->products()->attach($product->id, ['quantity' => 1]);
+    $combo->products()->attach($product->id, ['quantity' => 1, 'subtract_value' => 0]);
 
     \Pest\Laravel\put(route('combos.update', $combo), [
         'name' => 'Combo renombrado',
         'suggested_price' => 70000,
         'suggested_max_payments' => 4,
         'products' => [
-            ['id' => $product->id, 'quantity' => 3],
+            ['id' => $product->id, 'quantity' => 3, 'subtract_value' => 5000],
         ],
     ])->assertSessionHasNoErrors();
 
     expect($combo->refresh()->name)->toBe('Combo renombrado')
-        ->and($combo->products()->first()?->pivot?->quantity)->toBe(3);
+        ->and($combo->products()->first()?->pivot?->quantity)->toBe(3)
+        ->and($combo->products()->first()?->pivot?->subtract_value)->toBe(5000);
+});
+
+it('requires a subtract value for every product of the combo', function () {
+    actingAsRole();
+
+    $product = Product::factory()->create();
+
+    \Pest\Laravel\post(route('combos.store'), [
+        'name' => 'Combo sin resta',
+        'suggested_price' => 64000,
+        'suggested_max_payments' => 4,
+        'products' => [
+            ['id' => $product->id, 'quantity' => 1],
+        ],
+    ])->assertSessionHasErrors('products.0.subtract_value');
+});
+
+it('rejects a negative subtract value', function () {
+    actingAsRole();
+
+    $product = Product::factory()->create();
+
+    \Pest\Laravel\post(route('combos.store'), [
+        'name' => 'Combo resta negativa',
+        'suggested_price' => 64000,
+        'suggested_max_payments' => 4,
+        'products' => [
+            ['id' => $product->id, 'quantity' => 1, 'subtract_value' => -1],
+        ],
+    ])->assertSessionHasErrors('products.0.subtract_value');
 });

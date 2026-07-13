@@ -25,6 +25,7 @@ export function ComboForm({ form, products, submitLabel }: ComboFormProps) {
         setAddProduct,
         openEditProductModal,
         updateQuantity,
+        updateSubtractValue,
         addSelectedProduct,
         closeMuralModal,
     } = form;
@@ -109,6 +110,7 @@ export function ComboForm({ form, products, submitLabel }: ComboFormProps) {
                         openAddProductModal={setAddProduct}
                         openEditProductModal={openEditProductModal}
                         updateQuantity={updateQuantity}
+                        updateSubtractValue={updateSubtractValue}
                     >
                         <InputError
                             message={errors.products}

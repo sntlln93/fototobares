@@ -31,6 +31,7 @@ class StoreComboRequest extends FormRequest
             'products' => ['required', 'array'],
             'products.*.id' => ['required', 'exists:products,id'],
             'products.*.quantity' => ['required', 'integer', 'min:1'],
+            'products.*.subtract_value' => ['required', 'integer', 'min:0'],
             'products.*.variants' => ['sometimes'],
         ];
     }
@@ -47,6 +48,7 @@ class StoreComboRequest extends FormRequest
      *     products: array<int, array{
      *         id: int,
      *         quantity: int,
+     *         subtract_value: int,
      *         variants?: string,
      *     }>
      * }
@@ -60,6 +62,7 @@ class StoreComboRequest extends FormRequest
          *     products: array<int, array{
          *         id: int,
          *         quantity: int,
+         *         subtract_value: int,
          *         variants?: string,
          *     }>
          * }

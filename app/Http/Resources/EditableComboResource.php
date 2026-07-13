@@ -32,6 +32,8 @@ class EditableComboResource extends JsonResource
                     /* @phpstan-ignore-next-line */
                     'quantity' => $p->getRelationValue('pivot')->quantity,
                     /* @phpstan-ignore-next-line */
+                    'subtract_value' => $p->getRelationValue('pivot')->subtract_value,
+                    /* @phpstan-ignore-next-line */
                     'variants' => $p->getRelationValue('pivot')->variants,
                 ];
             }),

@@ -10,5 +10,7 @@ class ComboProduct extends Pivot
 {
     protected $casts = [
         'variants' => 'array',
+        'quantity' => 'integer',
+        'subtract_value' => 'integer',
     ];
 }

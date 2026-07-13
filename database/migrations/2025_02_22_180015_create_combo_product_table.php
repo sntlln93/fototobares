@@ -23,6 +23,10 @@ return new class extends Migration
 
             $table->json('variants')->nullable();
             $table->integer('quantity')->default(1);
+
+            // How much the combo price drops when this product is taken out of
+            // the order: set per combo, unrelated to the product list price
+            $table->integer('subtract_value')->default(0);
             $table->timestamps();
         });
     }
