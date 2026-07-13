@@ -1,8 +1,8 @@
+import { buttonVariants } from '@/components/ui/button';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Breadcrumbs } from '@/features/breadcrumbs';
 import { type BreadcrumbItem as BreadcrumbItemType } from '@/types';
 import { Link } from '@inertiajs/react';
-import { buttonVariants } from './ui/button';
 
 export function AppSidebarHeader({
     breadcrumbs = [],

@@ -85,7 +85,9 @@ Underlying tools if you need one directly: `sail composer pint` / `sail composer
 Request flow: thin controller (`app/Http/Controllers/BO/`) → dedicated `FormRequest` (`app/Http/Requests/`) → Action/Service (`app/Actions/`, `app/Services/`) → API Resource (`app/Http/Resources/`) → Inertia page.
 
 - **Thin controllers**: HTTP routing, authorization, responses only. No SQL, validation, or business logic. Never `$request->validate()` — always inject a FormRequest.
-- **Actions/Services**: business logic in single-responsibility classes with one `execute()`/`handle()` method.
+- **Actions/Services**: single-responsibility classes exposing one `execute()`/`handle()` method.
+- **Action**: encapsulates core business/domain logic; never communicates with external systems.
+- **Service**: implements the Adapter pattern. Wraps third-party APIs/SDKs to hide implementation details and prevent external leakage into the domain.
 - **Thin models**: relations, casts, basic scopes only. Resources/DTOs do data shaping. Complex queries go in scopes/query classes, not controllers.
 - `Model::shouldBeStrict()` is active (`AppServiceProvider`) — lazy loading **throws**. Every Resource must eager-load what it serializes. `tests/Feature/PageSmokeTest.php` auto-discovers all GET routes against the demo seed and fails on any ≥400 response; it catches missing eager loads.
 - Roles: `App\Enums\UserRole` (master, administración, oficina, editor, taller), enforced with `role:` route-middleware groups in `routes/web.php`. `RoleAccessTest` covers the roles×routes matrix.

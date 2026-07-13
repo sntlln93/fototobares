@@ -1,6 +1,6 @@
 import { AppContent } from '@/components/app-content';
-import { AppHeader } from '@/components/app-header';
 import { AppShell } from '@/components/app-shell';
+import { AppHeader } from '@/features/app-header';
 import { type BreadcrumbItem } from '@/types';
 
 interface AppHeaderLayoutProps {

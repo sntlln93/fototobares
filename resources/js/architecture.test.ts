@@ -1,6 +1,6 @@
 /// <reference types="node" />
 import { readFileSync, readdirSync, statSync } from 'node:fs';
-import { dirname, join, relative } from 'node:path';
+import { dirname, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 
@@ -70,20 +70,27 @@ describe('frontend architecture', () => {
         ).toEqual([]);
     });
 
-    it("no module imports another module's internals", () => {
-        // A page module may depend on another module's public surface (its root
-        // files), but not reach into its components/ or hooks/. Cross-module
-        // coupling is written with the @/ alias, which is what we scan for.
+    it('no module imports from another page module', () => {
+        // Page modules are independent: anything shared between two modules
+        // belongs in features/ (domain-aware) or components/ (atomic), never in
+        // the other module — not even its root entrypoints (#136). Both alias
+        // (@/pages/...) and relative (../...) imports are resolved and checked.
         const importRe = /from\s+['"]([^'"]+)['"]/g;
-        const internalRe = /^@\/pages\/([^/]+)\/(?:components|hooks)\b/;
 
         const offenders = subDirs(pagesDir).flatMap((module) =>
             allFiles(join(pagesDir, module)).flatMap((file) => {
                 const src = readFileSync(file, 'utf8');
                 const hits: string[] = [];
                 for (const [, spec] of src.matchAll(importRe)) {
-                    const match = spec.match(internalRe);
-                    if (match && match[1] !== module) {
+                    const target = spec.startsWith('@/')
+                        ? join(jsDir, spec.slice(2))
+                        : spec.startsWith('.')
+                          ? resolve(dirname(file), spec)
+                          : null;
+                    if (!target) continue;
+                    const rel = relative(pagesDir, target);
+                    if (rel.startsWith('..')) continue;
+                    if (rel.split(sep)[0] !== module) {
                         hits.push(`${relative(jsDir, file)} -> ${spec}`);
                     }
                 }
@@ -93,7 +100,7 @@ describe('frontend architecture', () => {
 
         expect(
             offenders,
-            `Cross-module imports of another module's internals: ${offenders.join(', ')}`,
+            `Cross-module imports between page modules: ${offenders.join(', ')}`,
         ).toEqual([]);
     });
 });

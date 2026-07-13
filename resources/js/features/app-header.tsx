@@ -1,10 +1,10 @@
+import AppLogo from '@/components/app-logo';
 import { Breadcrumbs } from '@/features/breadcrumbs';
 import { type BreadcrumbItem, type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
 import { DesktopNav } from './app-header/desktop-nav';
 import { HeaderActions } from './app-header/header-actions';
 import { MobileNav } from './app-header/mobile-nav';
-import AppLogo from './app-logo';
 
 interface AppHeaderProps {
     breadcrumbs?: BreadcrumbItem[];
