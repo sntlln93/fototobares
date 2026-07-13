@@ -8,7 +8,7 @@ FROM php:8.5-fpm AS base
 
 COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr/local/bin/
 
-RUN install-php-extensions pdo_mysql gd bcmath intl zip opcache pcntl redis \
+RUN install-php-extensions pdo_mysql gd bcmath intl zip opcache pcntl \
     && apt-get update \
     && apt-get install -y --no-install-recommends nginx gettext-base curl \
     && rm -rf /var/lib/apt/lists/*
