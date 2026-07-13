@@ -99,8 +99,8 @@ export default tseslint.config(
     },
     // Import boundary (#131): vendored ui/ primitives must stay domain-agnostic
     // — no reaching into pages, features, layouts or global hooks. The
-    // cross-module boundary (a module must not import another module's
-    // internals) is enforced by resources/js/architecture.test.ts.
+    // cross-module boundary (a module must not import from another module) is
+    // enforced by resources/js/architecture.test.ts.
     {
         files: ['resources/js/components/ui/**'],
         rules: {
@@ -119,6 +119,34 @@ export default tseslint.config(
                             ],
                             message:
                                 'components/ui/ must stay domain-agnostic (no pages/features/layouts imports).',
+                        },
+                    ],
+                },
+            ],
+        },
+    },
+    // Import boundary (#136): root components/ are atomic and shared, without
+    // domain or layout awareness — composed/domain-aware components belong in
+    // features/ (like app-header after its move there).
+    {
+        files: ['resources/js/components/**'],
+        ignores: ['resources/js/components/ui/**'],
+        rules: {
+            'no-restricted-imports': [
+                'error',
+                {
+                    patterns: [
+                        {
+                            group: [
+                                '@/pages/*',
+                                '@/pages/**',
+                                '@/features/*',
+                                '@/features/**',
+                                '@/layouts/*',
+                                '@/layouts/**',
+                            ],
+                            message:
+                                'components/ (root) must stay atomic: if it needs pages/features/layouts, it belongs in features/.',
                         },
                     ],
                 },
