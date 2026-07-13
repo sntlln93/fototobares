@@ -65,6 +65,14 @@ class Order extends Model
         return $this->hasMany(Payment::class)->orderBy('paid_on')->orderBy('id');
     }
 
+    /**
+     * @return HasMany<Note, $this>
+     */
+    public function notes()
+    {
+        return $this->hasMany(Note::class)->latest();
+    }
+
     public function paidTotal(): int
     {
         return (int) $this->payments()->sum('amount');

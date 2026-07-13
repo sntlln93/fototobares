@@ -6,6 +6,7 @@ use App\Http\Controllers\BO\ClassroomController;
 use App\Http\Controllers\BO\ComboController;
 use App\Http\Controllers\BO\DashboardController;
 use App\Http\Controllers\BO\DeliveryController;
+use App\Http\Controllers\BO\NoteController;
 use App\Http\Controllers\BO\OrderController;
 use App\Http\Controllers\BO\OrderDraftController;
 use App\Http\Controllers\BO\PaymentController;
@@ -39,6 +40,11 @@ Route::middleware(['auth', 'role:master,administración,oficina'])->group(functi
     Route::prefix('payments')->group(function () {
         Route::post('/', [PaymentController::class, 'store'])->name('payments.store');
         Route::put('/{payment}', [PaymentController::class, 'update'])->name('payments.update');
+    });
+
+    Route::prefix('notes')->group(function () {
+        Route::post('/', [NoteController::class, 'store'])->name('notes.store');
+        Route::delete('/{note}', [NoteController::class, 'destroy'])->name('notes.destroy');
     });
 });
 

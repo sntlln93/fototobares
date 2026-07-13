@@ -105,7 +105,7 @@ class OrderController extends Controller
 
     public function show(Order $order): Response
     {
-        $order->load('client', 'products.type', 'payments', 'classroom.school', 'details.productionStatus');
+        $order->load('client', 'products.type', 'payments', 'notes', 'classroom.school', 'details.productionStatus');
 
         return Inertia::render('orders/show', [
             'order' => new OrderResource($order),

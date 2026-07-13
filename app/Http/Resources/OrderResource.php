@@ -70,6 +70,15 @@ class OrderResource extends JsonResource
                     ];
                 });
             }),
+            'notes' => $this->whenLoaded('notes', function () {
+                return $this->notes->map(function ($note) {
+                    return [
+                        'id' => $note->id,
+                        'body' => $note->body,
+                        'created_at' => $note->created_at->format('d/m/Y H:i'),
+                    ];
+                });
+            }),
             'products' => $this->products->map(function ($product) use ($details) {
                 /** @var OrderDetail|null $detail */
                 $detail = $details->get($product->pivot->id); // @phpstan-ignore-line

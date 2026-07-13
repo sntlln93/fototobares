@@ -156,7 +156,6 @@ declare global {
 
     interface Order {
         id: number;
-        notes: string;
         client_id: number;
         classroom_id: number;
         total_price: number;
@@ -177,6 +176,7 @@ declare global {
         school: School;
         products: OrderProduct[];
         payments?: Payment[];
+        notes?: Note[];
     }
 
     interface Payment {
@@ -186,6 +186,12 @@ declare global {
         type: string;
         transaction_number: string | null;
         paid_on: string;
+    }
+
+    interface Note {
+        id: number;
+        body: string;
+        created_at: string;
     }
 
     interface Classroom {
