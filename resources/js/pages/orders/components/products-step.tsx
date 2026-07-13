@@ -8,13 +8,14 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Combobox } from '@/components/ui/combobox';
 import { AlertCircle, PlusIcon } from 'lucide-react';
+import { ComboWithProducts } from '../form';
 import { OrderFormController } from '../hooks/use-create-order-form';
 import { ProductListItem } from './product-list-item';
 
 interface ProductsStepProps {
     form: OrderFormController;
     products: Product[];
-    combos: Array<Combo & { products: Product[] }>;
+    combos: ComboWithProducts[];
 }
 
 export function ProductsStep({ form, products, combos }: ProductsStepProps) {

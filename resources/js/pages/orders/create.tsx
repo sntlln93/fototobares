@@ -7,6 +7,7 @@ import { ClientStep } from './components/client-step';
 import { OrderStep } from './components/order-step';
 import { ProductsStep } from './components/products-step';
 import { SchoolStep } from './components/school-step';
+import { ComboWithProducts } from './form';
 import { DraftProp } from './form-state';
 import { SchoolLevel, useCreateOrderForm } from './hooks/use-create-order-form';
 
@@ -29,7 +30,7 @@ export default function CreateOrder({
     draft,
 }: PageProps<{
     schoolLevels: SchoolLevel[];
-    combos: Array<Combo & { products: Product[] }>;
+    combos: ComboWithProducts[];
     schools: Array<School & { classrooms: Classroom[] }>;
     products: Product[];
     draft?: DraftProp | null;

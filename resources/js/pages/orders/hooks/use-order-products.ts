@@ -1,14 +1,15 @@
 import { InertiaFormProps } from '@inertiajs/react';
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { ProductOrder } from '../form';
+import { ComboWithProducts, ProductOrder } from '../form';
 import { OrderFormData, removeDetailAt, replaceDetailAt } from '../form-state';
+import { computeTotal, priceBreakdown } from '../pricing';
 
 interface UseOrderProductsParams {
     data: OrderFormData;
     setData: InertiaFormProps<OrderFormData>['setData'];
     products: Product[];
-    combos: Array<Combo & { products: Product[] }>;
+    combos: ComboWithProducts[];
 }
 
 /**
@@ -28,35 +29,53 @@ export function useOrderProducts({
 
     const [editingIndex, setEditingIndex] = useState<number | null>(null);
 
+    const breakdown = priceBreakdown(data.order_details, combos, products);
+
+    const comboOf = (details: ProductOrder[]) =>
+        details.find((detail) => detail.combo_id !== undefined)?.combo_id;
+
+    /**
+     * The single door to the cart: the total is always recomputed from the
+     * details, never accumulated over the previous one. A price typed by hand
+     * therefore survives only until the cart changes again.
+     */
+    const applyDetails = (details: ProductOrder[]) => {
+        const seedsPayments =
+            comboOf(data.order_details) === undefined &&
+            comboOf(details) !== undefined;
+
+        const firstCombo = combos.find(
+            (combo) => combo.id === comboOf(details),
+        );
+
+        setData((current) => ({
+            ...current,
+            order_details: details,
+            total_price: String(computeTotal(details, combos, products)),
+            payment_plan:
+                seedsPayments && firstCombo
+                    ? String(firstCombo.default_payments)
+                    : current.payment_plan,
+        }));
+    };
+
     const handleAddProduct = (id: number) => {
         setOpenAddModal([products.find((p) => p.id === id)!]);
     };
 
+    /**
+     * The combo only enters the cart once its products are configured, so
+     * cancelling the modal leaves the price untouched.
+     */
     const handleAddCombo = (id: number) => {
         const combo = combos.find((p) => p.id === id)!;
-
-        setData(
-            'total_price',
-            String(Number(data.total_price) + Number(combo.suggested_price)),
-        );
-
-        // The first combo of the order seeds the installments; a second one
-        // must not overwrite the number the seller already agreed on
-        const hasCombo = data.order_details.some(
-            (detail) => detail.combo_id !== undefined,
-        );
-
-        if (!hasCombo) {
-            setData('payment_plan', String(combo.default_payments));
-        }
 
         setOpenAddModal(combo.products.map((p) => ({ ...p, combo_id: id })));
     };
 
     const setProductsOrder = (productsOrder: ProductOrder[]) => {
         if (editingIndex !== null) {
-            setData(
-                'order_details',
+            applyDetails(
                 replaceDetailAt(
                     data.order_details,
                     editingIndex,
@@ -67,7 +86,7 @@ export function useOrderProducts({
             return;
         }
 
-        setData('order_details', [...data.order_details, ...productsOrder]);
+        applyDetails([...data.order_details, ...productsOrder]);
     };
 
     const handleEditProduct = (index: number) => {
@@ -89,8 +108,12 @@ export function useOrderProducts({
     };
 
     const handleRemoveProduct = (index: number) => {
-        setData('order_details', removeDetailAt(data.order_details, index));
-        toast.info('Producto quitado. Recordá revisar el precio final.');
+        applyDetails(removeDetailAt(data.order_details, index));
+        toast.info('Producto quitado. Se recalculó el precio.');
+    };
+
+    const recalculatePrice = () => {
+        setData('total_price', String(breakdown.total));
     };
 
     return {
@@ -98,10 +121,12 @@ export function useOrderProducts({
         setOpenAddModal,
         editingIndex,
         setEditingIndex,
+        breakdown,
         handleAddProduct,
         handleAddCombo,
         setProductsOrder,
         handleEditProduct,
         handleRemoveProduct,
+        recalculatePrice,
     };
 }

@@ -2,6 +2,7 @@ import { useForm } from '@inertiajs/react';
 import axios from 'axios';
 import { FormEvent, FormEventHandler, useEffect, useState } from 'react';
 import { toast } from 'sonner';
+import { ComboWithProducts } from '../form';
 import {
     DraftProp,
     OrderFormData,
@@ -16,7 +17,7 @@ export type AccordionValue =
 
 interface UseCreateOrderFormParams {
     products: Product[];
-    combos: Array<Combo & { products: Product[] }>;
+    combos: ComboWithProducts[];
     schools: Array<School & { classrooms: Classroom[] }>;
     draft?: DraftProp | null;
 }
@@ -70,22 +71,6 @@ export function useCreateOrderForm({
 
     const filteredSchools = schools.filter(
         (school) => levelFilter === 'Todos' || school.level === levelFilter,
-    );
-
-    const counts = data.order_details.reduce<{
-        combos: Record<number, number>;
-        undefinedCount: number;
-    }>(
-        (acc, order) => {
-            if (order.combo_id !== undefined) {
-                acc.combos[order.combo_id] =
-                    (acc.combos[order.combo_id] || 0) + 1;
-            } else {
-                acc.undefinedCount++;
-            }
-            return acc;
-        },
-        { combos: {}, undefinedCount: 0 },
     );
 
     const errorFlags: Record<Exclude<AccordionValue, undefined>, boolean> = {
@@ -180,7 +165,6 @@ export function useCreateOrderForm({
         selectedSchoolData,
         selectedClassroom,
         filteredSchools,
-        counts,
         errorFlags,
         toStep,
         submit,

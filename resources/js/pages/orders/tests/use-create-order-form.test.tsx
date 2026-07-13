@@ -1,6 +1,7 @@
 import { act, renderHook } from '@testing-library/react';
 import { FormEvent } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { ComboProduct, ComboWithProducts } from '../form';
 import { DraftProp, OrderFormData } from '../form-state';
 import { useCreateOrderForm } from '../hooks/use-create-order-form';
 
@@ -20,11 +21,16 @@ vi.mock('@inertiajs/react', async () => {
         return {
             data,
             setData: (
-                keyOrData: keyof OrderFormData | OrderFormData,
+                keyOrData:
+                    | keyof OrderFormData
+                    | OrderFormData
+                    | ((previous: OrderFormData) => OrderFormData),
                 value?: unknown,
             ) => {
                 if (typeof keyOrData === 'string') {
                     setData((prev) => ({ ...prev, [keyOrData]: value }));
+                } else if (typeof keyOrData === 'function') {
+                    setData(keyOrData);
                 } else {
                     setData(keyOrData);
                 }
@@ -52,18 +58,24 @@ const toast = vi.hoisted(() => ({
 
 vi.mock('sonner', () => ({ toast }));
 
-const taza = { id: 5, name: 'Taza' } as Product;
-const mural = { id: 6, name: 'Mural' } as Product;
+const taza = { id: 5, name: 'Taza', unit_price: 12000 } as Product;
+const mural = { id: 6, name: 'Mural', unit_price: 40000 } as Product;
 const products = [taza, mural];
 
-const combos = [
+const inCombo = (product: Product, subtractValue: number) =>
+    ({
+        ...product,
+        pivot: { quantity: 1, subtract_value: subtractValue },
+    }) as ComboProduct;
+
+const combos: ComboWithProducts[] = [
     {
         id: 2,
         name: 'Combo escolar',
         suggested_price: 5000,
         default_payments: 3,
-        products: [taza, mural],
-    } as Combo & { products: Product[] },
+        products: [inCombo(taza, 1000), inCombo(mural, 3000)],
+    },
 ];
 
 const schools = [
@@ -226,7 +238,7 @@ describe('useCreateOrderForm', () => {
         expect(result.current.filteredSchools.map((s) => s.id)).toEqual([10]);
     });
 
-    it('counts combo repetitions and standalone details separately', () => {
+    it('breaks the price down into the combo, its subtractions and the extras', () => {
         const { result } = renderForm();
 
         act(() =>
@@ -234,15 +246,18 @@ describe('useCreateOrderForm', () => {
                 ...result.current.data,
                 order_details: [
                     { product_id: 5, combo_id: 2, note: '' },
-                    { product_id: 6, combo_id: 2, note: '' },
                     { product_id: 5, note: '' },
                 ],
             }),
         );
 
-        expect(result.current.counts).toEqual({
-            combos: { 2: 2 },
-            undefinedCount: 1,
+        expect(result.current.breakdown).toEqual({
+            lines: [
+                { label: 'Combo escolar', amount: 5000 },
+                { label: 'Sin Mural', amount: -3000 },
+                { label: 'Taza', amount: 12000 },
+            ],
+            total: 14000,
         });
     });
 
@@ -264,12 +279,13 @@ describe('useCreateOrderForm', () => {
         });
     });
 
-    it('adds a combo to the cart summing its price into the total', () => {
+    it('prices the combo only once its products are configured', () => {
         const { result } = renderForm();
 
         act(() => result.current.handleAddCombo(2));
 
-        expect(result.current.data.total_price).toBe('5000');
+        // Cancelling the modal must leave the price untouched
+        expect(result.current.data.total_price).toBe('0');
         expect(
             result.current.openAddModal?.map((p) => ({
                 id: p.id,
