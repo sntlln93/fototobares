@@ -10,7 +10,7 @@ import {
 } from '../form-state';
 import { useOrderProducts } from './use-order-products';
 
-export type SchoolLevel = 'Todos' | 'Jardin' | 'Primaria' | 'Secundaria';
+export type SchoolLevel = 'Todos' | 'Jardín' | 'Primaria' | 'Secundaria';
 export type AccordionValue =
     'schools' | 'products' | 'client' | 'order' | undefined;
 
