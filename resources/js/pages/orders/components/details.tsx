@@ -1,4 +1,5 @@
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
     Card,
     CardContent,
@@ -8,8 +9,14 @@ import {
 } from '@/components/ui/card';
 import { ProductIcon } from '@/features/product-icon';
 import { capitalize, formatPrice } from '@/lib/utils';
+import { Flame } from 'lucide-react';
+import { useDetailPriority } from '../hooks/use-detail-priority';
 
-export function Details({ products }: { products: OrderProduct[] }) {
+export function Details({ order }: { order: Order }) {
+    const { toggle } = useDetailPriority(order.id);
+    const products = order.products || [];
+    const isCancelled = Boolean(order.cancelled_at);
+
     return (
         <Card className="lg:min-w-100">
             <CardHeader>
@@ -18,7 +25,21 @@ export function Details({ products }: { products: OrderProduct[] }) {
             <CardContent className="space-y-4">
                 {products.length ? (
                     products.map((product) => (
-                        <DetailItem product={product} key={product.id} />
+                        <DetailItem
+                            product={product}
+                            key={product.id}
+                            canPrioritize={
+                                !isCancelled &&
+                                !product.delivered_at &&
+                                !product.recycled_to
+                            }
+                            onTogglePriority={() =>
+                                toggle(
+                                    product.order_detail_id,
+                                    !product.priority,
+                                )
+                            }
+                        />
                     ))
                 ) : (
                     <CardDescription className="text-center text-gray-500">
@@ -31,7 +52,15 @@ export function Details({ products }: { products: OrderProduct[] }) {
     );
 }
 
-function DetailItem({ product }: { product: OrderProduct }) {
+function DetailItem({
+    product,
+    canPrioritize,
+    onTogglePriority,
+}: {
+    product: OrderProduct;
+    canPrioritize: boolean;
+    onTogglePriority: () => void;
+}) {
     return (
         <div
             key={product.id}
@@ -64,6 +93,12 @@ function DetailItem({ product }: { product: OrderProduct }) {
                     )}
                 </div>
                 <div className="mt-2 flex flex-wrap gap-1">
+                    {product.priority && (
+                        <Badge variant="destructive" className="gap-1">
+                            <Flame className="h-3 w-3" />
+                            Prioridad
+                        </Badge>
+                    )}
                     {product.recycled_to ? (
                         <Badge variant="destructive">
                             {product.recycled_to === 'stock'
@@ -85,6 +120,17 @@ function DetailItem({ product }: { product: OrderProduct }) {
                         </span>
                     )}
                 </div>
+                {canPrioritize && (
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        className="mt-2 h-auto px-2 py-1 text-xs"
+                        onClick={onTogglePriority}
+                    >
+                        <Flame className="mr-1 h-3 w-3" />
+                        {product.priority ? 'Quitar prioridad' : 'Priorizar'}
+                    </Button>
+                )}
             </div>
         </div>
     );

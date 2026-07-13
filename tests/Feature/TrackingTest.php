@@ -30,7 +30,7 @@ it('updates the status of a batch of details', function () {
     }
 });
 
-it('flags priority when a detail moves backwards and keeps it afterwards', function () {
+it('does not flag priority when a detail moves backwards', function () {
     actingAsRole(UserRole::Worker);
 
     $product = productWithChain();
@@ -44,9 +44,19 @@ it('flags priority when a detail moves backwards and keeps it afterwards', funct
         'production_status_id' => stageOf($product, 1)->id,
     ]);
 
-    expect($detail->refresh()->priority)->toBeTrue();
+    expect($detail->refresh()->production_status_id)->toBe(stageOf($product, 1)->id)
+        ->and($detail->priority)->toBeFalse();
+});
 
-    // Moving forward again keeps the priority flag (sticky)
+it('keeps a manual priority when the detail moves', function () {
+    actingAsRole(UserRole::Worker);
+
+    $product = productWithChain();
+    $detail = OrderDetail::factory()->create([
+        'product_id' => $product->id,
+        'priority' => true,
+    ]);
+
     post(route('tracking.batch'), [
         'detail_ids' => [$detail->id],
         'production_status_id' => stageOf($product, 2)->id,

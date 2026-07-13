@@ -59,7 +59,7 @@ export default function Order({
                     onCancel={() => setShowCancelModal(true)}
                 />
 
-                <Details products={data.products || []} />
+                <Details order={data} />
 
                 {!isCancelled && (
                     <DeliveryCard order={data} onPayBalance={openPayBalance} />

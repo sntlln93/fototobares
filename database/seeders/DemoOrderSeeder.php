@@ -60,8 +60,9 @@ class DemoOrderSeeder extends Seeder
         $this->addDetail($order, $carpeta, null, 'Thiago');
         $order->payments()->create(['amount' => 20000, 'type' => 'transferencia', 'transaction_number' => 'MP73920184652', 'paid_on' => now()->subDays(2)->toDateString()]);
 
-        // 3. Priority: the mural reached "Corte de moldura" (one strip
-        // deducted) and was sent back to "Impreso" (stock stays deducted)
+        // 3. Priority: the mural broke after "Corte de moldura" (one strip
+        // deducted) and has to be remade, so the office flagged it as
+        // priority and sent it back to "Impreso" (stock stays deducted)
         $order = $this->makeOrder($sextoA, 'Carla Medina', '3804000003', 'Lola', 3, 40000, 4, 25);
         $detail = $this->addDetail($order, $molduraFina, $this->muralVariant('vertical', 'black'), 'Lola - egresados 2026');
         $this->setStatus($detail, $molduraFina, 3, hoursAgo: 48);

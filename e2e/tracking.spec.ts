@@ -2,12 +2,12 @@ import { expect, test } from '@playwright/test';
 
 // Smoke over the per-product tracking board, on order #1's details (Ana
 // Suárez / Valentina — nothing produced yet, untouched by other specs).
-// Priority stays a read-only assertion: #108 will replace the automatic
-// backtrack priority with a manual one.
+// Priority is read-only here: it is set from the order page (see
+// priority.spec.ts).
 test('quick advance, batch update and priority badge', async ({ page }) => {
     await page.goto('/tracking');
 
-    // Seeded priority: Lola's mural was sent back to an earlier stage
+    // Seeded priority: Lola's mural broke and has to be remade
     await expect(
         page
             .getByRole('row')
