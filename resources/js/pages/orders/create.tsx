@@ -2,7 +2,7 @@ import { Accordion } from '@/components/ui/accordion';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
-import { AddDetail } from './add-detail';
+import { AddDetail } from './components/add-detail';
 import { ClientStep } from './components/client-step';
 import { OrderStep } from './components/order-step';
 import { ProductsStep } from './components/products-step';

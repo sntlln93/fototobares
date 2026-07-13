@@ -49,14 +49,28 @@ npm run test:e2e                          # e2e (Playwright, host; resetea la DB
 La suite e2e resetea la base (`migrate:fresh --seed`) al arrancar y necesita
 Sail levantado. Primera vez: `npx playwright install chromium`.
 
+Tanto Pest como Vitest incluyen **tests de arquitectura** que hacen fallar el
+build ante una violación estructural, sin baseline:
+
+- Backend (`tests/Arch/`): controllers finos, actions de una sola
+  responsabilidad (`handle()`), validación por FormRequest y layering
+  (el dominio no depende de `App\Http`).
+- Frontend (`resources/js/architecture.test.ts`): co-locación por módulo
+  (solo `components/`, `hooks/`, `tests/`), sin carpetas `partials/` y sin
+  imports cross-module de los internals de otro módulo.
+
 ## CI
 
 Dos workflows corren en cada PR y en cada push a `develop`/`main`:
 
 - **Code Quality Checks**: `quality_backend` (Pint + PhpStan) y
-  `quality_frontend` (Prettier + ESLint + tsc).
-- **Tests**: `tests_backend` (Pest), `tests_frontend` (Vitest) y `e2e`
-  (Playwright contra `php artisan serve`).
+  `quality_frontend` (Prettier + ESLint + tsc). ESLint además enforza los
+  límites de tamaño (250 líneas por archivo, 150 por componente), las clases
+  Tailwind canónicas y que `components/ui` no importe dominio.
+- **Tests**: `tests_backend` (Pest, con los tests de arquitectura como paso
+  _fast-fail_ `🏛️ Arch tests` antes del resto), `tests_frontend` (Vitest,
+  incluye el test de arquitectura del frontend) y `e2e` (Playwright contra
+  `php artisan serve`).
 
 Los cinco checks son requeridos para mergear. El setup compartido vive en
 `.github/actions/`.

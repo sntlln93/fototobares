@@ -8,10 +8,10 @@ import {
 } from '@/components/ui/card';
 import { formatPrice } from '@/lib/utils';
 import { PackageCheck } from 'lucide-react';
-import { DeliveredList } from './components/delivered-list';
-import { DeliveryWarningModal } from './components/delivery-warning-modal';
-import { UndeliveredList } from './components/undelivered-list';
-import { useDelivery } from './hooks/use-delivery';
+import { useDelivery } from '../hooks/use-delivery';
+import { DeliveredList } from './delivered-list';
+import { DeliveryWarningModal } from './delivery-warning-modal';
+import { UndeliveredList } from './undelivered-list';
 
 export function DeliveryCard({
     order,

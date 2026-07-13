@@ -59,6 +59,7 @@ Underlying tools if you need one directly: `sail composer pint` / `sail composer
 - On GitHub issues: ignore label `deferred`, prioritize label `bug`.
 - Prefer shadcn/ui for frontend components.
 - Generate PDFs, printables and images client-side (canvas) — no server-side generation.
+- Work should be done sequentially with per-module commits.
 
 ## Commit format
 

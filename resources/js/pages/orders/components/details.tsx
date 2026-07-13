@@ -6,8 +6,8 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
+import { ProductIcon } from '@/features/product-icon';
 import { capitalize, formatPrice } from '@/lib/utils';
-import { ProductIcon } from '../products/partials/product-icon';
 
 export function Details({ products }: { products: OrderProduct[] }) {
     return (

@@ -5,9 +5,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { capitalize, getColorEs } from '@/lib/utils';
-import { DetailVariantField } from './components/detail-variant-field';
-import { ProductOrder, SelectableProduct } from './form';
-import { useAddDetail } from './hooks/use-add-detail';
+import { ProductOrder, SelectableProduct } from '../form';
+import { useAddDetail } from '../hooks/use-add-detail';
+import { DetailVariantField } from './detail-variant-field';
 
 export function AddDetail({
     addProducts,

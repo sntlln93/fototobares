@@ -8,8 +8,8 @@ import { BreadcrumbItem } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
 import { FileText, School } from 'lucide-react';
 import { useState } from 'react';
+import { DeleteOrderConfirmation } from './components/delete-confirmation';
 import { OrdersTable } from './components/orders-table';
-import { DeleteOrderConfirmation } from './partials/delete-confirmation';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {

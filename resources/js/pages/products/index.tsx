@@ -6,10 +6,10 @@ import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { Head, Link } from '@inertiajs/react';
 import { Plus } from 'lucide-react';
+import { DeleteProductConfirmation } from './components/delete-confirmation';
 import { ProductRow } from './components/product-row';
 import { ProductsTableHeader } from './components/products-table-header';
 import { useProducts } from './hooks/use-products';
-import { DeleteProductConfirmation } from './partials/delete-confirmation';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
