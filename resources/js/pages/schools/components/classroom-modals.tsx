@@ -1,7 +1,7 @@
-import { CreateClassroom } from '@/pages/classrooms/create';
-import { DeleteClassroomConfirmation } from '@/pages/classrooms/delete-confirmation';
-import { EditClassroom } from '@/pages/classrooms/edit';
 import { type SchoolShowController } from '../hooks/use-school-show';
+import { CreateClassroom } from './create-classroom';
+import { DeleteClassroomConfirmation } from './delete-classroom-confirmation';
+import { EditClassroom } from './edit-classroom';
 
 export function ClassroomModals({
     controller,
