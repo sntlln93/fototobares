@@ -1,0 +1,62 @@
+# Rendered to /etc/nginx/nginx.conf by entrypoint.sh; envsubst replaces
+# only ${PORT} (nginx's own $variables must survive untouched).
+user www-data;
+worker_processes auto;
+pid /run/nginx.pid;
+error_log /dev/stderr warn;
+
+events {
+    worker_connections 1024;
+}
+
+http {
+    include /etc/nginx/mime.types;
+    default_type application/octet-stream;
+    access_log /dev/stdout;
+    server_tokens off;
+    sendfile on;
+    tcp_nopush on;
+    keepalive_timeout 65;
+
+    gzip on;
+    gzip_vary on;
+    gzip_types text/plain text/css application/json application/javascript text/javascript image/svg+xml;
+
+    server {
+        listen ${PORT} default_server;
+        server_name _;
+        root /app/public;
+        index index.php;
+
+        # Matches post_max_size/upload_max_filesize (photo uploads)
+        client_max_body_size 100M;
+
+        location / {
+            try_files $uri $uri/ /index.php?$query_string;
+        }
+
+        # Hashed Vite assets are immutable
+        location /build/ {
+            expires 1y;
+            add_header Cache-Control "public, immutable";
+            try_files $uri =404;
+        }
+
+        location ~ \.php$ {
+            try_files $uri =404;
+            include fastcgi_params;
+            fastcgi_pass 127.0.0.1:9000;
+            fastcgi_index index.php;
+            fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
+            # Response headers can outgrow the 4k default — that caused 502s
+            # on /orders/create once (see the note in bootstrap/app.php).
+            fastcgi_buffer_size 16k;
+            fastcgi_buffers 32 16k;
+            fastcgi_busy_buffers_size 32k;
+        }
+
+        location ~ /\.(?!well-known) {
+            deny all;
+        }
+    }
+}

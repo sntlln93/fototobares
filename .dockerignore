@@ -1,0 +1,53 @@
+# VCS / tooling
+.git
+.github
+.gitattributes
+.gitignore
+.claude
+.devcontainer
+.vscode
+.idea
+.editorconfig
+.prettierrc
+.DS_Store
+
+# Never bake local secrets into the image
+.env*
+auth.json
+storage/*.key
+
+# Dependencies and build artifacts (built inside their own stages)
+node_modules
+vendor
+public/build
+public/hot
+# The image creates this symlink itself — keeps local and dokploy builds identical
+public/storage
+
+# Tests and dev-only files (release-notes/ and lang/ are runtime dependencies — keep them)
+tests
+e2e
+coverage
+test-results
+playwright-report
+vibe
+phpunit.xml
+phpstan.neon
+pint.json
+rector.php
+eslint.config.js
+vitest.config.ts
+playwright.config.ts
+.phpunit.result.cache
+.phpunit.cache
+resources/js/**/tests
+**/*.test.ts
+**/*.test.tsx
+nohup.out
+
+# Local dev / this build's own inputs
+docker-compose.yml
+Dockerfile
+.dockerignore
+CLAUDE.md
+storage/pail
