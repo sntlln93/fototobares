@@ -15,6 +15,7 @@ import { Spinner } from '@/components/ui/spinner';
 import { capitalize } from '@/lib/utils';
 import { useForm } from '@inertiajs/react';
 import { FormEventHandler } from 'react';
+import { TransactionNumberError } from './transaction-number-error';
 
 const PAYMENT_TYPES = ['efectivo', 'transferencia'] as const;
 
@@ -33,19 +34,18 @@ export function CreatePaymentModal({
         amount: number;
         type: (typeof PAYMENT_TYPES)[number];
         order_id: Order['id'];
-        proof_of_payment: File | null;
+        transaction_number: string;
     }>({
         amount: initialAmount ?? 0,
         type: PAYMENT_TYPES[0],
         order_id: orderId,
-        proof_of_payment: null,
+        transaction_number: '',
     });
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
 
         post(route('payments.store'), {
-            forceFormData: true,
             onSuccess: () => onClose(),
         });
     };
@@ -84,10 +84,10 @@ export function CreatePaymentModal({
                             setData((current) => ({
                                 ...current,
                                 type,
-                                proof_of_payment:
+                                transaction_number:
                                     type === 'transferencia'
-                                        ? current.proof_of_payment
-                                        : null,
+                                        ? current.transaction_number
+                                        : '',
                             }));
                         }}
                     >
@@ -107,27 +107,29 @@ export function CreatePaymentModal({
 
                 {data.type === 'transferencia' && (
                     <div className="mt-2">
-                        <Label htmlFor="proof_of_payment">
-                            Comprobante de transferencia (opcional)
+                        <Label htmlFor="transaction_number">
+                            Número de transacción
                         </Label>
                         <InputHint
                             className="text-xs"
-                            message="Imagen o PDF de hasta 5MB (MercadoPago, banco, etc.)"
+                            message="El número de referencia de la transferencia (MercadoPago, banco, etc.)"
                         />
                         <Input
-                            id="proof_of_payment"
-                            type="file"
-                            name="proof_of_payment"
-                            accept="image/jpeg,image/png,image/webp,application/pdf"
+                            id="transaction_number"
+                            type="text"
+                            name="transaction_number"
+                            value={data.transaction_number}
                             onChange={(event) =>
                                 setData(
-                                    'proof_of_payment',
-                                    event.target.files?.[0] ?? null,
+                                    'transaction_number',
+                                    event.target.value,
                                 )
                             }
                             className="mt-1 block w-full"
                         />
-                        <InputError message={errors.proof_of_payment} />
+                        <TransactionNumberError
+                            message={errors.transaction_number}
+                        />
                     </div>
                 )}
 

@@ -20,7 +20,7 @@ return new class extends Migration
 
             $table->integer('amount');
             $table->string('type');
-            $table->string('proof_of_payment')->nullable();
+            $table->string('transaction_number')->nullable()->unique();
             $table->timestamps();
         });
     }

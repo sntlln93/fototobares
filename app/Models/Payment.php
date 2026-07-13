@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $order_id
  * @property int $amount
  * @property string $type
- * @property string|null $proof_of_payment
+ * @property string|null $transaction_number
  */
 class Payment extends Model
 {

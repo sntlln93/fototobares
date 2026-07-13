@@ -184,7 +184,7 @@ declare global {
         order_id: number;
         amount: number;
         type: string;
-        proof_of_payment: string | null;
+        transaction_number: string | null;
         paid_at: string;
         paid_on?: string;
     }

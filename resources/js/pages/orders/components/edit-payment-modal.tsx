@@ -15,6 +15,7 @@ import { Spinner } from '@/components/ui/spinner';
 import { capitalize } from '@/lib/utils';
 import { useForm } from '@inertiajs/react';
 import { FormEventHandler } from 'react';
+import { TransactionNumberError } from './transaction-number-error';
 
 const PAYMENT_TYPES = ['efectivo', 'transferencia'] as const;
 
@@ -27,26 +28,22 @@ export function EditPaymentModal({
     show: boolean;
     onClose: () => void;
 }) {
-    const { post, data, setData, processing, errors } = useForm<{
+    const { put, data, setData, processing, errors } = useForm<{
         amount: number;
         type: string;
         order_id: number;
-        proof_of_payment: File | null;
-        _method: 'put';
+        transaction_number: string;
     }>({
         amount: payment.amount,
         type: payment.type,
         order_id: payment.order_id,
-        proof_of_payment: null,
-        _method: 'put',
+        transaction_number: payment.transaction_number ?? '',
     });
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
 
-        // Method spoofing: multipart/form-data does not work with PUT
-        post(route('payments.update', payment.id), {
-            forceFormData: true,
+        put(route('payments.update', payment.id), {
             onSuccess: () => onClose(),
         });
     };
@@ -85,10 +82,10 @@ export function EditPaymentModal({
                             setData((current) => ({
                                 ...current,
                                 type,
-                                proof_of_payment:
+                                transaction_number:
                                     type === 'transferencia'
-                                        ? current.proof_of_payment
-                                        : null,
+                                        ? current.transaction_number
+                                        : '',
                             }));
                         }}
                     >
@@ -108,31 +105,29 @@ export function EditPaymentModal({
 
                 {data.type === 'transferencia' && (
                     <div className="mt-2">
-                        <Label htmlFor="proof_of_payment">
-                            Comprobante de transferencia (opcional)
+                        <Label htmlFor="transaction_number">
+                            Número de transacción
                         </Label>
                         <InputHint
                             className="text-xs"
-                            message={
-                                payment.proof_of_payment
-                                    ? 'Si adjuntás un archivo nuevo, reemplaza al actual'
-                                    : 'Imagen o PDF de hasta 5MB (MercadoPago, banco, etc.)'
-                            }
+                            message="El número de referencia de la transferencia (MercadoPago, banco, etc.)"
                         />
                         <Input
-                            id="proof_of_payment"
-                            type="file"
-                            name="proof_of_payment"
-                            accept="image/jpeg,image/png,image/webp,application/pdf"
+                            id="transaction_number"
+                            type="text"
+                            name="transaction_number"
+                            value={data.transaction_number}
                             onChange={(event) =>
                                 setData(
-                                    'proof_of_payment',
-                                    event.target.files?.[0] ?? null,
+                                    'transaction_number',
+                                    event.target.value,
                                 )
                             }
                             className="mt-1 block w-full"
                         />
-                        <InputError message={errors.proof_of_payment} />
+                        <TransactionNumberError
+                            message={errors.transaction_number}
+                        />
                     </div>
                 )}
 
