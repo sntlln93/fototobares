@@ -16,6 +16,7 @@ Everything runs through Laravel Sail (Docker) — there is no local PHP, and a l
 
 ```bash
 ./vendor/bin/sail up -d                          # required for everything below
+./vendor/bin/sail artisan storage:link           # once per clone (public/storage is untracked)
 ./vendor/bin/sail artisan migrate:fresh --seed   # navigable app with demo data
 ./vendor/bin/sail npm run build                  # or `npm run dev` for HMR
 ```
@@ -73,8 +74,9 @@ Underlying tools if you need one directly: `sail composer pint` / `sail composer
 
 - PRs target `develop` and merge with **squash**; never reuse a merged branch.
 - Releases `develop → main` use a **merge commit** (never squash — a squashed release is what caused the recurring main/develop conflicts).
-- Merging to `main` auto-deploys via dokploy.
-- Five required checks on every PR: `quality_backend` (Pint+PhpStan), `quality_frontend` (Prettier+ESLint+tsc), `tests_backend` (Pest), `tests_frontend` (Vitest), `e2e` (Playwright). Shared setup lives in `.github/actions/setup-php|setup-node` — the single source of PHP/Node versions. Renaming a CI job requires updating the branch rulesets or PRs get blocked.
+- Merging to `main` auto-deploys via dokploy, which builds the repo `Dockerfile` (Build Type = Dockerfile). The production image creates the `public/storage` symlink and builds Laravel caches at container start (`docker/entrypoint.sh`); migrations stay manual post-deploy.
+- Five required checks on every PR: `quality_backend` (Pint+PhpStan), `quality_frontend` (Prettier+ESLint+tsc), `tests_backend` (Pest), `tests_frontend` (Vitest), `e2e` (Playwright). Renaming a CI job requires updating the branch rulesets or PRs get blocked.
+- PHP/Node versions are pinned in `.github/actions/setup-php|setup-node`, `docker-compose.yml` (Sail runtime) and the production `Dockerfile` — bump all of them together.
 
 ## Architecture
 

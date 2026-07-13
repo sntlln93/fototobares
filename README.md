@@ -18,13 +18,15 @@ parciales, cancelaciones con reciclaje y asignación de fotos por número.
 ## Desarrollo
 
 ```bash
-# primera vez (instala vendor/ sin PHP local)
+# primera vez (instala vendor/ sin PHP local; el ignore es solo para el
+# bootstrap: todavía no hay imagen php85-composer de Sail)
 docker run --rm -v "$(pwd)":/var/www/html -w /var/www/html \
-    laravelsail/php84-composer:latest composer install
+    laravelsail/php84-composer:latest composer install --ignore-platform-req=php
 
 cp .env.example .env
 ./vendor/bin/sail up -d
 ./vendor/bin/sail artisan key:generate
+./vendor/bin/sail artisan storage:link             # una sola vez por clon
 ./vendor/bin/sail artisan migrate:fresh --seed   # deja la app navegable con datos demo
 ./vendor/bin/sail npm ci
 ./vendor/bin/sail npm run build                  # o `npm run dev` para HMR
@@ -78,5 +80,6 @@ Los cinco checks son requeridos para mergear. El setup compartido vive en
 ## Flujo de trabajo
 
 - PRs a `develop` con squash; releases `develop → main` con merge commit.
-- El merge a `main` deploya automáticamente (dokploy).
+- El merge a `main` deploya automáticamente (dokploy, Build Type = Dockerfile:
+  la imagen de producción se construye con el `Dockerfile` del repo).
 - Convención de commits: `<type>(<scope>): <description>` (ver `CLAUDE.md`).
