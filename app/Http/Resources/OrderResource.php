@@ -66,8 +66,7 @@ class OrderResource extends JsonResource
                         'type' => $payment->type,
                         'transaction_number' => $payment->transaction_number,
                         'order_id' => $payment->order_id,
-                        'paid_at' => $payment->created_at->diffForHumans(), // @phpstan-ignore-line
-                        'paid_on' => $payment->created_at->format('d/m/Y'), // @phpstan-ignore-line
+                        'paid_on' => $payment->paid_on->format('Y-m-d'),
                     ];
                 });
             }),

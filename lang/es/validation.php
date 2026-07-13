@@ -193,6 +193,7 @@ return [
         'suggested_max_payments' => 'cantidad máxima de cuotas',
         'max_payments' => 'cantidad máxima de cuotas',
         'payment_plan' => 'cuotas',
+        'paid_on' => 'fecha de pago',
         'transaction_number' => 'número de transacción',
         'due_date' => 'vencimiento',
         'total_price' => 'precio final',

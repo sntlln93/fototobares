@@ -22,6 +22,7 @@ class PaymentFactory extends Factory
             'order_id' => Order::factory(),
             'amount' => 16000,
             'type' => 'efectivo',
+            'paid_on' => now()->toDateString(),
         ];
     }
 }

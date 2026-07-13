@@ -1,3 +1,4 @@
+import { DatePicker } from '@/components/date-picker';
 import InputError from '@/components/input-error';
 import InputHint from '@/components/input-hint';
 import { Modal } from '@/components/modal';
@@ -14,6 +15,7 @@ import {
 import { Spinner } from '@/components/ui/spinner';
 import { capitalize } from '@/lib/utils';
 import { useForm } from '@inertiajs/react';
+import { format } from 'date-fns';
 import { FormEventHandler } from 'react';
 import { TransactionNumberError } from './transaction-number-error';
 
@@ -34,11 +36,13 @@ export function CreatePaymentModal({
         amount: number;
         type: (typeof PAYMENT_TYPES)[number];
         order_id: Order['id'];
+        paid_on: string;
         transaction_number: string;
     }>({
         amount: initialAmount ?? 0,
         type: PAYMENT_TYPES[0],
         order_id: orderId,
+        paid_on: format(new Date(), 'yyyy-MM-dd'),
         transaction_number: '',
     });
 
@@ -103,6 +107,21 @@ export function CreatePaymentModal({
                         </SelectContent>
                     </Select>
                     <InputError message={errors.type} />
+                </div>
+
+                <div className="mt-2">
+                    <Label htmlFor="paid_on">Fecha de pago</Label>
+                    <DatePicker
+                        date={new Date(data.paid_on)}
+                        setDate={(date) =>
+                            setData(
+                                'paid_on',
+                                format(date ?? new Date(), 'yyyy-MM-dd'),
+                            )
+                        }
+                        disabled={{ after: new Date() }}
+                    />
+                    <InputError message={errors.paid_on} />
                 </div>
 
                 {data.type === 'transferencia' && (

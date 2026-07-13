@@ -29,7 +29,7 @@ class DashboardController extends Controller
         ];
 
         $collectedThisMonth = (int) Payment::query()
-            ->where('created_at', '>=', $startOfMonth)
+            ->where('paid_on', '>=', $startOfMonth)
             ->whereHas('order', fn ($q) => $q->whereNull('cancelled_at'))
             ->sum('amount');
 

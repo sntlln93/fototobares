@@ -11,13 +11,21 @@ import { es } from 'date-fns/locale';
 import { Calendar as CalendarIcon } from 'lucide-react';
 import { useState } from 'react';
 
+import { type DayPickerProps } from 'react-day-picker';
+
 type DatePickerProps = {
     placeholder?: string;
     date: Date;
     setDate: (date: Date | undefined) => void;
+    disabled?: DayPickerProps['disabled'];
 };
 
-export function DatePicker({ placeholder, date, setDate }: DatePickerProps) {
+export function DatePicker({
+    placeholder,
+    date,
+    setDate,
+    disabled,
+}: DatePickerProps) {
     const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
     return (
@@ -44,6 +52,7 @@ export function DatePicker({ placeholder, date, setDate }: DatePickerProps) {
                         setDate(day);
                         setIsCalendarOpen(false);
                     }}
+                    disabled={disabled}
                     autoFocus
                 />
             </PopoverContent>

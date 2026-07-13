@@ -21,6 +21,7 @@ return new class extends Migration
             $table->integer('amount');
             $table->string('type');
             $table->string('transaction_number')->nullable()->unique();
+            $table->date('paid_on');
             $table->timestamps();
         });
     }

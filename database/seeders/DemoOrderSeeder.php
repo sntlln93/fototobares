@@ -48,7 +48,7 @@ class DemoOrderSeeder extends Seeder
         $this->addDetail($order, $molduraAncha, $this->muralVariant('vertical', 'pink'), 'Valentina - egresados 2026');
         $this->addDetail($order, $carpeta, null, 'Valentina');
         $this->addDetail($order, $medalla, null, 'Valentina');
-        $order->payments()->create(['amount' => 10000, 'type' => 'efectivo']);
+        $order->payments()->create(['amount' => 10000, 'type' => 'efectivo', 'paid_on' => now()->toDateString()]);
 
         // 2. In production: boards glued (2 MDF boards deducted at
         // "Pegado"), transfer payment
@@ -56,7 +56,7 @@ class DemoOrderSeeder extends Seeder
         $detail = $this->addDetail($order, $clasico, $this->muralVariant('horizontal', 'black'), 'Thiago - egresados 2026');
         $this->setStatus($detail, $clasico, 3, hoursAgo: 30);
         $this->addDetail($order, $carpeta, null, 'Thiago');
-        $order->payments()->create(['amount' => 20000, 'type' => 'transferencia', 'transaction_number' => 'MP73920184652']);
+        $order->payments()->create(['amount' => 20000, 'type' => 'transferencia', 'transaction_number' => 'MP73920184652', 'paid_on' => now()->subDays(2)->toDateString()]);
 
         // 3. Priority: the mural reached "Corte de moldura" (one strip
         // deducted) and was sent back to "Impreso" (stock stays deducted)
@@ -69,7 +69,7 @@ class DemoOrderSeeder extends Seeder
         $order = $this->makeOrder($sextoA, 'Diego Farías', '3804000004', 'Benjamín', 4, 12000, 1, 10);
         $detail = $this->addDetail($order, $taza, null, 'Taza de Benjamín');
         $this->setStatus($detail, $taza, 4, hoursAgo: 5);
-        $order->payments()->create(['amount' => 12000, 'type' => 'efectivo']);
+        $order->payments()->create(['amount' => 12000, 'type' => 'efectivo', 'paid_on' => now()->subDays(5)->toDateString()]);
 
         // 5. Partially delivered: mural handed over (its whole chain
         // consumed: strip + board + bag), the rest in progress
@@ -81,7 +81,7 @@ class DemoOrderSeeder extends Seeder
         $detail = $this->addDetail($order, $carpeta, null, 'Mora');
         $this->setStatus($detail, $carpeta, 3, hoursAgo: 24);
         $this->addDetail($order, $medalla, null, 'Mora');
-        $order->payments()->create(['amount' => 26000, 'type' => 'transferencia', 'transaction_number' => 'BNA48210937566']);
+        $order->payments()->create(['amount' => 26000, 'type' => 'transferencia', 'transaction_number' => 'BNA48210937566', 'paid_on' => now()->subDays(2)->toDateString()]);
 
         // 6. Fully delivered and paid: gone from /tracking
         $order = $this->makeOrder($sextoA, 'Facundo Ríos', '3804000006', 'Ciro', 6, 6000, 1, 5);
@@ -89,7 +89,7 @@ class DemoOrderSeeder extends Seeder
         $this->setStatus($detail, $medalla, 4, hoursAgo: 96);
         $detail->delivered_at = now()->subDay();
         $detail->save();
-        $order->payments()->create(['amount' => 6000, 'type' => 'efectivo']);
+        $order->payments()->create(['amount' => 6000, 'type' => 'efectivo', 'paid_on' => now()->subDays(1)->toDateString()]);
 
         // 7. Cancelled: the glued mural returned its MDF board to stock
         // (movements -1/+1), medalla sent to recycling; keeps a payment
@@ -102,7 +102,7 @@ class DemoOrderSeeder extends Seeder
         $detail = $this->addDetail($order, $medalla, null, 'Emma');
         $detail->recycled_to = 'reciclaje';
         $detail->save();
-        $order->payments()->create(['amount' => 10000, 'type' => 'efectivo']);
+        $order->payments()->create(['amount' => 10000, 'type' => 'efectivo', 'paid_on' => now()->subDays(1)->toDateString()]);
         $order->cancelled_at = now()->subDay();
         $order->save();
 
@@ -111,7 +111,7 @@ class DemoOrderSeeder extends Seeder
         $detail = $this->addDetail($order, $taza, null, 'Taza de Isabella');
         $this->setStatus($detail, $taza, 2, hoursAgo: 120);
         $this->addDetail($order, $medalla, null, 'Isabella');
-        $order->payments()->create(['amount' => 9000, 'type' => 'efectivo']);
+        $order->payments()->create(['amount' => 9000, 'type' => 'efectivo', 'paid_on' => now()->subDays(5)->toDateString()]);
 
         // 9. Did not attend the photo session: no photo number assigned
         $order = $this->makeOrder($sextoA, 'Irina Sosa', '3804000009', 'Simón', null, 18000, 1, 12, attended: false);

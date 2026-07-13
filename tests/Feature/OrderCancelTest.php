@@ -88,6 +88,7 @@ it('blocks payments, edition and delivery on a cancelled order', function () {
         'order_id' => $order->id,
         'amount' => 1000,
         'type' => 'efectivo',
+        'paid_on' => now()->toDateString(),
     ])->assertSessionHasErrors('order_id');
 
     put(route('orders.delivery', $order), [

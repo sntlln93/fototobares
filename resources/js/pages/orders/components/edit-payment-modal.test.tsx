@@ -39,7 +39,7 @@ const makePayment = (overrides: Partial<Payment> = {}): Payment => ({
     amount: 5000,
     type: 'transferencia',
     transaction_number: 'MP12345678',
-    paid_at: 'hace 2 días',
+    paid_on: '2026-07-06',
     ...overrides,
 });
 
