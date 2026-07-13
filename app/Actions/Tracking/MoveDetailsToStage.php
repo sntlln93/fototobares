@@ -19,7 +19,7 @@ class MoveDetailsToStage implements ActionContract
     /**
      * Move the given details to a production stage, deducting stock for every
      * stage reached. Rejects the batch if any detail's product does not own the
-     * stage; moving a detail to an earlier stage flags it as priority.
+     * stage.
      *
      * @param  array<string, mixed>  $params  {detail_ids: array<int, int>, status: ProductionStatus, user: ?User}
      * @return int the number of details updated
@@ -53,15 +53,8 @@ class MoveDetailsToStage implements ActionContract
 
         DB::transaction(function () use ($details, $status, $user) {
             foreach ($details as $detail) {
-                $previousPosition = $detail->productionStatus->position ?? 0;
-
                 $detail->productionStatus()->associate($status);
                 $detail->status_updated_at = now();
-
-                if ($status->position < $previousPosition) {
-                    $detail->priority = true;
-                }
-
                 $detail->save();
                 $detail->setRelation('productionStatus', $status);
 
