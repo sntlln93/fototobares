@@ -8,7 +8,7 @@ import { UserInfo } from '@/components/user-info';
 import { useMobileNavigation } from '@/hooks/use-mobile-navigation';
 import { type User } from '@/types';
 import { Link } from '@inertiajs/react';
-import { BookOpen, LogOut, Settings } from 'lucide-react';
+import { LogOut, Settings } from 'lucide-react';
 
 interface UserMenuContentProps {
     user: User;
@@ -35,17 +35,6 @@ export function UserMenuContent({ user }: UserMenuContentProps) {
                     >
                         <Settings className="mr-2" />
                         Ajustes
-                    </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                    <Link
-                        className="block w-full"
-                        href={route('release-notes')}
-                        as="button"
-                        onClick={cleanup}
-                    >
-                        <BookOpen className="mr-2" />
-                        Notas de Lanzamiento
                     </Link>
                 </DropdownMenuItem>
             </DropdownMenuGroup>
