@@ -49,6 +49,8 @@ class DemoOrderSeeder extends Seeder
         $this->addDetail($order, $carpeta, null, 'Valentina');
         $this->addDetail($order, $medalla, null, 'Valentina');
         $order->payments()->create(['amount' => 10000, 'type' => 'efectivo', 'paid_on' => now()->toDateString()]);
+        $order->notes()->create(['body' => 'La mamá pidió que la avisemos por WhatsApp cuando esté lista la moldura.']);
+        $order->notes()->create(['body' => 'Confirmar dirección de entrega antes de despachar.']);
 
         // 2. In production: boards glued (2 MDF boards deducted at
         // "Pegado"), transfer payment
