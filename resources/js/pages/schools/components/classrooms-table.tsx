@@ -11,7 +11,7 @@ import { Searchbar } from '@/features/searchbar';
 import { onSort } from '@/lib/services/filter';
 import { cn } from '@/lib/utils';
 import { Link } from '@inertiajs/react';
-import { ArrowUpDown, Edit2, Plus, Trash } from 'lucide-react';
+import { ArrowUpDown, Edit2, Plus, ShoppingCart, Trash } from 'lucide-react';
 import {
     type SchoolShowController,
     type SchoolShowData,
@@ -71,7 +71,6 @@ export function ClassroomsTable({
                         <TableHead>
                             <div className="flex items-center gap-2">Niños</div>
                         </TableHead>
-                        <TableHead>Pedidos</TableHead>
 
                         <TableHead>Acciones</TableHead>
                     </TableRow>
@@ -99,8 +98,10 @@ export function ClassroomsTable({
                                     Ver alumnos
                                 </Link>
                             </TableCell>
-                            <TableCell>
+
+                            <TableCell className="flex gap-2">
                                 <Link
+                                    aria-label="Ver pedidos"
                                     href={route('orders.index', {
                                         classroom_id: classroom.id,
                                     })}
@@ -111,11 +112,8 @@ export function ClassroomsTable({
                                         }),
                                     )}
                                 >
-                                    Ver pedidos
+                                    <ShoppingCart />
                                 </Link>
-                            </TableCell>
-
-                            <TableCell className="flex gap-2">
                                 <Button
                                     variant="warning"
                                     size="sm"

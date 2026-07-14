@@ -8,8 +8,17 @@ import { ClassroomsTable } from './classrooms-table';
 
 vi.mock('@inertiajs/react', () => ({
     router: { get: vi.fn() },
-    Link: ({ href, children }: { href: string; children: React.ReactNode }) => (
-        <a href={href}>{children}</a>
+    Link: ({
+        href,
+        children,
+        ...props
+    }: {
+        href: string;
+        children: React.ReactNode;
+    }) => (
+        <a href={href} {...props}>
+            {children}
+        </a>
     ),
 }));
 
@@ -49,8 +58,8 @@ describe('ClassroomsTable', () => {
         render(<ClassroomsTable school={school} controller={controller} />);
 
         const links = screen
-            .getAllByText('Ver pedidos')
-            .map((el) => (el.closest('a') as HTMLAnchorElement).href);
+            .getAllByLabelText<HTMLAnchorElement>('Ver pedidos')
+            .map((el) => el.href);
 
         expect(links).toEqual([
             'http://localhost/orders.index?classroom_id=10',
