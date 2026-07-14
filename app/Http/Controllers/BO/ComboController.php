@@ -84,8 +84,8 @@ class ComboController extends Controller
     }
 
     /**
-     * @param  array<int, array{id: int, quantity: int, subtract_value: int, variants?: string}>  $products
-     * @return Collection<int, array{quantity: int, subtract_value: int, variants: string|null}>
+     * @param  array<int, array{id: int, quantity: int, subtract_value: int, variants?: array<string, mixed>|null}>  $products
+     * @return Collection<int, array{quantity: int, subtract_value: int, variants: array<string, mixed>|null}>
      */
     private function pivotData(array $products): Collection
     {

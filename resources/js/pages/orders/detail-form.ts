@@ -152,13 +152,7 @@ export const buildProductOrders = (
     }));
 
 /**
- * Variants may come from the combo pivot (and as a JSON string) or from
- * the product itself.
+ * Variants may come from the combo pivot or from the product itself.
  */
-export const resolveVariants = (product: SelectableProduct) => {
-    const variants = product.pivot?.variants ?? product.variants;
-
-    return typeof variants === 'string'
-        ? (JSON.parse(variants) as typeof product.variants)
-        : variants;
-};
+export const resolveVariants = (product: SelectableProduct) =>
+    product.pivot?.variants ?? product.variants;

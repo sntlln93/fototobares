@@ -209,15 +209,6 @@ describe('resolveVariants', () => {
         expect(resolveVariants(product)?.backgrounds).toEqual(['white']);
     });
 
-    it('parses pivot variants stored as JSON', () => {
-        const product = {
-            ...mural,
-            pivot: { variants: JSON.stringify(variants) },
-        } as unknown as SelectableProduct;
-
-        expect(resolveVariants(product)?.orientations).toEqual(['vertical']);
-    });
-
     it('falls back to the product variants', () => {
         const product = { ...mural, variants } as SelectableProduct;
 

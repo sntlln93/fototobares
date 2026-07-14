@@ -49,7 +49,7 @@ class StoreComboRequest extends FormRequest
      *         id: int,
      *         quantity: int,
      *         subtract_value: int,
-     *         variants?: string,
+     *         variants?: array<string, mixed>|null,
      *     }>
      * }
      */
@@ -63,7 +63,7 @@ class StoreComboRequest extends FormRequest
          *         id: int,
          *         quantity: int,
          *         subtract_value: int,
-         *         variants?: string,
+         *         variants?: array<string, mixed>|null,
          *     }>
          * }
          */

@@ -29,7 +29,7 @@ return new class extends Migration
         ]);
 
         $combo1->products()->attach([
-            $products->firstWhere('name', 'Moldura ancha')?->id => ['quantity' => 1, 'subtract_value' => 30000, 'variants' => json_encode($variants)],
+            $products->firstWhere('name', 'Moldura ancha')?->id => ['quantity' => 1, 'subtract_value' => 30000, 'variants' => $variants],
             $products->firstWhere('name', 'Carpeta 2 fotos')?->id => ['quantity' => 1, 'subtract_value' => 8000, 'variants' => null],
             $products->firstWhere('name', 'Medalla')?->id => ['quantity' => 1, 'subtract_value' => 2000, 'variants' => null],
         ]);
@@ -41,7 +41,7 @@ return new class extends Migration
         ]);
 
         $combo2->products()->attach([
-            $products->firstWhere('name', 'Clásico')?->id => ['quantity' => 1, 'subtract_value' => 28000, 'variants' => json_encode($variants)],
+            $products->firstWhere('name', 'Clásico')?->id => ['quantity' => 1, 'subtract_value' => 28000, 'variants' => $variants],
             $products->firstWhere('name', 'Carpeta 2 fotos')?->id => ['quantity' => 1, 'subtract_value' => 8000, 'variants' => null],
             $products->firstWhere('name', 'Medalla')?->id => ['quantity' => 1, 'subtract_value' => 2000, 'variants' => null],
         ]);
@@ -53,7 +53,7 @@ return new class extends Migration
         ]);
 
         $combo3->products()->attach([
-            $products->firstWhere('name', 'Moldura fina')?->id => ['quantity' => 1, 'subtract_value' => 26000, 'variants' => json_encode($variants)],
+            $products->firstWhere('name', 'Moldura fina')?->id => ['quantity' => 1, 'subtract_value' => 26000, 'variants' => $variants],
             $products->firstWhere('name', 'Carpeta 2 fotos')?->id => ['quantity' => 1, 'subtract_value' => 8000, 'variants' => null],
             $products->firstWhere('name', 'Medalla')?->id => ['quantity' => 1, 'subtract_value' => 2000, 'variants' => null],
         ]);
@@ -65,7 +65,7 @@ return new class extends Migration
         ]);
 
         $combo4->products()->attach([
-            $products->firstWhere('name', 'Moldura fina')?->id => ['quantity' => 1, 'subtract_value' => 26000, 'variants' => json_encode($variants)],
+            $products->firstWhere('name', 'Moldura fina')?->id => ['quantity' => 1, 'subtract_value' => 26000, 'variants' => $variants],
             $products->firstWhere('name', 'Carpeta 2 fotos')?->id => ['quantity' => 1, 'subtract_value' => 8000, 'variants' => null],
             $products->firstWhere('name', 'Medalla')?->id => ['quantity' => 1, 'subtract_value' => 2000, 'variants' => null],
             $products->firstWhere('name', 'Taza')?->id => ['quantity' => 1, 'subtract_value' => 5000, 'variants' => null],
