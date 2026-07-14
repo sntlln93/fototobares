@@ -52,7 +52,7 @@ export default function Orders({
                     <Searchbar
                         indexRoute="orders.index"
                         term={filters.search}
-                        placeholder="Buscar por #, nombre o teléfono"
+                        placeholder="N°, nombre o teléfono"
                     />
                     <Combobox
                         items={schools.map((school) => ({

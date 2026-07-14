@@ -97,7 +97,7 @@ export default function ClassroomShow({
                         indexRoute="classrooms.show"
                         routeParams={{ classroom: classroom.id }}
                         term={filters.search}
-                        placeholder="Buscar por #, nombre o teléfono"
+                        placeholder="N°, nombre o teléfono"
                     />
                 </div>
 

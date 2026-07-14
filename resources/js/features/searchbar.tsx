@@ -48,6 +48,8 @@ export function Searchbar({
                 placeholder={placeholder}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
+                // Room for the search icon sitting on top of the input
+                className="pr-10"
             />
             <div
                 className={cn(
