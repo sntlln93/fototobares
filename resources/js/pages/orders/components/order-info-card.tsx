@@ -10,7 +10,10 @@ import {
 import { PhoneLink } from '@/features/phone-link';
 import { cn, formatPrice } from '@/lib/utils';
 import { Link } from '@inertiajs/react';
-import { Ban, Edit2 } from 'lucide-react';
+import { Ban, Edit2, User } from 'lucide-react';
+import { useState } from 'react';
+import { useEditClientForm } from '../hooks/use-edit-client-form';
+import { EditClientModal } from './edit-client-modal';
 
 const STATUS_STYLES: Record<string, string> = {
     'sin habilitar': 'bg-zinc-400 hover:bg-zinc-400',
@@ -29,120 +32,153 @@ interface OrderInfoCardProps {
 
 export function OrderInfoCard({ order, onCancel }: OrderInfoCardProps) {
     const isCancelled = Boolean(order.cancelled_at);
+    const [showEditClientModal, setShowEditClientModal] = useState(false);
+    const editClientForm = useEditClientForm(order);
 
     return (
-        <Card className="relative">
-            {order.can_edit ? (
-                <Link
-                    href={route('orders.edit', {
-                        order: order.id,
-                    })}
-                    className={cn(
-                        'absolute top-4 right-4',
-                        buttonVariants({
-                            size: 'sm',
-                            variant: 'outline',
-                        }),
+        <>
+            <Card className="relative">
+                <div className="absolute top-4 right-4 flex gap-2">
+                    {!isCancelled && (
+                        <button
+                            onClick={() => setShowEditClientModal(true)}
+                            className={cn(
+                                buttonVariants({
+                                    size: 'sm',
+                                    variant: 'outline',
+                                }),
+                            )}
+                            title="Editar datos del cliente"
+                        >
+                            <User className="h-4 w-4" />
+                        </button>
                     )}
-                >
-                    <Edit2 />
-                </Link>
-            ) : (
-                <span
-                    className={cn(
-                        'absolute top-4 right-4 opacity-60',
-                        buttonVariants({
-                            size: 'sm',
-                            variant: 'outline',
-                        }),
+                    {order.can_edit ? (
+                        <Link
+                            href={route('orders.edit', {
+                                order: order.id,
+                            })}
+                            className={cn(
+                                buttonVariants({
+                                    size: 'sm',
+                                    variant: 'outline',
+                                }),
+                            )}
+                        >
+                            <Edit2 />
+                        </Link>
+                    ) : (
+                        <span
+                            className={cn(
+                                'opacity-60',
+                                buttonVariants({
+                                    size: 'sm',
+                                    variant: 'outline',
+                                }),
+                            )}
+                            aria-disabled="true"
+                            title="La edición se bloquea cuando la primera cuota está pagada o el pedido está cancelado"
+                        >
+                            <Edit2 />
+                        </span>
                     )}
-                    aria-disabled="true"
-                    title="La edición se bloquea cuando la primera cuota está pagada o el pedido está cancelado"
-                >
-                    <Edit2 />
-                </span>
-            )}
-            <CardHeader>
-                <CardDescription>
-                    {`${order.school.name}
+                </div>
+                <CardHeader>
+                    <CardDescription>
+                        {`${order.school.name}
                     (${order.classroom.name})`}
-                </CardDescription>
-                <CardTitle className="flex items-center gap-2">
-                    {order.client.name}
-                    {order.status && (
-                        <Badge className={cn(STATUS_STYLES[order.status])}>
-                            {order.status}
-                        </Badge>
+                    </CardDescription>
+                    <CardTitle className="flex items-center gap-2">
+                        {order.client.name}
+                        {order.status && (
+                            <Badge className={cn(STATUS_STYLES[order.status])}>
+                                {order.status}
+                            </Badge>
+                        )}
+                    </CardTitle>
+                    <CardDescription className="flex items-center gap-1">
+                        <PhoneLink phone={order.client.phone} />
+                    </CardDescription>
+                    <CardDescription>
+                        {`Pedido #${order.id}`}
+                        {order.child_name
+                            ? ` · Niño/a: ${order.child_name}`
+                            : ''}
+                        {order.photo_number !== null &&
+                        order.photo_number !== undefined
+                            ? ` · Foto N° ${order.photo_number}`
+                            : ''}
+                    </CardDescription>
+                </CardHeader>
+
+                <CardContent>
+                    {order.photo_url && (
+                        <a
+                            href={order.photo_url}
+                            target="_blank"
+                            rel="noreferrer"
+                        >
+                            <img
+                                src={order.photo_url}
+                                alt={`Foto N° ${order.photo_number}`}
+                                className="mb-3 h-32 w-32 rounded-md object-cover"
+                            />
+                        </a>
                     )}
-                </CardTitle>
-                <CardDescription className="flex items-center gap-1">
-                    <PhoneLink phone={order.client.phone} />
-                </CardDescription>
-                <CardDescription>
-                    {`Pedido #${order.id}`}
-                    {order.child_name ? ` · Niño/a: ${order.child_name}` : ''}
-                    {order.photo_number !== null &&
-                    order.photo_number !== undefined
-                        ? ` · Foto N° ${order.photo_number}`
-                        : ''}
-                </CardDescription>
-            </CardHeader>
-
-            <CardContent>
-                {order.photo_url && (
-                    <a href={order.photo_url} target="_blank" rel="noreferrer">
-                        <img
-                            src={order.photo_url}
-                            alt={`Foto N° ${order.photo_number}`}
-                            className="mb-3 h-32 w-32 rounded-md object-cover"
-                        />
-                    </a>
-                )}
-                <CardDescription>
-                    Total: {formatPrice(order.total_price)}
-                </CardDescription>
-                <CardDescription>
-                    Pagado: {formatPrice(order.paid_total ?? 0)}
-                </CardDescription>
-                <CardDescription
-                    className={
-                        (order.balance ?? 0) > 0
-                            ? 'font-semibold text-amber-600'
-                            : 'text-green-600'
-                    }
-                >
-                    Saldo: {formatPrice(order.balance ?? 0)}
-                </CardDescription>
-                <CardDescription>Cuotas: {order.payment_plan}</CardDescription>
-                <CardDescription>
-                    Primer vencimiento: {order.due_date}
-                </CardDescription>
-
-                {isCancelled && (
-                    <CardDescription className="mt-2 font-semibold text-red-600">
-                        Pedido cancelado el {order.cancelled_at}.
+                    <CardDescription>
+                        Total: {formatPrice(order.total_price)}
                     </CardDescription>
-                )}
-
-                {!order.can_edit && !isCancelled && (
-                    <CardDescription className="text-amber-600">
-                        La edición se bloquea cuando la primera cuota está
-                        pagada.
+                    <CardDescription>
+                        Pagado: {formatPrice(order.paid_total ?? 0)}
                     </CardDescription>
-                )}
-
-                {!isCancelled && (
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        className="mt-4 text-red-600 hover:text-red-700"
-                        onClick={onCancel}
+                    <CardDescription
+                        className={
+                            (order.balance ?? 0) > 0
+                                ? 'font-semibold text-amber-600'
+                                : 'text-green-600'
+                        }
                     >
-                        <Ban className="mr-1 h-4 w-4" />
-                        Cancelar pedido
-                    </Button>
-                )}
-            </CardContent>
-        </Card>
+                        Saldo: {formatPrice(order.balance ?? 0)}
+                    </CardDescription>
+                    <CardDescription>
+                        Cuotas: {order.payment_plan}
+                    </CardDescription>
+                    <CardDescription>
+                        Primer vencimiento: {order.due_date}
+                    </CardDescription>
+
+                    {isCancelled && (
+                        <CardDescription className="mt-2 font-semibold text-red-600">
+                            Pedido cancelado el {order.cancelled_at}.
+                        </CardDescription>
+                    )}
+
+                    {!order.can_edit && !isCancelled && (
+                        <CardDescription className="text-amber-600">
+                            La edición se bloquea cuando la primera cuota está
+                            pagada.
+                        </CardDescription>
+                    )}
+
+                    {!isCancelled && (
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            className="mt-4 text-red-600 hover:text-red-700"
+                            onClick={onCancel}
+                        >
+                            <Ban className="mr-1 h-4 w-4" />
+                            Cancelar pedido
+                        </Button>
+                    )}
+                </CardContent>
+            </Card>
+
+            <EditClientModal
+                show={showEditClientModal}
+                onClose={() => setShowEditClientModal(false)}
+                form={editClientForm}
+            />
+        </>
     );
 }

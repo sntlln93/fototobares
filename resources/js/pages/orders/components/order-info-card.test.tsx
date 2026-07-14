@@ -20,6 +20,21 @@ vi.mock('@inertiajs/react', () => ({
     ),
 }));
 
+vi.mock('../hooks/use-edit-client-form', () => ({
+    useEditClientForm: () => ({
+        data: {
+            name: '',
+            phone: '',
+            child_name: '',
+            attended_photo_session: null,
+        },
+        setData: vi.fn(),
+        errors: {},
+        processing: false,
+        submit: vi.fn(),
+    }),
+}));
+
 vi.stubGlobal(
     'route',
     (name: string, params?: Record<string, unknown>) =>
@@ -182,5 +197,41 @@ describe('OrderInfoCard', () => {
                 'La edición se bloquea cuando la primera cuota está pagada.',
             ),
         ).toBeNull();
+    });
+
+    it('shows the edit client button when the order is not cancelled', () => {
+        render(
+            <OrderInfoCard
+                order={makeOrder({ cancelled_at: null })}
+                onCancel={vi.fn()}
+            />,
+        );
+
+        expect(screen.getByTitle('Editar datos del cliente')).toBeTruthy();
+    });
+
+    it('hides the edit client button when the order is cancelled', () => {
+        render(
+            <OrderInfoCard
+                order={makeOrder({ cancelled_at: '2026-07-01' })}
+                onCancel={vi.fn()}
+            />,
+        );
+
+        expect(screen.queryByTitle('Editar datos del cliente')).toBeNull();
+    });
+
+    it('opens the edit client modal when clicking the edit client button', () => {
+        render(
+            <OrderInfoCard
+                order={makeOrder({ cancelled_at: null })}
+                onCancel={vi.fn()}
+            />,
+        );
+
+        const editClientButton = screen.getByTitle('Editar datos del cliente');
+        fireEvent.click(editClientButton);
+
+        expect(screen.getByText('Editar datos del cliente')).toBeTruthy();
     });
 });
