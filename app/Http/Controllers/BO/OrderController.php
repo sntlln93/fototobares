@@ -26,7 +26,7 @@ class OrderController extends Controller
 {
     public function index(Request $request): Response
     {
-        /** @var 'id' search */
+        /** @var string|null $search */
         $search = $request->query('search');
 
         /** @var string sort_by */
@@ -44,7 +44,7 @@ class OrderController extends Controller
             ->get();
 
         $orders = Order::with('client', 'products.type', 'classroom.school')
-            ->where('id', 'like', "%$search%")
+            ->search($search)
             ->whereHas('classroom', function ($query) use ($school_id) {
                 if (empty($school_id)) {
                     return $query;
@@ -53,11 +53,13 @@ class OrderController extends Controller
                 return $query->where('classrooms.school_id', $school_id);
             })
             ->orderBy($sort_by, $sort_order)
-            ->paginate(20);
+            ->paginate(20)
+            ->withQueryString();
 
         return Inertia::render('orders/index', [
             'orders' => OrderResource::collection($orders),
             'schools' => $schools,
+            'filters' => ['search' => $search],
         ]);
     }
 
