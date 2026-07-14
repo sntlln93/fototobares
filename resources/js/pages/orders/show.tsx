@@ -1,3 +1,4 @@
+import { Masonry } from '@/components/masonry';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
@@ -53,31 +54,63 @@ export default function Order({
                 />
             )}
 
-            <section className="flex flex-col gap-6 px-6 py-6 lg:flex-row lg:flex-wrap">
-                <OrderInfoCard
-                    order={data}
-                    onCancel={() => setShowCancelModal(true)}
+            <section className="px-6 py-6">
+                <Masonry
+                    items={[
+                        {
+                            key: 'info',
+                            content: (
+                                <OrderInfoCard
+                                    order={data}
+                                    onCancel={() => setShowCancelModal(true)}
+                                />
+                            ),
+                        },
+                        {
+                            key: 'details',
+                            content: <Details order={data} />,
+                        },
+                        ...(isCancelled
+                            ? []
+                            : [
+                                  {
+                                      key: 'delivery',
+                                      content: (
+                                          <DeliveryCard
+                                              order={data}
+                                              onPayBalance={openPayBalance}
+                                          />
+                                      ),
+                                  },
+                              ]),
+                        {
+                            key: 'payments',
+                            content: (
+                                <PaymentHistory
+                                    order={data}
+                                    payments={data.payments || []}
+                                    showCreatePayment={showCreatePayment}
+                                    setShowCreatePayment={(show) => {
+                                        setShowCreatePayment(show);
+                                        if (!show)
+                                            setPaymentInitialAmount(null);
+                                    }}
+                                    initialAmount={paymentInitialAmount}
+                                    canRegister={!isCancelled}
+                                />
+                            ),
+                        },
+                        {
+                            key: 'notes',
+                            content: (
+                                <OrderNotes
+                                    order={data}
+                                    notes={data.notes || []}
+                                />
+                            ),
+                        },
+                    ]}
                 />
-
-                <Details order={data} />
-
-                {!isCancelled && (
-                    <DeliveryCard order={data} onPayBalance={openPayBalance} />
-                )}
-
-                <PaymentHistory
-                    order={data}
-                    payments={data.payments || []}
-                    showCreatePayment={showCreatePayment}
-                    setShowCreatePayment={(show) => {
-                        setShowCreatePayment(show);
-                        if (!show) setPaymentInitialAmount(null);
-                    }}
-                    initialAmount={paymentInitialAmount}
-                    canRegister={!isCancelled}
-                />
-
-                <OrderNotes order={data} notes={data.notes || []} />
             </section>
         </AppLayout>
     );

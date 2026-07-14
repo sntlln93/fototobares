@@ -29,7 +29,7 @@ export function OrderInfoCard({ order, onCancel }: OrderInfoCardProps) {
     const isCancelled = Boolean(order.cancelled_at);
 
     return (
-        <Card className="relative lg:min-w-100">
+        <Card className="relative">
             {order.can_edit ? (
                 <Link
                     href={route('orders.edit', {

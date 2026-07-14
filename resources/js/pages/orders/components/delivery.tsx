@@ -34,7 +34,7 @@ export function DeliveryCard({
     } = useDelivery(order);
 
     return (
-        <Card className="lg:min-w-100">
+        <Card>
             {pendingDelivery && (
                 <DeliveryWarningModal
                     show={Boolean(pendingDelivery)}

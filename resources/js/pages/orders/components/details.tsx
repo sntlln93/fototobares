@@ -18,7 +18,7 @@ export function Details({ order }: { order: Order }) {
     const isCancelled = Boolean(order.cancelled_at);
 
     return (
-        <Card className="lg:min-w-100">
+        <Card>
             <CardHeader>
                 <CardTitle className="text-xl">Detalle</CardTitle>
             </CardHeader>

@@ -4,6 +4,16 @@ import { afterEach, vi } from 'vitest';
 // Without vitest globals, testing-library cannot register its own cleanup
 afterEach(() => cleanup());
 
+// jsdom does not implement ResizeObserver, required by the masonry layout
+vi.stubGlobal(
+    'ResizeObserver',
+    class {
+        observe() {}
+        unobserve() {}
+        disconnect() {}
+    },
+);
+
 // jsdom does not implement matchMedia, required by the sidebar's
 // useIsMobile hook and other responsive components
 Object.defineProperty(window, 'matchMedia', {
