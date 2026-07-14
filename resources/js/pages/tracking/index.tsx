@@ -13,7 +13,11 @@ import {
     TrackingDetail,
     TrackingProduct,
 } from './components/product-group';
-import { Filters, TrackingFilters } from './components/tracking-filters';
+import {
+    Filters,
+    SchoolWithClassrooms,
+    TrackingFilters,
+} from './components/tracking-filters';
 import { useSelection } from './hooks/use-selection';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -33,7 +37,7 @@ export default function Tracking({
     details: TrackingDetail[];
     products: TrackingProduct[];
     productTypes: ProductType[];
-    schools: Array<{ id: number; name: string }>;
+    schools: SchoolWithClassrooms[];
     filters: Filters;
 }>) {
     const { selected, toggle, toggleGroupItems, clear } = useSelection();
@@ -53,6 +57,7 @@ export default function Tracking({
 
         if (next.search) params.search = next.search;
         if (next.school_id) params.school_id = String(next.school_id);
+        if (next.classroom_id) params.classroom_id = String(next.classroom_id);
         if (next.product_type_id)
             params.product_type_id = String(next.product_type_id);
         if (next.production_status_id)
