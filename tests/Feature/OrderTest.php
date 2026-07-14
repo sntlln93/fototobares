@@ -195,3 +195,82 @@ it('updates the note of a single detail without touching its twin', function () 
     expect($order->details()->orderBy('id')->pluck('note')->all())
         ->toBe(['Taza de Lucas', 'Taza de Emma']);
 });
+
+it('updates client data via the dedicated endpoint', function () {
+    actingAsRole();
+
+    $order = Order::factory()->create();
+
+    put(route('orders.update-client', $order), [
+        'name' => 'Nuevo Cliente',
+        'phone' => '3801234567',
+        'child_name' => 'Nuevo Niño',
+        'attended_photo_session' => true,
+    ])->assertSessionHasNoErrors();
+
+    expect($order->refresh()->client->name)->toBe('Nuevo Cliente')
+        ->and($order->refresh()->client->phone)->toBe('3801234567')
+        ->and($order->refresh()->child_name)->toBe('Nuevo Niño')
+        ->and($order->refresh()->attended_photo_session)->toBeTrue();
+});
+
+it('allows client update even when first installment is paid', function () {
+    actingAsRole();
+
+    $order = Order::factory()->create([
+        'total_price' => 64000,
+        'payment_plan' => 4,
+    ]);
+    Payment::factory()->create(['order_id' => $order->id, 'amount' => 16000]);
+
+    put(route('orders.update-client', $order), [
+        'name' => 'Cliente Actualizado',
+        'phone' => '3801234567',
+        'child_name' => 'Niño Actualizado',
+        'attended_photo_session' => false,
+    ])->assertSessionHasNoErrors();
+
+    expect($order->refresh()->client->name)->toBe('Cliente Actualizado');
+});
+
+it('blocks client update for cancelled orders', function () {
+    actingAsRole();
+
+    $order = Order::factory()->create(['cancelled_at' => now()]);
+
+    put(route('orders.update-client', $order), [
+        'name' => 'Cliente Test',
+        'phone' => '3801234567',
+    ])->assertSessionHasErrors('order');
+
+    expect($order->refresh()->client->name)->not->toBe('Cliente Test');
+});
+
+it('does not touch order price or details when updating client', function () {
+    actingAsRole();
+
+    $classroom = Classroom::factory()->create();
+    $product = Product::factory()->create();
+
+    $order = Order::factory()->create([
+        'classroom_id' => $classroom->id,
+        'total_price' => 24000,
+        'payment_plan' => 2,
+    ]);
+    $order->products()->attach($product->id, ['note' => 'original note', 'variant' => []]);
+
+    $originalPrice = $order->total_price;
+    $originalPlan = $order->payment_plan;
+    $originalDetail = $order->details()->first();
+
+    put(route('orders.update-client', $order), [
+        'name' => 'Nuevo Cliente',
+        'phone' => '3801234567',
+        'child_name' => 'Nuevo Niño',
+        'attended_photo_session' => true,
+    ])->assertSessionHasNoErrors();
+
+    expect($order->refresh()->total_price)->toBe($originalPrice)
+        ->and($order->refresh()->payment_plan)->toBe($originalPlan)
+        ->and($order->details()->first()->note)->toBe($originalDetail->note);
+});
