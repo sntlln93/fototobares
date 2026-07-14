@@ -24,55 +24,51 @@ return new class extends Migration
 
         $combo1 = Combo::create([
             'name' => 'Combo 1 (M.A)',
-            'suggested_financed_price' => 64000,
-            'suggested_max_payments' => 4,
+            'default_payments' => 4,
             'suggested_price' => 60000,
         ]);
 
         $combo1->products()->attach([
-            $products->firstWhere('name', 'Moldura ancha')?->id => ['quantity' => 1, 'variants' => json_encode($variants)],
-            $products->firstWhere('name', 'Carpeta 2 fotos')?->id => ['quantity' => 1, 'variants' => null],
-            $products->firstWhere('name', 'Medalla')?->id => ['quantity' => 1, 'variants' => null],
+            $products->firstWhere('name', 'Moldura ancha')?->id => ['quantity' => 1, 'subtract_value' => 30000, 'variants' => json_encode($variants)],
+            $products->firstWhere('name', 'Carpeta 2 fotos')?->id => ['quantity' => 1, 'subtract_value' => 8000, 'variants' => null],
+            $products->firstWhere('name', 'Medalla')?->id => ['quantity' => 1, 'subtract_value' => 2000, 'variants' => null],
         ]);
 
         $combo2 = Combo::create([
             'name' => 'Combo 2 (CLA)',
-            'suggested_financed_price' => 60000,
-            'suggested_max_payments' => 4,
+            'default_payments' => 4,
             'suggested_price' => 56000,
         ]);
 
         $combo2->products()->attach([
-            $products->firstWhere('name', 'Clásico')?->id => ['quantity' => 1, 'variants' => json_encode($variants)],
-            $products->firstWhere('name', 'Carpeta 2 fotos')?->id => ['quantity' => 1, 'variants' => null],
-            $products->firstWhere('name', 'Medalla')?->id => ['quantity' => 1, 'variants' => null],
+            $products->firstWhere('name', 'Clásico')?->id => ['quantity' => 1, 'subtract_value' => 28000, 'variants' => json_encode($variants)],
+            $products->firstWhere('name', 'Carpeta 2 fotos')?->id => ['quantity' => 1, 'subtract_value' => 8000, 'variants' => null],
+            $products->firstWhere('name', 'Medalla')?->id => ['quantity' => 1, 'subtract_value' => 2000, 'variants' => null],
         ]);
 
         $combo3 = Combo::create([
             'name' => 'Combo 3 (M.F)',
-            'suggested_financed_price' => 56000,
-            'suggested_max_payments' => 4,
+            'default_payments' => 4,
             'suggested_price' => 52000,
         ]);
 
         $combo3->products()->attach([
-            $products->firstWhere('name', 'Moldura fina')?->id => ['quantity' => 1, 'variants' => json_encode($variants)],
-            $products->firstWhere('name', 'Carpeta 2 fotos')?->id => ['quantity' => 1, 'variants' => null],
-            $products->firstWhere('name', 'Medalla')?->id => ['quantity' => 1, 'variants' => null],
+            $products->firstWhere('name', 'Moldura fina')?->id => ['quantity' => 1, 'subtract_value' => 26000, 'variants' => json_encode($variants)],
+            $products->firstWhere('name', 'Carpeta 2 fotos')?->id => ['quantity' => 1, 'subtract_value' => 8000, 'variants' => null],
+            $products->firstWhere('name', 'Medalla')?->id => ['quantity' => 1, 'subtract_value' => 2000, 'variants' => null],
         ]);
 
         $combo4 = Combo::create([
             'name' => 'Combo 3 (M.F) con taza',
-            'suggested_financed_price' => 68000,
-            'suggested_max_payments' => 4,
+            'default_payments' => 4,
             'suggested_price' => 64000,
         ]);
 
         $combo4->products()->attach([
-            $products->firstWhere('name', 'Moldura fina')?->id => ['quantity' => 1, 'variants' => json_encode($variants)],
-            $products->firstWhere('name', 'Carpeta 2 fotos')?->id => ['quantity' => 1, 'variants' => null],
-            $products->firstWhere('name', 'Medalla')?->id => ['quantity' => 1, 'variants' => null],
-            $products->firstWhere('name', 'Taza')?->id => ['quantity' => 1, 'variants' => null],
+            $products->firstWhere('name', 'Moldura fina')?->id => ['quantity' => 1, 'subtract_value' => 26000, 'variants' => json_encode($variants)],
+            $products->firstWhere('name', 'Carpeta 2 fotos')?->id => ['quantity' => 1, 'subtract_value' => 8000, 'variants' => null],
+            $products->firstWhere('name', 'Medalla')?->id => ['quantity' => 1, 'subtract_value' => 2000, 'variants' => null],
+            $products->firstWhere('name', 'Taza')?->id => ['quantity' => 1, 'subtract_value' => 5000, 'variants' => null],
         ]);
     }
 

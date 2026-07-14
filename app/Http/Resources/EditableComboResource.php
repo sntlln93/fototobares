@@ -25,12 +25,14 @@ class EditableComboResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'suggested_price' => $this->suggested_price,
-            'suggested_max_payments' => $this->suggested_max_payments,
+            'default_payments' => $this->default_payments,
             'products' => $this->products->map(function (Product $p) {
                 return [
                     'id' => $p->id,
                     /* @phpstan-ignore-next-line */
                     'quantity' => $p->getRelationValue('pivot')->quantity,
+                    /* @phpstan-ignore-next-line */
+                    'subtract_value' => $p->getRelationValue('pivot')->subtract_value,
                     /* @phpstan-ignore-next-line */
                     'variants' => $p->getRelationValue('pivot')->variants,
                 ];

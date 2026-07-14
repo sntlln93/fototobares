@@ -14,6 +14,7 @@ import { Link } from '@inertiajs/react';
 import { format } from 'date-fns';
 import { AlertCircle } from 'lucide-react';
 import { OrderFormController } from '../hooks/use-create-order-form';
+import { PriceBreakdown } from './price-breakdown';
 
 export function OrderStep({ form }: { form: OrderFormController }) {
     const {
@@ -21,13 +22,16 @@ export function OrderStep({ form }: { form: OrderFormController }) {
         setData,
         errors,
         errorFlags,
-        counts,
+        breakdown,
+        recalculatePrice,
         processing,
         toStep,
         submit,
         handleSaveAsDraft,
         handleSaveAndContinue,
     } = form;
+
+    const adjustedByHand = Number(data.total_price) !== breakdown.total;
 
     return (
         <AccordionItem value="order">
@@ -42,9 +46,6 @@ export function OrderStep({ form }: { form: OrderFormController }) {
             <AccordionContent className="px-1">
                 <div className="mt-3">
                     <Label>Precio final</Label>
-                    <InputHint
-                        message={`Calculado a base de (${Object.keys(counts.combos).length}) combo y (${counts.undefinedCount}) productos`}
-                    />
                     <Input
                         type="number"
                         id="total_price"
@@ -54,6 +55,12 @@ export function OrderStep({ form }: { form: OrderFormController }) {
                         className="mt-1 block w-full"
                     />
                     <InputError message={errors.total_price} />
+
+                    <PriceBreakdown
+                        breakdown={breakdown}
+                        adjustedByHand={adjustedByHand}
+                        onRecalculate={recalculatePrice}
+                    />
                 </div>
 
                 <div className="mt-3">

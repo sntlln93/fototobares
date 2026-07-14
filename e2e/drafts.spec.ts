@@ -46,7 +46,9 @@ test('draft: save, preload via "Ver", saving the order consumes it', async ({
     await stepTriggers(page).filter({ hasText: 'Productos' }).first().click();
     await addSimpleProduct(page, 'Taza', 'Taza de Guada');
     await stepTriggers(page).filter({ hasText: 'Pedido' }).first().click();
-    await expect(page.locator('#total_price')).toHaveValue('30000');
+    // The draft price was typed by hand with an empty cart: adding the taza
+    // recalculates the total from the cart (#96), so it becomes its list price
+    await expect(page.locator('#total_price')).toHaveValue('12000');
     await page.getByRole('button', { name: 'Guardar', exact: true }).click();
     await page.waitForURL('/orders');
 

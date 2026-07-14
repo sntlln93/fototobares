@@ -22,7 +22,7 @@ class ComboResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'suggested_price' => $this->suggested_price,
-            'suggested_max_payments' => $this->suggested_max_payments,
+            'default_payments' => $this->default_payments,
             'products' => ProductResource::collection($this->products),
         ];
     }

@@ -13,8 +13,10 @@ export function ComboProducts({
     openAddProductModal,
     openEditProductModal,
     updateQuantity,
+    updateSubtractValue,
 }: PropsWithChildren<{
     updateQuantity: (id: number, value: number) => void;
+    updateSubtractValue: (id: number, value: number) => void;
     openAddProductModal: (id: number) => void;
     openEditProductModal: (id: number) => void;
     products: Product[];
@@ -29,9 +31,7 @@ export function ComboProducts({
 
     return (
         <div className="w-full">
-            <Label htmlFor="suggested_max_payments">
-                Productos del combo ({selectedProducts.length})
-            </Label>
+            <Label>Productos del combo ({selectedProducts.length})</Label>
 
             <ul className="my-2 gap-4">
                 {selectedProducts.map((selected) => {
@@ -46,6 +46,7 @@ export function ComboProducts({
                             selected={selected}
                             product={product}
                             updateQuantity={updateQuantity}
+                            updateSubtractValue={updateSubtractValue}
                             openEditProductModal={openEditProductModal}
                         />
                     );

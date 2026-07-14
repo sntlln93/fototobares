@@ -1,8 +1,10 @@
 import { format } from 'date-fns';
 import { beforeEach, describe, expect, it } from 'vitest';
+import { ComboProduct, ComboWithProducts } from './form';
 import {
     DraftProp,
     emptyForm,
+    expandComboQuantities,
     removeDetailAt,
     replaceDetailAt,
     resetForNextClient,
@@ -175,5 +177,48 @@ describe('order details editing', () => {
         replaceDetailAt(original, 0, []);
 
         expect(original).toHaveLength(3);
+    });
+});
+
+describe('expandComboQuantities', () => {
+    const inCombo = (id: number, quantity: number) =>
+        ({
+            id,
+            name: `Producto ${id}`,
+            pivot: { quantity, subtract_value: 0 },
+        }) as ComboProduct;
+
+    const combo = {
+        id: 1,
+        name: 'Combo con dos fotos',
+        products: [inCombo(5, 2), inCombo(6, 1)],
+    } as ComboWithProducts;
+
+    it('replicates a combo product carrying several units', () => {
+        const details = [
+            { product_id: 5, combo_id: 1, note: 'Foto de Luca' },
+            { product_id: 6, combo_id: 1, note: 'Mural de Luca' },
+        ];
+
+        expect(expandComboQuantities(details, [combo])).toEqual([
+            details[0],
+            details[0],
+            details[1],
+        ]);
+    });
+
+    it('leaves standalone products alone: they are added one at a time', () => {
+        const details = [{ product_id: 5, note: 'Foto suelta' }];
+
+        expect(expandComboQuantities(details, [combo])).toEqual(details);
+    });
+
+    it('adds a single unit when the combo or the product is unknown', () => {
+        const details = [
+            { product_id: 5, combo_id: 99, note: '' },
+            { product_id: 99, combo_id: 1, note: '' },
+        ];
+
+        expect(expandComboQuantities(details, [combo])).toEqual(details);
     });
 });

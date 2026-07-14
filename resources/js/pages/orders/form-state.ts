@@ -1,5 +1,5 @@
 import { format } from 'date-fns';
-import { ProductOrder } from './form';
+import { ComboWithProducts, ProductOrder } from './form';
 
 export type DraftProp = {
     id: number;
@@ -70,6 +70,26 @@ export const removeDetailAt = (
     details: ProductOrder[],
     index: number,
 ): ProductOrder[] => details.filter((_, i) => i !== index);
+
+/**
+ * A combo may carry several units of the same product (`pivot.quantity`): each
+ * unit is its own detail. They are configured once — two identical products of
+ * the same combo share variant and note — and replicated here.
+ */
+export const expandComboQuantities = (
+    details: ProductOrder[],
+    combos: ComboWithProducts[],
+): ProductOrder[] =>
+    details.flatMap((detail) => {
+        const quantity = combos
+            .find((combo) => combo.id === detail.combo_id)
+            ?.products.find((product) => product.id === detail.product_id)
+            ?.pivot.quantity;
+
+        return Array.from({ length: Math.max(quantity ?? 1, 1) }, () => ({
+            ...detail,
+        }));
+    });
 
 export const replaceDetailAt = (
     details: ProductOrder[],

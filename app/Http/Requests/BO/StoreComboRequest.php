@@ -27,10 +27,11 @@ class StoreComboRequest extends FormRequest
         return [
             'name' => ['required'],
             'suggested_price' => ['required', 'numeric', 'min:1'],
-            'suggested_max_payments' => ['required', 'numeric', 'min:1'],
+            'default_payments' => ['required', 'numeric', 'min:1'],
             'products' => ['required', 'array'],
             'products.*.id' => ['required', 'exists:products,id'],
             'products.*.quantity' => ['required', 'integer', 'min:1'],
+            'products.*.subtract_value' => ['required', 'integer', 'min:0'],
             'products.*.variants' => ['sometimes'],
         ];
     }
@@ -43,10 +44,11 @@ class StoreComboRequest extends FormRequest
      * @return array{
      *     name: string,
      *     suggested_price: float,
-     *     suggested_max_payments: int,
+     *     default_payments: int,
      *     products: array<int, array{
      *         id: int,
      *         quantity: int,
+     *         subtract_value: int,
      *         variants?: string,
      *     }>
      * }
@@ -56,10 +58,11 @@ class StoreComboRequest extends FormRequest
         /** @var array{
          *     name: string,
          *     suggested_price: float,
-         *     suggested_max_payments: int,
+         *     default_payments: int,
          *     products: array<int, array{
          *         id: int,
          *         quantity: int,
+         *         subtract_value: int,
          *         variants?: string,
          *     }>
          * }

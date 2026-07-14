@@ -14,7 +14,6 @@ import { OrderFormData } from '../form-state';
 interface ProductListItemProps {
     detail: OrderFormData['order_details'][number];
     product: Product;
-    combo?: Combo;
     index: number;
     onEdit: (index: number) => void;
     onRemove: (index: number) => void;
@@ -23,18 +22,14 @@ interface ProductListItemProps {
 export function ProductListItem({
     detail,
     product,
-    combo,
     index,
     onEdit,
     onRemove,
 }: ProductListItemProps) {
     return (
-        <li className="flex items-center justify-between rounded-md border border-input bg-background px-4 py-2">
-            <div className="flex flex-col gap-2">
-                <span>
-                    {product.name}
-                    {combo ? ` (combo ${combo.name})` : ''}
-                </span>
+        <li className="mb-2 flex flex-wrap items-center justify-between gap-2 rounded-md border border-input bg-background px-4 py-2">
+            <div className="flex min-w-0 flex-col gap-2">
+                <span>{product.name}</span>
                 {product.product_type_id === 1 ? (
                     <div className="flex items-center">
                         <Badge variant="outline" className="gap-1 rounded-lg">

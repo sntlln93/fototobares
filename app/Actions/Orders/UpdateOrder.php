@@ -40,17 +40,29 @@ class UpdateOrder implements ActionContract
             /** @var array<int, array<string, mixed>> $orderDetails */
             $orderDetails = $data['order_details'];
 
-            $order->products()->sync(
-                collect($orderDetails)->mapWithKeys(function (array $product) {
-                    /** @var int $productId */
-                    $productId = $product['product_id'];
+            // Details are addressed row by row, never keyed by product: an
+            // order may repeat a product (two mugs with different names, or a
+            // combo carrying several units of the same one) and syncing by
+            // product_id collapsed those rows into a single one
+            foreach ($orderDetails as $detail) {
+                $attributes = [
+                    'variant' => $detail['variant'] ?? [],
+                    'note' => $detail['note'],
+                ];
 
-                    return [$productId => [
-                        'variant' => $product['variant'] ?? [],
-                        'note' => $product['note'],
-                    ]];
-                })->toArray()
-            );
+                if (! isset($detail['id'])) {
+                    $order->products()->attach($detail['product_id'], $attributes);
+
+                    continue;
+                }
+
+                // Scoped to the order: an id from another order matches nothing.
+                // Updated through the model so the variant cast applies
+                $order->details()
+                    ->whereKey($detail['id'])
+                    ->first()
+                    ?->update($attributes);
+            }
         });
     }
 }

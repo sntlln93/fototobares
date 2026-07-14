@@ -48,6 +48,7 @@ export function useComboForm({
                 {
                     id: product.id,
                     quantity: 1,
+                    subtract_value: 0,
                 },
             ]);
         } else {
@@ -98,6 +99,17 @@ export function useComboForm({
         }
     };
 
+    const updateSubtractValue = (id: number, value: number) => {
+        setData(
+            'products',
+            data.products.map((product) =>
+                product.id === id
+                    ? { ...product, subtract_value: value }
+                    : product,
+            ),
+        );
+    };
+
     const addSelectedProduct = (product: SelectedProduct) => {
         setData('products', upsertSelectedProduct(data.products, product));
     };
@@ -118,6 +130,7 @@ export function useComboForm({
         submit,
         openEditProductModal,
         updateQuantity,
+        updateSubtractValue,
         addSelectedProduct,
         closeMuralModal,
     };

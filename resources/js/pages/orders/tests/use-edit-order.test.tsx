@@ -44,8 +44,13 @@ const makeOrder = (overrides: Partial<Order> = {}): Order =>
         due_date: '2026-08-15',
         classroom_id: 4,
         products: [
-            { id: 2, note: 'sin marco', variant: { color: 'negro' } },
-            { id: 5, note: null },
+            {
+                id: 2,
+                order_detail_id: 11,
+                note: 'sin marco',
+                variant: { color: 'negro' },
+            },
+            { id: 5, order_detail_id: 12, note: null },
         ],
         ...overrides,
     }) as unknown as Order;
@@ -69,11 +74,12 @@ describe('useEditOrder', () => {
             classroom_id: 4,
             order_details: [
                 {
+                    id: 11,
                     product_id: 2,
                     note: 'sin marco',
                     variant: { color: 'negro' },
                 },
-                { product_id: 5, note: null, variant: {} },
+                { id: 12, product_id: 5, note: null, variant: {} },
             ],
         });
     });

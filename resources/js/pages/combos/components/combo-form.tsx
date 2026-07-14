@@ -25,6 +25,7 @@ export function ComboForm({ form, products, submitLabel }: ComboFormProps) {
         setAddProduct,
         openEditProductModal,
         updateQuantity,
+        updateSubtractValue,
         addSelectedProduct,
         closeMuralModal,
     } = form;
@@ -79,25 +80,23 @@ export function ComboForm({ form, products, submitLabel }: ComboFormProps) {
                     />
                 </div>
                 <div className="mt-6">
-                    <Label htmlFor="suggested_max_payments">
-                        Cantidad máxima de cuotas
-                    </Label>
+                    <Label htmlFor="default_payments">Cuotas por defecto</Label>
 
                     <Input
-                        id="suggested_max_payments"
+                        id="default_payments"
                         type="number"
-                        name="suggested_max_payments"
+                        name="default_payments"
                         min={0}
-                        value={data.suggested_max_payments}
+                        value={data.default_payments}
                         onChange={(e) =>
-                            setData('suggested_max_payments', e.target.value)
+                            setData('default_payments', e.target.value)
                         }
                         className="mt-1 block w-full"
                         placeholder="Cantidad en números enteros"
                     />
 
                     <InputError
-                        message={errors.suggested_max_payments}
+                        message={errors.default_payments}
                         className="mt-2"
                     />
                 </div>
@@ -109,6 +108,7 @@ export function ComboForm({ form, products, submitLabel }: ComboFormProps) {
                         openAddProductModal={setAddProduct}
                         openEditProductModal={openEditProductModal}
                         updateQuantity={updateQuantity}
+                        updateSubtractValue={updateSubtractValue}
                     >
                         <InputError
                             message={errors.products}

@@ -28,7 +28,7 @@ export default function EditCombo({
         initialData: {
             name: combo.data.name,
             suggested_price: combo.data.suggested_price,
-            suggested_max_payments: combo.data.suggested_max_payments,
+            default_payments: combo.data.default_payments,
             products: combo.data.products,
         },
         onSubmit: (form) =>

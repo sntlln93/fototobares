@@ -43,17 +43,10 @@ class ComboController extends Controller
         $combo = Combo::create([
             'name' => $validated['name'],
             'suggested_price' => $validated['suggested_price'],
-            'suggested_max_payments' => $validated['suggested_max_payments'],
+            'default_payments' => $validated['default_payments'],
         ]);
 
-        $combo->products()->attach(
-            (new Collection($validated['products']))->mapWithKeys(function ($product) {
-                return [$product['id'] => [
-                    'quantity' => $product['quantity'],
-                    'variants' => $product['variants'] ?? null,
-                ]];
-            })
-        );
+        $combo->products()->attach($this->pivotData($validated['products']));
 
         return redirect()->route('combos.index');
     }
@@ -75,17 +68,10 @@ class ComboController extends Controller
         $combo->update([
             'name' => $validated['name'],
             'suggested_price' => $validated['suggested_price'],
-            'suggested_max_payments' => $validated['suggested_max_payments'],
+            'default_payments' => $validated['default_payments'],
         ]);
 
-        $combo->products()->sync(
-            (new Collection($validated['products']))->mapWithKeys(function ($product) {
-                return [$product['id'] => [
-                    'quantity' => $product['quantity'],
-                    'variants' => $product['variants'] ?? null,
-                ]];
-            })
-        );
+        $combo->products()->sync($this->pivotData($validated['products']));
 
         return redirect()->route('combos.index');
     }
@@ -95,5 +81,20 @@ class ComboController extends Controller
         $action->handle(['combo' => $combo]);
 
         return redirect()->route('combos.index');
+    }
+
+    /**
+     * @param  array<int, array{id: int, quantity: int, subtract_value: int, variants?: string}>  $products
+     * @return Collection<int, array{quantity: int, subtract_value: int, variants: string|null}>
+     */
+    private function pivotData(array $products): Collection
+    {
+        return (new Collection($products))->mapWithKeys(function (array $product) {
+            return [$product['id'] => [
+                'quantity' => $product['quantity'],
+                'subtract_value' => $product['subtract_value'],
+                'variants' => $product['variants'] ?? null,
+            ]];
+        });
     }
 }

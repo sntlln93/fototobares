@@ -104,6 +104,7 @@ describe('AddProduct', () => {
         expect(addProduct).toHaveBeenCalledWith({
             id: 1,
             quantity: 1,
+            subtract_value: 0,
             variants: {
                 photo_types: ['grupo'],
                 orientations: ['vertical', 'horizontal'],

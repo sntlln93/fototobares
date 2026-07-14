@@ -52,7 +52,7 @@ it('renders every GET page without errors', function () {
                 'combo' => Combo::first() ?? Combo::create([
                     'name' => 'Combo smoke',
                     'suggested_price' => 64000,
-                    'suggested_max_payments' => 4,
+                    'default_payments' => 4,
                 ]),
                 'order' => Order::first(),
                 'product' => Product::first(),

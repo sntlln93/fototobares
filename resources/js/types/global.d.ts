@@ -143,7 +143,7 @@ declare global {
         id: number;
         name: string;
         suggested_price: number;
-        suggested_max_payments: number;
+        default_payments: number;
     }
 
     type OrderStatus =
