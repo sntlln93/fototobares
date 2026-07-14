@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Support\Phone;
 use Carbon\CarbonInterface;
 use Database\Factories\OrderFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -22,6 +24,15 @@ class Order extends Model
     use HasFactory;
 
     use SoftDeletes;
+
+    /** Below this many digits a search term is an order number, not a phone. */
+    private const MIN_PHONE_DIGITS = 4;
+
+    /**
+     * Phones are stored as free text, so the column is stripped of its
+     * separators on the fly to be comparable with a normalized search term.
+     */
+    private const CLIENT_PHONE_DIGITS = "REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(clients.phone, ' ', ''), '-', ''), '(', ''), ')', ''), '+', ''), '.', '')";
 
     /**
      * @return BelongsTo<Client, $this>
@@ -72,6 +83,43 @@ class Order extends Model
     public function notes()
     {
         return $this->hasMany(Note::class)->latest();
+    }
+
+    /**
+     * Free-text search over the columns the order tables show: order number,
+     * child, client and — the WhatsApp use case — the client's phone, matched
+     * digit by digit so separators and the +549 prefix don't get in the way.
+     *
+     * The phone is only searched with at least MIN_PHONE_DIGITS digits, or a
+     * short numeric search (an order number) would match every phone
+     * containing those digits.
+     *
+     * @param  Builder<Order>  $query
+     * @return Builder<Order>
+     */
+    public function scopeSearch(Builder $query, ?string $term): Builder
+    {
+        $term = trim((string) $term);
+
+        if ($term === '') {
+            return $query;
+        }
+
+        $like = '%'.addcslashes($term, '%_\\').'%';
+        $digits = Phone::localDigits($term);
+        $phone = strlen($digits) >= self::MIN_PHONE_DIGITS ? '%'.$digits.'%' : null;
+
+        return $query->where(function (Builder $query) use ($like, $phone) {
+            $query->where('orders.id', 'like', $like)
+                ->orWhere('orders.child_name', 'like', $like)
+                ->orWhereHas('client', function (Builder $client) use ($like, $phone) {
+                    $client->where('clients.name', 'like', $like);
+
+                    if ($phone !== null) {
+                        $client->orWhereRaw(self::CLIENT_PHONE_DIGITS.' like ?', [$phone]);
+                    }
+                });
+        });
     }
 
     public function paidTotal(): int

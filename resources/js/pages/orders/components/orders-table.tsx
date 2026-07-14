@@ -7,6 +7,8 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
+import { Highlight } from '@/features/highlight';
+import { PhoneLink } from '@/features/phone-link';
 import { onSort } from '@/lib/services/filter';
 import { cn, formatPrice } from '@/lib/utils';
 import { Link } from '@inertiajs/react';
@@ -14,10 +16,12 @@ import { ArrowUpDown, Eye, Trash } from 'lucide-react';
 
 interface OrdersTableProps {
     orders: Order[];
+    /** The applied search term, marked in the columns it matched. */
+    search?: string | null;
     onDelete: (order: Order) => void;
 }
 
-export function OrdersTable({ orders, onDelete }: OrdersTableProps) {
+export function OrdersTable({ orders, search, onDelete }: OrdersTableProps) {
     return (
         <Table>
             <TableHeader>
@@ -33,6 +37,7 @@ export function OrdersTable({ orders, onDelete }: OrdersTableProps) {
                         </div>
                     </TableHead>
                     <TableHead>Cliente</TableHead>
+                    <TableHead>Teléfono</TableHead>
                     <TableHead>Productos</TableHead>
                     <TableHead>
                         <div className="flex items-center gap-2">
@@ -56,10 +61,16 @@ export function OrdersTable({ orders, onDelete }: OrdersTableProps) {
                 {orders.map((order) => (
                     <TableRow key={order.id}>
                         <TableCell className="font-medium">
-                            {order.id}
+                            <Highlight text={String(order.id)} term={search} />
                         </TableCell>
-                        <TableCell className="flex gap-2">
-                            {order.client.name}
+                        <TableCell>
+                            <Highlight text={order.client.name} term={search} />
+                        </TableCell>
+                        <TableCell>
+                            <PhoneLink
+                                phone={order.client.phone}
+                                term={search}
+                            />
                         </TableCell>
                         <TableCell>{order.products.length}</TableCell>
                         <TableCell>{formatPrice(order.total_price)}</TableCell>

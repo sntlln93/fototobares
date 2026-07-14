@@ -14,20 +14,27 @@ use App\Http\Resources\OrderResource;
 use App\Models\Classroom;
 use App\Models\Order;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class ClassroomController extends Controller
 {
-    public function show(Classroom $classroom): Response
+    public function show(Request $request, Classroom $classroom): Response
     {
+        /** @var string|null $search */
+        $search = $request->query('search');
+
         $orders = Order::where('classroom_id', $classroom->id)
             ->with('client', 'products.type', 'classroom.school')
-            ->paginate(20);
+            ->search($search)
+            ->paginate(20)
+            ->withQueryString();
 
         return Inertia::render('classrooms/show', [
             'classroom' => $classroom->load('teacher', 'school'),
             'orders' => OrderResource::collection($orders),
+            'filters' => ['search' => $search],
         ]);
     }
 

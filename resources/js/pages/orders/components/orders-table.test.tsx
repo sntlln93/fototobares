@@ -113,11 +113,51 @@ describe('OrdersTable', () => {
         render(<OrdersTable orders={[]} onDelete={vi.fn()} />);
 
         const headers = screen.getAllByRole('columnheader');
+        const header = (name: string) =>
+            headers.find((columnheader) =>
+                columnheader.textContent?.includes(name),
+            )!;
 
-        fireEvent.click(within(headers[0]).getByRole('button'));
+        fireEvent.click(within(header('#')).getByRole('button'));
         expect(sort).toHaveBeenCalledWith('id', 'orders.index');
 
-        fireEvent.click(within(headers[3]).getByRole('button'));
+        fireEvent.click(within(header('Precio')).getByRole('button'));
         expect(sort).toHaveBeenCalledWith('total_price', 'orders.index');
+    });
+
+    it('shows the client phone with a link to their whatsapp chat', () => {
+        render(
+            <OrdersTable
+                orders={[
+                    makeOrder({
+                        client: { name: 'Marta López', phone: '3804000003' },
+                    }),
+                ]}
+                onDelete={vi.fn()}
+            />,
+        );
+
+        const row = screen.getAllByRole('row')[1];
+        const chat = within(row).getByRole('link', {
+            name: 'Abrir chat de WhatsApp con 3804000003',
+        });
+
+        expect(chat.getAttribute('href')).toBe('https://wa.me/5493804000003');
+    });
+
+    it('marks the searched phone in the row it matched', () => {
+        const { container } = render(
+            <OrdersTable
+                orders={[
+                    makeOrder({
+                        client: { name: 'Marta López', phone: '3804000003' },
+                    }),
+                ]}
+                search="+54 9 3804000003"
+                onDelete={vi.fn()}
+            />,
+        );
+
+        expect(container.querySelector('mark')?.textContent).toBe('3804000003');
     });
 });
