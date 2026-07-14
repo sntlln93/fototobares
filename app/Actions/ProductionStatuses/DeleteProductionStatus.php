@@ -18,7 +18,7 @@ class DeleteProductionStatus implements ActionContract
      *
      * @throws ValidationException when the stage is the only one of its
      *                             product, has details currently in it
-     *                             or consumes stockables
+     *                             or moves stockables
      */
     public function handle(array $params): void
     {
@@ -43,7 +43,7 @@ class DeleteProductionStatus implements ActionContract
 
         if ($status->stockables()->exists()) {
             throw ValidationException::withMessages([
-                'status' => 'No se puede eliminar: esta etapa consume insumos. Quitá esa configuración primero.',
+                'status' => 'No se puede eliminar: esta etapa mueve insumos. Quitá esa configuración primero.',
             ]);
         }
 

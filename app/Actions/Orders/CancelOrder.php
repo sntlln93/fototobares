@@ -63,7 +63,7 @@ class CancelOrder implements ActionContract
                 $detail->save();
 
                 if ($destination['destination'] === 'stock') {
-                    $this->stockService->returnForDetail($detail, $user);
+                    $this->stockService->reverseForDetail($detail, $user);
                 }
             }
 

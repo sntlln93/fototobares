@@ -16,7 +16,7 @@ class Stockable extends Model
     use HasFactory;
 
     /**
-     * Stages that consume this stockable, with the consumed quantity.
+     * Stages that move this stockable's stock, with the signed delta.
      *
      * @return BelongsToMany<ProductionStatus, $this>
      */

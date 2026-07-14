@@ -102,7 +102,7 @@ class DemoOrderSeeder extends Seeder
         $order = $this->makeOrder($sextoA, 'Gimena Vera', '3804000007', 'Emma', 7, 54000, 4, 18);
         $detail = $this->addDetail($order, $molduraAncha, $this->muralVariant('vertical', 'black'), 'Emma - egresados 2026');
         $this->setStatus($detail, $molduraAncha, 4, hoursAgo: 60);
-        $this->stock->returnForDetail($detail, $this->master);
+        $this->stock->reverseForDetail($detail, $this->master);
         $detail->recycled_to = 'stock';
         $detail->save();
         $detail = $this->addDetail($order, $medalla, null, 'Emma');
@@ -183,8 +183,8 @@ class DemoOrderSeeder extends Seeder
     }
 
     /**
-     * Moves a detail to the given stage mirroring the tracking flow:
-     * the service deducts whatever the reached stages consume.
+     * Moves a detail to the given stage mirroring the tracking flow: the
+     * service applies whatever the reached stages add or consume.
      */
     private function setStatus(OrderDetail $detail, Product $product, int $position, bool $priority = false, int $hoursAgo = 0): void
     {
@@ -199,7 +199,7 @@ class DemoOrderSeeder extends Seeder
         $detail->save();
         $detail->setRelation('productionStatus', $status);
 
-        $this->stock->deductForDetail($detail, $this->master);
+        $this->stock->applyForDetail($detail, $this->master);
     }
 
     /**

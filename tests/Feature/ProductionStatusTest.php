@@ -111,7 +111,7 @@ it('refuses to delete a stage that consumes stockables', function () {
     actingAsRole(UserRole::Admin);
 
     $status = statusFor('Clásico', 3);
-    $status->stockables()->attach(Stockable::factory()->create()->id, ['quantity' => 2]);
+    $status->stockables()->attach(Stockable::factory()->create()->id, ['quantity' => -2]);
 
     delete(route('production-statuses.destroy', $status))
         ->assertSessionHasErrors('status');
@@ -168,22 +168,57 @@ it('hangs a stockable consumption from a stage and updates its quantity', functi
     post(route('production-statuses.stockables.store', $status), [
         'stockable_id' => $stockable->id,
         'quantity' => 2,
+        'direction' => 'subtract',
     ])->assertSessionHasNoErrors();
 
     expect($status->stockables()->count())->toBe(1)
-        ->and((int) $status->stockables()->first()?->pivot->quantity)->toBe(2);
+        ->and((int) $status->stockables()->first()?->pivot->quantity)->toBe(-2);
 
     // Posting again updates the quantity in place
     post(route('production-statuses.stockables.store', $status), [
         'stockable_id' => $stockable->id,
         'quantity' => 5,
+        'direction' => 'subtract',
     ])->assertSessionHasNoErrors();
 
     expect($status->stockables()->count())->toBe(1)
-        ->and((int) $status->stockables()->first()?->pivot->quantity)->toBe(5);
+        ->and((int) $status->stockables()->first()?->pivot->quantity)->toBe(-5);
 });
 
-it('rejects consuming the same stockable on two stages of one product', function () {
+it('hangs a stockable production from a stage with a positive pivot', function () {
+    actingAsRole(UserRole::Admin);
+
+    $status = statusFor('Clásico', 3);
+    $stockable = Stockable::factory()->create();
+
+    post(route('production-statuses.stockables.store', $status), [
+        'stockable_id' => $stockable->id,
+        'quantity' => 1,
+        'direction' => 'add',
+    ])->assertSessionHasNoErrors();
+
+    expect((int) $status->stockables()->first()?->pivot->quantity)->toBe(1);
+});
+
+it('rejects a zero quantity or a missing direction', function () {
+    actingAsRole(UserRole::Admin);
+
+    $status = statusFor('Clásico', 3);
+    $stockable = Stockable::factory()->create();
+
+    post(route('production-statuses.stockables.store', $status), [
+        'stockable_id' => $stockable->id,
+        'quantity' => 0,
+        'direction' => 'subtract',
+    ])->assertSessionHasErrors('quantity');
+
+    post(route('production-statuses.stockables.store', $status), [
+        'stockable_id' => $stockable->id,
+        'quantity' => 1,
+    ])->assertSessionHasErrors('direction');
+});
+
+it('allows the same stockable on two stages of one product', function () {
     actingAsRole(UserRole::Admin);
 
     $stockable = Stockable::factory()->create();
@@ -192,7 +227,8 @@ it('rejects consuming the same stockable on two stages of one product', function
     post(route('production-statuses.stockables.store', statusFor('Clásico', 6)), [
         'stockable_id' => $stockable->id,
         'quantity' => 1,
-    ])->assertSessionHasErrors('stockable_id');
+        'direction' => 'subtract',
+    ])->assertSessionHasNoErrors();
 });
 
 it('allows consuming the same stockable on stages of different products', function () {
@@ -204,6 +240,7 @@ it('allows consuming the same stockable on stages of different products', functi
     post(route('production-statuses.stockables.store', statusFor('Taza', 4)), [
         'stockable_id' => $stockable->id,
         'quantity' => 1,
+        'direction' => 'subtract',
     ])->assertSessionHasNoErrors();
 });
 
