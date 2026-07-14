@@ -14,6 +14,9 @@ vi.stubGlobal(
     },
 );
 
+// jsdom does not implement scrollIntoView, required by cmdk's command list
+Element.prototype.scrollIntoView = vi.fn();
+
 // jsdom does not implement matchMedia, required by the sidebar's
 // useIsMobile hook and other responsive components
 Object.defineProperty(window, 'matchMedia', {

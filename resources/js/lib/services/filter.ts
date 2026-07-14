@@ -22,6 +22,24 @@ export function onSearch(
     });
 }
 
+export function onFilter(
+    filters: Record<string, string | number | null>,
+    indexRoute: string,
+) {
+    const query = route().queryParams;
+    delete query.page;
+
+    for (const [key, value] of Object.entries(filters)) {
+        delete query[key];
+
+        if (value !== null && value !== '') {
+            query[key] = String(value);
+        }
+    }
+
+    router.get(route(indexRoute), query);
+}
+
 export function onSort(sort_by: string, indexRoute: string) {
     const sort_order =
         route().queryParams.sort_order === 'desc' ? 'asc' : 'desc';

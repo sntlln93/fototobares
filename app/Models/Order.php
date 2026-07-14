@@ -122,6 +122,34 @@ class Order extends Model
         });
     }
 
+    /**
+     * @param  Builder<Order>  $query
+     * @return Builder<Order>
+     */
+    public function scopeForSchool(Builder $query, ?int $schoolId): Builder
+    {
+        if ($schoolId === null) {
+            return $query;
+        }
+
+        return $query->whereHas('classroom', function (Builder $classroom) use ($schoolId) {
+            $classroom->where('classrooms.school_id', $schoolId);
+        });
+    }
+
+    /**
+     * @param  Builder<Order>  $query
+     * @return Builder<Order>
+     */
+    public function scopeForClassroom(Builder $query, ?int $classroomId): Builder
+    {
+        if ($classroomId === null) {
+            return $query;
+        }
+
+        return $query->where('orders.classroom_id', $classroomId);
+    }
+
     public function paidTotal(): int
     {
         return (int) $this->payments()->sum('amount');
