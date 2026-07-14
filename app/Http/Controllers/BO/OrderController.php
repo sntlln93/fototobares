@@ -123,17 +123,7 @@ class OrderController extends Controller
             return back()->withErrors(['order' => 'No se puede editar un pedido cancelado.']);
         }
 
-        // Calculate if can edit: allow edit if no payments or first payment not complete
-        $canEdit = true;
-        if ($order->payments()->count() > 0) {
-            $totalPaid = $order->payments()->sum('amount');
-            $firstQuote = $order->total_price / $order->payment_plan;
-            if ($totalPaid >= $firstQuote) {
-                $canEdit = false;
-            }
-        }
-
-        if (! $canEdit) {
+        if ($order->firstInstallmentPaid()) {
             return back()->withErrors(['order' => 'No se puede editar este pedido. La primera cuota ha sido pagada completamente.']);
         }
 
@@ -159,17 +149,7 @@ class OrderController extends Controller
             return back()->withErrors(['order' => 'No se puede editar un pedido cancelado.']);
         }
 
-        // Allow edit only while no payment covers the first installment
-        $canEdit = true;
-        if ($order->payments()->count() > 0) {
-            $totalPaid = $order->payments()->sum('amount');
-            $firstQuote = $order->total_price / $order->payment_plan;
-            if ($totalPaid >= $firstQuote) {
-                $canEdit = false;
-            }
-        }
-
-        if (! $canEdit) {
+        if ($order->firstInstallmentPaid()) {
             return back()->withErrors(['order' => 'No se puede editar este pedido. La primera cuota ha sido pagada completamente.']);
         }
 
