@@ -34,6 +34,7 @@ Route::middleware(['auth', 'role:master,administración,oficina'])->group(functi
     Route::resource('combos', ComboController::class)->except(['show']);
     Route::resource('orders', OrderController::class);
     Route::post('/orders/{order}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
+    Route::put('/orders/{order}/client', [OrderController::class, 'updateClient'])->name('orders.update-client');
     Route::put('/orders/{order}/delivery', [DeliveryController::class, 'update'])->name('orders.delivery');
     Route::put('/orders/{order}/priority', [DetailPriorityController::class, 'update'])->name('orders.priority');
     Route::put('/orders/{order}/production-status', [DetailProductionStatusController::class, 'update'])->name('orders.production-status');

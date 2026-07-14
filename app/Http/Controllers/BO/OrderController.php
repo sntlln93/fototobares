@@ -7,9 +7,11 @@ namespace App\Http\Controllers\BO;
 use App\Actions\Orders\CancelOrder;
 use App\Actions\Orders\CreateOrder;
 use App\Actions\Orders\UpdateOrder;
+use App\Actions\Orders\UpdateOrderClient;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\BO\CancelOrderRequest;
 use App\Http\Requests\BO\StoreOrderRequest;
+use App\Http\Requests\BO\UpdateOrderClientRequest;
 use App\Http\Resources\OrderResource;
 use App\Models\Combo;
 use App\Models\Order;
@@ -184,5 +186,16 @@ class OrderController extends Controller
 
         return redirect()->route('orders.show', ['order' => $order->id])
             ->with('success', 'Pedido cancelado');
+    }
+
+    public function updateClient(UpdateOrderClientRequest $request, Order $order, UpdateOrderClient $action): RedirectResponse
+    {
+        if ($order->cancelled_at !== null) {
+            return back()->withErrors(['order' => 'No se puede editar un pedido cancelado.']);
+        }
+
+        $action->handle(['order' => $order, 'data' => $request->validated()]);
+
+        return back()->with('success', 'Datos del cliente actualizados exitosamente');
     }
 }
