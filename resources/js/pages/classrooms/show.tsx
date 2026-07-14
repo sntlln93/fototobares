@@ -11,15 +11,15 @@ import { cn } from '@/lib/utils';
 import { BreadcrumbItem } from '@/types';
 import { Head, Link } from '@inertiajs/react';
 import { ArrowLeft, ImagePlus, ShoppingCart } from 'lucide-react';
-import { StudentsTable } from './components/students-table';
+import { ClassroomStudent, StudentsTable } from './components/students-table';
 
 export default function ClassroomShow({
     classroom,
-    orders,
+    students,
     filters,
 }: PageProps<{
     classroom: Classroom & { teacher?: Teacher; school: School };
-    orders: Paginated<Order>;
+    students: Paginated<ClassroomStudent>;
     filters: { search: string | null };
 }>) {
     const breadcrumbs: BreadcrumbItem[] = [
@@ -89,7 +89,7 @@ export default function ClassroomShow({
             <section className="p-6">
                 <div className="mb-4 flex items-center justify-between">
                     <h2 className="text-2xl font-bold">
-                        Alumnos ({orders.data.length})
+                        Alumnos ({students.data.length})
                     </h2>
                     <Link
                         href={route('photos.index', {
@@ -116,9 +116,9 @@ export default function ClassroomShow({
                     />
                 </div>
 
-                {orders.data.length > 0 ? (
+                {students.data.length > 0 ? (
                     <StudentsTable
-                        orders={orders.data}
+                        students={students.data}
                         search={filters.search}
                     />
                 ) : (

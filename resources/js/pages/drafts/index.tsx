@@ -19,21 +19,24 @@ import { BreadcrumbItem } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
 import { FileText, Plus, Trash2 } from 'lucide-react';
 
+interface DraftRow {
+    id: number;
+    photo_number: number | null;
+    child_name?: string;
+    client_name?: string;
+    client_phone?: string;
+    attended_photo_session?: boolean;
+    total_price: number;
+    payment_plan: number;
+    due_date: string;
+    classroom: Classroom & { school?: School };
+    created_at: string;
+}
+
 export default function DraftsIndex({
     drafts,
 }: PageProps<{
-    drafts: Paginated<{
-        id: number;
-        child_name?: string;
-        client_name?: string;
-        client_phone?: string;
-        attended_photo_session?: boolean;
-        total_price: number;
-        payment_plan: number;
-        due_date: string;
-        classroom: Classroom & { school?: School };
-        created_at: string;
-    }>;
+    drafts: Paginated<DraftRow>;
 }>) {
     const breadcrumbs: BreadcrumbItem[] = [
         {
@@ -87,7 +90,7 @@ export default function DraftsIndex({
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead className="w-25">#</TableHead>
+                                <TableHead className="w-25">N°</TableHead>
                                 <TableHead>Nombre Niño</TableHead>
                                 <TableHead>Cliente</TableHead>
                                 <TableHead>Escuela (Aula)</TableHead>
@@ -102,7 +105,7 @@ export default function DraftsIndex({
                             {drafts.data.map((draft) => (
                                 <TableRow key={draft.id}>
                                     <TableCell className="font-medium">
-                                        {draft.id}
+                                        {draft.photo_number ?? '—'}
                                     </TableCell>
                                     <TableCell>
                                         {draft.child_name || 'N/A'}
