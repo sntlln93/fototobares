@@ -38,7 +38,7 @@ export function OrderNotes({ order, notes }: { order: Order; notes: Note[] }) {
                 />
             )}
 
-            <Card className="lg:min-w-100">
+            <Card>
                 <CardHeader>
                     <CardTitle className="text-xl">Notas del pedido</CardTitle>
                 </CardHeader>
