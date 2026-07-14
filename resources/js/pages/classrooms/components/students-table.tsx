@@ -23,7 +23,7 @@ export function StudentsTable({ orders, search }: StudentsTableProps) {
         <Table>
             <TableHeader>
                 <TableRow>
-                    <TableHead className="w-25">#</TableHead>
+                    <TableHead className="w-25">N° de orden</TableHead>
                     <TableHead>Nombre del Niño</TableHead>
                     <TableHead>Cliente</TableHead>
                     <TableHead>Teléfono</TableHead>
@@ -38,7 +38,14 @@ export function StudentsTable({ orders, search }: StudentsTableProps) {
                 {orders.map((order) => (
                     <TableRow key={order.id}>
                         <TableCell className="font-medium">
-                            <Highlight text={String(order.id)} term={search} />
+                            {order.photo_number != null ? (
+                                <Highlight
+                                    text={String(order.photo_number)}
+                                    term={search}
+                                />
+                            ) : (
+                                '—'
+                            )}
                         </TableCell>
                         <TableCell>
                             {order.child_name ? (
@@ -47,7 +54,7 @@ export function StudentsTable({ orders, search }: StudentsTableProps) {
                                     term={search}
                                 />
                             ) : (
-                                'N/A'
+                                '—'
                             )}
                         </TableCell>
                         <TableCell>
