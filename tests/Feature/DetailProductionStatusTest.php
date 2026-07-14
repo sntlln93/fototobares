@@ -82,7 +82,7 @@ it('moves a detail to a stage of its product, deducting the stage stock', functi
 
     $product = productWithChain(['Impreso', 'Pegado']);
     $planchas = Stockable::factory()->create(['quantity' => 10]);
-    stageOf($product, 2)->stockables()->attach($planchas->id, ['quantity' => 2]);
+    stageOf($product, 2)->stockables()->attach($planchas->id, ['quantity' => -2]);
 
     $order = orderWithFirstInstallmentPaid();
     $detail = OrderDetail::factory()->create(['order_id' => $order->id, 'product_id' => $product->id]);
@@ -103,7 +103,7 @@ it('returns a detail to "sin empezar" without giving the stock back', function (
 
     $product = productWithChain(['Impreso', 'Pegado']);
     $planchas = Stockable::factory()->create(['quantity' => 10]);
-    stageOf($product, 2)->stockables()->attach($planchas->id, ['quantity' => 2]);
+    stageOf($product, 2)->stockables()->attach($planchas->id, ['quantity' => -2]);
 
     $order = orderWithFirstInstallmentPaid();
     $detail = OrderDetail::factory()->create(['order_id' => $order->id, 'product_id' => $product->id]);

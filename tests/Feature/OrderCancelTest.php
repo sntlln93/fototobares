@@ -33,7 +33,7 @@ it('returns exactly the deducted supplies when sent back to stock', function () 
 
     $product = productWithChain(['Pendiente', 'Corte', 'Embolsado']);
     $stockable = Stockable::factory()->create(['quantity' => 10]);
-    stageOf($product, 2)->stockables()->attach($stockable->id, ['quantity' => 2]);
+    stageOf($product, 2)->stockables()->attach($stockable->id, ['quantity' => -2]);
 
     $order = Order::factory()->create();
     $deducted = OrderDetail::factory()->create([
@@ -41,7 +41,7 @@ it('returns exactly the deducted supplies when sent back to stock', function () 
         'product_id' => $product->id,
         'production_status_id' => stageOf($product, 2)->id,
     ]);
-    app(StockService::class)->deductForDetail($deducted);
+    app(StockService::class)->applyForDetail($deducted);
     $notDeducted = OrderDetail::factory()->create([
         'order_id' => $order->id,
         'product_id' => $product->id,
@@ -61,6 +61,59 @@ it('returns exactly the deducted supplies when sent back to stock', function () 
     expect($stockable->refresh()->quantity)->toBe(10)
         ->and($stockable->movements()->where('reason', 'devolución por cancelación')->count())->toBe(1)
         ->and($stockable->movements()->where('reason', 'devolución por cancelación')->first()?->quantity)->toBe(2);
+});
+
+it('subtracts a produced intermediate back out when cancelled to stock', function () {
+    actingAsRole();
+
+    $product = productWithChain(['Pegado']);
+    $armados = Stockable::factory()->create(['quantity' => 0]);
+    stageOf($product, 1)->stockables()->attach($armados->id, ['quantity' => 1]);
+
+    $order = Order::factory()->create();
+    $detail = OrderDetail::factory()->create([
+        'order_id' => $order->id,
+        'product_id' => $product->id,
+        'production_status_id' => stageOf($product, 1)->id,
+    ]);
+    app(StockService::class)->applyForDetail($detail);
+
+    expect($armados->refresh()->quantity)->toBe(1);
+
+    post(route('orders.cancel', $order), [
+        'destinations' => [
+            ['detail_id' => $detail->id, 'destination' => 'stock'],
+        ],
+    ]);
+
+    expect($armados->refresh()->quantity)->toBe(0)
+        ->and($armados->movements()->where('reason', 'ajuste por cancelación')->count())->toBe(1)
+        ->and($armados->movements()->where('reason', 'ajuste por cancelación')->first()?->quantity)->toBe(-1);
+});
+
+it('keeps a produced intermediate in stock when cancelled to recycling', function () {
+    actingAsRole();
+
+    $product = productWithChain(['Pegado']);
+    $armados = Stockable::factory()->create(['quantity' => 0]);
+    stageOf($product, 1)->stockables()->attach($armados->id, ['quantity' => 1]);
+
+    $order = Order::factory()->create();
+    $detail = OrderDetail::factory()->create([
+        'order_id' => $order->id,
+        'product_id' => $product->id,
+        'production_status_id' => stageOf($product, 1)->id,
+    ]);
+    app(StockService::class)->applyForDetail($detail);
+
+    post(route('orders.cancel', $order), [
+        'destinations' => [
+            ['detail_id' => $detail->id, 'destination' => 'reciclaje'],
+        ],
+    ]);
+
+    expect($armados->refresh()->quantity)->toBe(1)
+        ->and($armados->movements()->count())->toBe(1);
 });
 
 it('rejects details that belong to another order', function () {

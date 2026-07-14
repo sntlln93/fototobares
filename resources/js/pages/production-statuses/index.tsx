@@ -30,8 +30,9 @@ export default function ProductionStatusesIndex({
                 </h1>
                 <p className="mt-1 text-gray-500">
                     Cada producto tiene su propia cadena de etapas. Colgá de
-                    cada etapa los insumos que consume (con su cantidad): se
-                    descuentan del stock cuando el producto llega a esa etapa.
+                    cada etapa los insumos que mueve (con su cantidad): se
+                    restan o se suman al stock cuando el producto llega a esa
+                    etapa.
                 </p>
             </section>
 
