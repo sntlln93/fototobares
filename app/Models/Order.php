@@ -29,12 +29,6 @@ class Order extends Model
     private const MIN_PHONE_DIGITS = 4;
 
     /**
-     * Phones are stored as free text, so the column is stripped of its
-     * separators on the fly to be comparable with a normalized search term.
-     */
-    private const CLIENT_PHONE_DIGITS = "REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(clients.phone, ' ', ''), '-', ''), '(', ''), ')', ''), '+', ''), '.', '')";
-
-    /**
      * @return BelongsTo<Client, $this>
      */
     public function client()
@@ -117,7 +111,7 @@ class Order extends Model
                     $client->where('clients.name', 'like', $like);
 
                     if ($phone !== null) {
-                        $client->orWhereRaw(self::CLIENT_PHONE_DIGITS.' like ?', [$phone]);
+                        $client->orWhereRaw(Phone::digitsExpression('clients.phone').' like ?', [$phone]);
                     }
                 });
         });

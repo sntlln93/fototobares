@@ -1,7 +1,7 @@
 import { render, screen, within } from '@testing-library/react';
 import { ReactNode } from 'react';
 import { describe, expect, it, vi } from 'vitest';
-import { StudentsTable } from './students-table';
+import { ClassroomStudent, StudentsTable } from './students-table';
 
 vi.mock('@inertiajs/react', () => ({
     Link: ({
@@ -22,25 +22,28 @@ vi.mock('@inertiajs/react', () => ({
 vi.stubGlobal(
     'route',
     (name: string, params?: Record<string, unknown>) =>
-        `http://localhost/${name}/${params?.order ?? ''}`,
+        `http://localhost/${name}/${params?.order ?? params?.draft ?? ''}`,
 );
 
-const makeOrder = (overrides: Partial<Order> = {}): Order =>
-    ({
-        id: 7,
-        photo_number: 12,
-        child_name: 'Maylén Ortiz',
-        total_price: 15000,
-        payment_plan: 3,
-        due_date: '2026-08-01',
-        client: { id: 1, name: 'Marta López', phone: '3804000003' },
-        products: [{}, {}],
-        ...overrides,
-    }) as unknown as Order;
+const makeStudent = (
+    overrides: Partial<ClassroomStudent> = {},
+): ClassroomStudent => ({
+    kind: 'order',
+    id: 7,
+    photo_number: 12,
+    child_name: 'Maylén Ortiz',
+    client_name: 'Marta López',
+    client_phone: '3804000003',
+    products_count: 2,
+    total_price: 15000,
+    payment_plan: 3,
+    due_date: '1 de ago 2026',
+    ...overrides,
+});
 
 describe('StudentsTable', () => {
     it('renders the child order number with a link to the order', () => {
-        render(<StudentsTable orders={[makeOrder()]} />);
+        render(<StudentsTable students={[makeStudent()]} />);
 
         const row = screen.getAllByRole('row')[1];
 
@@ -54,8 +57,8 @@ describe('StudentsTable', () => {
     it('falls back to a dash without an order number or child name', () => {
         render(
             <StudentsTable
-                orders={[
-                    makeOrder({ photo_number: null, child_name: undefined }),
+                students={[
+                    makeStudent({ photo_number: null, child_name: null }),
                 ]}
             />,
         );
@@ -66,9 +69,41 @@ describe('StudentsTable', () => {
 
     it('marks the searched order number', () => {
         const { container } = render(
-            <StudentsTable orders={[makeOrder()]} search="12" />,
+            <StudentsTable students={[makeStudent()]} search="12" />,
         );
 
         expect(container.querySelector('mark')?.textContent).toBe('12');
+    });
+
+    it('shows a draft badge and a "Completar pedido" link with the draft id', () => {
+        render(
+            <StudentsTable
+                students={[
+                    makeStudent({ kind: 'draft', id: 3, photo_number: 5 }),
+                ]}
+            />,
+        );
+
+        const row = screen.getAllByRole('row')[1];
+
+        expect(within(row).getByText('Borrador')).toBeTruthy();
+        expect(
+            within(row)
+                .getByRole('link', { name: 'Completar pedido' })
+                .getAttribute('href'),
+        ).toBe('http://localhost/orders.create/3');
+    });
+
+    it('does not collide keys when an order and a draft share the same id', () => {
+        render(
+            <StudentsTable
+                students={[
+                    makeStudent({ kind: 'order', id: 1, photo_number: 1 }),
+                    makeStudent({ kind: 'draft', id: 1, photo_number: 2 }),
+                ]}
+            />,
+        );
+
+        expect(screen.getAllByRole('row')).toHaveLength(3); // header + 2 rows
     });
 });

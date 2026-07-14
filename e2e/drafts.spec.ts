@@ -58,3 +58,72 @@ test('draft: save, preload via "Ver", saving the order consumes it', async ({
         page.getByRole('row').filter({ hasText: 'Cliente Borrador E2E' }),
     ).toHaveCount(0);
 });
+
+// Issue #160: a draft must show up in its classroom listing with a photo
+// number and a "Completar pedido" action, and keep that number once the
+// order is completed from there.
+test('draft: shows up in the classroom listing and keeps its number once completed', async ({
+    page,
+}) => {
+    await page.goto('/orders/create');
+    await fillSchoolStep(page);
+    await fillClientStep(page, {
+        name: 'Cliente Curso E2E',
+        phone: '3804777777',
+        child: 'Renata',
+    });
+    await nextStep(page);
+    await page.locator('#total_price').fill('30000');
+    await page.locator('#payment_plan').fill('1');
+    await page.getByRole('button', { name: 'Guardar como borrador' }).click();
+    await page.waitForURL('/drafts');
+
+    // Navigate to the classroom (Escuela Normal / 6TO A) through the UI
+    await page.goto('/schools');
+    await page
+        .getByRole('row', { name: /Escuela Normal/ })
+        .getByRole('link')
+        .first()
+        .click();
+    await page.waitForURL(/\/schools\/\d+/);
+    await page
+        .getByRole('row', { name: /6TO A/i })
+        .getByRole('link', { name: 'Ver alumnos' })
+        .click();
+    await page.waitForURL(/\/classrooms\/\d+/);
+    const classroomUrl = page.url();
+
+    const draftRow = page
+        .getByRole('row')
+        .filter({ hasText: 'Cliente Curso E2E' });
+    await expect(draftRow).toBeVisible();
+    await expect(draftRow.getByText('Borrador')).toBeVisible();
+
+    const photoNumber = await draftRow.locator('td').first().innerText();
+    expect(photoNumber).toMatch(/^\d+$/);
+
+    // Complete the draft into a real order
+    await draftRow.getByRole('link', { name: 'Completar pedido' }).click();
+    await page.waitForURL(/\/orders\/create/);
+    await stepTriggers(page).filter({ hasText: 'Productos' }).first().click();
+    await addSimpleProduct(page, 'Taza', 'Taza de Renata');
+    await stepTriggers(page).filter({ hasText: 'Pedido' }).first().click();
+    await page.getByRole('button', { name: 'Guardar', exact: true }).click();
+    await page.waitForURL('/orders');
+
+    // Same classroom row now shows the same number, with "Ver" instead
+    await page.goto(classroomUrl);
+
+    const completedRow = page
+        .getByRole('row')
+        .filter({ hasText: 'Cliente Curso E2E' });
+    await expect(completedRow).not.toContainText('Borrador');
+    await expect(completedRow.locator('td').first()).toHaveText(photoNumber);
+    await expect(completedRow.getByRole('link', { name: 'Ver' })).toBeVisible();
+
+    // Gone from /drafts
+    await page.goto('/drafts');
+    await expect(
+        page.getByRole('row').filter({ hasText: 'Cliente Curso E2E' }),
+    ).toHaveCount(0);
+});

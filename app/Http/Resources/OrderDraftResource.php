@@ -22,6 +22,7 @@ class OrderDraftResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            'photo_number' => $this->photo_number,
             'child_name' => $this->child_name,
             'client_name' => $this->client_name,
             'client_phone' => $this->client_phone,

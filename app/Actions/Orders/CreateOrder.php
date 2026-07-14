@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\DB;
 
 class CreateOrder implements ActionContract
 {
+    public function __construct(private readonly AllocatePhotoNumber $allocatePhotoNumber) {}
+
     /**
      * Create an order with its client and product details, auto-assigning the
      * classroom photo number, and consume the source draft when present.
@@ -28,22 +30,28 @@ class CreateOrder implements ActionContract
 
             $attended = $params['attended_photo_session'] ?? null;
 
+            $classroomId = is_numeric($params['classroom_id']) ? (int) $params['classroom_id'] : 0;
+
+            $draft = isset($params['draft_id']) && is_numeric($params['draft_id'])
+                ? OrderDraft::find((int) $params['draft_id'])
+                : null;
+
             // Photos are numbered by classroom following the order in which
             // orders are taken: assign the next photo number automatically,
-            // unless the child did not attend the photo session.
+            // unless the child did not attend the photo session. Completing a
+            // draft in its own classroom keeps the number it already got.
             $photoNumber = null;
 
             if ($attended !== false) {
-                $maxPhotoNumber = Order::withTrashed()
-                    ->where('classroom_id', $params['classroom_id'])
-                    ->max('photo_number');
-
-                $photoNumber = (is_numeric($maxPhotoNumber) ? (int) $maxPhotoNumber : 0) + 1;
+                $photoNumber = ($draft !== null && $draft->photo_number !== null
+                        && $draft->classroom_id === $classroomId)
+                    ? $draft->photo_number
+                    : $this->allocatePhotoNumber->handle(['classroom_id' => $classroomId]);
             }
 
             $order = Order::create([
                 'client_id' => $client->id,
-                'classroom_id' => $params['classroom_id'],
+                'classroom_id' => $classroomId,
                 'total_price' => $params['total_price'],
                 'payment_plan' => $params['payment_plan'],
                 'due_date' => $params['due_date'],
@@ -62,9 +70,7 @@ class CreateOrder implements ActionContract
                 ]);
             }
 
-            if (isset($params['draft_id'])) {
-                OrderDraft::query()->whereKey($params['draft_id'])->delete();
-            }
+            $draft?->delete();
         });
     }
 }

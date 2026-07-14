@@ -10,11 +10,13 @@ use App\Actions\Classrooms\UpdateClassroom;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\BO\StoreClassroomRequest;
 use App\Http\Requests\BO\UpdateClassroomRequest;
-use App\Http\Resources\OrderResource;
+use App\Http\Resources\ClassroomStudentResource;
 use App\Models\Classroom;
 use App\Models\Order;
+use App\Models\OrderDraft;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -26,17 +28,44 @@ class ClassroomController extends Controller
         $search = $request->query('search');
 
         $orders = Order::where('classroom_id', $classroom->id)
-            ->with('client', 'products.type', 'classroom.school')
+            ->with('client')
+            ->withCount('products')
             ->search($search)
-            ->orderByRaw('orders.photo_number is null')
-            ->orderBy('photo_number')
-            ->orderBy('id')
-            ->paginate(20)
-            ->withQueryString();
+            ->get();
+
+        $drafts = OrderDraft::where('classroom_id', $classroom->id)
+            ->search($search)
+            ->get();
+
+        // Merged, interleaved by photo number: the listing follows the paper
+        // sheet, where drafts and orders share the same sequence.
+        $students = $orders->toBase()->concat($drafts->toBase())
+            ->sortBy(fn (Order|OrderDraft $row): array => [
+                $row->photo_number === null ? 1 : 0,
+                (int) $row->photo_number,
+                $row->created_at?->getTimestamp() ?? 0,
+                $row->id,
+            ])->values();
+
+        $page = LengthAwarePaginator::resolveCurrentPage();
+        $perPage = 20;
+
+        $paginator = new LengthAwarePaginator(
+            $students->forPage($page, $perPage),
+            $students->count(),
+            $perPage,
+            $page,
+            [
+                'path' => LengthAwarePaginator::resolveCurrentPath(),
+                'pageName' => 'page',
+            ],
+        );
+
+        $paginator->appends($request->query());
 
         return Inertia::render('classrooms/show', [
             'classroom' => $classroom->load('teacher', 'school'),
-            'orders' => OrderResource::collection($orders),
+            'students' => ClassroomStudentResource::collection($paginator),
             'filters' => ['search' => $search],
         ]);
     }

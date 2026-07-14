@@ -1,3 +1,4 @@
+import { Badge } from '@/components/ui/badge';
 import { buttonVariants } from '@/components/ui/button';
 import {
     Table,
@@ -12,13 +13,26 @@ import { PhoneLink } from '@/features/phone-link';
 import { cn, formatPrice } from '@/lib/utils';
 import { Link } from '@inertiajs/react';
 
+export interface ClassroomStudent {
+    kind: 'order' | 'draft';
+    id: number;
+    photo_number: number | null;
+    child_name: string | null;
+    client_name: string | null;
+    client_phone: string | null;
+    products_count: number;
+    total_price: number;
+    payment_plan: number;
+    due_date: string | null;
+}
+
 interface StudentsTableProps {
-    orders: Order[];
+    students: ClassroomStudent[];
     /** The applied search term, marked in the columns it matched. */
     search?: string | null;
 }
 
-export function StudentsTable({ orders, search }: StudentsTableProps) {
+export function StudentsTable({ students, search }: StudentsTableProps) {
     return (
         <Table>
             <TableHeader>
@@ -35,12 +49,12 @@ export function StudentsTable({ orders, search }: StudentsTableProps) {
                 </TableRow>
             </TableHeader>
             <TableBody>
-                {orders.map((order) => (
-                    <TableRow key={order.id}>
+                {students.map((student) => (
+                    <TableRow key={`${student.kind}-${student.id}`}>
                         <TableCell className="font-medium">
-                            {order.photo_number != null ? (
+                            {student.photo_number != null ? (
                                 <Highlight
-                                    text={String(order.photo_number)}
+                                    text={String(student.photo_number)}
                                     term={search}
                                 />
                             ) : (
@@ -48,19 +62,24 @@ export function StudentsTable({ orders, search }: StudentsTableProps) {
                             )}
                         </TableCell>
                         <TableCell>
-                            {order.child_name ? (
-                                <Highlight
-                                    text={order.child_name}
-                                    term={search}
-                                />
-                            ) : (
-                                '—'
-                            )}
+                            <div className="flex items-center gap-2">
+                                {student.child_name ? (
+                                    <Highlight
+                                        text={student.child_name}
+                                        term={search}
+                                    />
+                                ) : (
+                                    '—'
+                                )}
+                                {student.kind === 'draft' && (
+                                    <Badge variant="secondary">Borrador</Badge>
+                                )}
+                            </div>
                         </TableCell>
                         <TableCell>
-                            {order.client.name ? (
+                            {student.client_name ? (
                                 <Highlight
-                                    text={order.client.name}
+                                    text={student.client_name}
                                     term={search}
                                 />
                             ) : (
@@ -69,34 +88,53 @@ export function StudentsTable({ orders, search }: StudentsTableProps) {
                         </TableCell>
                         <TableCell>
                             <PhoneLink
-                                phone={order.client.phone}
+                                phone={student.client_phone}
                                 term={search}
                             />
                         </TableCell>
-                        <TableCell>{order.products.length}</TableCell>
-                        <TableCell>{formatPrice(order.total_price)}</TableCell>
+                        <TableCell>{student.products_count}</TableCell>
                         <TableCell>
-                            {order.payment_plan} (
-                            {formatPrice(
-                                order.total_price / order.payment_plan,
-                            )}
-                            )
+                            {formatPrice(student.total_price)}
                         </TableCell>
-                        <TableCell>{order.due_date}</TableCell>
                         <TableCell>
-                            <Link
-                                className={cn(
-                                    buttonVariants({
-                                        size: 'sm',
-                                        variant: 'outline',
-                                    }),
-                                )}
-                                href={route('orders.show', {
-                                    order: order.id,
-                                })}
-                            >
-                                Ver
-                            </Link>
+                            {student.payment_plan > 0
+                                ? `${student.payment_plan} (${formatPrice(
+                                      student.total_price /
+                                          student.payment_plan,
+                                  )})`
+                                : '—'}
+                        </TableCell>
+                        <TableCell>{student.due_date ?? '—'}</TableCell>
+                        <TableCell>
+                            {student.kind === 'draft' ? (
+                                <Link
+                                    className={cn(
+                                        buttonVariants({
+                                            size: 'sm',
+                                            variant: 'outline',
+                                        }),
+                                    )}
+                                    href={route('orders.create', {
+                                        draft: student.id,
+                                    })}
+                                >
+                                    Completar pedido
+                                </Link>
+                            ) : (
+                                <Link
+                                    className={cn(
+                                        buttonVariants({
+                                            size: 'sm',
+                                            variant: 'outline',
+                                        }),
+                                    )}
+                                    href={route('orders.show', {
+                                        order: student.id,
+                                    })}
+                                >
+                                    Ver
+                                </Link>
+                            )}
                         </TableCell>
                     </TableRow>
                 ))}
