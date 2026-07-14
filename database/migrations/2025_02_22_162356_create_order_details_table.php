@@ -24,6 +24,7 @@ return new class extends Migration
             $table->json('variant')->nullable();
             $table->text('note')->nullable();
             $table->foreignId('production_status_id')->nullable()->constrained();
+            $table->timestamp('production_enabled_at')->nullable();
             $table->timestamp('status_updated_at')->nullable();
             $table->boolean('priority')->default(false);
             $table->string('recycled_to')->nullable();

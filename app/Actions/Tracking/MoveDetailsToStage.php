@@ -54,6 +54,8 @@ class MoveDetailsToStage implements ActionContract
         DB::transaction(function () use ($details, $status, $user) {
             foreach ($details as $detail) {
                 $detail->productionStatus()->associate($status);
+                // A detail on a stage is by definition enabled for production
+                $detail->production_enabled_at ??= now();
                 $detail->status_updated_at = now();
                 $detail->save();
                 $detail->setRelation('productionStatus', $status);

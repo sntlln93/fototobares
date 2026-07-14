@@ -15,10 +15,12 @@ use App\Services\StockService;
 use Illuminate\Database\Seeder;
 
 /**
- * Eleven orders covering every state of the manual checklist: pending,
- * in production, priority, finished, partially/fully delivered,
- * cancelled with recycling/stock return, overdue with balance and one
- * without a photo session.
+ * Eleven orders covering every state of the manual checklist: production
+ * not yet enabled (first installment unpaid), pending, in production,
+ * priority, finished, partially/fully delivered, cancelled with
+ * recycling/stock return, overdue with balance and one without a photo
+ * session. Every order with details in /tracking has its first
+ * installment paid — production is gated by it (#106).
  */
 class DemoOrderSeeder extends Seeder
 {
@@ -42,13 +44,13 @@ class DemoOrderSeeder extends Seeder
         $medalla = Product::where('name', 'Medalla')->firstOrFail();
         $taza = Product::where('name', 'Taza')->firstOrFail();
 
-        // 1. Pending order: nothing produced, partial cash payment,
-        // still editable (paid less than the first installment)
+        // 1. Pending order: first installment paid and production enabled,
+        // nothing produced yet (all details "sin empezar" in /tracking)
         $order = $this->makeOrder($sextoA, 'Ana Suárez', '3804000001', 'Valentina', 1, 60000, 4, 30);
-        $this->addDetail($order, $molduraAncha, $this->muralVariant('vertical', 'pink'), 'Valentina - egresados 2026');
-        $this->addDetail($order, $carpeta, null, 'Valentina');
-        $this->addDetail($order, $medalla, null, 'Valentina');
-        $order->payments()->create(['amount' => 10000, 'type' => 'efectivo', 'paid_on' => now()->toDateString()]);
+        $this->addDetail($order, $molduraAncha, $this->muralVariant('vertical', 'pink'), 'Valentina - egresados 2026', enabled: true);
+        $this->addDetail($order, $carpeta, null, 'Valentina', enabled: true);
+        $this->addDetail($order, $medalla, null, 'Valentina', enabled: true);
+        $order->payments()->create(['amount' => 15000, 'type' => 'efectivo', 'paid_on' => now()->toDateString()]);
         $order->notes()->create(['body' => 'La mamá pidió que la avisemos por WhatsApp cuando esté lista la moldura.']);
         $order->notes()->create(['body' => 'Confirmar dirección de entrega antes de despachar.']);
 
@@ -57,7 +59,7 @@ class DemoOrderSeeder extends Seeder
         $order = $this->makeOrder($sextoA, 'Bruno Díaz', '3804000002', 'Thiago', 2, 56000, 4, 20);
         $detail = $this->addDetail($order, $clasico, $this->muralVariant('horizontal', 'black'), 'Thiago - egresados 2026');
         $this->setStatus($detail, $clasico, 3, hoursAgo: 30);
-        $this->addDetail($order, $carpeta, null, 'Thiago');
+        $this->addDetail($order, $carpeta, null, 'Thiago', enabled: true);
         $order->payments()->create(['amount' => 20000, 'type' => 'transferencia', 'transaction_number' => 'MP73920184652', 'paid_on' => now()->subDays(2)->toDateString()]);
 
         // 3. Priority: the mural broke after "Corte de moldura" (one strip
@@ -67,6 +69,7 @@ class DemoOrderSeeder extends Seeder
         $detail = $this->addDetail($order, $molduraFina, $this->muralVariant('vertical', 'black'), 'Lola - egresados 2026');
         $this->setStatus($detail, $molduraFina, 3, hoursAgo: 48);
         $this->setStatus($detail, $molduraFina, 2, priority: true, hoursAgo: 2);
+        $order->payments()->create(['amount' => 10000, 'type' => 'efectivo', 'paid_on' => now()->subDays(3)->toDateString()]);
 
         // 4. Finished and fully paid: ready to deliver with no warning
         $order = $this->makeOrder($sextoA, 'Diego Farías', '3804000004', 'Benjamín', 4, 12000, 1, 10);
@@ -83,7 +86,7 @@ class DemoOrderSeeder extends Seeder
         $detail->save();
         $detail = $this->addDetail($order, $carpeta, null, 'Mora');
         $this->setStatus($detail, $carpeta, 3, hoursAgo: 24);
-        $this->addDetail($order, $medalla, null, 'Mora');
+        $this->addDetail($order, $medalla, null, 'Mora', enabled: true);
         $order->payments()->create(['amount' => 26000, 'type' => 'transferencia', 'transaction_number' => 'BNA48210937566', 'paid_on' => now()->subDays(2)->toDateString()]);
 
         // 6. Fully delivered and paid: gone from /tracking
@@ -105,7 +108,7 @@ class DemoOrderSeeder extends Seeder
         $detail = $this->addDetail($order, $medalla, null, 'Emma');
         $detail->recycled_to = 'reciclaje';
         $detail->save();
-        $order->payments()->create(['amount' => 10000, 'type' => 'efectivo', 'paid_on' => now()->subDays(1)->toDateString()]);
+        $order->payments()->create(['amount' => 14000, 'type' => 'efectivo', 'paid_on' => now()->subDays(1)->toDateString()]);
         $order->cancelled_at = now()->subDay();
         $order->save();
 
@@ -113,18 +116,23 @@ class DemoOrderSeeder extends Seeder
         $order = $this->makeOrder($sextoA, 'Hernán Luna', '3804000008', 'Isabella', 8, 18000, 2, -15);
         $detail = $this->addDetail($order, $taza, null, 'Taza de Isabella');
         $this->setStatus($detail, $taza, 2, hoursAgo: 120);
-        $this->addDetail($order, $medalla, null, 'Isabella');
+        $this->addDetail($order, $medalla, null, 'Isabella', enabled: true);
         $order->payments()->create(['amount' => 9000, 'type' => 'efectivo', 'paid_on' => now()->subDays(5)->toDateString()]);
 
         // 9. Did not attend the photo session: no photo number assigned
         $order = $this->makeOrder($sextoA, 'Irina Sosa', '3804000009', 'Simón', null, 18000, 1, 12, attended: false);
-        $this->addDetail($order, $carpeta, null, 'Simón');
+        $this->addDetail($order, $carpeta, null, 'Simón', enabled: true);
+        $order->payments()->create(['amount' => 18000, 'type' => 'efectivo', 'paid_on' => now()->subDays(2)->toDateString()]);
 
         // Orders on the other schools so the school filters have data
         $order = $this->makeOrder($salaDe5, 'Julia Toledo', '3804000010', 'Bautista', 1, 12000, 1, 18);
         $detail = $this->addDetail($order, $taza, null, 'Taza de Bautista');
         $this->setStatus($detail, $taza, 3, hoursAgo: 12);
+        $order->payments()->create(['amount' => 12000, 'type' => 'transferencia', 'transaction_number' => 'MP58316742900', 'paid_on' => now()->subDays(1)->toDateString()]);
 
+        // 11. Production not enabled: no payment yet, so the clásico is out
+        // of /tracking until the first installment is paid and the office
+        // enables it from the order page (#106)
         $order = $this->makeOrder($quintoHum, 'Karen Ibáñez', '3804000011', 'Renata', 1, 44000, 4, 22);
         $this->addDetail($order, $clasico, $this->muralVariant('vertical', 'pink'), 'Renata - promo 2026');
     }
@@ -157,9 +165,13 @@ class DemoOrderSeeder extends Seeder
     /**
      * @param  array<string, string>|null  $variant
      */
-    private function addDetail(Order $order, Product $product, ?array $variant, string $note): OrderDetail
+    private function addDetail(Order $order, Product $product, ?array $variant, string $note, bool $enabled = false): OrderDetail
     {
-        $order->products()->attach($product->id, ['variant' => $variant, 'note' => $note]);
+        $order->products()->attach($product->id, [
+            'variant' => $variant,
+            'note' => $note,
+            'production_enabled_at' => $enabled ? now() : null,
+        ]);
 
         /** @var OrderDetail $detail */
         $detail = OrderDetail::where('order_id', $order->id)
@@ -181,6 +193,7 @@ class DemoOrderSeeder extends Seeder
             ->firstOrFail();
 
         $detail->production_status_id = $status->id;
+        $detail->production_enabled_at ??= now()->subHours($hoursAgo);
         $detail->status_updated_at = now()->subHours($hoursAgo);
         $detail->priority = $priority;
         $detail->save();

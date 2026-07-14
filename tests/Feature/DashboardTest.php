@@ -17,15 +17,17 @@ it('computes the dashboard metrics', function () {
     $order = Order::factory()->create(['total_price' => 64000]);
     Payment::factory()->create(['order_id' => $order->id, 'amount' => 16000]);
 
-    OrderDetail::factory()->create(['order_id' => $order->id]); // sin empezar
-    OrderDetail::factory()->create([
+    OrderDetail::factory()->enabled()->create(['order_id' => $order->id]); // sin empezar
+    OrderDetail::factory()->enabled()->create([
         'order_id' => $order->id,
         'production_status_id' => statusFor('taza', 2)->id, // en producción
     ]);
-    OrderDetail::factory()->create([
+    OrderDetail::factory()->enabled()->create([
         'order_id' => $order->id,
         'production_status_id' => statusFor('taza', 4)->id, // último estado
     ]);
+    // Sin habilitar (primera cuota impaga): fuera de las métricas de producción
+    OrderDetail::factory()->create(['order_id' => $order->id]);
 
     // Cancelado: excluido de todas las métricas
     Order::factory()->cancelled()->create(['total_price' => 12000]);

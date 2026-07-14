@@ -39,6 +39,9 @@ class TrackingController extends Controller
             ->with('product.type', 'productionStatus', 'order.client', 'order.classroom.school')
             ->whereNull('delivered_at')
             ->whereNull('recycled_to')
+            // Production starts with the first paid installment: details not
+            // yet enabled from the order page stay out of the workshop board
+            ->whereNotNull('production_enabled_at')
             ->whereHas('order', function ($query) use ($school_id, $search) {
                 $query->whereNull('cancelled_at');
 

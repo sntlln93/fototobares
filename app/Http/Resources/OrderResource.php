@@ -57,6 +57,7 @@ class OrderResource extends JsonResource
             'paid_total' => $this->whenLoaded('payments', fn () => $this->sumPayments()),
             'balance' => $this->whenLoaded('payments', fn () => $this->total_price - $this->sumPayments()),
             'can_edit' => $this->canEdit(),
+            'first_installment_paid' => $this->firstInstallmentPaid(),
             'can_delete' => $this->cancelled_at === null && $this->payments()->doesntExist(),
             'payments' => $this->whenLoaded('payments', function () {
                 return $this->payments->map(function ($payment) {
@@ -98,8 +99,16 @@ class OrderResource extends JsonResource
                     'delivered_at' => $product->pivot->delivered_at,  // @phpstan-ignore-line
                     'production_status' => $detail?->productionStatus?->name,
                     'production_status_id' => $detail?->production_status_id,
+                    'production_enabled' => $detail?->production_enabled_at !== null,
                     'priority' => $detail?->priority,
                     'recycled_to' => $detail?->recycled_to,
+                    'statuses' => $product->relationLoaded('productionStatuses')
+                        ? $product->productionStatuses->map(fn (ProductionStatus $status) => [
+                            'id' => $status->id,
+                            'name' => $status->name,
+                            'position' => $status->position,
+                        ])
+                        : [],
                 ];
             }),
             'classroom' => $classroom,
@@ -128,10 +137,7 @@ class OrderResource extends JsonResource
             return false;
         }
 
-        $totalPaid = $this->payments()->sum('amount');
-        $firstQuote = $this->total_price / $this->payment_plan;
-
-        return $totalPaid < $firstQuote;
+        return ! $this->firstInstallmentPaid();
     }
 
     /**
@@ -161,6 +167,10 @@ class OrderResource extends JsonResource
 
         if ($delivered->isNotEmpty()) {
             return 'entregado parcial';
+        }
+
+        if ($active->every(fn (OrderDetail $detail) => $detail->production_enabled_at === null)) {
+            return 'sin habilitar';
         }
 
         if ($active->every(fn (OrderDetail $detail) => $detail->production_status_id === null)) {

@@ -7,6 +7,7 @@ use App\Http\Controllers\BO\ComboController;
 use App\Http\Controllers\BO\DashboardController;
 use App\Http\Controllers\BO\DeliveryController;
 use App\Http\Controllers\BO\DetailPriorityController;
+use App\Http\Controllers\BO\DetailProductionStatusController;
 use App\Http\Controllers\BO\NoteController;
 use App\Http\Controllers\BO\OrderController;
 use App\Http\Controllers\BO\OrderDraftController;
@@ -35,6 +36,7 @@ Route::middleware(['auth', 'role:master,administración,oficina'])->group(functi
     Route::post('/orders/{order}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
     Route::put('/orders/{order}/delivery', [DeliveryController::class, 'update'])->name('orders.delivery');
     Route::put('/orders/{order}/priority', [DetailPriorityController::class, 'update'])->name('orders.priority');
+    Route::put('/orders/{order}/production-status', [DetailProductionStatusController::class, 'update'])->name('orders.production-status');
     Route::resource('drafts', OrderDraftController::class)->only(['index', 'store', 'destroy']);
     Route::resource('schools', SchoolController::class);
     Route::resource('classrooms', ClassroomController::class)->only(['destroy', 'update', 'store', 'show']);
