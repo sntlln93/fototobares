@@ -90,11 +90,7 @@ export function OrderStep({ form }: { form: OrderFormController }) {
                     <div className="block">
                         <DatePicker
                             placeholder="Primer vencimiento"
-                            date={
-                                data.due_date
-                                    ? new Date(data.due_date)
-                                    : new Date()
-                            }
+                            date={data.due_date}
                             setDate={(date) =>
                                 setData(
                                     'due_date',

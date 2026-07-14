@@ -112,7 +112,7 @@ export function CreatePaymentModal({
                 <div className="mt-2">
                     <Label htmlFor="paid_on">Fecha de pago</Label>
                     <DatePicker
-                        date={new Date(data.paid_on)}
+                        date={data.paid_on}
                         setDate={(date) =>
                             setData(
                                 'paid_on',

@@ -11,6 +11,8 @@ export default defineConfig({
     },
     test: {
         environment: 'jsdom',
+        // The app runs in Argentina (UTC−3): dates behave there, not in UTC
+        env: { TZ: 'America/Argentina/Buenos_Aires' },
         include: ['resources/js/**/*.test.{ts,tsx}'],
         setupFiles: ['resources/js/tests/setup.ts'],
     },
