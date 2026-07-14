@@ -54,8 +54,8 @@ class DemoOrderSeeder extends Seeder
         $order->notes()->create(['body' => 'La mamá pidió que la avisemos por WhatsApp cuando esté lista la moldura.']);
         $order->notes()->create(['body' => 'Confirmar dirección de entrega antes de despachar.']);
 
-        // 2. In production: boards glued (2 MDF boards deducted at
-        // "Pegado"), transfer payment
+        // 2. In production: boards glued (2 MDF boards deducted and 1
+        // "armado" produced at "Pegado"), transfer payment
         $order = $this->makeOrder($sextoA, 'Bruno Díaz', '3804000002', 'Thiago', 2, 56000, 4, 20);
         $detail = $this->addDetail($order, $clasico, $this->muralVariant('horizontal', 'black'), 'Thiago - egresados 2026');
         $this->setStatus($detail, $clasico, 3, hoursAgo: 30);
@@ -78,7 +78,8 @@ class DemoOrderSeeder extends Seeder
         $order->payments()->create(['amount' => 12000, 'type' => 'efectivo', 'paid_on' => now()->subDays(5)->toDateString()]);
 
         // 5. Partially delivered: mural handed over (its whole chain
-        // consumed: strip + board + bag), the rest in progress
+        // consumed: strip + board + bag; the armado produced at "Pegado"
+        // is consumed back at "Pintado", net 0), the rest in progress
         $order = $this->makeOrder($sextoA, 'Elena Paz', '3804000005', 'Mora', 5, 52000, 4, 15);
         $detail = $this->addDetail($order, $molduraFina, $this->muralVariant('horizontal', 'pink'), 'Mora - egresados 2026');
         $this->setStatus($detail, $molduraFina, 7, hoursAgo: 72);
@@ -98,7 +99,8 @@ class DemoOrderSeeder extends Seeder
         $order->payments()->create(['amount' => 6000, 'type' => 'efectivo', 'paid_on' => now()->subDays(1)->toDateString()]);
 
         // 7. Cancelled: the glued mural returned its MDF board to stock
-        // (movements -1/+1), medalla sent to recycling; keeps a payment
+        // ("devolución" +1) and gave back the armado it had produced
+        // ("ajuste" -1); medalla sent to recycling; keeps a payment
         $order = $this->makeOrder($sextoA, 'Gimena Vera', '3804000007', 'Emma', 7, 54000, 4, 18);
         $detail = $this->addDetail($order, $molduraAncha, $this->muralVariant('vertical', 'black'), 'Emma - egresados 2026');
         $this->setStatus($detail, $molduraAncha, 4, hoursAgo: 60);
