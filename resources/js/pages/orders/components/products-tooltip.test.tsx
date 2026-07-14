@@ -7,6 +7,7 @@ const products = [
         order_detail_id: 1,
         name: 'Mural clásico',
         product_type_id: 1,
+        priority: true,
         variant: {
             color: '#fff',
             background: 'Bosque',
@@ -32,5 +33,13 @@ describe('ProductsTooltip', () => {
         expect(screen.getByText('Mural clásico')).toBeTruthy();
         expect(screen.getByText('Taza')).toBeTruthy();
         expect(screen.getByText('Bosque')).toBeTruthy();
+    });
+
+    it('badges only the products flagged as priority', () => {
+        render(<ProductsTooltip products={products} />);
+
+        fireEvent.click(screen.getByLabelText('Ver productos'));
+
+        expect(screen.getAllByText('Prioridad')).toHaveLength(1);
     });
 });

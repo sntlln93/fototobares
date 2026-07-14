@@ -28,6 +28,9 @@ class ClassroomController extends Controller
         $orders = Order::where('classroom_id', $classroom->id)
             ->with('client', 'products.type', 'classroom.school')
             ->search($search)
+            ->orderByRaw('orders.photo_number is null')
+            ->orderBy('photo_number')
+            ->orderBy('id')
             ->paginate(20)
             ->withQueryString();
 
