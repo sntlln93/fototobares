@@ -111,6 +111,7 @@ class Order extends Model
 
         return $query->where(function (Builder $query) use ($like, $phone) {
             $query->where('orders.id', 'like', $like)
+                ->orWhere('orders.photo_number', 'like', $like)
                 ->orWhere('orders.child_name', 'like', $like)
                 ->orWhereHas('client', function (Builder $client) use ($like, $phone) {
                     $client->where('clients.name', 'like', $like);

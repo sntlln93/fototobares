@@ -71,6 +71,43 @@ it('combines the classroom filter with the search term', function () {
         ->toBe([$order->id]);
 });
 
+it('defaults to the child order number when filtering by classroom', function () {
+    $classroom = Classroom::factory()->create();
+
+    $second = Order::factory()->create(['classroom_id' => $classroom->id, 'photo_number' => 2]);
+    $unnumbered = Order::factory()->create(['classroom_id' => $classroom->id, 'photo_number' => null]);
+    $first = Order::factory()->create(['classroom_id' => $classroom->id, 'photo_number' => 1]);
+
+    expect(filteredOrderIds(['classroom_id' => $classroom->id]))
+        ->toBe([$first->id, $second->id, $unnumbered->id]);
+});
+
+it('keeps the id order when no classroom filter is applied', function () {
+    $classroom = Classroom::factory()->create();
+
+    $late = Order::factory()->create(['classroom_id' => $classroom->id, 'photo_number' => 2]);
+    $early = Order::factory()->create(['classroom_id' => $classroom->id, 'photo_number' => 1]);
+
+    expect(filteredOrderIds([]))->toBe([$late->id, $early->id]);
+});
+
+it('lists the classroom students by their order number', function () {
+    $classroom = Classroom::factory()->create();
+
+    $second = Order::factory()->create(['classroom_id' => $classroom->id, 'photo_number' => 2]);
+    $unnumbered = Order::factory()->create(['classroom_id' => $classroom->id, 'photo_number' => null]);
+    $first = Order::factory()->create(['classroom_id' => $classroom->id, 'photo_number' => 1]);
+
+    $response = get(route('classrooms.show', ['classroom' => $classroom->id]));
+    $response->assertOk();
+
+    /** @var array<int, array<string, mixed>> $orders */
+    $orders = $response->viewData('page')['props']['orders']['data'];
+
+    expect(array_map(fn (array $order) => (int) $order['id'], $orders))
+        ->toBe([$first->id, $second->id, $unnumbered->id]);
+});
+
 it('returns nothing when no order belongs to the filtered classroom', function () {
     Order::factory()->create();
     $empty = Classroom::factory()->create();

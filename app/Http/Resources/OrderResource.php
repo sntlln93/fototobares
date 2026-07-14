@@ -100,7 +100,7 @@ class OrderResource extends JsonResource
                     'production_status' => $detail?->productionStatus?->name,
                     'production_status_id' => $detail?->production_status_id,
                     'production_enabled' => $detail?->production_enabled_at !== null,
-                    'priority' => $detail?->priority,
+                    'priority' => $product->pivot->priority,  // @phpstan-ignore-line
                     'recycled_to' => $detail?->recycled_to,
                     'statuses' => $product->relationLoaded('productionStatuses')
                         ? $product->productionStatuses->map(fn (ProductionStatus $status) => [

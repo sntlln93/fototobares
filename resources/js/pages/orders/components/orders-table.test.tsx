@@ -39,6 +39,8 @@ const price = (amount: number) => formatPrice(amount).replace(/\s/g, ' ');
 const makeOrder = (overrides: Partial<Order> = {}): Order =>
     ({
         id: 7,
+        photo_number: 12,
+        child_name: 'Maylén Ortiz',
         total_price: 15000,
         payment_plan: 3,
         due_date: '2026-08-01',
@@ -60,6 +62,8 @@ describe('OrdersTable', () => {
 
         const row = screen.getAllByRole('row')[1];
 
+        expect(within(row).getByText('12')).toBeTruthy();
+        expect(within(row).getByText('Maylén Ortiz')).toBeTruthy();
         expect(within(row).getByText('Marta López')).toBeTruthy();
         expect(within(row).getByText(price(15000))).toBeTruthy();
         expect(within(row).getByText(`3 (${price(5000)})`)).toBeTruthy();
@@ -109,7 +113,7 @@ describe('OrdersTable', () => {
         expect(onDelete).not.toHaveBeenCalled();
     });
 
-    it('sorts by id and price from the header buttons', () => {
+    it('sorts by order number and price from the header buttons', () => {
         render(<OrdersTable orders={[]} onDelete={vi.fn()} />);
 
         const headers = screen.getAllByRole('columnheader');
@@ -118,11 +122,46 @@ describe('OrdersTable', () => {
                 columnheader.textContent?.includes(name),
             )!;
 
-        fireEvent.click(within(header('#')).getByRole('button'));
-        expect(sort).toHaveBeenCalledWith('id', 'orders.index');
+        fireEvent.click(within(header('N° de orden')).getByRole('button'));
+        expect(sort).toHaveBeenCalledWith('photo_number', 'orders.index');
 
         fireEvent.click(within(header('Precio')).getByRole('button'));
         expect(sort).toHaveBeenCalledWith('total_price', 'orders.index');
+
+        expect(screen.queryByText('Vencimiento')).toBeNull();
+    });
+
+    it('falls back to a dash without an order number or child name', () => {
+        render(
+            <OrdersTable
+                orders={[
+                    makeOrder({ photo_number: null, child_name: undefined }),
+                ]}
+                onDelete={vi.fn()}
+            />,
+        );
+
+        const row = screen.getAllByRole('row')[1];
+        expect(within(row).getAllByText('—')).toHaveLength(2);
+    });
+
+    it('flags the orders that carry a priority product', () => {
+        render(
+            <OrdersTable
+                orders={[
+                    makeOrder({
+                        products: [{ priority: true }, {}] as Order['products'],
+                    }),
+                    makeOrder({ id: 8 }),
+                ]}
+                onDelete={vi.fn()}
+            />,
+        );
+
+        const [flagged, calm] = screen.getAllByRole('row').slice(1);
+
+        expect(within(flagged).getByLabelText('Con prioridad')).toBeTruthy();
+        expect(within(calm).queryByLabelText('Con prioridad')).toBeNull();
     });
 
     it('shows the client phone with a link to their whatsapp chat', () => {

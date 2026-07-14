@@ -29,14 +29,16 @@ class OrderController extends Controller
         /** @var string|null $search */
         $search = $request->query('search');
 
-        /** @var string sort_by */
-        $sort_by = $request->query('sort_by') ?? 'id';
-
-        /** @var 'asc'|'desc' sort_order */
-        $sort_order = $request->query('sort_order') ?? 'asc';
-
         $school_id = $request->filled('school_id') ? $request->integer('school_id') : null;
         $classroom_id = $request->filled('classroom_id') ? $request->integer('classroom_id') : null;
+
+        // A classroom-filtered list matches the paper sheet, so it follows
+        // the child's order number by default
+        /** @var string $sort_by */
+        $sort_by = $request->query('sort_by') ?? ($classroom_id !== null ? 'photo_number' : 'id');
+
+        /** @var 'asc'|'desc' $sort_order */
+        $sort_order = $request->query('sort_order') ?? 'asc';
 
         $schools = School::query()
             ->with(['classrooms'])
@@ -47,7 +49,9 @@ class OrderController extends Controller
             ->search($search)
             ->forSchool($school_id)
             ->forClassroom($classroom_id)
+            ->when($sort_by === 'photo_number', fn ($query) => $query->orderByRaw('orders.photo_number is null'))
             ->orderBy($sort_by, $sort_order)
+            ->orderBy('orders.id')
             ->paginate(20)
             ->withQueryString();
 
