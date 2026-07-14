@@ -101,10 +101,10 @@ it('lists the classroom students by their order number', function () {
     $response = get(route('classrooms.show', ['classroom' => $classroom->id]));
     $response->assertOk();
 
-    /** @var array<int, array<string, mixed>> $orders */
-    $orders = $response->viewData('page')['props']['orders']['data'];
+    /** @var array<int, array<string, mixed>> $students */
+    $students = $response->viewData('page')['props']['students']['data'];
 
-    expect(array_map(fn (array $order) => (int) $order['id'], $orders))
+    expect(array_map(fn (array $student) => (int) $student['id'], $students))
         ->toBe([$first->id, $second->id, $unnumbered->id]);
 });
 

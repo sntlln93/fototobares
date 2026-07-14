@@ -30,10 +30,12 @@ function searchedOrderIds(string $term, ?Classroom $classroom = null): array
     $response = get($route);
     $response->assertOk();
 
-    /** @var array<int, array<string, mixed>> $orders */
-    $orders = $response->viewData('page')['props']['orders']['data'];
+    $prop = $classroom === null ? 'orders' : 'students';
 
-    return array_map(fn (array $order) => (int) $order['id'], $orders);
+    /** @var array<int, array<string, mixed>> $rows */
+    $rows = $response->viewData('page')['props'][$prop]['data'];
+
+    return array_map(fn (array $row) => (int) $row['id'], $rows);
 }
 
 beforeEach(function () {
