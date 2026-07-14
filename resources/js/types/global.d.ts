@@ -120,8 +120,11 @@ declare global {
         delivered_at?: string | null;
         production_status?: string | null;
         production_status_id?: number | null;
+        production_enabled?: boolean;
         priority?: boolean | null;
         recycled_to?: 'stock' | 'reciclaje' | null;
+        /** Stages of the product's chain, ordered by position */
+        statuses?: ProductionStatus[];
     }
 
     interface ProductionStatus {
@@ -147,6 +150,7 @@ declare global {
     }
 
     type OrderStatus =
+        | 'sin habilitar'
         | 'pendiente'
         | 'en producción'
         | 'terminado'
@@ -171,6 +175,7 @@ declare global {
         balance?: number;
         can_edit?: boolean;
         can_delete?: boolean;
+        first_installment_paid?: boolean;
         client: Client;
         classroom: Classroom;
         school: School;

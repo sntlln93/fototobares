@@ -174,15 +174,17 @@ it('never deducts twice when moving back and forth', function () {
         ->and($tiras->movements()->count())->toBe(1);
 });
 
-it('lists only pending details of active orders', function () {
+it('lists only enabled, pending details of active orders', function () {
     actingAsRole(UserRole::Worker);
 
-    $pending = OrderDetail::factory()->create();
+    $pending = OrderDetail::factory()->enabled()->create();
     OrderDetail::factory()->delivered()->create();
     OrderDetail::factory()->recycled()->create();
-    OrderDetail::factory()->create([
+    OrderDetail::factory()->enabled()->create([
         'order_id' => Order::factory()->cancelled()->create()->id,
     ]);
+    // Production not enabled yet: the first installment gates it (#106)
+    OrderDetail::factory()->create();
 
     get(route('tracking.index'))->assertInertia(
         fn (Assert $page) => $page

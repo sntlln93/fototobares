@@ -54,6 +54,7 @@ class OrderDetail extends Pivot
     protected $casts = [
         'variant' => 'array',
         'priority' => 'boolean',
+        'production_enabled_at' => 'datetime',
         'status_updated_at' => 'datetime',
         'delivered_at' => 'datetime',
     ];

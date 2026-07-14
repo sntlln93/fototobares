@@ -38,10 +38,13 @@ class DashboardController extends Controller
             ->whereHas('order', fn ($q) => $q->whereNull('cancelled_at'))
             ->sum('amount');
 
-        // Production: pending details of active, undelivered orders
+        // Production: pending details of active, undelivered orders. Details
+        // whose production is not enabled yet (first installment unpaid) are
+        // not workshop work, so they stay out of these metrics.
         $activeDetails = OrderDetail::query()
             ->whereNull('delivered_at')
             ->whereNull('recycled_to')
+            ->whereNotNull('production_enabled_at')
             ->whereHas('order', fn ($q) => $q->whereNull('cancelled_at'));
 
         /** @var array<int, int> $lastPositions */

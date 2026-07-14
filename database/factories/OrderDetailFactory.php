@@ -32,6 +32,15 @@ class OrderDetailFactory extends Factory
         return $this->state(fn () => ['delivered_at' => now()]);
     }
 
+    /**
+     * Production enabled: the first installment was paid and the office
+     * let the detail into the workshop board.
+     */
+    public function enabled(): static
+    {
+        return $this->state(fn () => ['production_enabled_at' => now()]);
+    }
+
     public function recycled(string $destination = 'reciclaje'): static
     {
         return $this->state(fn () => ['recycled_to' => $destination]);

@@ -49,7 +49,7 @@ class Order extends Model
     {
         return $this->belongsToMany(Product::class, 'order_details')
             ->using(OrderDetail::class)
-            ->withPivot('id', 'note', 'variant', 'delivered_at', 'production_status_id', 'status_updated_at', 'priority', 'recycled_to')
+            ->withPivot('id', 'note', 'variant', 'delivered_at', 'production_status_id', 'production_enabled_at', 'status_updated_at', 'priority', 'recycled_to')
             ->withTimestamps();
     }
 
@@ -153,6 +153,24 @@ class Order extends Model
     public function paidTotal(): int
     {
         return (int) $this->payments()->sum('amount');
+    }
+
+    /**
+     * Whether the client already covered the first installment
+     * (total / plan). It gates production: nothing is manufactured —
+     * or enters /tracking — before this is true.
+     */
+    public function firstInstallmentPaid(): bool
+    {
+        if ((int) $this->payment_plan <= 0) {
+            return false;
+        }
+
+        $paid = $this->relationLoaded('payments')
+            ? $this->payments->sum(fn (Payment $payment): int => (int) $payment->amount)
+            : $this->paidTotal();
+
+        return $paid >= (int) $this->total_price / (int) $this->payment_plan;
     }
 
     public function balance(): int
