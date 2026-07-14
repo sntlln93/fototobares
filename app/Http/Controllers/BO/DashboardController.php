@@ -68,13 +68,17 @@ class DashboardController extends Controller
             })
             ->map(fn ($group) => $group->count());
 
-        // Overdue orders: due date past, balance pending
+        // Overdue orders: paid less than the installments already due. The
+        // schedule runs month to month from the first due date, so a client
+        // who paid the first installment is up to date until the next one.
+        $today = now()->startOfDay();
+
         $overdueOrders = (clone $activeOrders)
             ->with('client', 'classroom.school')
             ->withSum('payments', 'amount')
-            ->where('due_date', '<', now()->startOfDay())
+            ->where('due_date', '<', $today)
             ->get()
-            ->filter(fn (Order $order) => ((int) $order->payments_sum_amount) < $order->total_price)
+            ->filter(fn (Order $order) => ((int) $order->payments_sum_amount) < $order->amountOverdue($today))
             ->sortBy('due_date')
             ->take(8)
             ->values()

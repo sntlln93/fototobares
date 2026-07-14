@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Carbon\CarbonInterface;
 use Database\Factories\OrderFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -81,6 +82,47 @@ class Order extends Model
     public function balance(): int
     {
         return (int) $this->total_price - $this->paidTotal();
+    }
+
+    /**
+     * Installments whose due day already passed on the given date. The first
+     * one falls on `due_date` and each following one a month later, on the
+     * same day: 25/7, 25/8, 25/9…
+     *
+     * A due day that a shorter month lacks rolls over (31/1 → 3/3), so an
+     * order is never counted late before the day the seller picked.
+     */
+    public function overdueInstallments(CarbonInterface $on): int
+    {
+        $plan = (int) $this->payment_plan;
+        $day = $on->copy()->startOfDay();
+
+        $overdue = 0;
+
+        for ($month = 0; $month < $plan; $month++) {
+            if ($this->due_date->copy()->addMonths($month)->startOfDay()->greaterThanOrEqualTo($day)) {
+                break;
+            }
+
+            $overdue++;
+        }
+
+        return $overdue;
+    }
+
+    /**
+     * Amount the client should have paid by the given date: one installment
+     * per due day already passed.
+     */
+    public function amountOverdue(CarbonInterface $on): int
+    {
+        $plan = (int) $this->payment_plan;
+
+        if ($plan <= 0) {
+            return 0;
+        }
+
+        return (int) round((int) $this->total_price * $this->overdueInstallments($on) / $plan);
     }
 
     /**
