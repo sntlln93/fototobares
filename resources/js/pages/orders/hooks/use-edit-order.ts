@@ -5,6 +5,8 @@ import { toast } from 'sonner';
 export type EditAccordionValue = 'products' | 'client' | 'order' | undefined;
 
 export type OrderDetailForm = {
+    /** The order_details row: an order may repeat a product */
+    id: number;
     product_id: number;
     note: string | null;
     variant: Record<string, string>;
@@ -14,8 +16,10 @@ export function useEditOrder(order: Order) {
     const [accordionValue, setAccordionValue] =
         useState<EditAccordionValue>('client');
 
-    // Transform order data for form - preserve existing note and variant from pivot
+    // Transform order data for form - preserve existing note and variant from
+    // pivot, addressed by the detail id so repeated products stay apart
     const orderDetails = order.products.map((product) => ({
+        id: product.order_detail_id,
         product_id: product.id,
         note: product.note || null,
         variant: product.variant || {},

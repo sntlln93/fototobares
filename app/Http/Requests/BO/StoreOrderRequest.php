@@ -37,6 +37,9 @@ class StoreOrderRequest extends FormRequest
             'draft_id' => ['nullable', 'integer', 'exists:order_drafts,id'],
 
             'order_details' => ['required', 'array'],
+            // Existing rows carry their id on update: details are addressed one
+            // by one, since an order may repeat a product
+            'order_details.*.id' => ['nullable', 'integer', 'exists:order_details,id'],
             'order_details.*.product_id' => ['required', 'integer', 'exists:products,id'],
             'order_details.*.note' => ['nullable', 'string'],
             'order_details.*.variant' => ['sometimes', 'array'],
@@ -63,6 +66,7 @@ class StoreOrderRequest extends FormRequest
      *     attended_photo_session?: bool|null,
      *     draft_id?: int|null,
      *     order_details: array<int, array{
+     *         id?: int|null,
      *         product_id: int,
      *         note: string|null,
      *         variant?: array{
@@ -87,6 +91,7 @@ class StoreOrderRequest extends FormRequest
          *     attended_photo_session?: bool|null,
          *     draft_id?: int|null,
          *     order_details: array<int, array{
+         *         id?: int|null,
          *         product_id: int,
          *         note: string|null,
          *         variant?: array{

@@ -135,3 +135,63 @@ it('soft deletes an order without payments', function () {
 
     assertSoftDeleted('orders', ['id' => $order->id]);
 });
+
+it('keeps each detail of a repeated product apart when the order is edited', function () {
+    actingAsRole();
+
+    $classroom = Classroom::factory()->create();
+    $product = Product::factory()->create();
+
+    $order = Order::factory()->create([
+        'classroom_id' => $classroom->id,
+        'total_price' => 24000,
+        'payment_plan' => 2,
+    ]);
+
+    // The same product twice: two mugs with a different name printed on each
+    $order->products()->attach($product->id, ['note' => 'Taza de Luca', 'variant' => []]);
+    $order->products()->attach($product->id, ['note' => 'Taza de Emma', 'variant' => []]);
+
+    $details = $order->details()->orderBy('id')->get();
+
+    // Regression: syncing by product_id collapsed both rows into one, so
+    // editing the price alone overwrote the first note with the second
+    put(route('orders.update', $order), [
+        ...validOrderPayload($classroom, $product),
+        'total_price' => 30000,
+        'order_details' => $details->map(fn ($detail) => [
+            'id' => $detail->id,
+            'product_id' => $detail->product_id,
+            'note' => $detail->note,
+        ])->all(),
+    ])->assertSessionHasNoErrors();
+
+    expect($order->refresh()->total_price)->toBe(30000)
+        ->and($order->details()->orderBy('id')->pluck('note')->all())
+        ->toBe(['Taza de Luca', 'Taza de Emma']);
+});
+
+it('updates the note of a single detail without touching its twin', function () {
+    actingAsRole();
+
+    $classroom = Classroom::factory()->create();
+    $product = Product::factory()->create();
+
+    $order = Order::factory()->create(['classroom_id' => $classroom->id]);
+
+    $order->products()->attach($product->id, ['note' => 'Taza de Luca', 'variant' => []]);
+    $order->products()->attach($product->id, ['note' => 'Taza de Emma', 'variant' => []]);
+
+    $details = $order->details()->orderBy('id')->get();
+
+    put(route('orders.update', $order), [
+        ...validOrderPayload($classroom, $product),
+        'order_details' => [
+            ['id' => $details[0]->id, 'product_id' => $product->id, 'note' => 'Taza de Lucas'],
+            ['id' => $details[1]->id, 'product_id' => $product->id, 'note' => 'Taza de Emma'],
+        ],
+    ])->assertSessionHasNoErrors();
+
+    expect($order->details()->orderBy('id')->pluck('note')->all())
+        ->toBe(['Taza de Lucas', 'Taza de Emma']);
+});
