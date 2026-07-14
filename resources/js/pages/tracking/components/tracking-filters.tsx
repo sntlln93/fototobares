@@ -13,9 +13,16 @@ import { useState } from 'react';
 
 export type Filters = {
     search: string | null;
-    school_id: string | null;
+    school_id: number | null;
+    classroom_id: number | null;
     product_type_id: string | null;
     production_status_id: string | null;
+};
+
+export type SchoolWithClassrooms = {
+    id: number;
+    name: string;
+    classrooms: Array<{ id: number; name: string; school_id: number }>;
 };
 
 export function TrackingFilters({
@@ -25,14 +32,36 @@ export function TrackingFilters({
     onApply,
 }: {
     filters: Filters;
-    schools: Array<{ id: number; name: string }>;
+    schools: SchoolWithClassrooms[];
     productTypes: ProductType[];
     onApply: (overrides: Partial<Filters> & { search?: string }) => void;
 }) {
     const [search, setSearch] = useState(filters.search ?? '');
 
+    // A classroom implies its school, so the school select also reflects
+    // visits that only carried classroom_id
+    const selectedSchool =
+        schools.find((school) => school.id === filters.school_id) ??
+        schools.find((school) =>
+            school.classrooms.some(
+                (classroom) => classroom.id === filters.classroom_id,
+            ),
+        );
+
+    const classroomItems = selectedSchool
+        ? selectedSchool.classrooms.map((classroom) => ({
+              id: classroom.id,
+              label: classroom.name,
+          }))
+        : schools.flatMap((school) =>
+              school.classrooms.map((classroom) => ({
+                  id: classroom.id,
+                  label: `${school.name} — ${classroom.name}`,
+              })),
+          );
+
     return (
-        <div className="flex flex-col gap-2 md:flex-row md:items-center">
+        <div className="flex flex-col gap-2 md:flex-row md:flex-wrap md:items-center">
             <form
                 className="flex items-center gap-2"
                 onSubmit={(e) => {
@@ -52,11 +81,13 @@ export function TrackingFilters({
             </form>
 
             <Select
-                value={filters.school_id ? String(filters.school_id) : 'all'}
+                value={selectedSchool ? String(selectedSchool.id) : 'all'}
                 onValueChange={(value) =>
+                    // Changing school invalidates any classroom filter
                     onApply({
                         search,
-                        school_id: value === 'all' ? null : value,
+                        school_id: value === 'all' ? null : Number(value),
+                        classroom_id: null,
                     })
                 }
             >
@@ -68,6 +99,33 @@ export function TrackingFilters({
                     {schools.map((school) => (
                         <SelectItem value={String(school.id)} key={school.id}>
                             {school.name}
+                        </SelectItem>
+                    ))}
+                </SelectContent>
+            </Select>
+
+            <Select
+                value={
+                    filters.classroom_id ? String(filters.classroom_id) : 'all'
+                }
+                onValueChange={(value) =>
+                    onApply({
+                        search,
+                        classroom_id: value === 'all' ? null : Number(value),
+                    })
+                }
+            >
+                <SelectTrigger className="md:w-56">
+                    <SelectValue placeholder="Curso" />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectItem value="all">Todos los cursos</SelectItem>
+                    {classroomItems.map((classroom) => (
+                        <SelectItem
+                            value={String(classroom.id)}
+                            key={classroom.id}
+                        >
+                            {classroom.label}
                         </SelectItem>
                     ))}
                 </SelectContent>

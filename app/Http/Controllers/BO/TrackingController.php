@@ -7,6 +7,7 @@ namespace App\Http\Controllers\BO;
 use App\Actions\Tracking\MoveDetailsToStage;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\BO\BatchUpdateTrackingRequest;
+use App\Models\Classroom;
 use App\Models\Order;
 use App\Models\OrderDetail;
 use App\Models\Product;
@@ -26,8 +27,8 @@ class TrackingController extends Controller
         /** @var string|null $search */
         $search = $request->query('search');
 
-        /** @var string|null $school_id */
-        $school_id = $request->query('school_id');
+        $school_id = $request->filled('school_id') ? $request->integer('school_id') : null;
+        $classroom_id = $request->filled('classroom_id') ? $request->integer('classroom_id') : null;
 
         /** @var string|null $product_type_id */
         $product_type_id = $request->query('product_type_id');
@@ -42,11 +43,15 @@ class TrackingController extends Controller
             // Production starts with the first paid installment: details not
             // yet enabled from the order page stay out of the workshop board
             ->whereNotNull('production_enabled_at')
-            ->whereHas('order', function ($query) use ($school_id, $search) {
+            ->whereHas('order', function ($query) use ($school_id, $classroom_id, $search) {
                 $query->whereNull('cancelled_at');
 
-                if (! empty($school_id)) {
+                if ($school_id !== null) {
                     $query->whereHas('classroom', fn ($q) => $q->where('school_id', $school_id));
+                }
+
+                if ($classroom_id !== null) {
+                    $query->where('classroom_id', $classroom_id);
                 }
 
                 if (! empty($search)) {
@@ -78,7 +83,7 @@ class TrackingController extends Controller
             ->with('type', 'productionStatuses')
             ->get();
 
-        $schools = School::query()->whereHas('classrooms')->get();
+        $schools = School::query()->with('classrooms')->whereHas('classrooms')->get();
 
         return Inertia::render('tracking/index', [
             'details' => $details->map(function (OrderDetail $detail) {
@@ -121,10 +126,16 @@ class TrackingController extends Controller
             'schools' => $schools->map(fn (School $school) => [
                 'id' => $school->id,
                 'name' => $school->name,
+                'classrooms' => $school->classrooms->map(fn (Classroom $classroom) => [
+                    'id' => $classroom->id,
+                    'name' => $classroom->name,
+                    'school_id' => $classroom->school_id,
+                ]),
             ]),
             'filters' => [
                 'search' => $search,
                 'school_id' => $school_id,
+                'classroom_id' => $classroom_id,
                 'product_type_id' => $product_type_id,
                 'production_status_id' => $production_status_id,
             ],
