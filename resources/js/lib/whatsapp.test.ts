@@ -1,5 +1,35 @@
 import { describe, expect, it } from 'vitest';
-import { normalizeArPhone, waShareUrl } from './whatsapp';
+import {
+    localPhoneDigits,
+    normalizeArPhone,
+    waChatUrl,
+    waShareUrl,
+} from './whatsapp';
+
+describe('localPhoneDigits', () => {
+    it('keeps only the dialable digits', () => {
+        expect(localPhoneDigits('380 412-3456')).toBe('3804123456');
+        expect(localPhoneDigits('+54 9 380 412-3456')).toBe('3804123456');
+        expect(localPhoneDigits('543804123456')).toBe('3804123456');
+        expect(localPhoneDigits('03804123456')).toBe('3804123456');
+    });
+
+    it('is empty when the text has no digits', () => {
+        expect(localPhoneDigits('sin teléfono')).toBe('');
+    });
+});
+
+describe('waChatUrl', () => {
+    it('links to the chat with that number', () => {
+        expect(waChatUrl('380 412-3456')).toBe('https://wa.me/5493804123456');
+    });
+
+    it('is null when the number cannot be dialed', () => {
+        expect(waChatUrl(null)).toBe(null);
+        expect(waChatUrl('')).toBe(null);
+        expect(waChatUrl('1234')).toBe(null);
+    });
+});
 
 describe('normalizeArPhone', () => {
     it('prefixes local numbers with the mobile country code', () => {

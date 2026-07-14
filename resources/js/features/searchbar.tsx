@@ -4,24 +4,48 @@ import { onSearch } from '@/lib/services/filter';
 import { cn } from '@/lib/utils';
 import { router } from '@inertiajs/react';
 import { FilterX, Search } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useDebounce } from 'use-debounce';
 
-export function Searchbar({ indexRoute }: { indexRoute: string }) {
-    const [search, setSearch] = useState('');
+interface SearchbarProps {
+    indexRoute: string;
+    /** Route params for pages that are not plain indexes (e.g. a classroom). */
+    routeParams?: Record<string, string | number>;
+    /** The term already applied, echoed back by the page, so it survives reloads. */
+    term?: string | null;
+    placeholder?: string;
+}
+
+export function Searchbar({
+    indexRoute,
+    routeParams,
+    term,
+    placeholder,
+}: SearchbarProps) {
+    const applied = term ?? '';
+    const [search, setSearch] = useState(applied);
     const [debouncedSearch] = useDebounce(search, 1000);
+    const requested = useRef(applied);
 
     useEffect(() => {
-        if (debouncedSearch.length < 3) return;
+        // Already the applied filter: nothing to do (this is also the mount case).
+        // Any other term is searched, however short: order numbers are 1-2 digits.
+        if (debouncedSearch === applied) return;
 
-        onSearch(debouncedSearch, indexRoute);
-    }, [debouncedSearch, indexRoute]);
+        // The visit preserves this component's state, so a re-render must not
+        // fire the same search again.
+        if (debouncedSearch === requested.current) return;
+
+        requested.current = debouncedSearch;
+        onSearch(debouncedSearch, indexRoute, routeParams);
+    }, [debouncedSearch, applied, indexRoute, routeParams]);
 
     return (
         <div className="relative flex gap-1">
             <Input
                 id="search"
                 name="search"
+                placeholder={placeholder}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
             />
@@ -39,7 +63,7 @@ export function Searchbar({ indexRoute }: { indexRoute: string }) {
             <Button
                 variant="outline"
                 size="icon"
-                onClick={() => router.get(route(indexRoute))}
+                onClick={() => router.get(route(indexRoute, routeParams))}
             >
                 <FilterX />
             </Button>

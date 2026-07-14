@@ -7,6 +7,7 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
+import { PhoneLink } from '@/features/phone-link';
 import { cn, formatPrice } from '@/lib/utils';
 import { Link } from '@inertiajs/react';
 import { Ban, Edit2 } from 'lucide-react';
@@ -73,6 +74,9 @@ export function OrderInfoCard({ order, onCancel }: OrderInfoCardProps) {
                         </Badge>
                     )}
                 </CardTitle>
+                <CardDescription className="flex items-center gap-1">
+                    <PhoneLink phone={order.client.phone} />
+                </CardDescription>
                 <CardDescription>
                     {`Pedido #${order.id}`}
                     {order.child_name ? ` · Niño/a: ${order.child_name}` : ''}

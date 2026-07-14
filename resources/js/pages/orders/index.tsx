@@ -21,7 +21,12 @@ const breadcrumbs: BreadcrumbItem[] = [
 export default function Orders({
     orders,
     schools,
-}: PageProps<{ orders: Paginated<Order>; schools: School[] }>) {
+    filters,
+}: PageProps<{
+    orders: Paginated<Order>;
+    schools: School[];
+    filters: { search: string | null };
+}>) {
     const params = new URLSearchParams(window.location.search);
 
     const [comboDropdownOpen, setComboDropdownOpen] = useState(false);
@@ -44,7 +49,11 @@ export default function Orders({
 
             <section className="p-6">
                 <div className="mb-4 flex flex-wrap gap-4">
-                    <Searchbar indexRoute="orders.index" />
+                    <Searchbar
+                        indexRoute="orders.index"
+                        term={filters.search}
+                        placeholder="Buscar por #, nombre o teléfono"
+                    />
                     <Combobox
                         items={schools.map((school) => ({
                             label: school.name,
@@ -83,6 +92,7 @@ export default function Orders({
 
                 <OrdersTable
                     orders={orders.data}
+                    search={filters.search}
                     onDelete={setDeleteableOrder}
                 />
 

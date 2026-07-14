@@ -1,14 +1,25 @@
 import { router } from '@inertiajs/react';
 
-export function onSearch(searchTerm: string, indexRoute: string) {
+export function onSearch(
+    searchTerm: string,
+    indexRoute: string,
+    routeParams?: Record<string, string | number>,
+) {
     const query = route().queryParams;
     delete query.search;
+    delete query.page;
 
     if (searchTerm) {
         query.search = searchTerm;
     }
 
-    router.get(route(indexRoute), query);
+    // The search fires while typing: remounting the page would take the focus
+    // away from the input mid-word, so the visit reuses the mounted components.
+    router.get(route(indexRoute, routeParams), query, {
+        preserveState: true,
+        preserveScroll: true,
+        replace: true,
+    });
 }
 
 export function onSort(sort_by: string, indexRoute: string) {
