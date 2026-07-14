@@ -245,6 +245,21 @@ describe('useOrderProducts', () => {
         );
     });
 
+    it('removes every detail of a combo and drops its price', () => {
+        const details: ProductOrder[] = [
+            { product_id: 1, combo_id: 4, note: '' },
+            { product_id: 2, combo_id: 4, note: '' },
+            { product_id: 3, note: 'Portarretrato suelto' },
+        ];
+        const { result, applied } = setup(details);
+
+        act(() => result.current.handleRemoveCombo(4));
+
+        expect(applied().order_details).toEqual([details[2]]);
+        // Only the standalone portarretrato is left
+        expect(applied().total_price).toBe('15000');
+    });
+
     it('exposes the breakdown and restores the calculated price on demand', () => {
         const { result, setData } = setup([
             { product_id: 1, combo_id: 4, note: '' },

@@ -9,8 +9,9 @@ import { Button } from '@/components/ui/button';
 import { Combobox } from '@/components/ui/combobox';
 import { AlertCircle, PlusIcon } from 'lucide-react';
 import { ComboWithProducts } from '../form';
+import { groupDetails } from '../grouping';
 import { OrderFormController } from '../hooks/use-create-order-form';
-import { ProductListItem } from './product-list-item';
+import { DetailGroup } from './detail-group';
 
 interface ProductsStepProps {
     form: OrderFormController;
@@ -32,7 +33,10 @@ export function ProductsStep({ form, products, combos }: ProductsStepProps) {
         handleAddProduct,
         handleEditProduct,
         handleRemoveProduct,
+        handleRemoveCombo,
     } = form;
+
+    const { comboGroups, extras } = groupDetails(data.order_details, combos);
 
     return (
         <AccordionItem value="products">
@@ -80,32 +84,26 @@ export function ProductsStep({ form, products, combos }: ProductsStepProps) {
                     </Button>
                 </Combobox>
 
-                <ul className="my-2 gap-4">
-                    {data.order_details.map((selected, index) => {
-                        const product = products.find(
-                            (p) => p.id === selected.product_id,
-                        );
-                        const combo = combos.find(
-                            (c) => c.id === selected.combo_id,
-                        );
+                {comboGroups.map(({ combo, items }) => (
+                    <DetailGroup
+                        key={combo.id}
+                        title={combo.name}
+                        price={combo.suggested_price}
+                        items={items}
+                        products={products}
+                        onEdit={handleEditProduct}
+                        onRemove={handleRemoveProduct}
+                        onRemoveGroup={() => handleRemoveCombo(combo.id)}
+                    />
+                ))}
 
-                        // The product may have been deleted since the detail
-                        // was added or restored
-                        if (!product) return null;
-
-                        return (
-                            <ProductListItem
-                                key={`${product.id}-${combo ? combo.id : ''}-${index}`}
-                                detail={selected}
-                                product={product}
-                                combo={combo}
-                                index={index}
-                                onEdit={handleEditProduct}
-                                onRemove={handleRemoveProduct}
-                            />
-                        );
-                    })}
-                </ul>
+                <DetailGroup
+                    title="Otros productos"
+                    items={extras}
+                    products={products}
+                    onEdit={handleEditProduct}
+                    onRemove={handleRemoveProduct}
+                />
 
                 <InputError message={errors.order_details} />
 

@@ -112,6 +112,13 @@ export function useOrderProducts({
         toast.info('Producto quitado. Se recalculó el precio.');
     };
 
+    const handleRemoveCombo = (comboId: number) => {
+        applyDetails(
+            data.order_details.filter((detail) => detail.combo_id !== comboId),
+        );
+        toast.info('Combo quitado. Se recalculó el precio.');
+    };
+
     const recalculatePrice = () => {
         setData('total_price', String(breakdown.total));
     };
@@ -127,6 +134,7 @@ export function useOrderProducts({
         setProductsOrder,
         handleEditProduct,
         handleRemoveProduct,
+        handleRemoveCombo,
         recalculatePrice,
     };
 }
