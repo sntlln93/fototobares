@@ -53,6 +53,12 @@ const comboMural = {
 
 const comboTaza = { ...taza, pivot: pivot(3000) } as ComboProduct;
 
+// The premium combo carries two portarretratos
+const comboPortarretrato = {
+    ...portarretrato,
+    pivot: { quantity: 2, subtract_value: 4000 },
+} as ComboProduct;
+
 const combo = {
     id: 4,
     name: 'Combo escolar',
@@ -66,7 +72,7 @@ const otherCombo = {
     name: 'Combo premium',
     suggested_price: 20000,
     default_payments: 4,
-    products: [comboTaza],
+    products: [comboTaza, comboPortarretrato],
 } as ComboWithProducts;
 
 const setup = (details: ProductOrder[] = []) => {
@@ -142,6 +148,33 @@ describe('useOrderProducts', () => {
         expect(applied().order_details).toEqual([existing, ...added]);
         // Combo 15000 + the standalone taza 12000, ignoring the old total
         expect(applied().total_price).toBe('27000');
+    });
+
+    it('adds one detail per unit when the combo carries several of a product', () => {
+        const { result, applied } = setup();
+        const detail = { product_id: 3, combo_id: 5, note: 'Foto de Emma' };
+
+        act(() => result.current.setProductsOrder([detail]));
+
+        // The combo carries 2 portarretratos: same variants and note, two units
+        expect(applied().order_details).toEqual([detail, detail]);
+    });
+
+    it('does not multiply the units again when the detail is edited', () => {
+        const detail = { product_id: 3, combo_id: 5, note: 'Foto de Emma' };
+        const { result, applied } = setup([detail, detail]);
+
+        act(() => result.current.handleEditProduct(0));
+        act(() =>
+            result.current.setProductsOrder([
+                { ...detail, note: 'Foto de Emma R.' },
+            ]),
+        );
+
+        expect(applied().order_details).toEqual([
+            { ...detail, note: 'Foto de Emma R.' },
+            detail,
+        ]);
     });
 
     it('seeds the installments with the default of the first combo added', () => {

@@ -2,7 +2,12 @@ import { InertiaFormProps } from '@inertiajs/react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { ComboWithProducts, ProductOrder } from '../form';
-import { OrderFormData, removeDetailAt, replaceDetailAt } from '../form-state';
+import {
+    expandComboQuantities,
+    OrderFormData,
+    removeDetailAt,
+    replaceDetailAt,
+} from '../form-state';
 import { computeTotal, priceBreakdown } from '../pricing';
 
 interface UseOrderProductsParams {
@@ -86,7 +91,11 @@ export function useOrderProducts({
             return;
         }
 
-        applyDetails([...data.order_details, ...productsOrder]);
+        // Editing replaces one detail: only a fresh add multiplies the units
+        applyDetails([
+            ...data.order_details,
+            ...expandComboQuantities(productsOrder, combos),
+        ]);
     };
 
     const handleEditProduct = (index: number) => {
