@@ -32,4 +32,16 @@ class Phone
 
         return $digits;
     }
+
+    /**
+     * SQL expression stripping a phone column's separators so it's
+     * comparable, digit by digit, with a normalized search term.
+     *
+     * @param  literal-string  $column
+     * @return literal-string
+     */
+    public static function digitsExpression(string $column): string
+    {
+        return "REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE({$column}, ' ', ''), '-', ''), '(', ''), ')', ''), '+', ''), '.', '')";
+    }
 }
