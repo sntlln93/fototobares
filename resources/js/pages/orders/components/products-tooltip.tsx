@@ -1,3 +1,4 @@
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
     Popover,
@@ -5,6 +6,7 @@ import {
     PopoverTrigger,
 } from '@/components/ui/popover';
 import { ProductIcon } from '@/features/product-icon';
+import { Flame } from 'lucide-react';
 import { VariantBadges } from './variant-badges';
 
 /**
@@ -42,6 +44,15 @@ export function ProductsTooltip({ products }: { products: OrderProduct[] }) {
                                 <p className="pt-0.5 text-sm font-medium">
                                     {product.name}
                                 </p>
+                                {product.priority && (
+                                    <Badge
+                                        variant="destructive"
+                                        className="gap-1"
+                                    >
+                                        <Flame className="h-3 w-3" />
+                                        Prioridad
+                                    </Badge>
+                                )}
                                 {product.product_type_id === 1 && (
                                     <VariantBadges variant={product.variant} />
                                 )}

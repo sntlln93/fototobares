@@ -12,7 +12,7 @@ import { PhoneLink } from '@/features/phone-link';
 import { onSort } from '@/lib/services/filter';
 import { cn, formatPrice } from '@/lib/utils';
 import { Link } from '@inertiajs/react';
-import { ArrowUpDown, Eye, Trash } from 'lucide-react';
+import { ArrowUpDown, Eye, Flame, Trash } from 'lucide-react';
 import { ProductsTooltip } from './products-tooltip';
 
 interface OrdersTableProps {
@@ -30,13 +30,16 @@ export function OrdersTable({ orders, search, onDelete }: OrdersTableProps) {
                     <TableHead className="w-25">
                         <div className="flex items-center gap-2">
                             <button
-                                onClick={() => onSort('id', 'orders.index')}
+                                onClick={() =>
+                                    onSort('photo_number', 'orders.index')
+                                }
                             >
                                 <ArrowUpDown className="h-4 w-4" />
                             </button>
-                            #
+                            N° de orden
                         </div>
                     </TableHead>
+                    <TableHead>Niño</TableHead>
                     <TableHead>Cliente</TableHead>
                     <TableHead>Teléfono</TableHead>
                     <TableHead>Productos</TableHead>
@@ -54,7 +57,6 @@ export function OrdersTable({ orders, search, onDelete }: OrdersTableProps) {
                     </TableHead>
                     <TableHead>Cuotas ($)</TableHead>
                     <TableHead>Escuela (Aula)</TableHead>
-                    <TableHead>Vencimiento</TableHead>
                     <TableHead>Acciones</TableHead>
                 </TableRow>
             </TableHeader>
@@ -62,7 +64,24 @@ export function OrdersTable({ orders, search, onDelete }: OrdersTableProps) {
                 {orders.map((order) => (
                     <TableRow key={order.id}>
                         <TableCell className="font-medium">
-                            <Highlight text={String(order.id)} term={search} />
+                            {order.photo_number != null ? (
+                                <Highlight
+                                    text={String(order.photo_number)}
+                                    term={search}
+                                />
+                            ) : (
+                                '—'
+                            )}
+                        </TableCell>
+                        <TableCell>
+                            {order.child_name ? (
+                                <Highlight
+                                    text={order.child_name}
+                                    term={search}
+                                />
+                            ) : (
+                                '—'
+                            )}
                         </TableCell>
                         <TableCell>
                             <Highlight text={order.client.name} term={search} />
@@ -77,6 +96,14 @@ export function OrdersTable({ orders, search, onDelete }: OrdersTableProps) {
                             <div className="flex items-center gap-1">
                                 {order.products.length}
                                 <ProductsTooltip products={order.products} />
+                                {order.products.some(
+                                    (product) => product.priority,
+                                ) && (
+                                    <Flame
+                                        aria-label="Con prioridad"
+                                        className="h-4 w-4 text-destructive"
+                                    />
+                                )}
                             </div>
                         </TableCell>
                         <TableCell>{formatPrice(order.total_price)}</TableCell>
@@ -97,7 +124,6 @@ export function OrdersTable({ orders, search, onDelete }: OrdersTableProps) {
                             </Link>{' '}
                             ({order.classroom.name})
                         </TableCell>
-                        <TableCell>{order.due_date}</TableCell>
                         <TableCell className="flex gap-2">
                             <Link
                                 className={cn(

@@ -82,6 +82,13 @@ it('finds an order by the child name', function () {
     expect(searchedOrderIds('Joaquín'))->toBe([$order->id]);
 });
 
+it('finds an order by the child order number in its classroom', function () {
+    $order = orderFor('Carla López', '3804000003', ['photo_number' => 12]);
+    orderFor('Otro Cliente', '3804999999', ['photo_number' => 34]);
+
+    expect(searchedOrderIds('12'))->toBe([$order->id]);
+});
+
 it('still finds an order by its number', function () {
     $order = orderFor('Carla López', '3804000003');
 
