@@ -35,8 +35,8 @@ class OrderController extends Controller
         /** @var 'asc'|'desc' sort_order */
         $sort_order = $request->query('sort_order') ?? 'asc';
 
-        /** @var int|null $school_id */
-        $school_id = $request->query('school_id');
+        $school_id = $request->filled('school_id') ? $request->integer('school_id') : null;
+        $classroom_id = $request->filled('classroom_id') ? $request->integer('classroom_id') : null;
 
         $schools = School::query()
             ->with(['classrooms'])
@@ -45,13 +45,8 @@ class OrderController extends Controller
 
         $orders = Order::with('client', 'products.type', 'classroom.school')
             ->search($search)
-            ->whereHas('classroom', function ($query) use ($school_id) {
-                if (empty($school_id)) {
-                    return $query;
-                }
-
-                return $query->where('classrooms.school_id', $school_id);
-            })
+            ->forSchool($school_id)
+            ->forClassroom($classroom_id)
             ->orderBy($sort_by, $sort_order)
             ->paginate(20)
             ->withQueryString();
@@ -59,7 +54,11 @@ class OrderController extends Controller
         return Inertia::render('orders/index', [
             'orders' => OrderResource::collection($orders),
             'schools' => $schools,
-            'filters' => ['search' => $search],
+            'filters' => [
+                'search' => $search,
+                'school_id' => $school_id,
+                'classroom_id' => $classroom_id,
+            ],
         ]);
     }
 

@@ -7,27 +7,42 @@ import {
 } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { Link } from '@inertiajs/react';
-import { Edit } from 'lucide-react';
+import { Edit, ShoppingCart } from 'lucide-react';
 import { type SchoolShowData } from '../hooks/use-school-show';
 
 export function SchoolInfoCard({ school }: { school: SchoolShowData }) {
     return (
         <section className="px-6 pt-6">
             <Card className="relative max-w-106.25">
-                <Link
-                    href={route('schools.edit', {
-                        school: school.id,
-                    })}
-                    className={cn(
-                        'absolute top-4 right-4',
-                        buttonVariants({
-                            size: 'sm',
-                            variant: 'warning',
-                        }),
-                    )}
-                >
-                    <Edit />
-                </Link>
+                <div className="absolute top-4 right-4 flex gap-2">
+                    <Link
+                        href={route('orders.index', {
+                            school_id: school.id,
+                        })}
+                        className={cn(
+                            buttonVariants({
+                                size: 'sm',
+                                variant: 'outline',
+                            }),
+                        )}
+                    >
+                        <ShoppingCart />
+                        Ver pedidos
+                    </Link>
+                    <Link
+                        href={route('schools.edit', {
+                            school: school.id,
+                        })}
+                        className={cn(
+                            buttonVariants({
+                                size: 'sm',
+                                variant: 'warning',
+                            }),
+                        )}
+                    >
+                        <Edit />
+                    </Link>
+                </div>
                 <CardHeader>
                     <CardDescription>{school.user.name}</CardDescription>
                     <CardTitle>

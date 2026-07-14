@@ -1,15 +1,7 @@
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import {
-    Edit,
-    RectangleHorizontal,
-    RectangleVertical,
-    Square,
-    Trash,
-    User,
-    Users,
-} from 'lucide-react';
+import { Edit, Trash } from 'lucide-react';
 import { OrderFormData } from '../form-state';
+import { VariantBadges } from './variant-badges';
 
 interface ProductListItemProps {
     detail: OrderFormData['order_details'][number];
@@ -31,31 +23,7 @@ export function ProductListItem({
             <div className="flex min-w-0 flex-col gap-2">
                 <span>{product.name}</span>
                 {product.product_type_id === 1 ? (
-                    <div className="flex items-center">
-                        <Badge variant="outline" className="gap-1 rounded-lg">
-                            <Square
-                                className="h-4 w-4"
-                                style={{ fill: detail.variant?.color }}
-                            />
-                        </Badge>
-                        <Badge variant="outline" className="rounded-lg">
-                            {detail.variant?.background}
-                        </Badge>
-                        <Badge variant="outline" className="rounded-lg">
-                            {detail.variant?.photo_type === 'individual' ? (
-                                <User className="h-4 w-4" />
-                            ) : (
-                                <Users className="h-4 w-4" />
-                            )}
-                        </Badge>
-                        <Badge variant="outline" className="rounded-lg">
-                            {detail.variant?.orientation === 'vertical' ? (
-                                <RectangleVertical className="h-4 w-4" />
-                            ) : (
-                                <RectangleHorizontal className="h-4 w-4" />
-                            )}
-                        </Badge>
-                    </div>
+                    <VariantBadges variant={detail.variant} />
                 ) : undefined}
             </div>
             <div className="flex gap-1">

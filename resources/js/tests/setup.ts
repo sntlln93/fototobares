@@ -14,8 +14,8 @@ vi.stubGlobal(
     },
 );
 
-// jsdom does not implement the pointer-capture and scrolling APIs that
-// Radix Select relies on to open its listbox
+// jsdom does not implement scrollIntoView (required by cmdk's command
+// list) nor the pointer-capture APIs Radix Select needs to open its listbox
 Element.prototype.scrollIntoView = vi.fn();
 Element.prototype.hasPointerCapture = vi.fn(() => false);
 Element.prototype.releasePointerCapture = vi.fn();
