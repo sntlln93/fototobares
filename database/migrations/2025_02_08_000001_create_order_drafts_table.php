@@ -16,6 +16,7 @@ return new class extends Migration
         Schema::create('order_drafts', function (Blueprint $table) {
             $table->id();
             $table->foreignId('classroom_id')->constrained();
+            $table->integer('photo_number')->nullable();
             $table->string('child_name')->nullable();
             $table->string('client_name')->nullable();
             $table->string('client_phone')->nullable();
