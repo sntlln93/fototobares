@@ -71,6 +71,7 @@ export function ClassroomsTable({
                         <TableHead>
                             <div className="flex items-center gap-2">Niños</div>
                         </TableHead>
+                        <TableHead>Pedidos</TableHead>
 
                         <TableHead>Acciones</TableHead>
                     </TableRow>
@@ -96,6 +97,21 @@ export function ClassroomsTable({
                                     )}
                                 >
                                     Ver alumnos
+                                </Link>
+                            </TableCell>
+                            <TableCell>
+                                <Link
+                                    href={route('orders.index', {
+                                        classroom_id: classroom.id,
+                                    })}
+                                    className={cn(
+                                        buttonVariants({
+                                            size: 'sm',
+                                            variant: 'outline',
+                                        }),
+                                    )}
+                                >
+                                    Ver pedidos
                                 </Link>
                             </TableCell>
 

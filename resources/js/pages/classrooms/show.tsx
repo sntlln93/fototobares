@@ -10,7 +10,7 @@ import AppLayout from '@/layouts/app-layout';
 import { cn } from '@/lib/utils';
 import { BreadcrumbItem } from '@/types';
 import { Head, Link } from '@inertiajs/react';
-import { ArrowLeft, ImagePlus } from 'lucide-react';
+import { ArrowLeft, ImagePlus, ShoppingCart } from 'lucide-react';
 import { StudentsTable } from './components/students-table';
 
 export default function ClassroomShow({
@@ -43,20 +43,35 @@ export default function ClassroomShow({
 
             <section className="px-6 pt-6">
                 <Card className="relative max-w-106.25">
-                    <Link
-                        href={route('schools.show', {
-                            school: classroom.school.id,
-                        })}
-                        className={cn(
-                            'absolute top-4 right-4',
-                            buttonVariants({
-                                size: 'sm',
-                                variant: 'outline',
-                            }),
-                        )}
-                    >
-                        <ArrowLeft />
-                    </Link>
+                    <div className="absolute top-4 right-4 flex gap-2">
+                        <Link
+                            href={route('orders.index', {
+                                classroom_id: classroom.id,
+                            })}
+                            className={cn(
+                                buttonVariants({
+                                    size: 'sm',
+                                    variant: 'outline',
+                                }),
+                            )}
+                        >
+                            <ShoppingCart />
+                            Ver pedidos
+                        </Link>
+                        <Link
+                            href={route('schools.show', {
+                                school: classroom.school.id,
+                            })}
+                            className={cn(
+                                buttonVariants({
+                                    size: 'sm',
+                                    variant: 'outline',
+                                }),
+                            )}
+                        >
+                            <ArrowLeft />
+                        </Link>
+                    </div>
                     <CardHeader>
                         <CardDescription>
                             {classroom.school.name}
