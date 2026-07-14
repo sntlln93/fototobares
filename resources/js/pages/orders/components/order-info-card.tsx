@@ -13,6 +13,7 @@ import { Link } from '@inertiajs/react';
 import { Ban, Edit2 } from 'lucide-react';
 
 const STATUS_STYLES: Record<string, string> = {
+    'sin habilitar': 'bg-zinc-400 hover:bg-zinc-400',
     pendiente: 'bg-gray-500 hover:bg-gray-500',
     'en producción': 'bg-blue-600 hover:bg-blue-600',
     terminado: 'bg-violet-600 hover:bg-violet-600',

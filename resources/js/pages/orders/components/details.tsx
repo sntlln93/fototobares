@@ -11,9 +11,12 @@ import { ProductIcon } from '@/features/product-icon';
 import { capitalize, formatPrice } from '@/lib/utils';
 import { Flame } from 'lucide-react';
 import { useDetailPriority } from '../hooks/use-detail-priority';
+import { useDetailProductionStatus } from '../hooks/use-detail-production-status';
+import { ProductionStatusControl } from './production-status-control';
 
 export function Details({ order }: { order: Order }) {
     const { toggle } = useDetailPriority(order.id);
+    const { setStatus } = useDetailProductionStatus(order.id);
     const products = order.products || [];
     const isCancelled = Boolean(order.cancelled_at);
 
@@ -39,6 +42,12 @@ export function Details({ order }: { order: Order }) {
                                     !product.priority,
                                 )
                             }
+                            firstInstallmentPaid={Boolean(
+                                order.first_installment_paid,
+                            )}
+                            onStatusChange={(statusId) =>
+                                setStatus(product.order_detail_id, statusId)
+                            }
                         />
                     ))
                 ) : (
@@ -56,10 +65,14 @@ function DetailItem({
     product,
     canPrioritize,
     onTogglePriority,
+    firstInstallmentPaid,
+    onStatusChange,
 }: {
     product: OrderProduct;
     canPrioritize: boolean;
     onTogglePriority: () => void;
+    firstInstallmentPaid: boolean;
+    onStatusChange: (statusId: number | null) => void;
 }) {
     return (
         <div
@@ -111,7 +124,9 @@ function DetailItem({
                         </Badge>
                     ) : (
                         <Badge variant="outline">
-                            {product.production_status ?? 'Sin empezar'}
+                            {product.production_enabled
+                                ? (product.production_status ?? 'Sin empezar')
+                                : 'Sin habilitar'}
                         </Badge>
                     )}
                     {product.note && (
@@ -121,15 +136,24 @@ function DetailItem({
                     )}
                 </div>
                 {canPrioritize && (
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        className="mt-2 h-auto px-2 py-1 text-xs"
-                        onClick={onTogglePriority}
-                    >
-                        <Flame className="mr-1 h-3 w-3" />
-                        {product.priority ? 'Quitar prioridad' : 'Priorizar'}
-                    </Button>
+                    <>
+                        <ProductionStatusControl
+                            product={product}
+                            firstInstallmentPaid={firstInstallmentPaid}
+                            onChange={onStatusChange}
+                        />
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            className="mt-2 h-auto px-2 py-1 text-xs"
+                            onClick={onTogglePriority}
+                        >
+                            <Flame className="mr-1 h-3 w-3" />
+                            {product.priority
+                                ? 'Quitar prioridad'
+                                : 'Priorizar'}
+                        </Button>
+                    </>
                 )}
             </div>
         </div>

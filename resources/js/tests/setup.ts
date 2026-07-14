@@ -14,6 +14,12 @@ vi.stubGlobal(
     },
 );
 
+// jsdom does not implement the pointer-capture and scrolling APIs that
+// Radix Select relies on to open its listbox
+Element.prototype.scrollIntoView = vi.fn();
+Element.prototype.hasPointerCapture = vi.fn(() => false);
+Element.prototype.releasePointerCapture = vi.fn();
+
 // jsdom does not implement matchMedia, required by the sidebar's
 // useIsMobile hook and other responsive components
 Object.defineProperty(window, 'matchMedia', {

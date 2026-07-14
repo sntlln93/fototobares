@@ -29,6 +29,9 @@ const makeProduct = (overrides: Partial<OrderProduct> = {}): OrderProduct =>
         recycled_to: null,
         priority: false,
         production_status: 'Impreso',
+        production_status_id: 21,
+        production_enabled: true,
+        statuses: [{ id: 21, name: 'Impreso', position: 1 }],
         ...overrides,
     }) as unknown as OrderProduct;
 
@@ -40,6 +43,7 @@ const makeOrder = (
         id: 1,
         products,
         cancelled_at: null,
+        first_installment_paid: true,
         ...overrides,
     }) as unknown as Order;
 
@@ -104,5 +108,51 @@ describe('Details', () => {
         );
 
         expect(screen.queryByText('Priorizar')).toBeNull();
+    });
+
+    it('shows "Sin habilitar" and enables production from the badge area', () => {
+        render(
+            <Details
+                order={makeOrder([
+                    makeProduct({
+                        production_enabled: false,
+                        production_status: null,
+                        production_status_id: null,
+                    }),
+                ])}
+            />,
+        );
+
+        expect(screen.getByText('Sin habilitar')).toBeTruthy();
+
+        fireEvent.click(screen.getByText('Habilitar fabricación'));
+
+        expect(put).toHaveBeenCalledWith(
+            'http://localhost/orders.production-status/1',
+            { detail_id: 11, production_status_id: null },
+            expect.anything(),
+        );
+    });
+
+    it('only explains the gate while the first installment is unpaid', () => {
+        render(
+            <Details
+                order={makeOrder(
+                    [
+                        makeProduct({
+                            production_enabled: false,
+                            production_status: null,
+                            production_status_id: null,
+                        }),
+                    ],
+                    { first_installment_paid: false },
+                )}
+            />,
+        );
+
+        expect(screen.queryByText('Habilitar fabricación')).toBeNull();
+        expect(
+            screen.getByText(/se habilita cuando la primera cuota está paga/),
+        ).toBeTruthy();
     });
 });
