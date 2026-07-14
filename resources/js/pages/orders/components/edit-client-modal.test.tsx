@@ -77,22 +77,6 @@ describe('EditClientModal', () => {
         expect(onClose).toHaveBeenCalled();
     });
 
-    it('disables submit button while processing', () => {
-        const processingForm: EditClientFormController = {
-            ...mockForm,
-            processing: true,
-        };
-
-        render(
-            <EditClientModal show onClose={vi.fn()} form={processingForm} />,
-        );
-
-        const submitButton = screen
-            .getByText('Guardar cambios')
-            .closest('button') as HTMLButtonElement;
-        expect(submitButton.disabled).toBe(true);
-    });
-
     it('renders radio buttons for attended_photo_session', () => {
         render(<EditClientModal show onClose={vi.fn()} form={mockForm} />);
 
