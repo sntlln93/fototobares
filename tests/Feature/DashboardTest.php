@@ -67,3 +67,54 @@ it('does not list fully paid orders as overdue', function () {
         fn (Assert $page) => $page->has('overdueOrders', 0),
     );
 });
+
+it('does not list an order that paid every installment already due', function () {
+    actingAsRole();
+
+    // Venció la primera cuota; la segunda vence recién el mes que viene
+    $upToDate = Order::factory()->create([
+        'total_price' => 20000,
+        'payment_plan' => 4,
+        'due_date' => now()->subDays(10)->format('Y-m-d'),
+    ]);
+    Payment::factory()->create(['order_id' => $upToDate->id, 'amount' => 5000]);
+
+    get(route('dashboard'))->assertInertia(
+        fn (Assert $page) => $page->has('overdueOrders', 0),
+    );
+});
+
+it('lists an order that fell behind on a later installment', function () {
+    actingAsRole();
+
+    // Vencieron tres cuotas (mes a mes desde el primer vencimiento), pagó una
+    $behind = Order::factory()->create([
+        'total_price' => 20000,
+        'payment_plan' => 4,
+        'due_date' => now()->subMonths(2)->subDays(10)->format('Y-m-d'),
+    ]);
+    Payment::factory()->create(['order_id' => $behind->id, 'amount' => 5000]);
+
+    get(route('dashboard'))->assertInertia(
+        fn (Assert $page) => $page
+            ->has('overdueOrders', 1)
+            ->where('overdueOrders.0.id', $behind->id)
+            ->where('overdueOrders.0.balance', 15000),
+    );
+});
+
+it('stops counting installments once the plan is complete', function () {
+    actingAsRole();
+
+    // Plan de 2 cuotas vencido hace un año: se debe el total, no más
+    $order = Order::factory()->create([
+        'total_price' => 10000,
+        'payment_plan' => 2,
+        'due_date' => now()->subYear()->format('Y-m-d'),
+    ]);
+    Payment::factory()->create(['order_id' => $order->id, 'amount' => 10000]);
+
+    get(route('dashboard'))->assertInertia(
+        fn (Assert $page) => $page->has('overdueOrders', 0),
+    );
+});
