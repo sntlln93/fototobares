@@ -3,8 +3,11 @@
 declare(strict_types=1);
 
 use App\Enums\UserRole;
+use App\Models\Classroom;
 use App\Models\Order;
 use App\Models\OrderDetail;
+use App\Models\Product;
+use App\Models\School;
 use App\Models\Stockable;
 use Inertia\Testing\AssertableInertia as Assert;
 
@@ -191,5 +194,55 @@ it('lists only enabled, pending details of active orders', function () {
             ->component('tracking/index')
             ->has('details', 1)
             ->where('details.0.id', $pending->id),
+    );
+});
+
+it('filters the board by classroom, narrower than its school', function () {
+    actingAsRole(UserRole::Worker);
+
+    $school = School::factory()->create();
+    $classroom = Classroom::factory()->create(['school_id' => $school->id]);
+    $sibling = Classroom::factory()->create(['school_id' => $school->id]);
+
+    $detail = OrderDetail::factory()->enabled()->create([
+        'order_id' => Order::factory()->create(['classroom_id' => $classroom->id])->id,
+    ]);
+    OrderDetail::factory()->enabled()->create([
+        'order_id' => Order::factory()->create(['classroom_id' => $sibling->id])->id,
+    ]);
+    OrderDetail::factory()->enabled()->create();
+
+    get(route('tracking.index', ['school_id' => $school->id]))->assertInertia(
+        fn (Assert $page) => $page->has('details', 2),
+    );
+
+    get(route('tracking.index', ['classroom_id' => $classroom->id]))->assertInertia(
+        fn (Assert $page) => $page
+            ->has('details', 1)
+            ->where('details.0.id', $detail->id),
+    );
+});
+
+it('combines the classroom filter with the product type filter', function () {
+    actingAsRole(UserRole::Worker);
+
+    $classroom = Classroom::factory()->create();
+    $order = Order::factory()->create(['classroom_id' => $classroom->id]);
+
+    $mural = Product::factory()->mural()->create();
+    $detail = OrderDetail::factory()->enabled()->create([
+        'order_id' => $order->id,
+        'product_id' => $mural->id,
+    ]);
+    // Same classroom, default product type (taza): the type filter drops it
+    OrderDetail::factory()->enabled()->create(['order_id' => $order->id]);
+
+    get(route('tracking.index', [
+        'classroom_id' => $classroom->id,
+        'product_type_id' => $mural->product_type_id,
+    ]))->assertInertia(
+        fn (Assert $page) => $page
+            ->has('details', 1)
+            ->where('details.0.id', $detail->id),
     );
 });
