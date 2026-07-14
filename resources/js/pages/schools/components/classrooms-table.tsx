@@ -11,7 +11,7 @@ import { Searchbar } from '@/features/searchbar';
 import { onSort } from '@/lib/services/filter';
 import { cn } from '@/lib/utils';
 import { Link } from '@inertiajs/react';
-import { ArrowUpDown, Edit2, Plus, Trash } from 'lucide-react';
+import { ArrowUpDown, Edit2, Plus, ShoppingCart, Trash } from 'lucide-react';
 import {
     type SchoolShowController,
     type SchoolShowData,
@@ -100,6 +100,20 @@ export function ClassroomsTable({
                             </TableCell>
 
                             <TableCell className="flex gap-2">
+                                <Link
+                                    aria-label="Ver pedidos"
+                                    href={route('orders.index', {
+                                        classroom_id: classroom.id,
+                                    })}
+                                    className={cn(
+                                        buttonVariants({
+                                            size: 'sm',
+                                            variant: 'outline',
+                                        }),
+                                    )}
+                                >
+                                    <ShoppingCart />
+                                </Link>
                                 <Button
                                     variant="warning"
                                     size="sm"

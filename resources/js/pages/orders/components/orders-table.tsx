@@ -13,6 +13,7 @@ import { onSort } from '@/lib/services/filter';
 import { cn, formatPrice } from '@/lib/utils';
 import { Link } from '@inertiajs/react';
 import { ArrowUpDown, Eye, Trash } from 'lucide-react';
+import { ProductsTooltip } from './products-tooltip';
 
 interface OrdersTableProps {
     orders: Order[];
@@ -72,7 +73,12 @@ export function OrdersTable({ orders, search, onDelete }: OrdersTableProps) {
                                 term={search}
                             />
                         </TableCell>
-                        <TableCell>{order.products.length}</TableCell>
+                        <TableCell>
+                            <div className="flex items-center gap-1">
+                                {order.products.length}
+                                <ProductsTooltip products={order.products} />
+                            </div>
+                        </TableCell>
                         <TableCell>{formatPrice(order.total_price)}</TableCell>
                         <TableCell>
                             {order.payment_plan} (
