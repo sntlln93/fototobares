@@ -1,8 +1,9 @@
 import { expect, test } from '@playwright/test';
 
 // Order #2 (Bruno Díaz / Thiago): the Clásico was glued, so 2 MDF boards were
-// deducted — cancelling it back to stock must return them; the carpeta goes
-// to the recycling bin.
+// deducted and 1 "armado" was produced — cancelling it back to stock must
+// return the boards and subtract the armado back out; the carpeta goes to
+// the recycling bin.
 test('cancelling returns supplies to stock and lists recycled products', async ({
     page,
 }) => {
@@ -38,6 +39,15 @@ test('cancelling returns supplies to stock and lists recycled products', async (
             .getByRole('row')
             .filter({ hasText: 'Planchas de MDF' })
             .filter({ hasText: 'Devolución por cancelación' })
+            .first(),
+    ).toBeVisible();
+
+    // The armado it had produced is subtracted back out
+    await expect(
+        page
+            .getByRole('row')
+            .filter({ hasText: 'Murales armados' })
+            .filter({ hasText: 'Ajuste por cancelación' })
             .first(),
     ).toBeVisible();
 });

@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { FormEvent, useState } from 'react';
 import { StatusRow } from '../hooks/use-status-actions';
+import { StockableDeltaList } from './stockable-delta-list';
 
 export function StatusItem({
     status,
@@ -93,13 +94,7 @@ export function StatusItem({
             </Badge>
             <div className="flex min-w-32 flex-1 flex-col">
                 <span className="text-sm">{status.name}</span>
-                {consumes && (
-                    <span className="text-xs text-gray-500">
-                        {status.stockables
-                            .map((s) => `${s.quantity}× ${s.name}`)
-                            .join(' · ')}
-                    </span>
-                )}
+                <StockableDeltaList stockables={status.stockables} />
             </div>
             {inUse && (
                 <span
@@ -131,7 +126,7 @@ export function StatusItem({
                 <Button
                     size="sm"
                     variant="ghost"
-                    title="Insumos que consume esta etapa"
+                    title="Insumos que mueve esta etapa"
                     onClick={onEditConsumption}
                 >
                     <Package className="h-4 w-4" />
@@ -154,7 +149,7 @@ export function StatusItem({
                             : inUse
                               ? 'Hay productos en esta etapa'
                               : consumes
-                                ? 'Esta etapa consume insumos'
+                                ? 'Esta etapa mueve insumos'
                                 : 'Eliminar'
                     }
                     onClick={onDelete}

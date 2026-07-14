@@ -17,9 +17,9 @@ class MoveDetailsToStage implements ActionContract
     public function __construct(private StockService $stockService) {}
 
     /**
-     * Move the given details to a production stage, deducting stock for every
-     * stage reached. Rejects the batch if any detail's product does not own the
-     * stage.
+     * Move the given details to a production stage, applying the stock deltas
+     * hung from every stage reached. Rejects the batch if any detail's product
+     * does not own the stage.
      *
      * @param  array<string, mixed>  $params  {detail_ids: array<int, int>, status: ProductionStatus, user: ?User}
      * @return int the number of details updated
@@ -60,7 +60,7 @@ class MoveDetailsToStage implements ActionContract
                 $detail->save();
                 $detail->setRelation('productionStatus', $status);
 
-                $this->stockService->deductForDetail($detail, $user);
+                $this->stockService->applyForDetail($detail, $user);
             }
         });
 

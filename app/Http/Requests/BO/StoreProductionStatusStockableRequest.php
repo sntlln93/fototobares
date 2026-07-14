@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\BO;
 
-use App\Models\ProductionStatus;
+use App\Enums\StockDirection;
 use Illuminate\Contracts\Validation\ValidationRule;
-use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreProductionStatusStockableRequest extends FormRequest
 {
@@ -29,40 +29,18 @@ class StoreProductionStatusStockableRequest extends FormRequest
         return [
             'stockable_id' => ['required', 'integer', 'exists:stockables,id'],
             'quantity' => ['required', 'integer', 'min:1'],
+            'direction' => ['required', Rule::enum(StockDirection::class)],
         ];
     }
 
     /**
-     * A stockable can be consumed by at most one stage of a product,
-     * so the deduction stays idempotent per (detail, stockable).
-     *
-     * @return array<int, callable>
+     * Signed pivot delta: positive to add stock, negative to consume it.
      */
-    public function after(): array
+    public function delta(): int
     {
-        return [
-            function (Validator $validator) {
-                if ($validator->errors()->isNotEmpty()) {
-                    return;
-                }
+        $quantity = $this->integer('quantity');
+        $direction = StockDirection::from($this->string('direction')->toString());
 
-                /** @var ProductionStatus $status */
-                $status = $this->route('productionStatus');
-
-                $conflict = ProductionStatus::query()
-                    ->where('product_id', $status->product_id)
-                    ->whereKeyNot($status->id)
-                    ->whereHas('stockables', fn ($query) => $query
-                        ->where('stockables.id', $this->integer('stockable_id')))
-                    ->first();
-
-                if ($conflict !== null) {
-                    $validator->errors()->add(
-                        'stockable_id',
-                        "Este insumo ya se consume en la etapa \"{$conflict->name}\" de este producto.",
-                    );
-                }
-            },
-        ];
+        return $direction === StockDirection::Add ? $quantity : -$quantity;
     }
 }

@@ -17,7 +17,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('production_status_id')->constrained()->cascadeOnDelete();
             $table->foreignId('stockable_id')->constrained()->cascadeOnDelete();
-            $table->unsignedInteger('quantity')->default(1);
+            $table->integer('quantity');
             $table->unique(['production_status_id', 'stockable_id'], 'status_stockable_unique');
             $table->timestamps();
         });

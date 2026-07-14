@@ -17,20 +17,17 @@ class ProductionStatusStockableController extends Controller
      */
     public function store(StoreProductionStatusStockableRequest $request, ProductionStatus $productionStatus): RedirectResponse
     {
-        /** @var array{stockable_id: int, quantity: int} $validated */
-        $validated = $request->validated();
-
         $productionStatus->stockables()->syncWithoutDetaching([
-            $validated['stockable_id'] => ['quantity' => $validated['quantity']],
+            $request->integer('stockable_id') => ['quantity' => $request->delta()],
         ]);
 
-        return back()->with('success', 'Consumo de insumo guardado');
+        return back()->with('success', 'Movimiento de insumo guardado');
     }
 
     public function destroy(ProductionStatus $productionStatus, Stockable $stockable): RedirectResponse
     {
         $productionStatus->stockables()->detach($stockable->id);
 
-        return back()->with('success', 'Consumo de insumo quitado');
+        return back()->with('success', 'Movimiento de insumo quitado');
     }
 }

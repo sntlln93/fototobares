@@ -22,7 +22,9 @@ class ProductionStatus extends Model
     }
 
     /**
-     * Stockables consumed when a detail reaches this stage.
+     * Stockables whose stock moves when a detail reaches this stage.
+     * Pivot quantity is a signed delta: positive adds stock, negative
+     * consumes it.
      *
      * @return BelongsToMany<Stockable, $this>
      */

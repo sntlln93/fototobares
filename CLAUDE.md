@@ -96,7 +96,7 @@ Request flow: thin controller (`app/Http/Controllers/BO/`) → dedicated `FormRe
 
 ### Production domain (the non-obvious part)
 
-Production stages belong to a **product** (`production_statuses.product_id`), not a product type. Stock consumption is configured per stage via the `production_status_stockable` pivot (stage, stockable, quantity). Advancing an order detail through stages deducts the configured amounts for every stage reached (cumulative on jumps), recorded in `stock_movements` and idempotent per (detail, stockable). Cancellation returns stock exactly per recorded movements. A stockable may hang off only one stage per product. New products are born with a single "Terminado" stage (`CreateProduct` action).
+Production stages belong to a **product** (`production_statuses.product_id`), not a product type. Stock moves are configured per stage via the `production_status_stockable` pivot (stage, stockable, signed quantity — positive adds stock, negative consumes it), mirroring `stock_movements.quantity`. Advancing an order detail through stages applies the configured deltas for every stage reached (cumulative on jumps), recorded in `stock_movements` and idempotent per (detail, stage, stockable) — the same stockable can be produced by one stage and consumed by another on the same product. Cancelling to `stock` reverses the net balance in both directions (returning net-consumed inputs, subtracting back net-produced intermediates); cancelling to `reciclaje` leaves everything as-is, so produced intermediates stay in stock. New products are born with a single "Terminado" stage (`CreateProduct` action).
 
 ### Frontend structure
 

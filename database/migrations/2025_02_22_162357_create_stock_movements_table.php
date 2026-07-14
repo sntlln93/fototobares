@@ -17,6 +17,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('stockable_id')->constrained()->cascadeOnDelete();
             $table->foreignId('order_detail_id')->nullable()->constrained('order_details')->nullOnDelete();
+            $table->foreignId('production_status_id')->nullable()->constrained()->nullOnDelete();
             $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
             $table->integer('quantity');
             $table->string('reason');

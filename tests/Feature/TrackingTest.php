@@ -89,8 +89,8 @@ it('deducts the stockables hung from the reached stages', function () {
     $product = productWithChain(['Pendiente', 'Corte', 'Embolsado']);
     $tiras = Stockable::factory()->create(['quantity' => 10]);
     $bolsas = Stockable::factory()->create(['quantity' => 10]);
-    stageOf($product, 2)->stockables()->attach($tiras->id, ['quantity' => 2]);
-    stageOf($product, 3)->stockables()->attach($bolsas->id, ['quantity' => 1]);
+    stageOf($product, 2)->stockables()->attach($tiras->id, ['quantity' => -2]);
+    stageOf($product, 3)->stockables()->attach($bolsas->id, ['quantity' => -1]);
 
     $detail = OrderDetail::factory()->create(['product_id' => $product->id]);
 
@@ -130,8 +130,8 @@ it('deducts the skipped stages on a batch jump', function () {
     $product = productWithChain(['Pendiente', 'Corte', 'Embolsado']);
     $tiras = Stockable::factory()->create(['quantity' => 10]);
     $bolsas = Stockable::factory()->create(['quantity' => 10]);
-    stageOf($product, 2)->stockables()->attach($tiras->id, ['quantity' => 2]);
-    stageOf($product, 3)->stockables()->attach($bolsas->id, ['quantity' => 1]);
+    stageOf($product, 2)->stockables()->attach($tiras->id, ['quantity' => -2]);
+    stageOf($product, 3)->stockables()->attach($bolsas->id, ['quantity' => -1]);
 
     $detail = OrderDetail::factory()->create(['product_id' => $product->id]);
 
@@ -150,7 +150,7 @@ it('never deducts twice when moving back and forth', function () {
 
     $product = productWithChain(['Pendiente', 'Corte', 'Embolsado']);
     $tiras = Stockable::factory()->create(['quantity' => 10]);
-    stageOf($product, 2)->stockables()->attach($tiras->id, ['quantity' => 2]);
+    stageOf($product, 2)->stockables()->attach($tiras->id, ['quantity' => -2]);
 
     $detail = OrderDetail::factory()->create(['product_id' => $product->id]);
 
@@ -175,6 +175,80 @@ it('never deducts twice when moving back and forth', function () {
 
     expect($tiras->refresh()->quantity)->toBe(8)
         ->and($tiras->movements()->count())->toBe(1);
+});
+
+it('adds stock for a stage with a positive delta', function () {
+    actingAsRole(UserRole::Worker);
+
+    $product = productWithChain(['Pegado', 'Pintado']);
+    $armados = Stockable::factory()->create(['quantity' => 0]);
+    stageOf($product, 1)->stockables()->attach($armados->id, ['quantity' => 1]);
+
+    $detail = OrderDetail::factory()->create(['product_id' => $product->id]);
+
+    post(route('tracking.batch'), [
+        'detail_ids' => [$detail->id],
+        'production_status_id' => stageOf($product, 1)->id,
+    ]);
+
+    expect($armados->refresh()->quantity)->toBe(1)
+        ->and($armados->movements()->count())->toBe(1)
+        ->and($armados->movements()->first()?->quantity)->toBe(1)
+        ->and($armados->movements()->first()?->production_status_id)->toBe(stageOf($product, 1)->id);
+});
+
+it('mixes a subtraction and an addition on the same stage', function () {
+    actingAsRole(UserRole::Worker);
+
+    $product = productWithChain(['Pegado']);
+    $mdf = Stockable::factory()->create(['quantity' => 10]);
+    $armados = Stockable::factory()->create(['quantity' => 0]);
+    stageOf($product, 1)->stockables()->attach($mdf->id, ['quantity' => -2]);
+    stageOf($product, 1)->stockables()->attach($armados->id, ['quantity' => 1]);
+
+    $detail = OrderDetail::factory()->create(['product_id' => $product->id]);
+
+    post(route('tracking.batch'), [
+        'detail_ids' => [$detail->id],
+        'production_status_id' => stageOf($product, 1)->id,
+    ]);
+
+    expect($mdf->refresh()->quantity)->toBe(8)
+        ->and($armados->refresh()->quantity)->toBe(1);
+});
+
+it('stays idempotent per stage across a pipeline of adds and subtracts', function () {
+    actingAsRole(UserRole::Worker);
+
+    $product = productWithChain(['Pendiente', 'Pegado', 'Pintado']);
+    $armados = Stockable::factory()->create(['quantity' => 0]);
+    stageOf($product, 2)->stockables()->attach($armados->id, ['quantity' => 1]);
+    stageOf($product, 3)->stockables()->attach($armados->id, ['quantity' => -1]);
+
+    $detail = OrderDetail::factory()->create(['product_id' => $product->id]);
+
+    // Jumping straight to the last stage applies both stages exactly once
+    post(route('tracking.batch'), [
+        'detail_ids' => [$detail->id],
+        'production_status_id' => stageOf($product, 3)->id,
+    ]);
+
+    expect($armados->refresh()->quantity)->toBe(0)
+        ->and($armados->movements()->count())->toBe(2);
+
+    // Going back and forward again does not apply either stage twice
+    post(route('tracking.batch'), [
+        'detail_ids' => [$detail->id],
+        'production_status_id' => stageOf($product, 1)->id,
+    ]);
+
+    post(route('tracking.batch'), [
+        'detail_ids' => [$detail->id],
+        'production_status_id' => stageOf($product, 3)->id,
+    ]);
+
+    expect($armados->refresh()->quantity)->toBe(0)
+        ->and($armados->movements()->count())->toBe(2);
 });
 
 it('lists only enabled, pending details of active orders', function () {

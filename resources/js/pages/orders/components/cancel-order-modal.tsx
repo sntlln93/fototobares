@@ -70,7 +70,8 @@ export function CancelOrderModal({
                 <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
                     Elegí a dónde vuelve cada producto. Si vuelve a stock, sus
                     insumos se devuelven al inventario; si va a reciclaje, queda
-                    listado en el módulo de reciclaje.
+                    listado en el módulo de reciclaje y lo ya producido queda en
+                    stock.
                 </p>
 
                 <ul className="mt-4 space-y-2">
