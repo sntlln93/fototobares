@@ -129,8 +129,9 @@ export default function StockMovements({
                         <CardHeader className="text-center">
                             <CardTitle>Sin movimientos</CardTitle>
                             <CardDescription>
-                                Los descuentos automáticos por producción y las
-                                devoluciones por cancelación van a aparecer acá.
+                                Los movimientos automáticos por producción y los
+                                ajustes o devoluciones por cancelación van a
+                                aparecer acá.
                             </CardDescription>
                         </CardHeader>
                     </Card>

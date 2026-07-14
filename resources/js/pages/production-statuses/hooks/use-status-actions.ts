@@ -1,10 +1,13 @@
 import { router } from '@inertiajs/react';
 import { toast } from 'sonner';
 
+export type StockDirection = 'subtract' | 'add';
+
 export type StageStockable = {
     id: number;
     name: string;
     unit: string;
+    /** Signed pivot delta: positive adds stock, negative consumes it. */
     quantity: number;
 };
 
@@ -79,17 +82,18 @@ export function useStatusActions(product: ProductStagesRow) {
         statusId: number,
         stockableId: number,
         quantity: number,
+        direction: StockDirection,
         onSuccess?: () => void,
     ) => {
         router.post(
             route('production-statuses.stockables.store', {
                 productionStatus: statusId,
             }),
-            { stockable_id: stockableId, quantity },
+            { stockable_id: stockableId, quantity, direction },
             {
                 preserveScroll: true,
                 onSuccess: () => {
-                    toast.success('Consumo de insumo guardado');
+                    toast.success('Movimiento de insumo guardado');
                     onSuccess?.();
                 },
                 onError,
@@ -105,7 +109,7 @@ export function useStatusActions(product: ProductStagesRow) {
             }),
             {
                 preserveScroll: true,
-                onSuccess: () => toast.success('Consumo de insumo quitado'),
+                onSuccess: () => toast.success('Movimiento de insumo quitado'),
                 onError,
             },
         );

@@ -49,11 +49,12 @@ export function ProductCard({
                 <ConsumptionDialog
                     status={consumptionStatus}
                     stockables={stockables}
-                    onAttach={(stockableId, quantity) =>
+                    onAttach={(stockableId, quantity, direction) =>
                         attachStockable(
                             consumptionStatus.id,
                             stockableId,
                             quantity,
+                            direction,
                         )
                     }
                     onDetach={(stockableId) =>
