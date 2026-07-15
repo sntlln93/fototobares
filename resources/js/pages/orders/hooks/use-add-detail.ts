@@ -1,10 +1,10 @@
+import { resolveVariantDefinitions } from '@/lib/variants';
 import { useState } from 'react';
 import {
     DetailFormData,
     DetailFormErrors,
     buildProductOrders,
     initialDetailFormData,
-    resolveVariants,
     validateDetailForm,
 } from '../detail-form';
 import { ProductOrder, SelectableProduct } from '../form';
@@ -15,6 +15,25 @@ interface UseAddDetailParams {
     onClose: () => void;
     initialValues?: ProductOrder[];
 }
+
+const clearProductError = (
+    errors: DetailFormErrors,
+    productId: number,
+    key: string,
+): DetailFormErrors => {
+    if (!errors[productId]?.[key]) {
+        return errors;
+    }
+
+    const remaining = { ...errors[productId] };
+    delete remaining[key];
+
+    return Object.keys(remaining).length > 0
+        ? { ...errors, [productId]: remaining }
+        : Object.fromEntries(
+              Object.entries(errors).filter(([id]) => Number(id) !== productId),
+          );
+};
 
 export function useAddDetail({
     products,
@@ -30,53 +49,38 @@ export function useAddDetail({
 
     const [currentStep, setCurrentStep] = useState<number>(0);
 
-    const getProductValue = <K extends keyof typeof productData>(
-        productId: number,
-        key: K,
-    ) => productData[key].find((item) => item.product_id === productId)?.value;
+    const getVariantValue = (productId: number, label: string) =>
+        productData[productId]?.values[label] ?? null;
 
-    const updateProductData = <K extends keyof typeof productData>(
-        key: K,
+    const setVariantValue = (
         productId: number,
-        value: (typeof productData)[K][number]['value'],
+        label: string,
+        value: string | null,
     ) => {
-        setProductData((prev) => {
-            const exists = prev[key].some(
-                (item) => item.product_id === productId,
-            );
+        setProductData((prev) => ({
+            ...prev,
+            [productId]: {
+                values: { ...prev[productId]?.values, [label]: value },
+                note: prev[productId]?.note ?? '',
+            },
+        }));
 
-            const updatedData = {
-                ...prev,
-                [key]: exists
-                    ? prev[key].map((item) =>
-                          item.product_id === productId
-                              ? { ...item, value }
-                              : item,
-                      )
-                    : [...prev[key], { product_id: productId, value }],
-            };
+        if (value) {
+            setErrors((prev) => clearProductError(prev, productId, label));
+        }
+    };
 
-            // Reset error if the new value is non-falsy
-            if (value) {
-                setErrors((prevErrors) => {
-                    if (!prevErrors[productId]) return prevErrors;
+    const getNote = (productId: number) => productData[productId]?.note ?? '';
 
-                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                    const { [key]: _, ...remainingErrors } =
-                        prevErrors[productId];
+    const setNote = (productId: number, note: string) => {
+        setProductData((prev) => ({
+            ...prev,
+            [productId]: { values: prev[productId]?.values ?? {}, note },
+        }));
 
-                    return Object.keys(remainingErrors).length > 0
-                        ? { ...prevErrors, [productId]: remainingErrors }
-                        : Object.fromEntries(
-                              Object.entries(prevErrors).filter(
-                                  ([id]) => Number(id) !== productId,
-                              ),
-                          );
-                });
-            }
-
-            return updatedData;
-        });
+        if (note) {
+            setErrors((prev) => clearProductError(prev, productId, 'note'));
+        }
     };
 
     const handleAddProduct = () => {
@@ -104,17 +108,19 @@ export function useAddDetail({
         }
     };
 
-    const getVariants = (step: typeof currentStep) =>
-        resolveVariants(products[step]);
+    const getDefinitions = (step: typeof currentStep) =>
+        resolveVariantDefinitions(products[step]);
 
     return {
         errors,
         currentStep,
-        getProductValue,
-        updateProductData,
+        getVariantValue,
+        setVariantValue,
+        getNote,
+        setNote,
         handleAddProduct,
         handleNextStep,
         handlePreviousStep,
-        getVariants,
+        getDefinitions,
     };
 }

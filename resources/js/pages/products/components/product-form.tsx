@@ -11,20 +11,18 @@ import {
 } from '@/components/ui/select';
 import { Link } from '@inertiajs/react';
 import { ProductFormController } from '../hooks/use-product-form';
-import { ProductVariantsFields } from './product-variants-fields';
+import { VariantsEditor } from './variants-editor';
 
 export function ProductForm({
     form,
     product_types,
     typeSelectProps,
     submitLabel,
-    renderColorLabel,
 }: {
     form: ProductFormController;
     product_types: ProductType[];
     typeSelectProps: { value?: string; defaultValue?: string };
     submitLabel: string;
-    renderColorLabel?: (value: Color) => string;
 }) {
     const { data, setData, processing, errors, submit } = form;
 
@@ -102,12 +100,7 @@ export function ProductForm({
                 <InputError message={errors.max_payments} className="mt-2" />
             </div>
 
-            {data.product_type_id === 1 ? (
-                <ProductVariantsFields
-                    form={form}
-                    renderColorLabel={renderColorLabel}
-                />
-            ) : undefined}
+            <VariantsEditor form={form} />
 
             <div className="mt-6 flex justify-end gap-3">
                 <Button variant="outline" asChild>

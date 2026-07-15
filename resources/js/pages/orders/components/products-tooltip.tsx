@@ -53,9 +53,7 @@ export function ProductsTooltip({ products }: { products: OrderProduct[] }) {
                                         Prioridad
                                     </Badge>
                                 )}
-                                {product.product_type_id === 1 && (
-                                    <VariantBadges variant={product.variant} />
-                                )}
+                                <VariantBadges variant={product.variant} />
                             </div>
                         </li>
                     ))}

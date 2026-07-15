@@ -1,48 +1,41 @@
 import { Badge } from '@/components/ui/badge';
-import {
-    RectangleHorizontal,
-    RectangleVertical,
-    Square,
-    User,
-    Users,
-} from 'lucide-react';
 
 /**
- * The mural variant chosen on an order detail, as badges. Accepts both the
- * create-form shape and the loosely-typed variant the API serializes.
+ * A detail's variant snapshot, as badges. A null value means the variant is
+ * nullable and still pending definition (#113).
  */
 export function VariantBadges({
     variant,
 }: {
-    variant?: {
-        color?: string;
-        background?: string;
-        photo_type?: string;
-        orientation?: string;
-    };
+    variant?: VariantSnapshotEntry[];
 }) {
+    if (!variant?.length) {
+        return null;
+    }
+
     return (
         <div className="flex flex-wrap items-center gap-1">
-            <Badge variant="outline" className="gap-1 rounded-lg">
-                <Square className="h-4 w-4" style={{ fill: variant?.color }} />
-            </Badge>
-            <Badge variant="outline" className="rounded-lg">
-                {variant?.background}
-            </Badge>
-            <Badge variant="outline" className="rounded-lg">
-                {variant?.photo_type === 'individual' ? (
-                    <User className="h-4 w-4" />
+            {variant.map((entry) =>
+                entry.value === null ? (
+                    <Badge variant="outline" key={entry.label}>
+                        A definir: {entry.label}
+                    </Badge>
                 ) : (
-                    <Users className="h-4 w-4" />
-                )}
-            </Badge>
-            <Badge variant="outline" className="rounded-lg">
-                {variant?.orientation === 'vertical' ? (
-                    <RectangleVertical className="h-4 w-4" />
-                ) : (
-                    <RectangleHorizontal className="h-4 w-4" />
-                )}
-            </Badge>
+                    <Badge
+                        variant="outline"
+                        className="gap-1"
+                        key={entry.label}
+                    >
+                        {entry.value.color && (
+                            <span
+                                className="h-3 w-3 rounded-full border border-black/10"
+                                style={{ backgroundColor: entry.value.color }}
+                            />
+                        )}
+                        {entry.value.label}
+                    </Badge>
+                ),
+            )}
         </div>
     );
 }

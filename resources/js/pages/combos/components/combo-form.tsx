@@ -20,25 +20,25 @@ export function ComboForm({ form, products, submitLabel }: ComboFormProps) {
         errors,
         processing,
         submit,
-        showAddMuralProduct,
+        variantsModalProduct,
         editingVariants,
         setAddProduct,
         openEditProductModal,
         updateQuantity,
         updateSubtractValue,
         addSelectedProduct,
-        closeMuralModal,
+        closeVariantsModal,
     } = form;
 
     return (
         <>
-            {showAddMuralProduct ? (
+            {variantsModalProduct ? (
                 <AddProduct
                     addProduct={addSelectedProduct}
-                    product={showAddMuralProduct}
+                    product={variantsModalProduct}
                     initialVariants={editingVariants}
-                    show={Boolean(showAddMuralProduct)}
-                    onClose={closeMuralModal}
+                    show={Boolean(variantsModalProduct)}
+                    onClose={closeVariantsModal}
                 />
             ) : undefined}
 

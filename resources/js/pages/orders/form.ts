@@ -1,10 +1,5 @@
 export type ProductOrder = {
-    variant?: {
-        orientation: ProductOrientation;
-        photo_type: ProductPhotoType;
-        background: string;
-        color: string;
-    };
+    variant?: VariantSelection;
     product_id: number;
     combo_id?: number;
     note: string;
@@ -14,8 +9,8 @@ export type ComboProductPivot = {
     quantity: number;
     /** How much the combo price drops when this product is taken out */
     subtract_value: number;
-    /** The combo may restrict the variants of the product; JSON as sent */
-    variants?: Product['variants'] | string | null;
+    /** The combo may restrict the product's variant options */
+    variants?: ComboVariantSubset | null;
 };
 
 export type ComboProduct = Product & { pivot: ComboProductPivot };
@@ -25,5 +20,5 @@ export type ComboWithProducts = Combo & { products: ComboProduct[] };
 
 export type SelectableProduct = Product & {
     combo_id?: number;
-    pivot?: { variants: Product['variants'] };
+    pivot?: { variants?: ComboVariantSubset | null };
 };

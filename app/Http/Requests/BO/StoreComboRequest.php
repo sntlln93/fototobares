@@ -32,7 +32,7 @@ class StoreComboRequest extends FormRequest
             'products.*.id' => ['required', 'exists:products,id'],
             'products.*.quantity' => ['required', 'integer', 'min:1'],
             'products.*.subtract_value' => ['required', 'integer', 'min:0'],
-            'products.*.variants' => ['sometimes'],
+            'products.*.variants' => ['sometimes', 'nullable', 'array'],
         ];
     }
 

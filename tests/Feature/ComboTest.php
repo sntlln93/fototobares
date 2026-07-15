@@ -22,7 +22,7 @@ it('opens the edit page exposing pivot quantity and variants', function () {
     $combo->products()->attach($product->id, [
         'quantity' => 2,
         'subtract_value' => 2000,
-        'variants' => ['orientations' => ['vertical']],
+        'variants' => ['Orientación' => ['Vertical']],
     ]);
 
     // Regression: quantity was missing from withPivot and strict mode
@@ -32,7 +32,7 @@ it('opens the edit page exposing pivot quantity and variants', function () {
             ->component('combos/edit')
             ->where('combo.data.products.0.quantity', 2)
             ->where('combo.data.products.0.subtract_value', 2000)
-            ->where('combo.data.products.0.variants.orientations.0', 'vertical'),
+            ->where('combo.data.products.0.variants.Orientación.0', 'Vertical'),
     );
 });
 
@@ -52,7 +52,7 @@ it('stores variants encoded once and returns them as an array', function () {
                 'id' => $product->id,
                 'quantity' => 1,
                 'subtract_value' => 0,
-                'variants' => ['orientations' => ['horizontal']],
+                'variants' => ['Orientación' => ['Horizontal']],
             ],
         ],
     ])->assertSessionHasNoErrors();
@@ -61,8 +61,8 @@ it('stores variants encoded once and returns them as an array', function () {
 
     get(route('combos.edit', $combo))->assertInertia(
         fn (Assert $page) => $page->where(
-            'combo.data.products.0.variants.orientations.0',
-            'horizontal',
+            'combo.data.products.0.variants.Orientación.0',
+            'Horizontal',
         ),
     );
 });

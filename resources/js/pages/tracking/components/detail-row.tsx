@@ -1,6 +1,7 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { TableCell, TableRow } from '@/components/ui/table';
+import { variantSummary } from '@/lib/variants';
 import { ArrowRight, Flame } from 'lucide-react';
 import { TrackingDetail } from './product-group';
 
@@ -63,11 +64,9 @@ export function DetailRow({
             <TableCell>
                 <div className="flex flex-col">
                     <span>{detail.product_name}</span>
-                    {detail.variant && (
+                    {detail.variant && detail.variant.length > 0 && (
                         <span className="text-xs text-gray-500">
-                            {Object.values(detail.variant)
-                                .filter(Boolean)
-                                .join(' · ')}
+                            {variantSummary(detail.variant)}
                         </span>
                     )}
                 </div>

@@ -3,13 +3,35 @@ import { describe, expect, it, vi } from 'vitest';
 import { ProductOrder, SelectableProduct } from '../form';
 import { useAddDetail } from '../hooks/use-add-detail';
 
-const muralVariants = {
-    photo_types: ['individual', 'grupo'],
-    orientations: ['vertical', 'horizontal'],
-    backgrounds: ['blue'],
-    colors: ['brown'],
-    dimentions: '30x40',
-};
+const muralVariants: VariantDefinition[] = [
+    {
+        label: 'Orientación',
+        type: 'text',
+        nullable: false,
+        options: [{ label: 'Vertical' }, { label: 'Horizontal' }],
+    },
+    {
+        label: 'Tipo de foto',
+        type: 'text',
+        nullable: false,
+        options: [{ label: 'Individual' }, { label: 'Grupo' }],
+    },
+    {
+        label: 'Fondo',
+        type: 'color',
+        nullable: false,
+        options: [{ label: 'Celeste', color: '#93c5fd' }],
+    },
+    {
+        label: 'Color',
+        type: 'color',
+        nullable: false,
+        options: [
+            { label: 'Marrón', color: '#78350f' },
+            { label: 'Negro', color: '#1c1917' },
+        ],
+    },
+];
 
 const mural = {
     id: 1,
@@ -38,32 +60,32 @@ const setup = (
 
 const fillMural = (result: HookResult, productId: number) => {
     act(() => {
-        result.current.updateProductData('orientation', productId, 'vertical');
-        result.current.updateProductData('photoType', productId, 'individual');
-        result.current.updateProductData('background', productId, 'blue');
-        result.current.updateProductData('color', productId, 'brown');
-        result.current.updateProductData('note', productId, 'Emma');
+        result.current.setVariantValue(productId, 'Orientación', 'Vertical');
+        result.current.setVariantValue(productId, 'Tipo de foto', 'Individual');
+        result.current.setVariantValue(productId, 'Fondo', 'Celeste');
+        result.current.setVariantValue(productId, 'Color', 'Marrón');
+        result.current.setNote(productId, 'Emma');
     });
 };
 
 describe('useAddDetail', () => {
-    it('stores per-product values and replaces them on update', () => {
+    it('stores per-product note values and replaces them on update', () => {
         const { result } = setup([mural, taza]);
 
-        expect(result.current.getProductValue(1, 'note')).toBeUndefined();
+        expect(result.current.getNote(1)).toBe('');
 
         act(() => {
-            result.current.updateProductData('note', 1, 'Emma');
-            result.current.updateProductData('note', 2, 'Luca');
+            result.current.setNote(1, 'Emma');
+            result.current.setNote(2, 'Luca');
         });
 
-        expect(result.current.getProductValue(1, 'note')).toBe('Emma');
-        expect(result.current.getProductValue(2, 'note')).toBe('Luca');
+        expect(result.current.getNote(1)).toBe('Emma');
+        expect(result.current.getNote(2)).toBe('Luca');
 
-        act(() => result.current.updateProductData('note', 1, 'Emma B.'));
+        act(() => result.current.setNote(1, 'Emma B.'));
 
-        expect(result.current.getProductValue(1, 'note')).toBe('Emma B.');
-        expect(result.current.getProductValue(2, 'note')).toBe('Luca');
+        expect(result.current.getNote(1)).toBe('Emma B.');
+        expect(result.current.getNote(2)).toBe('Luca');
     });
 
     it('blocks adding while a mural is incomplete', () => {
@@ -74,10 +96,10 @@ describe('useAddDetail', () => {
         expect(addProducts).not.toHaveBeenCalled();
         expect(onClose).not.toHaveBeenCalled();
         expect(Object.keys(result.current.errors[1])).toEqual([
-            'orientation',
-            'photoType',
-            'background',
-            'color',
+            'Orientación',
+            'Tipo de foto',
+            'Fondo',
+            'Color',
             'note',
         ]);
     });
@@ -90,11 +112,9 @@ describe('useAddDetail', () => {
 
         expect(Object.keys(result.current.errors)).toEqual(['1', '9']);
 
-        act(() =>
-            result.current.updateProductData('orientation', 1, 'vertical'),
-        );
+        act(() => result.current.setVariantValue(1, 'Orientación', 'Vertical'));
 
-        expect(result.current.errors[1].orientation).toBeUndefined();
+        expect(result.current.errors[1].Orientación).toBeUndefined();
         expect(result.current.errors[1].note).toBeDefined();
 
         fillMural(result, 1);
@@ -108,13 +128,13 @@ describe('useAddDetail', () => {
         const { result } = setup([mural]);
 
         act(() => result.current.handleAddProduct());
-        act(() => result.current.updateProductData('note', 1, ''));
+        act(() => result.current.setNote(1, ''));
 
-        expect(result.current.getProductValue(1, 'note')).toBe('');
+        expect(result.current.getNote(1)).toBe('');
         expect(result.current.errors[1].note).toBeDefined();
     });
 
-    it('adds a completed mural with its variant payload and closes', () => {
+    it('adds a completed mural with its variant selection and closes', () => {
         const { result, addProducts, onClose } = setup([mural]);
 
         fillMural(result, 1);
@@ -126,10 +146,10 @@ describe('useAddDetail', () => {
                 combo_id: undefined,
                 product_id: 1,
                 variant: {
-                    orientation: 'vertical',
-                    photo_type: 'individual',
-                    background: 'blue',
-                    color: 'brown',
+                    Orientación: 'Vertical',
+                    'Tipo de foto': 'Individual',
+                    Fondo: 'Celeste',
+                    Color: 'Marrón',
                 },
                 note: 'Emma',
             },
@@ -143,19 +163,19 @@ describe('useAddDetail', () => {
                 product_id: 1,
                 note: 'Mural de Emma',
                 variant: {
-                    orientation: 'horizontal',
-                    photo_type: 'grupo',
-                    background: 'blue',
-                    color: 'brown',
+                    Orientación: 'Horizontal',
+                    'Tipo de foto': 'Grupo',
+                    Fondo: 'Celeste',
+                    Color: 'Negro',
                 },
             },
         ];
         const { result, addProducts, onClose } = setup([mural], initialValues);
 
-        expect(result.current.getProductValue(1, 'orientation')).toBe(
-            'horizontal',
+        expect(result.current.getVariantValue(1, 'Orientación')).toBe(
+            'Horizontal',
         );
-        expect(result.current.getProductValue(1, 'note')).toBe('Mural de Emma');
+        expect(result.current.getNote(1)).toBe('Mural de Emma');
 
         act(() => result.current.handleAddProduct());
 
@@ -188,15 +208,24 @@ describe('useAddDetail', () => {
         expect(result.current.currentStep).toBe(0);
     });
 
-    it('resolves the variants of the product at the given step', () => {
+    it('resolves the variant definitions of the product at the given step, honoring the combo subset', () => {
         const comboMural = {
             ...mural,
             id: 3,
-            pivot: { variants: { ...muralVariants, backgrounds: ['white'] } },
+            pivot: { variants: { Color: ['Negro'] } },
         } as unknown as SelectableProduct;
         const { result } = setup([mural, comboMural]);
 
-        expect(result.current.getVariants(0)?.backgrounds).toEqual(['blue']);
-        expect(result.current.getVariants(1)?.backgrounds).toEqual(['white']);
+        const plainColor = result.current
+            .getDefinitions(0)
+            .find((definition) => definition.label === 'Color');
+        const comboColor = result.current
+            .getDefinitions(1)
+            .find((definition) => definition.label === 'Color');
+
+        expect(plainColor?.options).toHaveLength(2);
+        expect(comboColor?.options).toEqual([
+            { label: 'Negro', color: '#1c1917' },
+        ]);
     });
 });

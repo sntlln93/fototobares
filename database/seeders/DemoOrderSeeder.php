@@ -15,12 +15,13 @@ use App\Services\StockService;
 use Illuminate\Database\Seeder;
 
 /**
- * Eleven orders covering every state of the manual checklist: production
+ * Twelve orders covering every state of the manual checklist: production
  * not yet enabled (first installment unpaid), pending, in production,
  * priority, finished, partially/fully delivered, cancelled with
- * recycling/stock return, overdue with balance and one without a photo
- * session. Every order with details in /tracking has its first
- * installment paid — production is gated by it (#106).
+ * recycling/stock return, overdue with balance, one without a photo
+ * session and one with a variant still pending definition (#113). Every
+ * order with details in /tracking has its first installment paid —
+ * production is gated by it (#106).
  */
 class DemoOrderSeeder extends Seeder
 {
@@ -43,6 +44,7 @@ class DemoOrderSeeder extends Seeder
         $carpeta = Product::where('name', 'Carpeta 2 fotos')->firstOrFail();
         $medalla = Product::where('name', 'Medalla')->firstOrFail();
         $taza = Product::where('name', 'Taza')->firstOrFail();
+        $banda = Product::where('name', 'Banda')->firstOrFail();
 
         // 1. Pending order: first installment paid and production enabled,
         // nothing produced yet (all details "sin empezar" in /tracking)
@@ -137,6 +139,14 @@ class DemoOrderSeeder extends Seeder
         // enables it from the order page (#106)
         $order = $this->makeOrder($quintoHum, 'Karen Ibáñez', '3804000011', 'Renata', 1, 44000, 4, 22);
         $this->addDetail($order, $clasico, $this->muralVariant('vertical', 'pink'), 'Renata - promo 2026');
+
+        // 12. Variant defined after the order, per #113: the band's Talle is
+        // picked once the child tries it on, not at order time. Sala de 5
+        // already holds photo_number 1 (order 10) and 2 (the Sala de 5
+        // draft), so this one gets 3
+        $order = $this->makeOrder($salaDe5, 'Lucía Ferreyra', '3804000013', 'Delfina', 3, 9000, 1, 14);
+        $this->addDetail($order, $banda, $this->bandaVariant(null), 'Delfina', enabled: true);
+        $order->payments()->create(['amount' => 9000, 'type' => 'efectivo', 'paid_on' => now()->toDateString()]);
     }
 
     private function makeOrder(
@@ -165,12 +175,12 @@ class DemoOrderSeeder extends Seeder
     }
 
     /**
-     * @param  array<string, string>|null  $variant
+     * @param  array<int, array{label: string, type: string, value: array{label: string, color?: string}|null}>|null  $variant
      */
     private function addDetail(Order $order, Product $product, ?array $variant, string $note, bool $enabled = false): OrderDetail
     {
         $order->products()->attach($product->id, [
-            'variant' => $variant,
+            'variant' => $variant ?? [],
             'note' => $note,
             'production_enabled_at' => $enabled ? now() : null,
         ]);
@@ -205,15 +215,30 @@ class DemoOrderSeeder extends Seeder
     }
 
     /**
-     * @return array<string, string>
+     * @return array<int, array{label: string, type: string, value: array{label: string, color?: string}|null}>
      */
     private function muralVariant(string $orientation, string $color): array
     {
+        $orientationLabel = $orientation === 'horizontal' ? 'Horizontal' : 'Vertical';
+        $colorOption = $color === 'black'
+            ? ['label' => 'Negro', 'color' => '#1c1917']
+            : ['label' => 'Rosa', 'color' => '#f9a8d4'];
+
         return [
-            'orientation' => $orientation,
-            'photo_type' => 'grupo',
-            'background' => 'blue',
-            'color' => $color,
+            ['label' => 'Tipo de foto', 'type' => 'text', 'value' => ['label' => 'Grupo']],
+            ['label' => 'Orientación', 'type' => 'text', 'value' => ['label' => $orientationLabel]],
+            ['label' => 'Fondo', 'type' => 'color', 'value' => ['label' => 'Celeste', 'color' => '#93c5fd']],
+            ['label' => 'Color', 'type' => 'color', 'value' => $colorOption],
+        ];
+    }
+
+    /**
+     * @return array<int, array{label: string, type: string, value: array{label: string}|null}>
+     */
+    private function bandaVariant(?string $talle): array
+    {
+        return [
+            ['label' => 'Talle', 'type' => 'text', 'value' => $talle !== null ? ['label' => $talle] : null],
         ];
     }
 }

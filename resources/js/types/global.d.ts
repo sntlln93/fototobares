@@ -102,21 +102,15 @@ declare global {
         max_payments: number;
         product_type_id: number;
         type: ProductType;
-        /** Nullable in the database: murals without variants exist */
-        variants?: {
-            photo_types: ProductPhotoType[];
-            orientations: ProductOrientation[];
-            backgrounds: string[];
-            colors: Color[];
-            dimentions: string;
-        } | null;
+        /** Nullable in the database: products without variants exist */
+        variants?: VariantDefinition[] | null;
     }
 
     interface OrderProduct extends Product {
         product_id: number;
         order_detail_id: number;
         note?: string | null;
-        variant?: Record<string, string>;
+        variant?: VariantSnapshotEntry[];
         delivered_at?: string | null;
         production_status?: string | null;
         production_status_id?: number | null;
@@ -137,10 +131,6 @@ declare global {
         id: number;
         name: string;
     }
-
-    type ProductPhotoType = 'grupo' | 'individual';
-    type ProductOrientation = 'vertical' | 'horizontal';
-    type Color = string;
 
     interface Combo {
         id: number;
@@ -220,13 +210,7 @@ declare global {
         product_id: number;
         notes: string;
         delivered_at?: Date;
-        variant: {
-            photo_type: ProductPhotoType;
-            orientation: ProductOrientation;
-            background: string;
-            color: string;
-            dimentions: string;
-        };
+        variant: VariantSnapshotEntry[];
     }
 
     interface Photo {

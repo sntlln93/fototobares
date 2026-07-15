@@ -1,3 +1,4 @@
+import { selectionFromSnapshot } from '@/lib/variants';
 import { useForm } from '@inertiajs/react';
 import { FormEvent, FormEventHandler, useState } from 'react';
 import { toast } from 'sonner';
@@ -9,7 +10,7 @@ export type OrderDetailForm = {
     id: number;
     product_id: number;
     note: string | null;
-    variant: Record<string, string>;
+    variant: VariantSelection;
 };
 
 export function useEditOrder(order: Order) {
@@ -17,12 +18,13 @@ export function useEditOrder(order: Order) {
         useState<EditAccordionValue>('client');
 
     // Transform order data for form - preserve existing note and variant from
-    // pivot, addressed by the detail id so repeated products stay apart
+    // pivot, addressed by the detail id so repeated products stay apart. The
+    // pivot carries a snapshot; the form posts a selection
     const orderDetails = order.products.map((product) => ({
         id: product.order_detail_id,
         product_id: product.id,
         note: product.note || null,
-        variant: product.variant || {},
+        variant: selectionFromSnapshot(product.variant),
     }));
 
     const { data, setData, put, processing, errors } = useForm<{

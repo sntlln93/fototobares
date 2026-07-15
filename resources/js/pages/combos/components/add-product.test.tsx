@@ -6,13 +6,20 @@ const mural = {
     id: 1,
     product_type_id: 1,
     name: 'Mural clásico',
-    variants: {
-        photo_types: ['individual', 'grupo'],
-        orientations: ['vertical', 'horizontal'],
-        backgrounds: ['blue'],
-        colors: ['brown'],
-        dimentions: '20x30',
-    },
+    variants: [
+        {
+            label: 'Orientación',
+            type: 'text',
+            nullable: false,
+            options: [{ label: 'Vertical' }, { label: 'Horizontal' }],
+        },
+        {
+            label: 'Color',
+            type: 'color',
+            nullable: false,
+            options: [{ label: 'Negro', color: '#1c1917' }],
+        },
+    ],
 } as unknown as Product;
 
 describe('AddProduct', () => {
@@ -44,26 +51,27 @@ describe('AddProduct', () => {
             />,
         );
 
+        // Every option starts selected (unrestricted default); uncheck all
+        // of Orientación to leave the definition empty
+        fireEvent.click(screen.getByLabelText('Vertical'));
+        fireEvent.click(screen.getByLabelText('Horizontal'));
+
         fireEvent.click(screen.getByText('Agregar Mural clásico'));
 
         expect(addProduct).not.toHaveBeenCalled();
         expect(
-            screen.getByText('Debes elegir por lo menos una orientación'),
+            screen.getByText(
+                'Debes elegir por lo menos una opción de "Orientación"',
+            ),
         ).toBeTruthy();
     });
 
-    it('prefills the checkboxes when editing', () => {
+    it('prefills the checklist from the existing restriction when editing', () => {
         render(
             <AddProduct
                 addProduct={vi.fn()}
                 product={mural}
-                initialVariants={{
-                    orientations: ['vertical'],
-                    photo_types: ['grupo'],
-                    backgrounds: ['blue'],
-                    colors: ['brown'],
-                    dimentions: '20x30',
-                }}
+                initialVariants={{ Orientación: ['Vertical'] }}
                 show
                 onClose={vi.fn()}
             />,
@@ -71,10 +79,10 @@ describe('AddProduct', () => {
 
         expect(screen.getByText(/Editar Mural clásico/)).toBeTruthy();
         expect(
-            screen.getByLabelText<HTMLInputElement>('vertical').checked,
+            screen.getByLabelText<HTMLInputElement>('Vertical').checked,
         ).toBe(true);
         expect(
-            screen.getByLabelText<HTMLInputElement>('horizontal').checked,
+            screen.getByLabelText<HTMLInputElement>('Horizontal').checked,
         ).toBe(false);
     });
 
@@ -86,19 +94,13 @@ describe('AddProduct', () => {
             <AddProduct
                 addProduct={addProduct}
                 product={mural}
-                initialVariants={{
-                    orientations: ['vertical'],
-                    photo_types: ['grupo'],
-                    backgrounds: ['blue'],
-                    colors: ['brown'],
-                    dimentions: '20x30',
-                }}
+                initialVariants={{ Orientación: ['Vertical'] }}
                 show
                 onClose={onClose}
             />,
         );
 
-        fireEvent.click(screen.getByLabelText('horizontal'));
+        fireEvent.click(screen.getByLabelText('Horizontal'));
         fireEvent.click(screen.getByText('Agregar Mural clásico'));
 
         expect(addProduct).toHaveBeenCalledWith({
@@ -106,11 +108,8 @@ describe('AddProduct', () => {
             quantity: 1,
             subtract_value: 0,
             variants: {
-                photo_types: ['grupo'],
-                orientations: ['vertical', 'horizontal'],
-                backgrounds: ['blue'],
-                colors: ['brown'],
-                dimentions: '20x30',
+                Orientación: ['Vertical', 'Horizontal'],
+                Color: ['Negro'],
             },
         });
         expect(onClose).toHaveBeenCalled();

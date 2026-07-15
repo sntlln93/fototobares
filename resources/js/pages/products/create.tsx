@@ -1,5 +1,4 @@
 import AppLayout from '@/layouts/app-layout';
-import { getColorEs } from '@/lib/utils';
 import { BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
 import { ProductForm } from './components/product-form';
@@ -30,7 +29,6 @@ export default function CreateProduct({
                 product_types={product_types}
                 typeSelectProps={{ defaultValue: 'mural' }}
                 submitLabel="Agregar producto"
-                renderColorLabel={getColorEs}
             />
         </AppLayout>
     );

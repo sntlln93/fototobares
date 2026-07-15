@@ -4,8 +4,12 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\BO;
 
+use App\Models\Product;
+use App\Rules\VariantSelection;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Collection;
+use Illuminate\Validation\Validator;
 
 class StoreOrderRequest extends FormRequest
 {
@@ -42,12 +46,48 @@ class StoreOrderRequest extends FormRequest
             'order_details.*.id' => ['nullable', 'integer', 'exists:order_details,id'],
             'order_details.*.product_id' => ['required', 'integer', 'exists:products,id'],
             'order_details.*.note' => ['nullable', 'string'],
-            'order_details.*.variant' => ['sometimes', 'array'],
-            'order_details.*.variant.orientation' => ['required_with:order_details.*.variant', 'string', 'in:horizontal,vertical'], // Adjust values as needed
-            'order_details.*.variant.photo_type' => ['required_with:order_details.*.variant', 'string', 'in:individual,grupo'], // Adjust values as needed
-            'order_details.*.variant.background' => ['required_with:order_details.*.variant', 'string'],
-            'order_details.*.variant.color' => ['required_with:order_details.*.variant', 'string'],
+            'order_details.*.variant' => ['sometimes', 'nullable', 'array'],
         ];
+    }
+
+    /**
+     * Per-detail variant selection rules depend on the product's own variant
+     * definitions, so they can't be static: addRules only works from here,
+     * not from a validator after() hook, since rules must exist before the
+     * fields they govern are validated.
+     */
+    public function withValidator(Validator $validator): void
+    {
+        /** @var array<int, mixed> $orderDetails */
+        $orderDetails = $this->input('order_details') ?? [];
+
+        $productIds = collect($orderDetails)
+            ->filter(fn ($detail) => is_array($detail) && isset($detail['product_id']))
+            ->pluck('product_id')
+            ->unique();
+
+        /** @var Collection<int, Product> $products */
+        $products = Product::whereIn('id', $productIds)->get(['id', 'variants'])->keyBy('id');
+
+        foreach ($orderDetails as $index => $detail) {
+            if (! is_array($detail) || ! isset($detail['product_id'])) {
+                continue;
+            }
+
+            /** @var int $productId */
+            $productId = $detail['product_id'];
+
+            $product = $products->get($productId);
+            $definitions = $product->variants ?? [];
+
+            if (empty($definitions)) {
+                continue;
+            }
+
+            $validator->addRules([
+                "order_details.{$index}.variant" => [new VariantSelection($definitions)],
+            ]);
+        }
     }
 
     /**
@@ -69,12 +109,7 @@ class StoreOrderRequest extends FormRequest
      *         id?: int|null,
      *         product_id: int,
      *         note: string|null,
-     *         variant?: array{
-     *             orientation?: string,
-     *             photo_type?: string,
-     *             background?: string,
-     *             color?: string
-     *         }
+     *         variant?: array<string, string|null>|null
      *     }>
      * }
      */
@@ -94,12 +129,7 @@ class StoreOrderRequest extends FormRequest
          *         id?: int|null,
          *         product_id: int,
          *         note: string|null,
-         *         variant?: array{
-         *             orientation?: string,
-         *             photo_type?: string,
-         *             background?: string,
-         *             color?: string
-         *         }
+         *         variant?: array<string, string|null>|null
          *     }>
          * }
          */

@@ -29,7 +29,7 @@ type RecycledItem = {
     classroom: string;
     product_name: string;
     product_type: string | null;
-    variant: Record<string, string> | null;
+    variant: VariantSnapshotEntry[] | null;
     note: string | null;
     destination: 'stock' | 'reciclaje';
     last_status: string | null;

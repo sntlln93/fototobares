@@ -1,20 +1,26 @@
+import { resolveVariantDefinitions } from '@/lib/variants';
 import { ProductOrder, SelectableProduct } from './form';
 
-export const MURAL_PRODUCT_TYPE_ID = 1;
+/**
+ * Murals require the printed note regardless of their variants. Orthogonal
+ * to the variant system — kept as its own list so removing it later is a
+ * one-line change, not an archaeology dig.
+ */
+export const NOTE_REQUIRED_TYPE_IDS = [1];
 
-export type ProductData<T> = { product_id: number; value: T };
-
-export type DetailFormData = {
-    orientation: ProductData<ProductOrientation>[];
-    photoType: ProductData<ProductPhotoType>[];
-    background: ProductData<string>[];
-    color: ProductData<string>[];
-    note: ProductData<string>[];
+export type ProductDetailFormData = {
+    values: VariantSelection;
+    note: string;
 };
 
-export type DetailFormErrors = {
-    [productId: number]: Partial<Record<keyof DetailFormData, string>>;
-};
+export type DetailFormData = Record<number, ProductDetailFormData>;
+
+export type DetailFormErrors = Record<number, Partial<Record<string, string>>>;
+
+const emptyProductData = (): ProductDetailFormData => ({
+    values: {},
+    note: '',
+});
 
 /**
  * Builds the modal state from existing values when editing an added product.
@@ -22,53 +28,22 @@ export type DetailFormErrors = {
 export const initialDetailFormData = (
     initialValues?: ProductOrder[],
 ): DetailFormData => {
-    const initial: DetailFormData = {
-        orientation: [],
-        photoType: [],
-        background: [],
-        color: [],
-        note: [],
-    };
+    const initial: DetailFormData = {};
 
     initialValues?.forEach((value) => {
-        if (value.variant) {
-            initial.orientation.push({
-                product_id: value.product_id,
-                value: value.variant.orientation,
-            });
-            initial.photoType.push({
-                product_id: value.product_id,
-                value: value.variant.photo_type,
-            });
-            initial.background.push({
-                product_id: value.product_id,
-                value: value.variant.background,
-            });
-            initial.color.push({
-                product_id: value.product_id,
-                value: value.variant.color,
-            });
-        }
-
-        if (value.note) {
-            initial.note.push({
-                product_id: value.product_id,
-                value: value.note,
-            });
-        }
+        initial[value.product_id] = {
+            values: value.variant ?? {},
+            note: value.note ?? '',
+        };
     });
 
     return initial;
 };
 
-const hasValue = (
-    list: ProductData<string>[] | ProductData<ProductOrientation>[],
-    productId: number,
-) => list.some((item) => item.product_id === productId);
-
 /**
- * Murals require every variant plus the printed note; other products
- * have no required fields.
+ * Every non-nullable variant definition requires a value; nullable ones
+ * never error out, since they can be defined later. Murals additionally
+ * require the printed note.
  */
 export const validateDetailForm = (
     products: SelectableProduct[],
@@ -77,41 +52,19 @@ export const validateDetailForm = (
     const errors: DetailFormErrors = {};
 
     products.forEach((product) => {
-        if (product.product_type_id !== MURAL_PRODUCT_TYPE_ID) {
-            return;
-        }
+        const productData = data[product.id] ?? emptyProductData();
+        const productErrors: Partial<Record<string, string>> = {};
 
-        const productErrors: Partial<Record<keyof DetailFormData, string>> = {};
-
-        // A mural without configured variants offers nothing to pick:
-        // only the printed note can be required
-        if (!product.variants) {
-            if (!hasValue(data.note, product.id)) {
-                productErrors.note =
-                    'Este campo es requerido cuando el producto es un mural';
-                errors[product.id] = productErrors;
+        resolveVariantDefinitions(product).forEach((definition) => {
+            if (!definition.nullable && !productData.values[definition.label]) {
+                productErrors[definition.label] = 'Debes elegir una opción';
             }
+        });
 
-            return;
-        }
-
-        if (!hasValue(data.orientation, product.id)) {
-            productErrors.orientation = 'Debes elegir una opción';
-        }
-
-        if (!hasValue(data.photoType, product.id)) {
-            productErrors.photoType = 'Debes elegir una opción';
-        }
-
-        if (!hasValue(data.background, product.id)) {
-            productErrors.background = 'Debes elegir una opción';
-        }
-
-        if (!hasValue(data.color, product.id)) {
-            productErrors.color = 'Debes elegir una opción';
-        }
-
-        if (!hasValue(data.note, product.id)) {
+        if (
+            NOTE_REQUIRED_TYPE_IDS.includes(product.product_type_id) &&
+            !productData.note
+        ) {
             productErrors.note =
                 'Este campo es requerido cuando el producto es un mural';
         }
@@ -124,35 +77,29 @@ export const validateDetailForm = (
     return errors;
 };
 
-const valueFor = <T>(list: ProductData<T>[], productId: number) =>
-    list.find((item) => item.product_id === productId)?.value;
-
 /**
- * Maps the modal state to order details. Only murals carry a variant.
- * Assumes the data was validated first.
+ * Maps the modal state to order details. Nullable definitions left unset
+ * are sent as an explicit null selection, so the backend snapshots them as
+ * pending. Assumes the data was validated first.
  */
 export const buildProductOrders = (
     products: SelectableProduct[],
     data: DetailFormData,
 ): ProductOrder[] =>
-    products.map((product) => ({
-        combo_id: product.combo_id,
-        product_id: product.id,
-        variant:
-            product.product_type_id === MURAL_PRODUCT_TYPE_ID &&
-            product.variants
-                ? {
-                      orientation: valueFor(data.orientation, product.id)!,
-                      photo_type: valueFor(data.photoType, product.id)!,
-                      background: valueFor(data.background, product.id)!,
-                      color: valueFor(data.color, product.id)!,
-                  }
-                : undefined,
-        note: valueFor(data.note, product.id) || '',
-    }));
+    products.map((product) => {
+        const productData = data[product.id] ?? emptyProductData();
+        const definitions = resolveVariantDefinitions(product);
 
-/**
- * Variants may come from the combo pivot or from the product itself.
- */
-export const resolveVariants = (product: SelectableProduct) =>
-    product.pivot?.variants ?? product.variants;
+        const variant: VariantSelection = {};
+        definitions.forEach((definition) => {
+            variant[definition.label] =
+                productData.values[definition.label] ?? null;
+        });
+
+        return {
+            combo_id: product.combo_id,
+            product_id: product.id,
+            variant: definitions.length > 0 ? variant : undefined,
+            note: productData.note || '',
+        };
+    });

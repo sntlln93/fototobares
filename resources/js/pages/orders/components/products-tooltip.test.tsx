@@ -8,12 +8,14 @@ const products = [
         name: 'Mural clásico',
         product_type_id: 1,
         priority: true,
-        variant: {
-            color: '#fff',
-            background: 'Bosque',
-            photo_type: 'individual',
-            orientation: 'vertical',
-        },
+        variant: [
+            { label: 'Fondo', type: 'color', value: { label: 'Bosque' } },
+            {
+                label: 'Orientación',
+                type: 'text',
+                value: { label: 'Vertical' },
+            },
+        ],
     },
     {
         order_detail_id: 2,

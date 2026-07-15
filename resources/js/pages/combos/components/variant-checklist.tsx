@@ -9,6 +9,7 @@ interface VariantChecklistProps<T extends string> {
     onChange: (e: ChangeEvent<HTMLInputElement>) => void;
     error?: string;
     renderLabel?: (value: T) => string;
+    swatchFor?: (value: T) => string | undefined;
 }
 
 export function VariantChecklist<T extends string>({
@@ -18,6 +19,7 @@ export function VariantChecklist<T extends string>({
     onChange,
     error,
     renderLabel,
+    swatchFor,
 }: VariantChecklistProps<T>) {
     return (
         <div className="mt-6">
@@ -32,6 +34,12 @@ export function VariantChecklist<T extends string>({
                             checked={selected.has(option)}
                             onChange={onChange}
                         />
+                        {swatchFor?.(option) && (
+                            <span
+                                className="ms-2 h-3 w-3 rounded-full border border-black/10"
+                                style={{ backgroundColor: swatchFor(option) }}
+                            />
+                        )}
                         <span className="ms-2 text-sm text-gray-600 dark:text-gray-400">
                             {renderLabel ? renderLabel(option) : option}
                         </span>

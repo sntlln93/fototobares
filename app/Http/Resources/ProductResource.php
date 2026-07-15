@@ -30,14 +30,7 @@ class ProductResource extends JsonResource
             'max_payments' => $this->resource->max_payments,
             'financed_price' => $this->resource->financed_price,
             'product_type_id' => $this->resource->product_type_id,
-            'variants' => $this->resource->variants
-                ? [
-                    'photo_types' => $this->resource->variants['photo_types'],
-                    'orientations' => $this->resource->variants['orientations'],
-                    'backgrounds' => $this->resource->variants['backgrounds'],
-                    'colors' => $this->resource->variants['colors'],
-                    'dimentions' => $this->resource->variants['dimentions'],
-                ] : [],
+            'variants' => $this->resource->variants ?? [],
         ];
     }
 }

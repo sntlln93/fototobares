@@ -15,11 +15,10 @@ return new class extends Migration
     {
         $products = Product::all();
         $variants = [
-            'colors' => ['black', 'pink'],
-            'dimentions' => '20x30',
-            'backgrounds' => ['blue'],
-            'photo_types' => ['grupo'],
-            'orientations' => ['vertical', 'horizontal'],
+            'Tipo de foto' => ['Grupo'],
+            'Orientación' => ['Vertical', 'Horizontal'],
+            'Fondo' => ['Celeste'],
+            'Color' => ['Negro', 'Rosa'],
         ];
 
         $combo1 = Combo::create([

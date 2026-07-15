@@ -31,18 +31,6 @@ export function getError(key: string, errors: Record<string, string>) {
     return err[key];
 }
 
-const color: Record<Color, string> = {
-    black: 'negro',
-    blue: 'celeste',
-    pink: 'rosa',
-    white: 'blanco',
-};
-
-export function getColorEs(color_en: Color) {
-    const value = color[color_en] ?? color_en;
-    return capitalize(value);
-}
-
 export function capitalize(value: string) {
     return value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
 }

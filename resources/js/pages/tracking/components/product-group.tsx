@@ -33,7 +33,7 @@ export type TrackingDetail = {
     product_name: string;
     product_type_id: number;
     product_type: string | null;
-    variant: Record<string, string> | null;
+    variant: VariantSnapshotEntry[] | null;
     note: string | null;
     production_status_id: number | null;
     production_status: string | null;
