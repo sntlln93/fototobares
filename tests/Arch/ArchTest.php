@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Contracts\ActionContract;
+use App\Contracts\DtoContract;
 use App\Http\Controllers\Controller;
 use App\Models\ComboProduct;
 use App\Models\OrderDetail;
@@ -66,6 +67,37 @@ arch('form requests are conventional')
     ->expect('App\Http\Requests')
     ->toExtend(FormRequest::class)
     ->toHaveSuffix('Request');
+
+// "FormRequests expose toData() builders; no validated() override survives"
+// (#150) — arch() can't see method overrides, only imports/types, so this is
+// a reflection scan: validated() must be inherited from FormRequest, never
+// redeclared. No baseline: every offender fails and is named.
+test('form requests do not override validated()', function () {
+    $requestsDir = dirname(__DIR__, 2).'/app/Http/Requests';
+    $iterator = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator($requestsDir, FilesystemIterator::SKIP_DOTS)
+    );
+
+    $offenders = [];
+    foreach ($iterator as $file) {
+        if ($file->getExtension() !== 'php') {
+            continue;
+        }
+
+        $relative = str_replace([$requestsDir.'/', '.php'], '', $file->getPathname());
+        $class = 'App\\Http\\Requests\\'.str_replace('/', '\\', $relative);
+
+        $reflection = new ReflectionClass($class);
+        $declaringClass = $reflection->getMethod('validated')->getDeclaringClass()->getName();
+
+        if ($declaringClass === $class) {
+            $offenders[] = $class;
+        }
+    }
+
+    sort($offenders);
+    expect($offenders)->toBe([], 'These requests override validated() instead of exposing toData(): '.implode(', ', $offenders));
+});
 
 // --- API Resources ----------------------------------------------------------
 
@@ -135,6 +167,14 @@ test('actions expose a single public method', function () {
 
     expect($offenders)->toBe([], 'Actions must expose exactly one public method: '.json_encode($offenders));
 });
+
+// --- Data: DTOs consumed by ActionContract::handle() -------------------------
+
+arch('data objects are final readonly DTOs')
+    ->expect('App\Data')
+    ->toBeFinal()
+    ->toBeReadonly()
+    ->toImplement(DtoContract::class);
 
 // --- Enums ------------------------------------------------------------------
 
