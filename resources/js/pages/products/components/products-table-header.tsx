@@ -54,16 +54,7 @@ export function ProductsTableHeader() {
                     </div>
                 </TableHead>
                 <TableHead>
-                    <div className="flex items-center gap-2">Medidas</div>
-                </TableHead>
-                <TableHead>
-                    <div className="flex items-center gap-2">Diseño</div>
-                </TableHead>
-                <TableHead>
-                    <div className="flex items-center gap-2">Fondos</div>
-                </TableHead>
-                <TableHead>
-                    <div className="flex items-center gap-2">Colores</div>
+                    <div className="flex items-center gap-2">Variantes</div>
                 </TableHead>
                 <TableHead>Acciones</TableHead>
             </TableRow>

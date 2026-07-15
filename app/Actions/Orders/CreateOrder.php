@@ -8,11 +8,15 @@ use App\Contracts\ActionContract;
 use App\Models\Client;
 use App\Models\Order;
 use App\Models\OrderDraft;
+use App\Models\Product;
 use Illuminate\Support\Facades\DB;
 
 class CreateOrder implements ActionContract
 {
-    public function __construct(private readonly AllocatePhotoNumber $allocatePhotoNumber) {}
+    public function __construct(
+        private readonly AllocatePhotoNumber $allocatePhotoNumber,
+        private readonly SnapshotDetailVariant $snapshotDetailVariant,
+    ) {}
 
     /**
      * Create an order with its client and product details, auto-assigning the
@@ -63,9 +67,24 @@ class CreateOrder implements ActionContract
             /** @var array<int, array<string, mixed>> $orderDetails */
             $orderDetails = $params['order_details'];
 
+            $products = Product::whereIn('id', collect($orderDetails)->pluck('product_id'))
+                ->get(['id', 'variants'])
+                ->keyBy('id');
+
             foreach ($orderDetails as $product) {
-                $order->products()->attach($product['product_id'], [
-                    'variant' => $product['variant'] ?? [],
+                /** @var int $productId */
+                $productId = $product['product_id'];
+
+                $productModel = $products->get($productId);
+
+                /** @var array<string, string|null> $selection */
+                $selection = $product['variant'] ?? [];
+
+                $order->products()->attach($productId, [
+                    'variant' => $this->snapshotDetailVariant->handle([
+                        'definitions' => $productModel->variants ?? [],
+                        'selection' => $selection,
+                    ]),
                     'note' => $product['note'],
                 ]);
             }

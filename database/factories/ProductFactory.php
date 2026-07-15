@@ -46,11 +46,41 @@ class ProductFactory extends Factory
             'financed_price' => 52000,
             'product_type_id' => ProductType::where('name', 'mural')->firstOrFail()->id,
             'variants' => [
-                'photo_types' => ['individual', 'grupo'],
-                'orientations' => ['vertical', 'horizontal'],
-                'backgrounds' => ['blue', 'white'],
-                'colors' => ['brown', 'black'],
-                'dimentions' => '30x40',
+                ['label' => 'Tipo de foto', 'type' => 'text', 'nullable' => false, 'options' => [
+                    ['label' => 'Individual'],
+                    ['label' => 'Grupo'],
+                ]],
+                ['label' => 'Orientación', 'type' => 'text', 'nullable' => false, 'options' => [
+                    ['label' => 'Vertical'],
+                    ['label' => 'Horizontal'],
+                ]],
+                ['label' => 'Fondo', 'type' => 'color', 'nullable' => false, 'options' => [
+                    ['label' => 'Celeste', 'color' => '#93c5fd'],
+                    ['label' => 'Blanco', 'color' => '#ffffff'],
+                ]],
+                ['label' => 'Color', 'type' => 'color', 'nullable' => false, 'options' => [
+                    ['label' => 'Marrón', 'color' => '#78350f'],
+                    ['label' => 'Negro', 'color' => '#1c1917'],
+                ]],
+            ],
+        ]);
+    }
+
+    public function banda(): static
+    {
+        return $this->state(fn () => [
+            'name' => 'Banda '.fake()->unique()->word(),
+            'unit_price' => 9000,
+            'max_payments' => 1,
+            'financed_price' => null,
+            'product_type_id' => ProductType::where('name', 'banda')->firstOrFail()->id,
+            'variants' => [
+                ['label' => 'Talle', 'type' => 'text', 'nullable' => true, 'options' => [
+                    ['label' => 'Único'],
+                    ['label' => 'S'],
+                    ['label' => 'M'],
+                    ['label' => 'L'],
+                ]],
             ],
         ]);
     }

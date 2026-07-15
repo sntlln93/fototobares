@@ -3,17 +3,38 @@ import { describe, expect, it, vi } from 'vitest';
 import { SelectableProduct } from '../form';
 import { AddDetail } from './add-detail';
 
+const muralVariants: VariantDefinition[] = [
+    {
+        label: 'Orientación',
+        type: 'text',
+        nullable: false,
+        options: [{ label: 'Vertical' }, { label: 'Horizontal' }],
+    },
+    {
+        label: 'Tipo de foto',
+        type: 'text',
+        nullable: false,
+        options: [{ label: 'Individual' }, { label: 'Grupo' }],
+    },
+    {
+        label: 'Fondo',
+        type: 'color',
+        nullable: false,
+        options: [{ label: 'Celeste', color: '#93c5fd' }],
+    },
+    {
+        label: 'Color',
+        type: 'color',
+        nullable: false,
+        options: [{ label: 'Marrón', color: '#78350f' }],
+    },
+];
+
 const mural = {
     id: 1,
     product_type_id: 1,
     name: 'Mural clásico',
-    variants: {
-        photo_types: ['individual', 'grupo'],
-        orientations: ['vertical', 'horizontal'],
-        backgrounds: ['blue'],
-        colors: ['brown'],
-        dimentions: '30x40',
-    },
+    variants: muralVariants,
 } as unknown as SelectableProduct;
 
 const taza = {
@@ -38,7 +59,9 @@ describe('AddDetail', () => {
         fireEvent.click(screen.getByText('Agregar 1 producto al pedido'));
 
         expect(addProducts).not.toHaveBeenCalled();
-        expect(screen.getAllByText('Debes elegir una opción')).toHaveLength(4);
+        expect(screen.getAllByText('Debes elegir una opción')).toHaveLength(
+            muralVariants.length,
+        );
         expect(
             screen.getByText(
                 'Este campo es requerido cuando el producto es un mural',

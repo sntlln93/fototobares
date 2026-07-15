@@ -48,7 +48,13 @@ const makeOrder = (overrides: Partial<Order> = {}): Order =>
                 id: 2,
                 order_detail_id: 11,
                 note: 'sin marco',
-                variant: { color: 'negro' },
+                variant: [
+                    {
+                        label: 'Color',
+                        type: 'color',
+                        value: { label: 'Negro', color: '#1c1917' },
+                    },
+                ],
             },
             { id: 5, order_detail_id: 12, note: null },
         ],
@@ -77,7 +83,7 @@ describe('useEditOrder', () => {
                     id: 11,
                     product_id: 2,
                     note: 'sin marco',
-                    variant: { color: 'negro' },
+                    variant: { Color: 'Negro' },
                 },
                 { id: 12, product_id: 5, note: null, variant: {} },
             ],

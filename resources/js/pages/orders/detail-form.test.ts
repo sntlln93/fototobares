@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import {
     buildProductOrders,
+    DetailFormData,
     initialDetailFormData,
-    resolveVariants,
     validateDetailForm,
 } from './detail-form';
 import { SelectableProduct } from './form';
@@ -11,13 +11,32 @@ const mural = {
     id: 1,
     product_type_id: 1,
     name: 'Mural clásico',
-    variants: {
-        photo_types: ['individual', 'grupo'],
-        orientations: ['vertical', 'horizontal'],
-        backgrounds: ['blue'],
-        colors: ['brown'],
-        dimentions: '30x40',
-    },
+    variants: [
+        {
+            label: 'Tipo de foto',
+            type: 'text',
+            nullable: false,
+            options: [{ label: 'Individual' }, { label: 'Grupo' }],
+        },
+        {
+            label: 'Orientación',
+            type: 'text',
+            nullable: false,
+            options: [{ label: 'Vertical' }, { label: 'Horizontal' }],
+        },
+        {
+            label: 'Fondo',
+            type: 'color',
+            nullable: false,
+            options: [{ label: 'Celeste', color: '#93c5fd' }],
+        },
+        {
+            label: 'Color',
+            type: 'color',
+            nullable: false,
+            options: [{ label: 'Marrón', color: '#78350f' }],
+        },
+    ],
 } as unknown as SelectableProduct;
 
 const taza = {
@@ -27,12 +46,30 @@ const taza = {
     combo_id: 4,
 } as SelectableProduct;
 
-const completeMuralData = () => ({
-    orientation: [{ product_id: 1, value: 'vertical' as const }],
-    photoType: [{ product_id: 1, value: 'individual' as const }],
-    background: [{ product_id: 1, value: 'blue' }],
-    color: [{ product_id: 1, value: 'brown' }],
-    note: [{ product_id: 1, value: 'Martina' }],
+const banda = {
+    id: 3,
+    product_type_id: 3,
+    name: 'Banda',
+    variants: [
+        {
+            label: 'Talle',
+            type: 'text',
+            nullable: true,
+            options: [{ label: 'Único' }, { label: 'S' }],
+        },
+    ],
+} as unknown as SelectableProduct;
+
+const completeMuralData = (): DetailFormData => ({
+    1: {
+        values: {
+            'Tipo de foto': 'Individual',
+            Orientación: 'Vertical',
+            Fondo: 'Celeste',
+            Color: 'Marrón',
+        },
+        note: 'Martina',
+    },
 });
 
 describe('validateDetailForm', () => {
@@ -40,10 +77,10 @@ describe('validateDetailForm', () => {
         const errors = validateDetailForm([mural], initialDetailFormData());
 
         expect(Object.keys(errors[1])).toEqual([
-            'orientation',
-            'photoType',
-            'background',
-            'color',
+            'Tipo de foto',
+            'Orientación',
+            'Fondo',
+            'Color',
             'note',
         ]);
     });
@@ -56,16 +93,22 @@ describe('validateDetailForm', () => {
 
     it('reports only the missing fields', () => {
         const data = completeMuralData();
-        data.color = [];
-        data.note = [];
+        delete data[1].values.Color;
+        data[1].note = '';
 
         const errors = validateDetailForm([mural], data);
 
-        expect(Object.keys(errors[1])).toEqual(['color', 'note']);
+        expect(Object.keys(errors[1])).toEqual(['Color', 'note']);
     });
 
-    it('requires nothing for non-mural products', () => {
+    it('requires nothing for non-mural products without variants', () => {
         const errors = validateDetailForm([taza], initialDetailFormData());
+
+        expect(errors).toEqual({});
+    });
+
+    it('never errors on a nullable variant left pending', () => {
+        const errors = validateDetailForm([banda], initialDetailFormData());
 
         expect(errors).toEqual({});
     });
@@ -102,7 +145,7 @@ describe('validateDetailForm', () => {
 });
 
 describe('buildProductOrders', () => {
-    it('builds a mural detail with its variant', () => {
+    it('builds a mural detail with its variant selection', () => {
         const orders = buildProductOrders([mural], completeMuralData());
 
         expect(orders).toEqual([
@@ -110,10 +153,10 @@ describe('buildProductOrders', () => {
                 combo_id: undefined,
                 product_id: 1,
                 variant: {
-                    orientation: 'vertical',
-                    photo_type: 'individual',
-                    background: 'blue',
-                    color: 'brown',
+                    'Tipo de foto': 'Individual',
+                    Orientación: 'Vertical',
+                    Fondo: 'Celeste',
+                    Color: 'Marrón',
                 },
                 note: 'Martina',
             },
@@ -147,37 +190,35 @@ describe('buildProductOrders', () => {
             },
         ]);
     });
+
+    it('sends an explicit null for a nullable variant left unset', () => {
+        const orders = buildProductOrders([banda], initialDetailFormData());
+
+        expect(orders[0].variant).toEqual({ Talle: null });
+    });
 });
 
 describe('initialDetailFormData', () => {
     it('starts empty without initial values', () => {
-        expect(initialDetailFormData()).toEqual({
-            orientation: [],
-            photoType: [],
-            background: [],
-            color: [],
-            note: [],
-        });
+        expect(initialDetailFormData()).toEqual({});
     });
 
-    it('prefills variant and note when editing', () => {
+    it('prefills variant selection and note when editing', () => {
         const data = initialDetailFormData([
             {
                 product_id: 1,
                 note: 'Martina',
                 variant: {
-                    orientation: 'vertical',
-                    photo_type: 'individual',
-                    background: 'blue',
-                    color: 'brown',
+                    'Tipo de foto': 'Individual',
+                    Orientación: 'Vertical',
+                    Fondo: 'Celeste',
+                    Color: 'Marrón',
                 },
             },
         ]);
 
-        expect(data.orientation).toEqual([
-            { product_id: 1, value: 'vertical' },
-        ]);
-        expect(data.note).toEqual([{ product_id: 1, value: 'Martina' }]);
+        expect(data[1].values.Orientación).toBe('Vertical');
+        expect(data[1].note).toBe('Martina');
     });
 
     it('prefills only the note for products without a variant', () => {
@@ -185,42 +226,7 @@ describe('initialDetailFormData', () => {
             { product_id: 2, note: 'Taza de Pedro' },
         ]);
 
-        expect(data.orientation).toEqual([]);
-        expect(data.note).toEqual([{ product_id: 2, value: 'Taza de Pedro' }]);
-    });
-});
-
-describe('resolveVariants', () => {
-    const variants = {
-        photo_types: ['individual'],
-        orientations: ['vertical'],
-        backgrounds: ['blue'],
-        colors: ['brown'],
-        dimentions: '30x40',
-    } as SelectableProduct['variants'];
-
-    it('prefers the combo pivot variants', () => {
-        const product = {
-            ...mural,
-            variants,
-            pivot: { variants: { ...variants, backgrounds: ['white'] } },
-        } as SelectableProduct;
-
-        expect(resolveVariants(product)?.backgrounds).toEqual(['white']);
-    });
-
-    it('parses pivot variants stored as JSON', () => {
-        const product = {
-            ...mural,
-            pivot: { variants: JSON.stringify(variants) },
-        } as unknown as SelectableProduct;
-
-        expect(resolveVariants(product)?.orientations).toEqual(['vertical']);
-    });
-
-    it('falls back to the product variants', () => {
-        const product = { ...mural, variants } as SelectableProduct;
-
-        expect(resolveVariants(product)).toEqual(variants);
+        expect(data[2].values).toEqual({});
+        expect(data[2].note).toBe('Taza de Pedro');
     });
 });

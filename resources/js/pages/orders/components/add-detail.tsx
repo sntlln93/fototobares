@@ -4,7 +4,6 @@ import { Modal } from '@/components/modal';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { capitalize, getColorEs } from '@/lib/utils';
 import { ProductOrder, SelectableProduct } from '../form';
 import { useAddDetail } from '../hooks/use-add-detail';
 import { DetailVariantField } from './detail-variant-field';
@@ -26,17 +25,18 @@ export function AddDetail({
     const {
         errors,
         currentStep,
-        getProductValue,
-        updateProductData,
+        getVariantValue,
+        setVariantValue,
+        getNote,
+        setNote,
         handleAddProduct,
         handleNextStep,
         handlePreviousStep,
-        getVariants,
+        getDefinitions,
     } = useAddDetail({ products, addProducts, onClose, initialValues });
 
     const product = products[currentStep];
-    // Narrowed once so TypeScript knows the variants exist inside the block
-    const currentVariants = getVariants(currentStep);
+    const definitions = getDefinitions(currentStep);
 
     return (
         <Modal show={show} onClose={onClose}>
@@ -49,74 +49,17 @@ export function AddDetail({
                     Agregando {currentStep + 1} de {products.length} productos
                 </h3>
 
-                {product.product_type_id === 1 && currentVariants ? (
-                    <>
-                        <DetailVariantField
-                            legend="Orientaciones disponibles para este producto"
-                            options={currentVariants.orientations}
-                            selectedValue={getProductValue(
-                                product.id,
-                                'orientation',
-                            )}
-                            onSelect={(value) =>
-                                updateProductData(
-                                    'orientation',
-                                    product.id,
-                                    value as ProductOrientation,
-                                )
-                            }
-                            renderLabel={capitalize}
-                            error={errors[product.id]?.orientation}
-                        />
-
-                        <DetailVariantField
-                            legend="Tipo de foto"
-                            options={currentVariants.photo_types}
-                            selectedValue={getProductValue(
-                                product.id,
-                                'photoType',
-                            )}
-                            onSelect={(value) =>
-                                updateProductData(
-                                    'photoType',
-                                    product.id,
-                                    value as ProductPhotoType,
-                                )
-                            }
-                            renderLabel={capitalize}
-                            error={errors[product.id]?.photoType}
-                        />
-
-                        <DetailVariantField
-                            legend="Fondos disponibles para este producto en este combo"
-                            options={currentVariants.backgrounds}
-                            selectedValue={getProductValue(
-                                product.id,
-                                'background',
-                            )}
-                            onSelect={(value) =>
-                                updateProductData(
-                                    'background',
-                                    product.id,
-                                    value,
-                                )
-                            }
-                            renderLabel={getColorEs}
-                            error={errors[product.id]?.background}
-                        />
-
-                        <DetailVariantField
-                            legend="Colores disponibles para este producto en este combo"
-                            options={currentVariants.colors}
-                            selectedValue={getProductValue(product.id, 'color')}
-                            onSelect={(value) =>
-                                updateProductData('color', product.id, value)
-                            }
-                            renderLabel={getColorEs}
-                            error={errors[product.id]?.color}
-                        />
-                    </>
-                ) : undefined}
+                {definitions.map((definition) => (
+                    <DetailVariantField
+                        key={definition.label}
+                        definition={definition}
+                        value={getVariantValue(product.id, definition.label)}
+                        onSelect={(value) =>
+                            setVariantValue(product.id, definition.label, value)
+                        }
+                        error={errors[product.id]?.[definition.label]}
+                    />
+                ))}
 
                 <div className="mt-2">
                     <Label htmlFor="note">Notas</Label>
@@ -129,14 +72,8 @@ export function AddDetail({
                         id="note"
                         type="text"
                         name="note"
-                        value={getProductValue(product.id, 'note') ?? ''}
-                        onChange={(e) =>
-                            updateProductData(
-                                'note',
-                                product.id,
-                                e.target.value,
-                            )
-                        }
+                        value={getNote(product.id)}
+                        onChange={(e) => setNote(product.id, e.target.value)}
                         className="mt-1 block w-full"
                     />
                     <InputError

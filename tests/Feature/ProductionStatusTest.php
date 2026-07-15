@@ -22,7 +22,7 @@ it('renders the stages grouped by product', function () {
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->component('production-statuses/index')
-            ->has('products', 12)
+            ->has('products', 13)
             ->has('stockables')
             ->where('products.0.name', 'Clásico')
             ->where('products.0.statuses.0.name', 'Sin foto')

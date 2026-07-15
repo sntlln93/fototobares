@@ -2,48 +2,64 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { DetailVariantField } from './detail-variant-field';
 
+const definition: VariantDefinition = {
+    label: 'Orientación',
+    type: 'text',
+    nullable: false,
+    options: [{ label: 'Vertical' }, { label: 'Horizontal' }],
+};
+
 const renderField = (
     props: Partial<Parameters<typeof DetailVariantField>[0]> = {},
 ) =>
     render(
         <DetailVariantField
-            legend="Orientación"
-            options={['vertical', 'horizontal']}
-            selectedValue={undefined}
+            definition={definition}
+            value={null}
             onSelect={vi.fn()}
-            renderLabel={(value) => value.toUpperCase()}
             {...props}
         />,
     );
 
 describe('DetailVariantField', () => {
-    it('renders one option per value through the label renderer', () => {
+    it('renders one option per value', () => {
         renderField();
 
         expect(screen.getByText('Orientación')).toBeTruthy();
-        expect(screen.getByLabelText('VERTICAL')).toBeTruthy();
-        expect(screen.getByLabelText('HORIZONTAL')).toBeTruthy();
+        expect(screen.getByText('Vertical')).toBeTruthy();
+        expect(screen.getByText('Horizontal')).toBeTruthy();
     });
 
-    it('marks only the selected option', () => {
-        renderField({ selectedValue: 'vertical' });
-
-        expect(
-            screen.getByLabelText<HTMLInputElement>('VERTICAL').checked,
-        ).toBe(true);
-        expect(
-            screen.getByLabelText<HTMLInputElement>('HORIZONTAL').checked,
-        ).toBe(false);
-    });
-
-    it('notifies the selection with the raw option value', () => {
+    it('notifies the selection with the option label', () => {
         const onSelect = vi.fn();
 
         renderField({ onSelect });
 
-        fireEvent.click(screen.getByLabelText('HORIZONTAL'));
+        fireEvent.click(screen.getByText('Horizontal'));
 
-        expect(onSelect).toHaveBeenCalledWith('horizontal');
+        expect(onSelect).toHaveBeenCalledWith('Horizontal');
+    });
+
+    it('does not offer "definir después" for a non-nullable definition', () => {
+        renderField();
+
+        expect(screen.queryByText('Definir después')).toBeNull();
+    });
+
+    it('offers "definir después" for a nullable definition and selects null', () => {
+        const onSelect = vi.fn();
+
+        render(
+            <DetailVariantField
+                definition={{ ...definition, nullable: true }}
+                value="Vertical"
+                onSelect={onSelect}
+            />,
+        );
+
+        fireEvent.click(screen.getByText('Definir después'));
+
+        expect(onSelect).toHaveBeenCalledWith(null);
     });
 
     it('shows the validation error only when present', () => {
@@ -53,10 +69,9 @@ describe('DetailVariantField', () => {
 
         rerender(
             <DetailVariantField
-                legend="Orientación"
-                options={['vertical', 'horizontal']}
+                definition={definition}
+                value={null}
                 onSelect={vi.fn()}
-                renderLabel={(value) => value.toUpperCase()}
                 error="Debes elegir una opción"
             />,
         );

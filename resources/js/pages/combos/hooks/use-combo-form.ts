@@ -14,7 +14,7 @@ export function useComboForm({
     onSubmit,
 }: UseComboFormParams) {
     const [addProduct, setAddProduct] = useState<number | null>(null);
-    const [showAddMuralProduct, setShowAddMuralProduct] =
+    const [variantsModalProduct, setVariantsModalProduct] =
         useState<Product | null>(null);
     const [editingVariants, setEditingVariants] = useState<
         SelectedProduct['variants'] | null
@@ -42,7 +42,7 @@ export function useComboForm({
         if (!product) return;
 
         // Products without configurable variants are added directly
-        if (product.product_type_id !== 1 || !product.variants) {
+        if (!product.variants?.length) {
             setData('products', [
                 ...data.products,
                 {
@@ -53,7 +53,7 @@ export function useComboForm({
             ]);
         } else {
             // eslint-disable-next-line react-hooks/set-state-in-effect -- state-as-event flow; superseded by the #96/#97 combo redesign
-            setShowAddMuralProduct(product);
+            setVariantsModalProduct(product);
         }
 
         // Reset so the same product can be re-added after being removed
@@ -68,7 +68,7 @@ export function useComboForm({
         if (!product || !selected) return;
 
         setEditingVariants(selected.variants ?? null);
-        setShowAddMuralProduct(product);
+        setVariantsModalProduct(product);
     };
 
     const updateQuantity = (id: number, value: number) => {
@@ -114,8 +114,8 @@ export function useComboForm({
         setData('products', upsertSelectedProduct(data.products, product));
     };
 
-    const closeMuralModal = () => {
-        setShowAddMuralProduct(null);
+    const closeVariantsModal = () => {
+        setVariantsModalProduct(null);
         setEditingVariants(null);
     };
 
@@ -125,14 +125,14 @@ export function useComboForm({
         errors: form.errors,
         processing: form.processing,
         setAddProduct,
-        showAddMuralProduct,
+        variantsModalProduct,
         editingVariants,
         submit,
         openEditProductModal,
         updateQuantity,
         updateSubtractValue,
         addSelectedProduct,
-        closeMuralModal,
+        closeVariantsModal,
     };
 }
 

@@ -9,7 +9,7 @@ export type SelectedProduct = {
     quantity: number;
     /** How much the combo price drops when this product is taken out */
     subtract_value: number;
-    variants?: Product['variants'];
+    variants?: ComboVariantSubset;
 };
 
 /**

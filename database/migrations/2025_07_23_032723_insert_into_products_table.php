@@ -24,11 +24,29 @@ return new class extends Migration
         $product_types = ProductType::all();
 
         $variants = [
-            'colors' => ['black', 'pink'],
-            'dimentions' => '20x30',
-            'backgrounds' => ['blue'],
-            'photo_types' => ['grupo'],
-            'orientations' => ['vertical', 'horizontal'],
+            ['label' => 'Tipo de foto', 'type' => 'text', 'nullable' => false, 'options' => [
+                ['label' => 'Grupo'],
+            ]],
+            ['label' => 'Orientación', 'type' => 'text', 'nullable' => false, 'options' => [
+                ['label' => 'Vertical'],
+                ['label' => 'Horizontal'],
+            ]],
+            ['label' => 'Fondo', 'type' => 'color', 'nullable' => false, 'options' => [
+                ['label' => 'Celeste', 'color' => '#93c5fd'],
+            ]],
+            ['label' => 'Color', 'type' => 'color', 'nullable' => false, 'options' => [
+                ['label' => 'Negro', 'color' => '#1c1917'],
+                ['label' => 'Rosa', 'color' => '#f9a8d4'],
+            ]],
+        ];
+
+        $bandaVariants = [
+            ['label' => 'Talle', 'type' => 'text', 'nullable' => true, 'options' => [
+                ['label' => 'Único'],
+                ['label' => 'S'],
+                ['label' => 'M'],
+                ['label' => 'L'],
+            ]],
         ];
 
         $products = [
@@ -121,6 +139,14 @@ return new class extends Migration
                 'max_payments' => 1,
                 'unit_price' => 13000,
                 'product_type_id' => $product_types->firstWhere('name', 'foto')->id,
+            ],
+            [
+                'name' => 'Banda',
+                'financed_price' => null,
+                'max_payments' => 1,
+                'unit_price' => 9000,
+                'product_type_id' => $product_types->firstWhere('name', 'banda')->id,
+                'variants' => $bandaVariants,
             ],
         ];
 

@@ -6,11 +6,10 @@ namespace App\Http\Requests\BO;
 
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Validator;
 
 class StoreProductRequest extends FormRequest
 {
-    const MURAL_PRODUCT_TYPE_ID = 1;
-
     /**
      * Determine if the user is authorized to make this request.
      */
@@ -26,37 +25,50 @@ class StoreProductRequest extends FormRequest
      */
     public function rules(): array
     {
-        $base_rules = [
+        return [
             'name' => ['required', 'string'],
             'unit_price' => ['required', 'numeric', 'min:1'],
             'max_payments' => ['required', 'numeric', 'min:1'],
             'product_type_id' => ['required', 'exists:product_types,id'],
+
+            'variants' => ['sometimes', 'nullable', 'array'],
+            'variants.*.label' => ['required', 'string', 'max:50', 'distinct'],
+            'variants.*.type' => ['required', 'string', 'in:text,color'],
+            'variants.*.nullable' => ['required', 'boolean'],
+            'variants.*.options' => ['required', 'array', 'min:1'],
+            'variants.*.options.*.label' => ['required', 'string', 'max:50'],
+            'variants.*.options.*.color' => ['nullable', 'regex:/^#[0-9a-fA-F]{6}$/'],
         ];
+    }
 
-        /** @var string $product_type_id */
-        $product_type_id = request('product_type_id');
+    /**
+     * Cross-field checks wildcard rules can't express: option labels unique
+     * within their own definition (distinct only compares siblings at the
+     * same nesting level, not per-parent) and a color required once the
+     * definition's type is "color".
+     */
+    public function withValidator(Validator $validator): void
+    {
+        $validator->after(function (Validator $validator) {
+            /** @var array<int, array{label?: string, type?: string, options?: array<int, array{label?: string, color?: string|null}>}> $definitions */
+            $definitions = $this->input('variants') ?? [];
 
-        if ((int) $product_type_id === self::MURAL_PRODUCT_TYPE_ID) {
-            return array_merge($base_rules, [
-                'variants' => ['required', 'array'],
+            foreach ($definitions as $index => $definition) {
+                $optionLabels = array_column($definition['options'] ?? [], 'label');
 
-                'variants.photo_types' => ['required', 'array', 'min:1'],
-                'variants.photo_types.*' => ['string', 'in:grupo,individual'],
+                if (count($optionLabels) !== count(array_unique($optionLabels))) {
+                    $validator->errors()->add("variants.{$index}.options", 'Las opciones de esta variante no pueden repetirse.');
+                }
 
-                'variants.orientations' => ['required', 'array', 'min:1'],
-                'variants.orientations.*' => ['string', 'in:vertical,horizontal'],
-
-                'variants.backgrounds' => ['required', 'array', 'min:1'],
-                'variants.backgrounds.*' => ['string', 'in:white,black,blue,pink'],
-
-                'variants.colors' => ['required', 'array', 'min:1'],
-                'variants.colors.*' => ['string', 'in:white,black,blue,pink'],
-
-                'variants.dimentions' => ['required', 'regex:/^\d+x\d+$/'],
-            ]);
-        }
-
-        return $base_rules;
+                if (($definition['type'] ?? null) === 'color') {
+                    foreach ($definition['options'] ?? [] as $optionIndex => $option) {
+                        if (empty($option['color'])) {
+                            $validator->errors()->add("variants.{$index}.options.{$optionIndex}.color", 'El color es requerido para esta opción.');
+                        }
+                    }
+                }
+            }
+        });
     }
 
     /**
@@ -67,31 +79,28 @@ class StoreProductRequest extends FormRequest
      *     unit_price: float,
      *     max_payments: int,
      *     product_type_id: int,
-     *     variants?: array{
-     *         photo_types: array<string>,
-     *         orientations: array<string>,
-     *         backgrounds: array<string>,
-     *         colors: array<string>,
-     *         dimentions: string
-     *     }
+     *     variants?: array<int, array{
+     *         label: string,
+     *         type: string,
+     *         nullable: bool,
+     *         options: array<int, array{label: string, color?: string|null}>
+     *     }>|null
      * }
      */
     public function validated($key = null, $default = null)
     {
-
         /**
          * @var array{
          *     name: string,
          *     unit_price: float,
          *     max_payments: int,
          *     product_type_id: int,
-         *     variants?: array{
-         *         photo_types: array<string>,
-         *         orientations: array<string>,
-         *         backgrounds: array<string>,
-         *         colors: array<string>,
-         *         dimentions: string
-         *     }
+         *     variants?: array<int, array{
+         *         label: string,
+         *         type: string,
+         *         nullable: bool,
+         *         options: array<int, array{label: string, color?: string|null}>
+         *     }>|null
          * }
          */
         $validated = parent::validated();

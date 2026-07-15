@@ -9,13 +9,23 @@ const toast = vi.hoisted(() => ({ info: vi.fn() }));
 
 vi.mock('sonner', () => ({ toast }));
 
-const catalogVariants = {
-    photo_types: ['individual', 'grupo'],
-    orientations: ['vertical', 'horizontal'],
-    backgrounds: ['blue', 'white'],
-    colors: ['brown'],
-    dimentions: '30x40',
-};
+const catalogVariants: VariantDefinition[] = [
+    {
+        label: 'Orientación',
+        type: 'text',
+        nullable: false,
+        options: [{ label: 'Vertical' }, { label: 'Horizontal' }],
+    },
+    {
+        label: 'Fondo',
+        type: 'color',
+        nullable: false,
+        options: [
+            { label: 'Celeste', color: '#93c5fd' },
+            { label: 'Blanco', color: '#ffffff' },
+        ],
+    },
+];
 
 const mural = {
     id: 1,
@@ -44,11 +54,10 @@ const pivot = (subtractValue: number) => ({
     subtract_value: subtractValue,
 });
 
-// Same mural but restricted by the combo pivot to a single background
+// Same mural, restricted by the combo pivot to a single background
 const comboMural = {
     ...mural,
-    variants: { ...catalogVariants, backgrounds: ['blue'] },
-    pivot: pivot(9000),
+    pivot: { ...pivot(9000), variants: { Fondo: ['Celeste'] } },
 } as unknown as ComboProduct;
 
 const comboTaza = { ...taza, pivot: pivot(3000) } as ComboProduct;
@@ -235,11 +244,14 @@ describe('useOrderProducts', () => {
 
         act(() => result.current.handleEditProduct(0));
 
+        const opened = result.current.openAddModal?.[0] as
+            (ComboProduct & { combo_id?: number }) | undefined;
+
         expect(result.current.editingIndex).toBe(0);
-        expect(result.current.openAddModal?.[0].combo_id).toBe(4);
-        expect(result.current.openAddModal?.[0].variants?.backgrounds).toEqual([
-            'blue',
-        ]);
+        expect(opened?.combo_id).toBe(4);
+        expect(opened?.pivot?.variants).toEqual({
+            Fondo: ['Celeste'],
+        });
     });
 
     it('falls back to the catalog when the combo does not carry the product', () => {

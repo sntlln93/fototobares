@@ -96,6 +96,7 @@ class OrderResource extends JsonResource
                     'product_id' => $product->pivot->product_id, // @phpstan-ignore-line
                     'note' => $product->pivot->note,  // @phpstan-ignore-line
                     'variant' => $product->pivot->variant,  // @phpstan-ignore-line
+                    'variants' => $product->variants ?? [],
                     'delivered_at' => $product->pivot->delivered_at,  // @phpstan-ignore-line
                     'production_status' => $detail?->productionStatus?->name,
                     'production_status_id' => $detail?->production_status_id,

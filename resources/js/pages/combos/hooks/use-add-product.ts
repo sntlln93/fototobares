@@ -1,12 +1,5 @@
-import { ChangeEvent, Dispatch, SetStateAction, useState } from 'react';
+import { ChangeEvent, useState } from 'react';
 import { SelectedProduct } from '../form';
-
-interface VariantErrors {
-    orientations?: string;
-    photoTypes?: string;
-    backgrounds?: string;
-    colors?: string;
-}
 
 interface UseAddProductParams {
     product: Product;
@@ -15,24 +8,24 @@ interface UseAddProductParams {
     onClose: () => void;
 }
 
-function toggleInSet<T extends string>(
-    setter: Dispatch<SetStateAction<Set<T>>>,
-) {
-    return (e: ChangeEvent<HTMLInputElement>) => {
-        const value = e.target.value as T;
-        const checked = e.target.checked;
-
-        setter((prev) => {
-            const newValues = new Set(prev);
-            if (checked) {
-                newValues.add(value);
-            } else {
-                newValues.delete(value);
-            }
-            return newValues;
-        });
-    };
-}
+/**
+ * Defaults to every option selected (no restriction) rather than empty:
+ * friendlier than forcing the user to re-check every option just to leave
+ * the product unrestricted.
+ */
+const initialSelection = (
+    product: Product,
+    initialVariants?: ComboVariantSubset | null,
+): Record<string, Set<string>> =>
+    Object.fromEntries(
+        (product.variants ?? []).map((definition) => [
+            definition.label,
+            new Set(
+                initialVariants?.[definition.label] ??
+                    definition.options.map((option) => option.label),
+            ),
+        ]),
+    );
 
 export function useAddProduct({
     product,
@@ -40,88 +33,62 @@ export function useAddProduct({
     addProduct,
     onClose,
 }: UseAddProductParams) {
-    const [orientations, setOrientations] = useState<Set<ProductOrientation>>(
-        new Set(initialVariants?.orientations ?? []),
-    );
-    const [photoTypes, setPhotoTypes] = useState<Set<ProductPhotoType>>(
-        new Set(initialVariants?.photo_types ?? []),
-    );
-    const [backgrounds, setBackgrounds] = useState<Set<string>>(
-        new Set(initialVariants?.backgrounds ?? []),
-    );
-    const [colors, setColors] = useState<Set<Color>>(
-        new Set(initialVariants?.colors ?? []),
+    const [selection, setSelection] = useState<Record<string, Set<string>>>(
+        () => initialSelection(product, initialVariants),
     );
 
-    const [errors, setErrors] = useState<VariantErrors | null>(null);
+    const [errors, setErrors] = useState<Record<string, string>>({});
+
+    const toggleOption =
+        (label: string) => (e: ChangeEvent<HTMLInputElement>) => {
+            const value = e.target.value;
+            const checked = e.target.checked;
+
+            setSelection((prev) => {
+                const next = new Set(prev[label]);
+
+                if (checked) {
+                    next.add(value);
+                } else {
+                    next.delete(value);
+                }
+
+                return { ...prev, [label]: next };
+            });
+        };
 
     const handleAddProduct = () => {
-        let hasErrors = 0;
+        const newErrors: Record<string, string> = {};
 
-        if ([...orientations].length === 0) {
-            hasErrors++;
-            setErrors((prev) => ({
-                ...prev,
-                orientations: 'Debes elegir por lo menos una orientación',
-            }));
-        }
+        (product.variants ?? []).forEach((definition) => {
+            if ((selection[definition.label]?.size ?? 0) === 0) {
+                newErrors[definition.label] =
+                    `Debes elegir por lo menos una opción de "${definition.label}"`;
+            }
+        });
 
-        if ([...photoTypes].length === 0) {
-            hasErrors++;
-            setErrors((prev) => ({
-                ...prev,
-                photoTypes: 'Debes elegir por lo menos un tipo de foto',
-            }));
-        }
+        if (Object.keys(newErrors).length > 0) {
+            setErrors(newErrors);
 
-        if ([...backgrounds].length === 0) {
-            hasErrors++;
-            setErrors((prev) => ({
-                ...prev,
-                backgrounds: 'Debes elegir por lo menos un fondo',
-            }));
-        }
-
-        if ([...colors].length === 0) {
-            hasErrors++;
-            setErrors((prev) => ({
-                ...prev,
-                colors: 'Debes elegir por lo menos un color',
-            }));
-        }
-
-        if (hasErrors > 0) {
             return;
         }
 
-        const selectedProduct = {
+        const selectedProduct: SelectedProduct = {
             id: product.id,
             quantity: 1,
             // Kept by upsertSelectedProduct when editing an existing product
             subtract_value: 0,
-            variants: {
-                photo_types: Array.from(photoTypes),
-                orientations: Array.from(orientations),
-                backgrounds: Array.from(backgrounds),
-                colors: Array.from(colors) as Color[],
-                dimentions: product.variants?.dimentions ?? '',
-            },
+            variants: Object.fromEntries(
+                Object.entries(selection).map(([label, options]) => [
+                    label,
+                    Array.from(options),
+                ]),
+            ),
         };
 
         addProduct(selectedProduct);
         onClose();
     };
 
-    return {
-        orientations,
-        photoTypes,
-        backgrounds,
-        colors,
-        errors,
-        handleSetOrientations: toggleInSet(setOrientations),
-        handleSetPhotoTypes: toggleInSet(setPhotoTypes),
-        handleSetBackgrounds: toggleInSet(setBackgrounds),
-        handleSetColors: toggleInSet(setColors),
-        handleAddProduct,
-    };
+    return { selection, errors, toggleOption, handleAddProduct };
 }

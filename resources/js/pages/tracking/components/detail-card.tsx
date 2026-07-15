@@ -1,6 +1,7 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { variantSummary } from '@/lib/variants';
 import { ArrowRight, Flame } from 'lucide-react';
 import { TrackingDetail } from './product-group';
 
@@ -81,11 +82,9 @@ export function DetailCard({
                 <span className="text-gray-500">
                     {detail.school} ({detail.classroom.toUpperCase()})
                 </span>
-                {detail.variant && (
+                {detail.variant && detail.variant.length > 0 && (
                     <span className="text-xs text-gray-500">
-                        {Object.values(detail.variant)
-                            .filter(Boolean)
-                            .join(' · ')}
+                        {variantSummary(detail.variant)}
                     </span>
                 )}
                 {detail.note && (

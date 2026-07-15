@@ -24,7 +24,14 @@ const makeDetail = (
     product_name: 'Moldura fina',
     product_type_id: 1,
     product_type: 'mural',
-    variant: { color: 'black', orientation: 'vertical' },
+    variant: [
+        {
+            label: 'Color',
+            type: 'color',
+            value: { label: 'Negro', color: '#1c1917' },
+        },
+        { label: 'Orientación', type: 'text', value: { label: 'Vertical' } },
+    ],
     note: 'Lola - egresados 2026',
     production_status_id: 5,
     production_status: 'Impreso',
@@ -56,7 +63,7 @@ describe('DetailCard', () => {
         expect(screen.getByText('(foto 3)')).toBeTruthy();
         expect(screen.getByText('Lola')).toBeTruthy();
         expect(screen.getByText('Escuela Normal (6TO A)')).toBeTruthy();
-        expect(screen.getByText('black · vertical')).toBeTruthy();
+        expect(screen.getByText('Negro · Vertical')).toBeTruthy();
         expect(screen.getByText('Lola - egresados 2026')).toBeTruthy();
         expect(screen.getByText('Impreso')).toBeTruthy();
     });
