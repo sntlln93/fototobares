@@ -15,8 +15,8 @@ use App\Contracts\DtoContract;
 final readonly class SchoolData implements DtoContract
 {
     /**
-     * @param  array{user_id: int, name: string, level: string}  $school
-     * @param  array{name?: string, phone?: string}|null  $principal
+     * @param  array{user_id: int|string, name: string, level: string}  $school
+     * @param  array{name?: string, phone?: int|string}|null  $principal
      * @param  array{street?: string, number?: string, neighborhood?: string, city: string}  $address
      */
     public function __construct(

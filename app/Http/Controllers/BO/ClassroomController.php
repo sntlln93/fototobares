@@ -7,6 +7,7 @@ namespace App\Http\Controllers\BO;
 use App\Actions\Classrooms\CreateClassroom;
 use App\Actions\Classrooms\DeleteClassroom;
 use App\Actions\Classrooms\UpdateClassroom;
+use App\Data\Classrooms\DeleteClassroomData;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\BO\StoreClassroomRequest;
 use App\Http\Requests\BO\UpdateClassroomRequest;
@@ -72,16 +73,16 @@ class ClassroomController extends Controller
 
     public function store(StoreClassroomRequest $request, CreateClassroom $action): RedirectResponse
     {
-        $validated = $request->validated();
+        $data = $request->toData();
 
-        $action->handle($validated);
+        $action->handle($data);
 
-        return redirect(route('schools.show', ['school' => $validated['school_id']]));
+        return redirect(route('schools.show', ['school' => $data->schoolId]));
     }
 
     public function update(UpdateClassroomRequest $request, Classroom $classroom, UpdateClassroom $action): RedirectResponse
     {
-        $action->handle(['classroom' => $classroom, 'data' => $request->validated()]);
+        $action->handle($request->toData($classroom));
 
         return redirect(route('schools.show', ['school' => $classroom->school_id]));
     }
@@ -98,7 +99,7 @@ class ClassroomController extends Controller
 
         $school_id = $classroom->school_id;
 
-        $action->handle(['classroom' => $classroom]);
+        $action->handle(new DeleteClassroomData($classroom));
 
         return redirect()->route('schools.show', ['school' => $school_id]);
     }

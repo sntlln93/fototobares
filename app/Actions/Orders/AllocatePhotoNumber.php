@@ -5,9 +5,14 @@ declare(strict_types=1);
 namespace App\Actions\Orders;
 
 use App\Contracts\ActionContract;
+use App\Contracts\DtoContract;
+use App\Data\Orders\AllocatePhotoNumberData;
 use App\Models\Order;
 use App\Models\OrderDraft;
 
+/**
+ * @implements ActionContract<AllocatePhotoNumberData>
+ */
 class AllocatePhotoNumber implements ActionContract
 {
     /**
@@ -15,16 +20,16 @@ class AllocatePhotoNumber implements ActionContract
      * between orders and drafts so a new order always counts existing drafts
      * (and vice versa) and never collides with them.
      *
-     * @param  array{classroom_id: int}  $params
+     * @param  AllocatePhotoNumberData  $params
      */
-    public function handle(array $params): int
+    public function handle(DtoContract $params): int
     {
         $maxOrderNumber = Order::withTrashed()
-            ->where('classroom_id', $params['classroom_id'])
+            ->where('classroom_id', $params->classroomId)
             ->max('photo_number');
 
         $maxDraftNumber = OrderDraft::query()
-            ->where('classroom_id', $params['classroom_id'])
+            ->where('classroom_id', $params->classroomId)
             ->max('photo_number');
 
         $max = max(

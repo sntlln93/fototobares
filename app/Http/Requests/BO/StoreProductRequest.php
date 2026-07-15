@@ -72,45 +72,21 @@ class StoreProductRequest extends FormRequest
         });
     }
 
-    /**
-     * Get the validated data as a structured array.
-     *
-     * @return array{
-     *     name: string,
-     *     unit_price: float,
-     *     max_payments: int,
-     *     product_type_id: int,
-     *     variants?: array<int, array{
-     *         label: string,
-     *         type: string,
-     *         nullable: bool,
-     *         options: array<int, array{label: string, color?: string|null}>
-     *     }>|null
-     * }
-     */
-    public function validated($key = null, $default = null)
+    public function toData(): CreateProductData
     {
-        /**
-         * @var array{
+        /** @var array{
          *     name: string,
-         *     unit_price: float,
-         *     max_payments: int,
-         *     product_type_id: int,
+         *     unit_price: int|float|string,
+         *     max_payments: int|float|string,
+         *     product_type_id: int|string,
          *     variants?: array<int, array{
          *         label: string,
          *         type: string,
          *         nullable: bool,
          *         options: array<int, array{label: string, color?: string|null}>
          *     }>|null
-         * }
+         * } $validated
          */
-        $validated = parent::validated();
-
-        return $validated;
-    }
-
-    public function toData(): CreateProductData
-    {
         $validated = $this->validated();
 
         return new CreateProductData(

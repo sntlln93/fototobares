@@ -5,20 +5,23 @@ declare(strict_types=1);
 namespace App\Actions\Combos;
 
 use App\Contracts\ActionContract;
-use App\Models\Combo;
+use App\Contracts\DtoContract;
+use App\Data\Combos\DeleteComboData;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * @implements ActionContract<DeleteComboData>
+ */
 class DeleteCombo implements ActionContract
 {
     /**
      * Delete a combo, detaching its products first.
      *
-     * @param  array<string, mixed>  $params  {combo: Combo}
+     * @param  DeleteComboData  $params
      */
-    public function handle(array $params): void
+    public function handle(DtoContract $params): void
     {
-        /** @var Combo $combo */
-        $combo = $params['combo'];
+        $combo = $params->combo;
 
         DB::transaction(function () use ($combo) {
             $combo->products()->detach();

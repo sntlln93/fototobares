@@ -34,34 +34,15 @@ class UpdateOrderClientRequest extends FormRequest
         ];
     }
 
-    /**
-     * Get the validated data as a structured array.
-     *
-     * @param  string|null  $key
-     * @param  mixed  $default
-     * @return array{
-     *     name: string|null,
-     *     phone: string|null,
-     *     child_name: string|null,
-     *     attended_photo_session: bool|null,
-     * }
-     */
-    public function validated($key = null, $default = null): array
+    public function toData(Order $order): UpdateOrderClientData
     {
         /** @var array{
          *     name: string|null,
          *     phone: string|null,
          *     child_name: string|null,
-         *     attended_photo_session: bool|null,
-         * }
+         *     attended_photo_session: bool|int|string|null,
+         * } $validated
          */
-        $validated = parent::validated($key, $default);
-
-        return $validated;
-    }
-
-    public function toData(Order $order): UpdateOrderClientData
-    {
         $validated = $this->validated();
 
         return new UpdateOrderClientData(
@@ -69,7 +50,9 @@ class UpdateOrderClientRequest extends FormRequest
             name: $validated['name'],
             phone: $validated['phone'],
             childName: $validated['child_name'],
-            attendedPhotoSession: $validated['attended_photo_session'],
+            attendedPhotoSession: $validated['attended_photo_session'] !== null
+                ? (bool) $validated['attended_photo_session']
+                : null,
         );
     }
 }

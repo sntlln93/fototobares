@@ -5,34 +5,32 @@ declare(strict_types=1);
 namespace App\Actions\Classrooms;
 
 use App\Contracts\ActionContract;
-use App\Models\Classroom;
+use App\Contracts\DtoContract;
+use App\Data\Classrooms\UpdateClassroomData;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * @implements ActionContract<UpdateClassroomData>
+ */
 class UpdateClassroom implements ActionContract
 {
     /**
      * Rename a classroom and, when teacher data is provided, update its
      * teacher contact.
      *
-     * @param  array<string, mixed>  $params  {classroom: Classroom, data: array<string, mixed>}
+     * @param  UpdateClassroomData  $params
      */
-    public function handle(array $params): void
+    public function handle(DtoContract $params): void
     {
-        /** @var Classroom $classroom */
-        $classroom = $params['classroom'];
-
-        /** @var array<string, mixed> $data */
-        $data = $params['data'];
-
-        DB::transaction(function () use ($classroom, $data) {
-            $classroom->update([
-                'name' => $data['name'],
+        DB::transaction(function () use ($params) {
+            $params->classroom->update([
+                'name' => $params->name,
             ]);
 
-            if ($data['teacher'] !== null || $data['phone'] !== null) {
-                $classroom->teacher()->update([
-                    'name' => $data['teacher'],
-                    'phone' => $data['phone'],
+            if ($params->teacher !== null || $params->phone !== null) {
+                $params->classroom->teacher()->update([
+                    'name' => $params->teacher,
+                    'phone' => $params->phone,
                 ]);
             }
         });

@@ -20,23 +20,10 @@ class DetailProductionStatusController extends Controller
      */
     public function update(UpdateDetailProductionStatusRequest $request, Order $order, SetDetailProductionStatus $action): RedirectResponse
     {
-        $validated = $request->validated();
-
-        /** @var int $detailId */
-        $detailId = $validated['detail_id'];
-
-        /** @var int|null $statusId */
-        $statusId = $validated['production_status_id'] ?? null;
-
         /** @var User|null $user */
         $user = $request->user();
 
-        $action->handle([
-            'order' => $order,
-            'detail_id' => $detailId,
-            'status_id' => $statusId,
-            'user' => $user,
-        ]);
+        $action->handle($request->toData($order, $user));
 
         return back()->with('success', 'Estado de fabricación actualizado');
     }

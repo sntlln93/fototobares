@@ -5,13 +5,16 @@ declare(strict_types=1);
 namespace App\Actions\Orders;
 
 use App\Contracts\ActionContract;
-use App\Models\Order;
+use App\Contracts\DtoContract;
+use App\Data\Orders\CancelOrderData;
 use App\Models\OrderDetail;
-use App\Models\User;
 use App\Services\StockService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
+/**
+ * @implements ActionContract<CancelOrderData>
+ */
 class CancelOrder implements ActionContract
 {
     public function __construct(private StockService $stockService) {}
@@ -20,20 +23,14 @@ class CancelOrder implements ActionContract
      * Cancel an order, sending each product back to stock (returning its
      * supplies) or to recycling, as chosen per product.
      *
-     * @param  array<string, mixed>  $params  {order: Order, data: array<string, mixed>, user: ?User}
+     * @param  CancelOrderData  $params
      *
      * @throws ValidationException
      */
-    public function handle(array $params): void
+    public function handle(DtoContract $params): void
     {
-        /** @var Order $order */
-        $order = $params['order'];
-
-        /** @var array<string, mixed> $data */
-        $data = $params['data'];
-
-        /** @var User|null $user */
-        $user = $params['user'];
+        $order = $params->order;
+        $user = $params->user;
 
         if ($order->cancelled_at !== null) {
             throw ValidationException::withMessages([
@@ -41,13 +38,12 @@ class CancelOrder implements ActionContract
             ]);
         }
 
-        /** @var array<int, array{detail_id: int, destination: string}> $destinations */
-        $destinations = $data['destinations'];
+        $destinations = $params->destinations;
 
         $details = $order->details()->get()->keyBy('id');
 
         foreach ($destinations as $destination) {
-            if (! $details->has($destination['detail_id'])) {
+            if (! $details->has($destination->detailId)) {
                 throw ValidationException::withMessages([
                     'destinations' => 'Uno de los productos no pertenece a este pedido.',
                 ]);
@@ -57,12 +53,12 @@ class CancelOrder implements ActionContract
         DB::transaction(function () use ($order, $destinations, $details, $user) {
             foreach ($destinations as $destination) {
                 /** @var OrderDetail $detail */
-                $detail = $details->get($destination['detail_id']);
+                $detail = $details->get($destination->detailId);
 
-                $detail->recycled_to = $destination['destination'];
+                $detail->recycled_to = $destination->destination;
                 $detail->save();
 
-                if ($destination['destination'] === 'stock') {
+                if ($destination->destination === 'stock') {
                     $this->stockService->reverseForDetail($detail, $user);
                 }
             }

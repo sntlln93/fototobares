@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\BO;
 
 use App\Actions\Stock\DeleteStockable;
+use App\Data\Stock\DeleteStockableData;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\BO\StoreStockableRequest;
 use App\Http\Requests\BO\UpdateStockableRequest;
@@ -69,7 +70,7 @@ class StockController extends Controller
 
     public function destroy(Stockable $stockable, DeleteStockable $action): RedirectResponse
     {
-        $action->handle(['stockable' => $stockable]);
+        $action->handle(new DeleteStockableData($stockable));
 
         return redirect(route('stockables.index'));
     }

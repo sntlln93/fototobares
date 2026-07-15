@@ -5,21 +5,24 @@ declare(strict_types=1);
 namespace App\Actions\Schools;
 
 use App\Contracts\ActionContract;
-use App\Models\School;
+use App\Contracts\DtoContract;
+use App\Data\Schools\DeleteSchoolData;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * @implements ActionContract<DeleteSchoolData>
+ */
 class DeleteSchool implements ActionContract
 {
     /**
      * Delete a school along with its address, principal, teachers and
      * classrooms. The caller guards against schools that still have orders.
      *
-     * @param  array<string, mixed>  $params  {school: School}
+     * @param  DeleteSchoolData  $params
      */
-    public function handle(array $params): void
+    public function handle(DtoContract $params): void
     {
-        /** @var School $school */
-        $school = $params['school'];
+        $school = $params->school;
 
         DB::transaction(function () use ($school) {
             $school->address()->delete();

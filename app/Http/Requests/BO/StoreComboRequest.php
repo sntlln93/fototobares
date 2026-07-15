@@ -38,44 +38,20 @@ class StoreComboRequest extends FormRequest
         ];
     }
 
-    /**
-     * Get the validated data as a structured array.
-     *
-     * @param  string|null  $key
-     * @param  mixed  $default
-     * @return array{
-     *     name: string,
-     *     suggested_price: float,
-     *     default_payments: int,
-     *     products: list<array{
-     *         id: int,
-     *         quantity: int,
-     *         subtract_value: int,
-     *         variants?: array<string, mixed>|null,
-     *     }>
-     * }
-     */
-    public function validated($key = null, $default = null): array
+    public function toData(): ComboData
     {
         /** @var array{
          *     name: string,
-         *     suggested_price: float,
-         *     default_payments: int,
+         *     suggested_price: int|float|string,
+         *     default_payments: int|float|string,
          *     products: list<array{
-         *         id: int,
-         *         quantity: int,
-         *         subtract_value: int,
+         *         id: int|string,
+         *         quantity: int|string,
+         *         subtract_value: int|string,
          *         variants?: array<string, mixed>|null,
          *     }>
-         * }
+         * } $validated
          */
-        $validated = parent::validated($key, $default);
-
-        return $validated;
-    }
-
-    public function toData(): ComboData
-    {
         $validated = $this->validated();
 
         return new ComboData(

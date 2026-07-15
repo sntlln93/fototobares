@@ -5,48 +5,42 @@ declare(strict_types=1);
 namespace App\Actions\Schools;
 
 use App\Contracts\ActionContract;
+use App\Contracts\DtoContract;
+use App\Data\Schools\UpdateSchoolData;
 use App\Enums\ContactRole;
-use App\Models\School;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * @implements ActionContract<UpdateSchoolData>
+ */
 class UpdateSchool implements ActionContract
 {
     /**
      * Update a school, creating or updating its principal as needed and
      * updating its address.
      *
-     * @param  array<string, mixed>  $params  {school: School, data: array<string, mixed>}
+     * @param  UpdateSchoolData  $params
      */
-    public function handle(array $params): void
+    public function handle(DtoContract $params): void
     {
-        /** @var School $school */
-        $school = $params['school'];
-
-        /** @var array<string, mixed> $data */
-        $data = $params['data'];
+        $school = $params->school;
+        $data = $params->data;
 
         DB::transaction(function () use ($school, $data) {
-            /** @var array<string, mixed> $schoolData */
-            $schoolData = $data['school'];
-            $school->update($schoolData);
+            $school->update($data->school);
 
-            if (isset($data['principal'])) {
-                /** @var array<string, mixed> $principalData */
-                $principalData = $data['principal'];
-
+            if ($data->principal !== null) {
                 if (! $school->principal) {
                     $school->principal()->create([
-                        ...$principalData,
+                        ...$data->principal,
                         'role' => ContactRole::Principal,
                     ]);
                 } else {
-                    $school->principal()->update($principalData);
+                    $school->principal()->update($data->principal);
                 }
             }
 
-            /** @var array<string, mixed> $addressData */
-            $addressData = $data['address'];
-            $school->address()->update($addressData);
+            $school->address()->update($data->address);
         });
     }
 }

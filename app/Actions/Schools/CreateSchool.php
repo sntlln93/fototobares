@@ -5,36 +5,35 @@ declare(strict_types=1);
 namespace App\Actions\Schools;
 
 use App\Contracts\ActionContract;
+use App\Contracts\DtoContract;
+use App\Data\Schools\SchoolData;
 use App\Enums\ContactRole;
 use App\Models\School;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * @implements ActionContract<SchoolData>
+ */
 class CreateSchool implements ActionContract
 {
     /**
      * Create a school with its optional principal and its address.
      *
-     * @param  array<string, mixed>  $params  validated school payload
+     * @param  SchoolData  $params
      */
-    public function handle(array $params): void
+    public function handle(DtoContract $params): void
     {
         DB::transaction(function () use ($params) {
-            /** @var array<string, mixed> $schoolData */
-            $schoolData = $params['school'];
-            $school = School::create($schoolData);
+            $school = School::create($params->school);
 
-            if (isset($params['principal'])) {
-                /** @var array<string, mixed> $principalData */
-                $principalData = $params['principal'];
+            if ($params->principal !== null) {
                 $school->principal()->create([
-                    ...$principalData,
+                    ...$params->principal,
                     'role' => ContactRole::Principal,
                 ]);
             }
 
-            /** @var array<string, mixed> $addressData */
-            $addressData = $params['address'];
-            $school->address()->create($addressData);
+            $school->address()->create($params->address);
         });
     }
 }

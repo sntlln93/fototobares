@@ -5,33 +5,33 @@ declare(strict_types=1);
 namespace App\Actions\Orders;
 
 use App\Contracts\ActionContract;
-use App\Models\Order;
+use App\Contracts\DtoContract;
+use App\Data\Orders\UpdateOrderClientData;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * @implements ActionContract<UpdateOrderClientData>
+ */
 class UpdateOrderClient implements ActionContract
 {
     /**
      * Update an order's client data and attended_photo_session flag.
      *
-     * @param  array<string, mixed>  $params  {order: Order, data: array<string, mixed>}
+     * @param  UpdateOrderClientData  $params
      */
-    public function handle(array $params): void
+    public function handle(DtoContract $params): void
     {
-        /** @var Order $order */
-        $order = $params['order'];
+        $order = $params->order;
 
-        /** @var array<string, mixed> $data */
-        $data = $params['data'];
-
-        DB::transaction(function () use ($order, $data) {
+        DB::transaction(function () use ($order, $params) {
             $order->update([
-                'child_name' => $data['child_name'] ?? null,
-                'attended_photo_session' => $data['attended_photo_session'] ?? null,
+                'child_name' => $params->childName,
+                'attended_photo_session' => $params->attendedPhotoSession,
             ]);
 
             $order->client()->update([
-                'name' => $data['name'] ?? null,
-                'phone' => $data['phone'] ?? null,
+                'name' => $params->name,
+                'phone' => $params->phone,
             ]);
         });
     }

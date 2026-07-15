@@ -18,21 +18,11 @@ class DetailPriorityController extends Controller
      */
     public function update(UpdateDetailPriorityRequest $request, Order $order, SetDetailPriority $action): RedirectResponse
     {
-        $validated = $request->validated();
+        $data = $request->toData($order);
 
-        /** @var int $detailId */
-        $detailId = $validated['detail_id'];
+        $action->handle($data);
 
-        /** @var bool $priority */
-        $priority = $validated['priority'];
-
-        $action->handle([
-            'order' => $order,
-            'detail_id' => $detailId,
-            'priority' => $priority,
-        ]);
-
-        $message = $priority
+        $message = $data->priority
             ? 'Producto marcado como prioritario'
             : 'Prioridad quitada';
 

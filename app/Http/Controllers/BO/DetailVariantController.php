@@ -22,19 +22,7 @@ class DetailVariantController extends Controller
             return back()->withErrors(['order' => 'No se puede editar un pedido cancelado.']);
         }
 
-        $validated = $request->validated();
-
-        /** @var int $detailId */
-        $detailId = $validated['detail_id'];
-
-        /** @var array<string, string|null> $variant */
-        $variant = $validated['variant'];
-
-        $action->handle([
-            'order' => $order,
-            'detail_id' => $detailId,
-            'variant' => $variant,
-        ]);
+        $action->handle($request->toData($order));
 
         return back()->with('success', 'Variante actualizada');
     }

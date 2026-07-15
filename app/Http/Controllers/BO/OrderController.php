@@ -8,6 +8,7 @@ use App\Actions\Orders\CancelOrder;
 use App\Actions\Orders\CreateOrder;
 use App\Actions\Orders\UpdateOrder;
 use App\Actions\Orders\UpdateOrderClient;
+use App\Data\Orders\UpdateOrderData;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\BO\CancelOrderRequest;
 use App\Http\Requests\BO\StoreOrderRequest;
@@ -105,7 +106,7 @@ class OrderController extends Controller
         /** @var string $redirect_to */
         $redirect_to = request()->query('redirectTo', route('orders.index'));
 
-        $action->handle($request->validated());
+        $action->handle($request->toData());
 
         return redirect($redirect_to);
     }
@@ -155,7 +156,7 @@ class OrderController extends Controller
             return back()->withErrors(['order' => 'No se puede editar este pedido. La primera cuota ha sido pagada completamente.']);
         }
 
-        $action->handle(['order' => $order, 'data' => $request->validated()]);
+        $action->handle(new UpdateOrderData($order, $request->toData()));
 
         return redirect()->route('orders.show', ['order' => $order->id])
             ->with('success', 'Pedido actualizado exitosamente');
@@ -182,7 +183,7 @@ class OrderController extends Controller
         /** @var User|null $user */
         $user = $request->user();
 
-        $action->handle(['order' => $order, 'data' => $request->validated(), 'user' => $user]);
+        $action->handle($request->toData($order, $user));
 
         return redirect()->route('orders.show', ['order' => $order->id])
             ->with('success', 'Pedido cancelado');
@@ -194,7 +195,7 @@ class OrderController extends Controller
             return back()->withErrors(['order' => 'No se puede editar un pedido cancelado.']);
         }
 
-        $action->handle(['order' => $order, 'data' => $request->validated()]);
+        $action->handle($request->toData($order));
 
         return back()->with('success', 'Datos del cliente actualizados exitosamente');
     }

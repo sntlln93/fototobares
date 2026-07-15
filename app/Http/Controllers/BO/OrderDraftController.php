@@ -28,7 +28,7 @@ class OrderDraftController extends Controller
 
     public function store(StoreOrderDraftRequest $request, CreateOrderDraft $action): RedirectResponse
     {
-        $action->handle($request->validated());
+        $action->handle($request->toData());
 
         return back()->with('success', 'Borrador guardado exitosamente');
     }

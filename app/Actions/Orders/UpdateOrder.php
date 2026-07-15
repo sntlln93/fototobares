@@ -5,10 +5,15 @@ declare(strict_types=1);
 namespace App\Actions\Orders;
 
 use App\Contracts\ActionContract;
-use App\Models\Order;
+use App\Contracts\DtoContract;
+use App\Data\Orders\SnapshotDetailVariantData;
+use App\Data\Orders\UpdateOrderData;
 use App\Models\Product;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * @implements ActionContract<UpdateOrderData>
+ */
 class UpdateOrder implements ActionContract
 {
     public function __construct(private readonly SnapshotDetailVariant $snapshotDetailVariant) {}
@@ -16,34 +21,30 @@ class UpdateOrder implements ActionContract
     /**
      * Update an order, its client and its product details.
      *
-     * @param  array<string, mixed>  $params  {order: Order, data: array<string, mixed>}
+     * @param  UpdateOrderData  $params
      */
-    public function handle(array $params): void
+    public function handle(DtoContract $params): void
     {
-        /** @var Order $order */
-        $order = $params['order'];
-
-        /** @var array<string, mixed> $data */
-        $data = $params['data'];
+        $order = $params->order;
+        $data = $params->data;
 
         DB::transaction(function () use ($order, $data) {
             $order->update([
-                'total_price' => $data['total_price'],
-                'payment_plan' => $data['payment_plan'],
-                'due_date' => $data['due_date'],
-                'child_name' => $data['child_name'] ?? null,
-                'attended_photo_session' => $data['attended_photo_session'] ?? null,
+                'total_price' => $data->totalPrice,
+                'payment_plan' => $data->paymentPlan,
+                'due_date' => $data->dueDate,
+                'child_name' => $data->childName,
+                'attended_photo_session' => $data->attendedPhotoSession,
             ]);
 
             $order->client()->update([
-                'name' => $data['name'],
-                'phone' => $data['phone'],
+                'name' => $data->name,
+                'phone' => $data->phone,
             ]);
 
-            /** @var array<int, array<string, mixed>> $orderDetails */
-            $orderDetails = $data['order_details'];
+            $orderDetails = $data->orderDetails;
 
-            $products = Product::whereIn('id', collect($orderDetails)->pluck('product_id'))
+            $products = Product::whereIn('id', collect($orderDetails)->pluck('productId'))
                 ->get(['id', 'variants'])
                 ->keyBy('id');
 
@@ -52,24 +53,18 @@ class UpdateOrder implements ActionContract
             // combo carrying several units of the same one) and syncing by
             // product_id collapsed those rows into a single one
             foreach ($orderDetails as $detail) {
-                /** @var int $productId */
-                $productId = $detail['product_id'];
-
-                $productModel = $products->get($productId);
-
-                /** @var array<string, string|null> $selection */
-                $selection = $detail['variant'] ?? [];
+                $productModel = $products->get($detail->productId);
 
                 $attributes = [
-                    'variant' => $this->snapshotDetailVariant->handle([
-                        'definitions' => $productModel->variants ?? [],
-                        'selection' => $selection,
-                    ]),
-                    'note' => $detail['note'],
+                    'variant' => $this->snapshotDetailVariant->handle(new SnapshotDetailVariantData(
+                        definitions: $productModel->variants ?? [],
+                        selection: $detail->variant ?? [],
+                    )),
+                    'note' => $detail->note,
                 ];
 
-                if (! isset($detail['id'])) {
-                    $order->products()->attach($productId, $attributes);
+                if ($detail->id === null) {
+                    $order->products()->attach($detail->productId, $attributes);
 
                     continue;
                 }
@@ -77,7 +72,7 @@ class UpdateOrder implements ActionContract
                 // Scoped to the order: an id from another order matches nothing.
                 // Updated through the model so the variant cast applies
                 $order->details()
-                    ->whereKey($detail['id'])
+                    ->whereKey($detail->id)
                     ->first()
                     ?->update($attributes);
             }

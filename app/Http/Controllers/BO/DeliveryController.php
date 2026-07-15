@@ -18,21 +18,11 @@ class DeliveryController extends Controller
      */
     public function update(UpdateDeliveryRequest $request, Order $order, MarkDeliveries $action): RedirectResponse
     {
-        $validated = $request->validated();
+        $data = $request->toData($order);
 
-        /** @var array<int, int> $detailIds */
-        $detailIds = $validated['detail_ids'];
+        $action->handle($data);
 
-        /** @var string $deliveryAction */
-        $deliveryAction = $validated['action'];
-
-        $action->handle([
-            'order' => $order,
-            'detail_ids' => $detailIds,
-            'action' => $deliveryAction,
-        ]);
-
-        $message = $deliveryAction === 'deliver'
+        $message = $data->action === 'deliver'
             ? 'Entrega registrada exitosamente'
             : 'Entrega deshecha';
 

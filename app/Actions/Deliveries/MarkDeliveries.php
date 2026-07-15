@@ -5,30 +5,27 @@ declare(strict_types=1);
 namespace App\Actions\Deliveries;
 
 use App\Contracts\ActionContract;
-use App\Models\Order;
+use App\Contracts\DtoContract;
+use App\Data\Deliveries\MarkDeliveriesData;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
+/**
+ * @implements ActionContract<MarkDeliveriesData>
+ */
 class MarkDeliveries implements ActionContract
 {
     /**
      * Deliver (or undeliver) the given details of an order. Cancelled orders
      * are rejected and recycled details are ignored.
      *
-     * @param  array<string, mixed>  $params  {order: Order, detail_ids: array<int, int>, action: string}
+     * @param  MarkDeliveriesData  $params
      *
      * @throws ValidationException
      */
-    public function handle(array $params): void
+    public function handle(DtoContract $params): void
     {
-        /** @var Order $order */
-        $order = $params['order'];
-
-        /** @var array<int, int> $detailIds */
-        $detailIds = $params['detail_ids'];
-
-        /** @var string $action */
-        $action = $params['action'];
+        $order = $params->order;
 
         if ($order->cancelled_at !== null) {
             throw ValidationException::withMessages([
@@ -37,7 +34,7 @@ class MarkDeliveries implements ActionContract
         }
 
         $details = $order->details()
-            ->whereIn('id', $detailIds)
+            ->whereIn('id', $params->detailIds)
             ->whereNull('recycled_to')
             ->get();
 
@@ -46,6 +43,8 @@ class MarkDeliveries implements ActionContract
                 'detail_ids' => 'No se encontraron productos para entregar en este pedido.',
             ]);
         }
+
+        $action = $params->action;
 
         DB::transaction(function () use ($details, $action) {
             foreach ($details as $detail) {

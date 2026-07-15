@@ -144,25 +144,16 @@ class TrackingController extends Controller
 
     public function batchUpdate(BatchUpdateTrackingRequest $request, MoveDetailsToStage $action): RedirectResponse
     {
+        /** @var array{production_status_id: int|string} $validated */
         $validated = $request->validated();
 
-        /** @var array<int, int> $detailIds */
-        $detailIds = $validated['detail_ids'];
-
-        /** @var int $statusId */
-        $statusId = $validated['production_status_id'];
-
         /** @var ProductionStatus $status */
-        $status = ProductionStatus::findOrFail($statusId);
+        $status = ProductionStatus::findOrFail($validated['production_status_id']);
 
         /** @var User|null $user */
         $user = $request->user();
 
-        $count = $action->handle([
-            'detail_ids' => $detailIds,
-            'status' => $status,
-            'user' => $user,
-        ]);
+        $count = $action->handle($request->toData($status, $user));
 
         return back()->with('success', "$count producto(s) actualizados a \"{$status->name}\"");
     }

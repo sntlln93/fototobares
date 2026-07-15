@@ -92,56 +92,26 @@ class StoreOrderRequest extends FormRequest
         }
     }
 
-    /**
-     * Get the validated data as a structured array.
-     *
-     * @param  string|null  $key
-     * @param  mixed  $default
-     * @return array{
-     *     name: string|null,
-     *     phone: string|null,
-     *     classroom_id: int,
-     *     total_price: float,
-     *     payment_plan: int,
-     *     due_date: string,
-     *     child_name?: string|null,
-     *     attended_photo_session?: bool|null,
-     *     draft_id?: int|null,
-     *     order_details: list<array{
-     *         id?: int|null,
-     *         product_id: int,
-     *         note: string|null,
-     *         variant?: array<string, string|null>|null
-     *     }>
-     * }
-     */
-    public function validated($key = null, $default = null): array
+    public function toData(): OrderData
     {
         /** @var array{
          *     name: string|null,
          *     phone: string|null,
-         *     classroom_id: int,
-         *     total_price: float,
-         *     payment_plan: int,
+         *     classroom_id: int|string,
+         *     total_price: int|float|string,
+         *     payment_plan: int|float|string,
          *     due_date: string,
          *     child_name?: string|null,
-         *     attended_photo_session?: bool|null,
-         *     draft_id?: int|null,
+         *     attended_photo_session?: bool|int|string|null,
+         *     draft_id?: int|string|null,
          *     order_details: list<array{
-         *         id?: int|null,
-         *         product_id: int,
+         *         id?: int|string|null,
+         *         product_id: int|string,
          *         note: string|null,
          *         variant?: array<string, string|null>|null
          *     }>
-         * }
+         * } $validated
          */
-        $validated = parent::validated($key, $default);
-
-        return $validated;
-    }
-
-    public function toData(): OrderData
-    {
         $validated = $this->validated();
 
         return new OrderData(

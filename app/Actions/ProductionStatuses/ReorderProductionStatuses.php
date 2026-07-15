@@ -5,23 +5,26 @@ declare(strict_types=1);
 namespace App\Actions\ProductionStatuses;
 
 use App\Contracts\ActionContract;
+use App\Contracts\DtoContract;
+use App\Data\ProductionStatuses\ReorderProductionStatusesData;
 use App\Models\ProductionStatus;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * @implements ActionContract<ReorderProductionStatusesData>
+ */
 class ReorderProductionStatuses implements ActionContract
 {
     /**
      * Apply the given order to the stages of a product. Expects an id
      * list already validated against the product's stages.
      *
-     * @param  array<string, mixed>  $params  {product_id: int, ordered_ids: array<int, int>}
+     * @param  ReorderProductionStatusesData  $params
      */
-    public function handle(array $params): void
+    public function handle(DtoContract $params): void
     {
-        $productId = $params['product_id'];
-
-        /** @var array<int, int> $orderedIds */
-        $orderedIds = $params['ordered_ids'];
+        $productId = $params->productId;
+        $orderedIds = $params->orderedIds;
 
         DB::transaction(function () use ($productId, $orderedIds) {
             // Two-phase update: (product_id, position) is unique, so

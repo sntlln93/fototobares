@@ -5,44 +5,39 @@ declare(strict_types=1);
 namespace App\Actions\Users;
 
 use App\Contracts\ActionContract;
-use App\Models\User;
+use App\Contracts\DtoContract;
+use App\Data\Users\UpdateUserData;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
+/**
+ * @implements ActionContract<UpdateUserData>
+ */
 class UpdateUser implements ActionContract
 {
     /**
      * Update a user's data and roles, replacing the password only when a new
      * one is provided.
      *
-     * @param  array<string, mixed>  $params  {user: User, data: array<string, mixed>}
+     * @param  UpdateUserData  $params
      */
-    public function handle(array $params): void
+    public function handle(DtoContract $params): void
     {
-        /** @var User $user */
-        $user = $params['user'];
+        $user = $params->user;
 
-        /** @var array<string, mixed> $data */
-        $data = $params['data'];
-
-        DB::transaction(function () use ($user, $data) {
-            /** @var array<int, int> $roles */
-            $roles = $data['roles'];
-
+        DB::transaction(function () use ($user, $params) {
             $attributes = [
-                'name' => $data['name'],
-                'email' => $data['email'],
+                'name' => $params->name,
+                'email' => $params->email,
             ];
 
-            if (! empty($data['password'])) {
-                /** @var string $password */
-                $password = $data['password'];
-                $attributes['password'] = Hash::make($password);
+            if (! empty($params->password)) {
+                $attributes['password'] = Hash::make($params->password);
             }
 
             $user->update($attributes);
 
-            $user->roles()->sync($roles);
+            $user->roles()->sync($params->roles);
         });
     }
 }

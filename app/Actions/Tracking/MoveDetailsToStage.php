@@ -5,13 +5,16 @@ declare(strict_types=1);
 namespace App\Actions\Tracking;
 
 use App\Contracts\ActionContract;
+use App\Contracts\DtoContract;
+use App\Data\Tracking\MoveDetailsToStageData;
 use App\Models\OrderDetail;
-use App\Models\ProductionStatus;
-use App\Models\User;
 use App\Services\StockService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
+/**
+ * @implements ActionContract<MoveDetailsToStageData>
+ */
 class MoveDetailsToStage implements ActionContract
 {
     public function __construct(private StockService $stockService) {}
@@ -21,24 +24,18 @@ class MoveDetailsToStage implements ActionContract
      * hung from every stage reached. Rejects the batch if any detail's product
      * does not own the stage.
      *
-     * @param  array<string, mixed>  $params  {detail_ids: array<int, int>, status: ProductionStatus, user: ?User}
+     * @param  MoveDetailsToStageData  $params
      * @return int the number of details updated
      *
      * @throws ValidationException
      */
-    public function handle(array $params): int
+    public function handle(DtoContract $params): int
     {
-        /** @var array<int, int> $detailIds */
-        $detailIds = $params['detail_ids'];
-
-        /** @var ProductionStatus $status */
-        $status = $params['status'];
-
-        /** @var User|null $user */
-        $user = $params['user'];
+        $status = $params->status;
+        $user = $params->user;
 
         $details = OrderDetail::with('product', 'productionStatus')
-            ->whereIn('id', $detailIds)
+            ->whereIn('id', $params->detailIds)
             ->get();
 
         $mismatched = $details->first(

@@ -5,12 +5,19 @@ declare(strict_types=1);
 namespace App\Actions\Orders;
 
 use App\Contracts\ActionContract;
+use App\Contracts\DtoContract;
+use App\Data\Orders\AllocatePhotoNumberData;
+use App\Data\Orders\OrderData;
+use App\Data\Orders\SnapshotDetailVariantData;
 use App\Models\Client;
 use App\Models\Order;
 use App\Models\OrderDraft;
 use App\Models\Product;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * @implements ActionContract<OrderData>
+ */
 class CreateOrder implements ActionContract
 {
     public function __construct(
@@ -22,22 +29,22 @@ class CreateOrder implements ActionContract
      * Create an order with its client and product details, auto-assigning the
      * classroom photo number, and consume the source draft when present.
      *
-     * @param  array<string, mixed>  $params  validated order payload
+     * @param  OrderData  $params
      */
-    public function handle(array $params): void
+    public function handle(DtoContract $params): void
     {
         DB::transaction(function () use ($params) {
             $client = Client::create([
-                'name' => $params['name'],
-                'phone' => $params['phone'],
+                'name' => $params->name,
+                'phone' => $params->phone,
             ]);
 
-            $attended = $params['attended_photo_session'] ?? null;
+            $attended = $params->attendedPhotoSession;
 
-            $classroomId = is_numeric($params['classroom_id']) ? (int) $params['classroom_id'] : 0;
+            $classroomId = $params->classroomId;
 
-            $draft = isset($params['draft_id']) && is_numeric($params['draft_id'])
-                ? OrderDraft::find((int) $params['draft_id'])
+            $draft = $params->draftId !== null
+                ? OrderDraft::find($params->draftId)
                 : null;
 
             // Photos are numbered by classroom following the order in which
@@ -50,42 +57,35 @@ class CreateOrder implements ActionContract
                 $photoNumber = ($draft !== null && $draft->photo_number !== null
                         && $draft->classroom_id === $classroomId)
                     ? $draft->photo_number
-                    : $this->allocatePhotoNumber->handle(['classroom_id' => $classroomId]);
+                    : $this->allocatePhotoNumber->handle(new AllocatePhotoNumberData($classroomId));
             }
 
             $order = Order::create([
                 'client_id' => $client->id,
                 'classroom_id' => $classroomId,
-                'total_price' => $params['total_price'],
-                'payment_plan' => $params['payment_plan'],
-                'due_date' => $params['due_date'],
-                'child_name' => $params['child_name'] ?? null,
+                'total_price' => $params->totalPrice,
+                'payment_plan' => $params->paymentPlan,
+                'due_date' => $params->dueDate,
+                'child_name' => $params->childName,
                 'attended_photo_session' => $attended,
                 'photo_number' => $photoNumber,
             ]);
 
-            /** @var array<int, array<string, mixed>> $orderDetails */
-            $orderDetails = $params['order_details'];
+            $orderDetails = $params->orderDetails;
 
-            $products = Product::whereIn('id', collect($orderDetails)->pluck('product_id'))
+            $products = Product::whereIn('id', collect($orderDetails)->pluck('productId'))
                 ->get(['id', 'variants'])
                 ->keyBy('id');
 
-            foreach ($orderDetails as $product) {
-                /** @var int $productId */
-                $productId = $product['product_id'];
+            foreach ($orderDetails as $detail) {
+                $productModel = $products->get($detail->productId);
 
-                $productModel = $products->get($productId);
-
-                /** @var array<string, string|null> $selection */
-                $selection = $product['variant'] ?? [];
-
-                $order->products()->attach($productId, [
-                    'variant' => $this->snapshotDetailVariant->handle([
-                        'definitions' => $productModel->variants ?? [],
-                        'selection' => $selection,
-                    ]),
-                    'note' => $product['note'],
+                $order->products()->attach($detail->productId, [
+                    'variant' => $this->snapshotDetailVariant->handle(new SnapshotDetailVariantData(
+                        definitions: $productModel->variants ?? [],
+                        selection: $detail->variant ?? [],
+                    )),
+                    'note' => $detail->note,
                 ]);
             }
 

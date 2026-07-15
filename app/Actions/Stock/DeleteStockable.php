@@ -5,20 +5,23 @@ declare(strict_types=1);
 namespace App\Actions\Stock;
 
 use App\Contracts\ActionContract;
-use App\Models\Stockable;
+use App\Contracts\DtoContract;
+use App\Data\Stock\DeleteStockableData;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * @implements ActionContract<DeleteStockableData>
+ */
 class DeleteStockable implements ActionContract
 {
     /**
      * Delete a stockable, detaching it from any production stages first.
      *
-     * @param  array<string, mixed>  $params  {stockable: Stockable}
+     * @param  DeleteStockableData  $params
      */
-    public function handle(array $params): void
+    public function handle(DtoContract $params): void
     {
-        /** @var Stockable $stockable */
-        $stockable = $params['stockable'];
+        $stockable = $params->stockable;
 
         DB::transaction(function () use ($stockable) {
             $stockable->productionStatuses()->detach();

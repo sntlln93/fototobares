@@ -7,6 +7,8 @@ namespace App\Http\Controllers\BO;
 use App\Actions\Schools\CreateSchool;
 use App\Actions\Schools\DeleteSchool;
 use App\Actions\Schools\UpdateSchool;
+use App\Data\Schools\DeleteSchoolData;
+use App\Data\Schools\UpdateSchoolData;
 use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreSchoolRequest;
@@ -61,7 +63,7 @@ class SchoolController extends Controller
 
     public function store(StoreSchoolRequest $request, CreateSchool $action): RedirectResponse
     {
-        $action->handle($request->validated());
+        $action->handle($request->toData());
 
         return redirect(route('schools.index'));
     }
@@ -81,7 +83,7 @@ class SchoolController extends Controller
 
     public function update(School $school, StoreSchoolRequest $request, UpdateSchool $action): RedirectResponse
     {
-        $action->handle(['school' => $school, 'data' => $request->validated()]);
+        $action->handle(new UpdateSchoolData($school, $request->toData()));
 
         return redirect(route('schools.index'));
     }
@@ -97,7 +99,7 @@ class SchoolController extends Controller
             return back()->withErrors(['school' => 'No se pueden eliminar escuelas que tengan pedidos registrados']);
         }
 
-        $action->handle(['school' => $school]);
+        $action->handle(new DeleteSchoolData($school));
 
         return redirect(route('schools.index'));
     }

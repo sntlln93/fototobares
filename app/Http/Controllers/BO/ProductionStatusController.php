@@ -7,6 +7,7 @@ namespace App\Http\Controllers\BO;
 use App\Actions\ProductionStatuses\CreateProductionStatus;
 use App\Actions\ProductionStatuses\DeleteProductionStatus;
 use App\Actions\ProductionStatuses\ReorderProductionStatuses;
+use App\Data\ProductionStatuses\DeleteProductionStatusData;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\BO\ReorderProductionStatusesRequest;
 use App\Http\Requests\BO\StoreProductionStatusRequest;
@@ -42,12 +43,11 @@ class ProductionStatusController extends Controller
 
     public function store(StoreProductionStatusRequest $request, CreateProductionStatus $action): RedirectResponse
     {
-        /** @var array{product_id: int, name: string} $validated */
-        $validated = $request->validated();
+        $data = $request->toData();
 
-        $action->handle($validated);
+        $action->handle($data);
 
-        return back()->with('success', "Etapa \"{$validated['name']}\" agregada");
+        return back()->with('success', "Etapa \"{$data->name}\" agregada");
     }
 
     public function update(UpdateProductionStatusRequest $request, ProductionStatus $productionStatus): RedirectResponse
@@ -59,17 +59,14 @@ class ProductionStatusController extends Controller
 
     public function destroy(ProductionStatus $productionStatus, DeleteProductionStatus $action): RedirectResponse
     {
-        $action->handle(['status' => $productionStatus]);
+        $action->handle(new DeleteProductionStatusData($productionStatus));
 
         return back()->with('success', "Etapa \"{$productionStatus->name}\" eliminada");
     }
 
     public function reorder(ReorderProductionStatusesRequest $request, ReorderProductionStatuses $action): RedirectResponse
     {
-        /** @var array{product_id: int, ordered_ids: array<int, int>} $validated */
-        $validated = $request->validated();
-
-        $action->handle($validated);
+        $action->handle($request->toData());
 
         return back()->with('success', 'Orden de etapas actualizado');
     }

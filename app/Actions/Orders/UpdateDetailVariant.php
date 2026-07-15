@@ -5,10 +5,15 @@ declare(strict_types=1);
 namespace App\Actions\Orders;
 
 use App\Contracts\ActionContract;
-use App\Models\Order;
+use App\Contracts\DtoContract;
+use App\Data\Orders\SnapshotDetailVariantData;
+use App\Data\Orders\UpdateDetailVariantData;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
+/**
+ * @implements ActionContract<UpdateDetailVariantData>
+ */
 class UpdateDetailVariant implements ActionContract
 {
     public function __construct(private readonly SnapshotDetailVariant $snapshotDetailVariant) {}
@@ -18,20 +23,15 @@ class UpdateDetailVariant implements ActionContract
      * rebuilding it from the product's own definitions — never trusting
      * client-sent labels/hexes for the option.
      *
-     * @param  array<string, mixed>  $params  {order: Order, detail_id: int, variant: array<string, string|null>}
+     * @param  UpdateDetailVariantData  $params
      *
      * @throws ValidationException
      */
-    public function handle(array $params): void
+    public function handle(DtoContract $params): void
     {
-        /** @var Order $order */
-        $order = $params['order'];
-
-        /** @var int $detailId */
-        $detailId = $params['detail_id'];
-
-        /** @var array<string, string|null> $selection */
-        $selection = $params['variant'];
+        $order = $params->order;
+        $detailId = $params->detailId;
+        $selection = $params->variant;
 
         DB::transaction(function () use ($order, $detailId, $selection) {
             $detail = $order->details()->with('product')->find($detailId);
@@ -42,10 +42,10 @@ class UpdateDetailVariant implements ActionContract
                 ]);
             }
 
-            $detail->variant = $this->snapshotDetailVariant->handle([
-                'definitions' => $detail->product->variants ?? [],
-                'selection' => $selection,
-            ]);
+            $detail->variant = $this->snapshotDetailVariant->handle(new SnapshotDetailVariantData(
+                definitions: $detail->product->variants ?? [],
+                selection: $selection,
+            ));
             $detail->save();
         });
     }

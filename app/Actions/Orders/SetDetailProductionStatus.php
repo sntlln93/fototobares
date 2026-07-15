@@ -6,12 +6,16 @@ namespace App\Actions\Orders;
 
 use App\Actions\Tracking\MoveDetailsToStage;
 use App\Contracts\ActionContract;
-use App\Models\Order;
+use App\Contracts\DtoContract;
+use App\Data\Orders\SetDetailProductionStatusData;
+use App\Data\Tracking\MoveDetailsToStageData;
 use App\Models\OrderDetail;
 use App\Models\ProductionStatus;
-use App\Models\User;
 use Illuminate\Validation\ValidationException;
 
+/**
+ * @implements ActionContract<SetDetailProductionStatusData>
+ */
 class SetDetailProductionStatus implements ActionContract
 {
     public function __construct(private MoveDetailsToStage $moveDetailsToStage) {}
@@ -22,23 +26,13 @@ class SetDetailProductionStatus implements ActionContract
      * A null status enables the detail as "sin empezar" (it enters /tracking);
      * a stage delegates to the tracking flow, which deducts stock.
      *
-     * @param  array<string, mixed>  $params  {order: Order, detail_id: int, status_id: ?int, user: ?User}
+     * @param  SetDetailProductionStatusData  $params
      *
      * @throws ValidationException
      */
-    public function handle(array $params): void
+    public function handle(DtoContract $params): void
     {
-        /** @var Order $order */
-        $order = $params['order'];
-
-        /** @var int $detailId */
-        $detailId = $params['detail_id'];
-
-        /** @var int|null $statusId */
-        $statusId = $params['status_id'];
-
-        /** @var User|null $user */
-        $user = $params['user'];
+        $order = $params->order;
 
         if ($order->cancelled_at !== null) {
             throw ValidationException::withMessages([
@@ -49,7 +43,7 @@ class SetDetailProductionStatus implements ActionContract
         $detail = $order->details()
             ->whereNull('recycled_to')
             ->whereNull('delivered_at')
-            ->find($detailId);
+            ->find($params->detailId);
 
         if ($detail === null) {
             throw ValidationException::withMessages([
@@ -63,20 +57,19 @@ class SetDetailProductionStatus implements ActionContract
             ]);
         }
 
-        if ($statusId === null) {
+        if ($params->statusId === null) {
             $this->markPending($detail);
 
             return;
         }
 
-        /** @var ProductionStatus $status */
-        $status = ProductionStatus::findOrFail($statusId);
+        $status = ProductionStatus::findOrFail($params->statusId);
 
-        $this->moveDetailsToStage->handle([
-            'detail_ids' => [$detail->id],
-            'status' => $status,
-            'user' => $user,
-        ]);
+        $this->moveDetailsToStage->handle(new MoveDetailsToStageData(
+            detailIds: [$detail->id],
+            status: $status,
+            user: $params->user,
+        ));
     }
 
     /**
