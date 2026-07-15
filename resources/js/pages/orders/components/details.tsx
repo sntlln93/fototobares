@@ -24,6 +24,7 @@ export function Details({ order }: { order: Order }) {
                 {products.length ? (
                     products.map((product) => (
                         <DetailItem
+                            orderId={order.id}
                             product={product}
                             key={product.id}
                             canPrioritize={
@@ -42,6 +43,11 @@ export function Details({ order }: { order: Order }) {
                             )}
                             onStatusChange={(statusId) =>
                                 setStatus(product.order_detail_id, statusId)
+                            }
+                            canEditVariant={
+                                !isCancelled &&
+                                !product.recycled_to &&
+                                Boolean(product.variants?.length)
                             }
                         />
                     ))

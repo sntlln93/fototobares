@@ -7,6 +7,16 @@ vi.mock('@inertiajs/react', () => ({
     router: { put: vi.fn() },
 }));
 
+vi.mock('../hooks/use-edit-variant-form', () => ({
+    useEditVariantForm: () => ({
+        data: { detail_id: 0, variant: {} },
+        setData: vi.fn(),
+        errors: {},
+        processing: false,
+        submit: vi.fn(),
+    }),
+}));
+
 vi.stubGlobal(
     'route',
     (name: string, params?: Record<string, unknown>) =>
@@ -154,5 +164,86 @@ describe('Details', () => {
         expect(
             screen.getByText(/se habilita cuando la primera cuota está paga/),
         ).toBeTruthy();
+    });
+
+    it('shows the edit variant button only for products with variant definitions', () => {
+        const { rerender } = render(
+            <Details order={makeOrder([makeProduct()])} />,
+        );
+
+        expect(screen.queryByText('Editar variantes')).toBeNull();
+
+        rerender(
+            <Details
+                order={makeOrder([
+                    makeProduct({
+                        variants: [
+                            {
+                                label: 'Talle',
+                                type: 'text',
+                                nullable: true,
+                                options: [{ label: 'Único' }],
+                            },
+                        ],
+                    }),
+                ])}
+            />,
+        );
+
+        expect(screen.getByText('Editar variantes')).toBeTruthy();
+    });
+
+    it('hides the edit variant button for cancelled or recycled details', () => {
+        const withVariants = makeProduct({
+            variants: [
+                {
+                    label: 'Talle',
+                    type: 'text',
+                    nullable: true,
+                    options: [{ label: 'Único' }],
+                },
+            ],
+        });
+
+        const { rerender } = render(
+            <Details
+                order={makeOrder([withVariants], {
+                    cancelled_at: '2026-07-01T00:00:00Z',
+                })}
+            />,
+        );
+
+        expect(screen.queryByText('Editar variantes')).toBeNull();
+
+        rerender(
+            <Details
+                order={makeOrder([{ ...withVariants, recycled_to: 'stock' }])}
+            />,
+        );
+
+        expect(screen.queryByText('Editar variantes')).toBeNull();
+    });
+
+    it('opens the edit variant modal from the button', () => {
+        render(
+            <Details
+                order={makeOrder([
+                    makeProduct({
+                        variants: [
+                            {
+                                label: 'Talle',
+                                type: 'text',
+                                nullable: true,
+                                options: [{ label: 'Único' }],
+                            },
+                        ],
+                    }),
+                ])}
+            />,
+        );
+
+        fireEvent.click(screen.getByText('Editar variantes'));
+
+        expect(screen.getByText('Editar variantes de Mural')).toBeTruthy();
     });
 });
