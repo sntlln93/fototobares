@@ -2,22 +2,33 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ProductIcon } from '@/features/product-icon';
 import { capitalize, formatPrice } from '@/lib/utils';
-import { Flame } from 'lucide-react';
+import { Flame, Pencil } from 'lucide-react';
+import { useState } from 'react';
+import { useEditVariantForm } from '../hooks/use-edit-variant-form';
+import { EditVariantModal } from './edit-variant-modal';
 import { ProductionStatusControl } from './production-status-control';
+import { VariantBadges } from './variant-badges';
 
 export function DetailItem({
+    orderId,
     product,
     canPrioritize,
     onTogglePriority,
     firstInstallmentPaid,
     onStatusChange,
+    canEditVariant,
 }: {
+    orderId: number;
     product: OrderProduct;
     canPrioritize: boolean;
     onTogglePriority: () => void;
     firstInstallmentPaid: boolean;
     onStatusChange: (statusId: number | null) => void;
+    canEditVariant: boolean;
 }) {
+    const [showEditVariant, setShowEditVariant] = useState(false);
+    const editVariantForm = useEditVariantForm(orderId, product);
+
     return (
         <div
             key={product.id}
@@ -79,6 +90,18 @@ export function DetailItem({
                         </span>
                     )}
                 </div>
+                <VariantBadges variant={product.variant} />
+                {canEditVariant && (
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        className="mt-2 h-auto px-2 py-1 text-xs"
+                        onClick={() => setShowEditVariant(true)}
+                    >
+                        <Pencil className="mr-1 h-3 w-3" />
+                        Editar variantes
+                    </Button>
+                )}
                 {canPrioritize && (
                     <>
                         <ProductionStatusControl
@@ -100,6 +123,12 @@ export function DetailItem({
                     </>
                 )}
             </div>
+            <EditVariantModal
+                show={showEditVariant}
+                onClose={() => setShowEditVariant(false)}
+                product={product}
+                form={editVariantForm}
+            />
         </div>
     );
 }
