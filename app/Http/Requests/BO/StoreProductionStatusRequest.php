@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\BO;
 
+use App\Data\ProductionStatuses\CreateProductionStatusData;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -45,5 +46,16 @@ class StoreProductionStatusRequest extends FormRequest
         return [
             'name.unique' => 'Ya existe una etapa con ese nombre para este producto.',
         ];
+    }
+
+    public function toData(): CreateProductionStatusData
+    {
+        /** @var array{product_id: int|string, name: string} $validated */
+        $validated = $this->validated();
+
+        return new CreateProductionStatusData(
+            productId: (int) $validated['product_id'],
+            name: $validated['name'],
+        );
     }
 }

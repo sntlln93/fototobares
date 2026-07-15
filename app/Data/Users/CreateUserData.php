@@ -1,0 +1,20 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Data\Users;
+
+use App\Contracts\DtoContract;
+
+final readonly class CreateUserData implements DtoContract
+{
+    /**
+     * @param  list<int>  $roles
+     */
+    public function __construct(
+        public string $name,
+        public string $email,
+        public string $password,
+        public array $roles,
+    ) {}
+}

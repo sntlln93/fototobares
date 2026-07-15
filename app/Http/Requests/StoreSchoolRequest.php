@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Requests;
 
+use App\Data\Schools\SchoolData;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -86,5 +87,16 @@ class StoreSchoolRequest extends FormRequest
         $validated = parent::validated($key, $default);
 
         return $validated;
+    }
+
+    public function toData(): SchoolData
+    {
+        $validated = $this->validated();
+
+        return new SchoolData(
+            school: $validated['school'],
+            principal: $validated['principal'] ?? null,
+            address: $validated['address'],
+        );
     }
 }

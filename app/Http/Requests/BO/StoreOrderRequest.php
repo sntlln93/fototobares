@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\BO;
 
+use App\Data\Orders\OrderData;
+use App\Data\Orders\OrderDetailData;
 use App\Models\Product;
 use App\Rules\VariantSelection;
 use Illuminate\Contracts\Validation\ValidationRule;
@@ -105,7 +107,7 @@ class StoreOrderRequest extends FormRequest
      *     child_name?: string|null,
      *     attended_photo_session?: bool|null,
      *     draft_id?: int|null,
-     *     order_details: array<int, array{
+     *     order_details: list<array{
      *         id?: int|null,
      *         product_id: int,
      *         note: string|null,
@@ -125,7 +127,7 @@ class StoreOrderRequest extends FormRequest
          *     child_name?: string|null,
          *     attended_photo_session?: bool|null,
          *     draft_id?: int|null,
-         *     order_details: array<int, array{
+         *     order_details: list<array{
          *         id?: int|null,
          *         product_id: int,
          *         note: string|null,
@@ -136,5 +138,33 @@ class StoreOrderRequest extends FormRequest
         $validated = parent::validated($key, $default);
 
         return $validated;
+    }
+
+    public function toData(): OrderData
+    {
+        $validated = $this->validated();
+
+        return new OrderData(
+            name: $validated['name'],
+            phone: $validated['phone'],
+            classroomId: (int) $validated['classroom_id'],
+            totalPrice: (float) $validated['total_price'],
+            paymentPlan: (int) $validated['payment_plan'],
+            dueDate: $validated['due_date'],
+            childName: $validated['child_name'] ?? null,
+            attendedPhotoSession: array_key_exists('attended_photo_session', $validated) && $validated['attended_photo_session'] !== null
+                ? (bool) $validated['attended_photo_session']
+                : null,
+            draftId: isset($validated['draft_id']) ? (int) $validated['draft_id'] : null,
+            orderDetails: array_map(
+                fn (array $detail) => new OrderDetailData(
+                    id: isset($detail['id']) ? (int) $detail['id'] : null,
+                    productId: (int) $detail['product_id'],
+                    note: $detail['note'],
+                    variant: $detail['variant'] ?? null,
+                ),
+                $validated['order_details'],
+            ),
+        );
     }
 }

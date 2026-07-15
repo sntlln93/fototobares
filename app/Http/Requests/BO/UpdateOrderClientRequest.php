@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\BO;
 
+use App\Data\Orders\UpdateOrderClientData;
+use App\Models\Order;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -56,5 +58,18 @@ class UpdateOrderClientRequest extends FormRequest
         $validated = parent::validated($key, $default);
 
         return $validated;
+    }
+
+    public function toData(Order $order): UpdateOrderClientData
+    {
+        $validated = $this->validated();
+
+        return new UpdateOrderClientData(
+            order: $order,
+            name: $validated['name'],
+            phone: $validated['phone'],
+            childName: $validated['child_name'],
+            attendedPhotoSession: $validated['attended_photo_session'],
+        );
     }
 }

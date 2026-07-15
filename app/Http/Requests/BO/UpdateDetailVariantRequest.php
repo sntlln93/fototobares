@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\BO;
 
+use App\Data\Orders\UpdateDetailVariantData;
 use App\Models\Order;
 use App\Models\OrderDetail;
 use App\Rules\VariantSelection;
@@ -62,5 +63,17 @@ class UpdateDetailVariantRequest extends FormRequest
         $validator->addRules([
             'variant' => [new VariantSelection($definitions)],
         ]);
+    }
+
+    public function toData(Order $order): UpdateDetailVariantData
+    {
+        /** @var array{detail_id: int|string, variant: array<string, string|null>} $validated */
+        $validated = $this->validated();
+
+        return new UpdateDetailVariantData(
+            order: $order,
+            detailId: (int) $validated['detail_id'],
+            variant: $validated['variant'],
+        );
     }
 }

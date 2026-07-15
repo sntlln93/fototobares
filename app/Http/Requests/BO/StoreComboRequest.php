@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\BO;
 
+use App\Data\Combos\ComboData;
+use App\Data\Combos\ComboProductData;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -45,7 +47,7 @@ class StoreComboRequest extends FormRequest
      *     name: string,
      *     suggested_price: float,
      *     default_payments: int,
-     *     products: array<int, array{
+     *     products: list<array{
      *         id: int,
      *         quantity: int,
      *         subtract_value: int,
@@ -59,7 +61,7 @@ class StoreComboRequest extends FormRequest
          *     name: string,
          *     suggested_price: float,
          *     default_payments: int,
-         *     products: array<int, array{
+         *     products: list<array{
          *         id: int,
          *         quantity: int,
          *         subtract_value: int,
@@ -70,5 +72,25 @@ class StoreComboRequest extends FormRequest
         $validated = parent::validated($key, $default);
 
         return $validated;
+    }
+
+    public function toData(): ComboData
+    {
+        $validated = $this->validated();
+
+        return new ComboData(
+            name: $validated['name'],
+            suggestedPrice: (float) $validated['suggested_price'],
+            defaultPayments: (int) $validated['default_payments'],
+            products: array_map(
+                fn (array $product) => new ComboProductData(
+                    id: (int) $product['id'],
+                    quantity: (int) $product['quantity'],
+                    subtractValue: (int) $product['subtract_value'],
+                    variants: $product['variants'] ?? null,
+                ),
+                $validated['products'],
+            ),
+        );
     }
 }
