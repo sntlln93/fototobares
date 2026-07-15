@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\BO;
 
-use App\Actions\Orders\SetDetailProductionStatus;
+use App\Actions\Orders\SetDetailProductionStatusAction;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\BO\UpdateDetailProductionStatusRequest;
 use App\Models\Order;
@@ -18,7 +18,7 @@ class DetailProductionStatusController extends Controller
      * production once the first installment is paid, or move the detail to a
      * stage of its product's chain.
      */
-    public function update(UpdateDetailProductionStatusRequest $request, Order $order, SetDetailProductionStatus $action): RedirectResponse
+    public function update(UpdateDetailProductionStatusRequest $request, Order $order, SetDetailProductionStatusAction $action): RedirectResponse
     {
         /** @var User|null $user */
         $user = $request->user();

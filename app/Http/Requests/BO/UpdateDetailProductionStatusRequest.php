@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\BO;
 
-use App\Data\Orders\SetDetailProductionStatusData;
+use App\Data\Orders\DetailProductionStatusSettingData;
 use App\Models\Order;
 use App\Models\User;
 use Illuminate\Contracts\Validation\ValidationRule;
@@ -31,12 +31,12 @@ class UpdateDetailProductionStatusRequest extends FormRequest
         ];
     }
 
-    public function toData(Order $order, ?User $user): SetDetailProductionStatusData
+    public function toData(Order $order, ?User $user): DetailProductionStatusSettingData
     {
         /** @var array{detail_id: int|string, production_status_id: int|string|null} $validated */
         $validated = $this->validated();
 
-        return new SetDetailProductionStatusData(
+        return new DetailProductionStatusSettingData(
             order: $order,
             detailId: (int) $validated['detail_id'],
             statusId: isset($validated['production_status_id']) ? (int) $validated['production_status_id'] : null,

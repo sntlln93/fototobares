@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\BO;
 
-use App\Data\Classrooms\CreateClassroomData;
+use App\Data\Classrooms\ClassroomCreationData;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -28,12 +28,12 @@ class StoreClassroomRequest extends FormRequest
         ];
     }
 
-    public function toData(): CreateClassroomData
+    public function toData(): ClassroomCreationData
     {
         /** @var array{name: string, school_id: int|string, teacher: string|null, phone: int|string|null} $validated */
         $validated = $this->validated();
 
-        return new CreateClassroomData(
+        return new ClassroomCreationData(
             name: $validated['name'],
             schoolId: (int) $validated['school_id'],
             teacher: $validated['teacher'],

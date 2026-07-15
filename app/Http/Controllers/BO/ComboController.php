@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\BO;
 
-use App\Actions\Combos\DeleteCombo;
+use App\Actions\Combos\DeleteComboAction;
+use App\Data\Combos\ComboDeletionData;
 use App\Data\Combos\ComboProductData;
-use App\Data\Combos\DeleteComboData;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\BO\StoreComboRequest;
 use App\Http\Resources\ComboResource;
@@ -78,9 +78,9 @@ class ComboController extends Controller
         return redirect()->route('combos.index');
     }
 
-    public function destroy(Combo $combo, DeleteCombo $action): RedirectResponse
+    public function destroy(Combo $combo, DeleteComboAction $action): RedirectResponse
     {
-        $action->handle(new DeleteComboData($combo));
+        $action->handle(new ComboDeletionData($combo));
 
         return redirect()->route('combos.index');
     }

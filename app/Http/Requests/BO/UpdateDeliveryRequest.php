@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\BO;
 
-use App\Data\Deliveries\MarkDeliveriesData;
+use App\Data\Deliveries\DeliveryMarkingData;
 use App\Models\Order;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -28,12 +28,12 @@ class UpdateDeliveryRequest extends FormRequest
         ];
     }
 
-    public function toData(Order $order): MarkDeliveriesData
+    public function toData(Order $order): DeliveryMarkingData
     {
         /** @var array{detail_ids: list<int|string>, action: string} $validated */
         $validated = $this->validated();
 
-        return new MarkDeliveriesData(
+        return new DeliveryMarkingData(
             order: $order,
             detailIds: array_map(fn ($id) => (int) $id, $validated['detail_ids']),
             action: $validated['action'],

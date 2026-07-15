@@ -7,9 +7,9 @@ namespace App\Data\Orders;
 use App\Contracts\DtoContract;
 
 /**
- * Shared payload for CreateOrder and UpdateOrder (both fed by
- * StoreOrderRequest). UpdateOrderData composes this rather than duplicating
- * its fields; UpdateOrder simply ignores classroomId/draftId.
+ * Shared payload for CreateOrderAction and UpdateOrderAction (both fed by
+ * StoreOrderRequest). OrderUpdateData composes this rather than duplicating
+ * its fields; UpdateOrderAction simply ignores classroomId/draftId.
  */
 final readonly class OrderData implements DtoContract
 {

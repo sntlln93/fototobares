@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\BO;
 
-use App\Data\Orders\SetDetailPriorityData;
+use App\Data\Orders\DetailPrioritySettingData;
 use App\Models\Order;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -27,12 +27,12 @@ class UpdateDetailPriorityRequest extends FormRequest
         ];
     }
 
-    public function toData(Order $order): SetDetailPriorityData
+    public function toData(Order $order): DetailPrioritySettingData
     {
         /** @var array{detail_id: int|string, priority: bool} $validated */
         $validated = $this->validated();
 
-        return new SetDetailPriorityData(
+        return new DetailPrioritySettingData(
             order: $order,
             detailId: (int) $validated['detail_id'],
             priority: (bool) $validated['priority'],

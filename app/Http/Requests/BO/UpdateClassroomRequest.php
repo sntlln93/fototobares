@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\BO;
 
-use App\Data\Classrooms\UpdateClassroomData;
+use App\Data\Classrooms\ClassroomUpdateData;
 use App\Models\Classroom;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -28,12 +28,12 @@ class UpdateClassroomRequest extends FormRequest
         ];
     }
 
-    public function toData(Classroom $classroom): UpdateClassroomData
+    public function toData(Classroom $classroom): ClassroomUpdateData
     {
         /** @var array{name: string, teacher: string|null, phone: int|string|null} $validated */
         $validated = $this->validated();
 
-        return new UpdateClassroomData(
+        return new ClassroomUpdateData(
             classroom: $classroom,
             name: $validated['name'],
             teacher: $validated['teacher'],

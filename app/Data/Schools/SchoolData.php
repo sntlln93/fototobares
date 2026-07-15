@@ -7,7 +7,7 @@ namespace App\Data\Schools;
 use App\Contracts\DtoContract;
 
 /**
- * Shared payload for CreateSchool and UpdateSchool (both fed by
+ * Shared payload for CreateSchoolAction and UpdateSchoolAction (both fed by
  * StoreSchoolRequest). The Actions forward each sub-array wholesale to the
  * corresponding model's create()/update(), so they stay plain arrays here
  * rather than nested DTOs.

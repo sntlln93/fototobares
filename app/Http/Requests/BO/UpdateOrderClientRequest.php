@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\BO;
 
-use App\Data\Orders\UpdateOrderClientData;
+use App\Data\Orders\OrderClientUpdateData;
 use App\Models\Order;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -34,7 +34,7 @@ class UpdateOrderClientRequest extends FormRequest
         ];
     }
 
-    public function toData(Order $order): UpdateOrderClientData
+    public function toData(Order $order): OrderClientUpdateData
     {
         /** @var array{
          *     name: string|null,
@@ -45,7 +45,7 @@ class UpdateOrderClientRequest extends FormRequest
          */
         $validated = $this->validated();
 
-        return new UpdateOrderClientData(
+        return new OrderClientUpdateData(
             order: $order,
             name: $validated['name'],
             phone: $validated['phone'],

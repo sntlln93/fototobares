@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\BO;
 
-use App\Actions\ProductionStatuses\CreateProductionStatus;
-use App\Actions\ProductionStatuses\DeleteProductionStatus;
-use App\Actions\ProductionStatuses\ReorderProductionStatuses;
-use App\Data\ProductionStatuses\DeleteProductionStatusData;
+use App\Actions\ProductionStatuses\CreateProductionStatusAction;
+use App\Actions\ProductionStatuses\DeleteProductionStatusAction;
+use App\Actions\ProductionStatuses\ReorderProductionStatusesAction;
+use App\Data\ProductionStatuses\ProductionStatusDeletionData;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\BO\ReorderProductionStatusesRequest;
 use App\Http\Requests\BO\StoreProductionStatusRequest;
@@ -41,7 +41,7 @@ class ProductionStatusController extends Controller
         ]);
     }
 
-    public function store(StoreProductionStatusRequest $request, CreateProductionStatus $action): RedirectResponse
+    public function store(StoreProductionStatusRequest $request, CreateProductionStatusAction $action): RedirectResponse
     {
         $data = $request->toData();
 
@@ -57,14 +57,14 @@ class ProductionStatusController extends Controller
         return back()->with('success', 'Etapa renombrada');
     }
 
-    public function destroy(ProductionStatus $productionStatus, DeleteProductionStatus $action): RedirectResponse
+    public function destroy(ProductionStatus $productionStatus, DeleteProductionStatusAction $action): RedirectResponse
     {
-        $action->handle(new DeleteProductionStatusData($productionStatus));
+        $action->handle(new ProductionStatusDeletionData($productionStatus));
 
         return back()->with('success', "Etapa \"{$productionStatus->name}\" eliminada");
     }
 
-    public function reorder(ReorderProductionStatusesRequest $request, ReorderProductionStatuses $action): RedirectResponse
+    public function reorder(ReorderProductionStatusesRequest $request, ReorderProductionStatusesAction $action): RedirectResponse
     {
         $action->handle($request->toData());
 

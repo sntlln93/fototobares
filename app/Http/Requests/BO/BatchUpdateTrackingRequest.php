@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\BO;
 
-use App\Data\Tracking\MoveDetailsToStageData;
+use App\Data\Tracking\DetailStageMovementData;
 use App\Models\ProductionStatus;
 use App\Models\User;
 use Illuminate\Contracts\Validation\ValidationRule;
@@ -29,12 +29,12 @@ class BatchUpdateTrackingRequest extends FormRequest
         ];
     }
 
-    public function toData(ProductionStatus $status, ?User $user): MoveDetailsToStageData
+    public function toData(ProductionStatus $status, ?User $user): DetailStageMovementData
     {
         /** @var array{detail_ids: list<int|string>} $validated */
         $validated = $this->validated();
 
-        return new MoveDetailsToStageData(
+        return new DetailStageMovementData(
             detailIds: array_map(fn ($id) => (int) $id, $validated['detail_ids']),
             status: $status,
             user: $user,

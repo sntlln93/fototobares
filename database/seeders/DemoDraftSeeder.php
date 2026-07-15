@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
-use App\Actions\Orders\CreateOrderDraft;
-use App\Data\Orders\CreateOrderDraftData;
+use App\Actions\Orders\CreateOrderDraftAction;
+use App\Data\Orders\OrderDraftCreationData;
 use App\Models\Classroom;
 use App\Models\Combo;
 use App\Models\Product;
@@ -13,7 +13,7 @@ use Illuminate\Database\Seeder;
 
 /**
  * One complete draft (prefills the whole order form when loaded) and one
- * barely started. Created through CreateOrderDraft so photo_number is
+ * barely started. Created through CreateOrderDraftAction so photo_number is
  * allocated via the real path, same as any other draft.
  */
 class DemoDraftSeeder extends Seeder
@@ -28,9 +28,9 @@ class DemoDraftSeeder extends Seeder
         $carpeta = Product::where('name', 'Carpeta 2 fotos')->firstOrFail();
         $medalla = Product::where('name', 'Medalla')->firstOrFail();
 
-        $action = app(CreateOrderDraft::class);
+        $action = app(CreateOrderDraftAction::class);
 
-        $action->handle(new CreateOrderDraftData(
+        $action->handle(new OrderDraftCreationData(
             classroomId: $sextoB->id,
             childName: 'Felipe',
             clientName: 'Laura Benítez',
@@ -56,7 +56,7 @@ class DemoDraftSeeder extends Seeder
             ],
         ));
 
-        $action->handle(new CreateOrderDraftData(
+        $action->handle(new OrderDraftCreationData(
             classroomId: $salaDe5->id,
             childName: 'Guadalupe',
             clientName: null,

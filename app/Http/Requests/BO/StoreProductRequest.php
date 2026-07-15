@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\BO;
 
-use App\Data\Products\CreateProductData;
+use App\Data\Products\ProductCreationData;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Validator;
@@ -72,7 +72,7 @@ class StoreProductRequest extends FormRequest
         });
     }
 
-    public function toData(): CreateProductData
+    public function toData(): ProductCreationData
     {
         /** @var array{
          *     name: string,
@@ -89,7 +89,7 @@ class StoreProductRequest extends FormRequest
          */
         $validated = $this->validated();
 
-        return new CreateProductData(
+        return new ProductCreationData(
             name: $validated['name'],
             unitPrice: (float) $validated['unit_price'],
             maxPayments: (int) $validated['max_payments'],

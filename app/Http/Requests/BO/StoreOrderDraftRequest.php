@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\BO;
 
-use App\Data\Orders\CreateOrderDraftData;
+use App\Data\Orders\OrderDraftCreationData;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -33,7 +33,7 @@ class StoreOrderDraftRequest extends FormRequest
         ];
     }
 
-    public function toData(): CreateOrderDraftData
+    public function toData(): OrderDraftCreationData
     {
         /** @var array{
          *     classroom_id: int|string,
@@ -49,7 +49,7 @@ class StoreOrderDraftRequest extends FormRequest
          */
         $validated = $this->validated();
 
-        return new CreateOrderDraftData(
+        return new OrderDraftCreationData(
             classroomId: (int) $validated['classroom_id'],
             childName: $validated['child_name'] ?? null,
             clientName: $validated['client_name'] ?? null,

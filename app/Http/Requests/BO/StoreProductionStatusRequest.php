@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\BO;
 
-use App\Data\ProductionStatuses\CreateProductionStatusData;
+use App\Data\ProductionStatuses\ProductionStatusCreationData;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -48,12 +48,12 @@ class StoreProductionStatusRequest extends FormRequest
         ];
     }
 
-    public function toData(): CreateProductionStatusData
+    public function toData(): ProductionStatusCreationData
     {
         /** @var array{product_id: int|string, name: string} $validated */
         $validated = $this->validated();
 
-        return new CreateProductionStatusData(
+        return new ProductionStatusCreationData(
             productId: (int) $validated['product_id'],
             name: $validated['name'],
         );

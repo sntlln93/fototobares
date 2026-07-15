@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\BO;
 
-use App\Data\Users\UpdateUserData;
+use App\Data\Users\UserUpdateData;
 use App\Models\User;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -34,12 +34,12 @@ class UpdateUserRequest extends FormRequest
         ];
     }
 
-    public function toData(User $user): UpdateUserData
+    public function toData(User $user): UserUpdateData
     {
         /** @var array{name: string, email: string, password: string|null, roles: list<int|string>} $validated */
         $validated = $this->validated();
 
-        return new UpdateUserData(
+        return new UserUpdateData(
             user: $user,
             name: $validated['name'],
             email: $validated['email'],

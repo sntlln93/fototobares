@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\BO;
 
-use App\Data\Users\CreateUserData;
+use App\Data\Users\UserCreationData;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -29,12 +29,12 @@ class StoreUserRequest extends FormRequest
         ];
     }
 
-    public function toData(): CreateUserData
+    public function toData(): UserCreationData
     {
         /** @var array{name: string, email: string, password: string, roles: list<int|string>} $validated */
         $validated = $this->validated();
 
-        return new CreateUserData(
+        return new UserCreationData(
             name: $validated['name'],
             email: $validated['email'],
             password: $validated['password'],

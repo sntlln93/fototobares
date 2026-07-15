@@ -120,6 +120,10 @@ arch('models extend eloquent')
 
 // --- Actions: single-responsibility -----------------------------------------
 
+arch('actions are suffixed')
+    ->expect('App\Actions')
+    ->toHaveSuffix('Action');
+
 arch('actions implement the action contract')
     ->expect('App\Actions')
     ->toImplement(ActionContract::class);
