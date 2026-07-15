@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Requests;
 
+use App\Data\Schools\SchoolData;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -40,40 +41,17 @@ class StoreSchoolRequest extends FormRequest
         ];
     }
 
-    /**
-     * Get the validated data as a structured array.
-     *
-     * @param  string|null  $key
-     * @param  mixed  $default
-     * @return array{
-     *     school: array{
-     *         user_id: int,
-     *         name: string,
-     *         level: string,
-     *     },
-     *     principal?: array{
-     *         name?: string,
-     *         phone?: string,
-     *     },
-     *     address: array{
-     *         street?: string,
-     *         number?: string,
-     *         neighborhood?: string,
-     *         city: string,
-     *     }
-     * }
-     */
-    public function validated($key = null, $default = null): array
+    public function toData(): SchoolData
     {
         /** @var array{
          *     school: array{
-         *         user_id: int,
+         *         user_id: int|string,
          *         name: string,
          *         level: string,
          *     },
          *     principal?: array{
          *         name?: string,
-         *         phone?: string,
+         *         phone?: int|string,
          *     },
          *     address: array{
          *         street?: string,
@@ -83,8 +61,12 @@ class StoreSchoolRequest extends FormRequest
          *     }
          * } $validated
          */
-        $validated = parent::validated($key, $default);
+        $validated = $this->validated();
 
-        return $validated;
+        return new SchoolData(
+            school: $validated['school'],
+            principal: $validated['principal'] ?? null,
+            address: $validated['address'],
+        );
     }
 }

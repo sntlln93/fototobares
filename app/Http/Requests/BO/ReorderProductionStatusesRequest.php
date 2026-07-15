@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\BO;
 
+use App\Data\ProductionStatuses\ProductionStatusesReorderingData;
 use App\Models\ProductionStatus;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Contracts\Validation\Validator;
@@ -67,5 +68,16 @@ class ReorderProductionStatusesRequest extends FormRequest
                 }
             },
         ];
+    }
+
+    public function toData(): ProductionStatusesReorderingData
+    {
+        /** @var array{product_id: int|string, ordered_ids: list<int|string>} $validated */
+        $validated = $this->validated();
+
+        return new ProductionStatusesReorderingData(
+            productId: (int) $validated['product_id'],
+            orderedIds: array_map(fn ($id) => (int) $id, $validated['ordered_ids']),
+        );
     }
 }

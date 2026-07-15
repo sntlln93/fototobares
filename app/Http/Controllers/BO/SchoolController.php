@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\BO;
 
-use App\Actions\Schools\CreateSchool;
-use App\Actions\Schools\DeleteSchool;
-use App\Actions\Schools\UpdateSchool;
+use App\Actions\Schools\CreateSchoolAction;
+use App\Actions\Schools\DeleteSchoolAction;
+use App\Actions\Schools\UpdateSchoolAction;
+use App\Data\Schools\SchoolDeletionData;
+use App\Data\Schools\SchoolUpdateData;
 use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreSchoolRequest;
@@ -59,9 +61,9 @@ class SchoolController extends Controller
         ]);
     }
 
-    public function store(StoreSchoolRequest $request, CreateSchool $action): RedirectResponse
+    public function store(StoreSchoolRequest $request, CreateSchoolAction $action): RedirectResponse
     {
-        $action->handle($request->validated());
+        $action->handle($request->toData());
 
         return redirect(route('schools.index'));
     }
@@ -79,14 +81,14 @@ class SchoolController extends Controller
         ]);
     }
 
-    public function update(School $school, StoreSchoolRequest $request, UpdateSchool $action): RedirectResponse
+    public function update(School $school, StoreSchoolRequest $request, UpdateSchoolAction $action): RedirectResponse
     {
-        $action->handle(['school' => $school, 'data' => $request->validated()]);
+        $action->handle(new SchoolUpdateData($school, $request->toData()));
 
         return redirect(route('schools.index'));
     }
 
-    public function destroy(School $school, DeleteSchool $action): RedirectResponse
+    public function destroy(School $school, DeleteSchoolAction $action): RedirectResponse
     {
         $classrooms = $school->classrooms->pluck('id');
         $hasOrders = Order::withTrashed()
@@ -97,7 +99,7 @@ class SchoolController extends Controller
             return back()->withErrors(['school' => 'No se pueden eliminar escuelas que tengan pedidos registrados']);
         }
 
-        $action->handle(['school' => $school]);
+        $action->handle(new SchoolDeletionData($school));
 
         return redirect(route('schools.index'));
     }

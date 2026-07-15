@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\BO;
 
+use App\Data\Products\ProductCreationData;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Validator;
@@ -71,40 +72,29 @@ class StoreProductRequest extends FormRequest
         });
     }
 
-    /**
-     * Get the validated data as a structured array.
-     *
-     * @return array{
-     *     name: string,
-     *     unit_price: float,
-     *     max_payments: int,
-     *     product_type_id: int,
-     *     variants?: array<int, array{
-     *         label: string,
-     *         type: string,
-     *         nullable: bool,
-     *         options: array<int, array{label: string, color?: string|null}>
-     *     }>|null
-     * }
-     */
-    public function validated($key = null, $default = null)
+    public function toData(): ProductCreationData
     {
-        /**
-         * @var array{
+        /** @var array{
          *     name: string,
-         *     unit_price: float,
-         *     max_payments: int,
-         *     product_type_id: int,
+         *     unit_price: int|float|string,
+         *     max_payments: int|float|string,
+         *     product_type_id: int|string,
          *     variants?: array<int, array{
          *         label: string,
          *         type: string,
          *         nullable: bool,
          *         options: array<int, array{label: string, color?: string|null}>
          *     }>|null
-         * }
+         * } $validated
          */
-        $validated = parent::validated();
+        $validated = $this->validated();
 
-        return $validated;
+        return new ProductCreationData(
+            name: $validated['name'],
+            unitPrice: (float) $validated['unit_price'],
+            maxPayments: (int) $validated['max_payments'],
+            productTypeId: (int) $validated['product_type_id'],
+            variants: $validated['variants'] ?? null,
+        );
     }
 }

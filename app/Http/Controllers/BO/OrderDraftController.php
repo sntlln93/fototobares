@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\BO;
 
-use App\Actions\Orders\CreateOrderDraft;
+use App\Actions\Orders\CreateOrderDraftAction;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\BO\StoreOrderDraftRequest;
 use App\Http\Resources\OrderDraftResource;
@@ -26,9 +26,9 @@ class OrderDraftController extends Controller
         ]);
     }
 
-    public function store(StoreOrderDraftRequest $request, CreateOrderDraft $action): RedirectResponse
+    public function store(StoreOrderDraftRequest $request, CreateOrderDraftAction $action): RedirectResponse
     {
-        $action->handle($request->validated());
+        $action->handle($request->toData());
 
         return back()->with('success', 'Borrador guardado exitosamente');
     }

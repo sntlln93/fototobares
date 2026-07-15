@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\BO;
 
+use App\Data\Orders\OrderClientUpdateData;
+use App\Models\Order;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -32,29 +34,25 @@ class UpdateOrderClientRequest extends FormRequest
         ];
     }
 
-    /**
-     * Get the validated data as a structured array.
-     *
-     * @param  string|null  $key
-     * @param  mixed  $default
-     * @return array{
-     *     name: string|null,
-     *     phone: string|null,
-     *     child_name: string|null,
-     *     attended_photo_session: bool|null,
-     * }
-     */
-    public function validated($key = null, $default = null): array
+    public function toData(Order $order): OrderClientUpdateData
     {
         /** @var array{
          *     name: string|null,
          *     phone: string|null,
          *     child_name: string|null,
-         *     attended_photo_session: bool|null,
-         * }
+         *     attended_photo_session: bool|int|string|null,
+         * } $validated
          */
-        $validated = parent::validated($key, $default);
+        $validated = $this->validated();
 
-        return $validated;
+        return new OrderClientUpdateData(
+            order: $order,
+            name: $validated['name'],
+            phone: $validated['phone'],
+            childName: $validated['child_name'],
+            attendedPhotoSession: $validated['attended_photo_session'] !== null
+                ? (bool) $validated['attended_photo_session']
+                : null,
+        );
     }
 }

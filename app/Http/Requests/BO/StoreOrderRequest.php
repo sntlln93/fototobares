@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\BO;
 
+use App\Data\Orders\OrderData;
+use App\Data\Orders\OrderDetailData;
 use App\Models\Product;
 use App\Rules\VariantSelection;
 use Illuminate\Contracts\Validation\ValidationRule;
@@ -90,51 +92,49 @@ class StoreOrderRequest extends FormRequest
         }
     }
 
-    /**
-     * Get the validated data as a structured array.
-     *
-     * @param  string|null  $key
-     * @param  mixed  $default
-     * @return array{
-     *     name: string|null,
-     *     phone: string|null,
-     *     classroom_id: int,
-     *     total_price: float,
-     *     payment_plan: int,
-     *     due_date: string,
-     *     child_name?: string|null,
-     *     attended_photo_session?: bool|null,
-     *     draft_id?: int|null,
-     *     order_details: array<int, array{
-     *         id?: int|null,
-     *         product_id: int,
-     *         note: string|null,
-     *         variant?: array<string, string|null>|null
-     *     }>
-     * }
-     */
-    public function validated($key = null, $default = null): array
+    public function toData(): OrderData
     {
         /** @var array{
          *     name: string|null,
          *     phone: string|null,
-         *     classroom_id: int,
-         *     total_price: float,
-         *     payment_plan: int,
+         *     classroom_id: int|string,
+         *     total_price: int|float|string,
+         *     payment_plan: int|float|string,
          *     due_date: string,
          *     child_name?: string|null,
-         *     attended_photo_session?: bool|null,
-         *     draft_id?: int|null,
-         *     order_details: array<int, array{
-         *         id?: int|null,
-         *         product_id: int,
+         *     attended_photo_session?: bool|int|string|null,
+         *     draft_id?: int|string|null,
+         *     order_details: list<array{
+         *         id?: int|string|null,
+         *         product_id: int|string,
          *         note: string|null,
          *         variant?: array<string, string|null>|null
          *     }>
-         * }
+         * } $validated
          */
-        $validated = parent::validated($key, $default);
+        $validated = $this->validated();
 
-        return $validated;
+        return new OrderData(
+            name: $validated['name'],
+            phone: $validated['phone'],
+            classroomId: (int) $validated['classroom_id'],
+            totalPrice: (float) $validated['total_price'],
+            paymentPlan: (int) $validated['payment_plan'],
+            dueDate: $validated['due_date'],
+            childName: $validated['child_name'] ?? null,
+            attendedPhotoSession: array_key_exists('attended_photo_session', $validated) && $validated['attended_photo_session'] !== null
+                ? (bool) $validated['attended_photo_session']
+                : null,
+            draftId: isset($validated['draft_id']) ? (int) $validated['draft_id'] : null,
+            orderDetails: array_map(
+                fn (array $detail) => new OrderDetailData(
+                    id: isset($detail['id']) ? (int) $detail['id'] : null,
+                    productId: (int) $detail['product_id'],
+                    note: $detail['note'],
+                    variant: $detail['variant'] ?? null,
+                ),
+                $validated['order_details'],
+            ),
+        );
     }
 }

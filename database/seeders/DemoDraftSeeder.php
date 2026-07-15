@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
-use App\Actions\Orders\CreateOrderDraft;
+use App\Actions\Orders\CreateOrderDraftAction;
+use App\Data\Orders\OrderDraftCreationData;
 use App\Models\Classroom;
 use App\Models\Combo;
 use App\Models\Product;
@@ -12,7 +13,7 @@ use Illuminate\Database\Seeder;
 
 /**
  * One complete draft (prefills the whole order form when loaded) and one
- * barely started. Created through CreateOrderDraft so photo_number is
+ * barely started. Created through CreateOrderDraftAction so photo_number is
  * allocated via the real path, same as any other draft.
  */
 class DemoDraftSeeder extends Seeder
@@ -27,18 +28,18 @@ class DemoDraftSeeder extends Seeder
         $carpeta = Product::where('name', 'Carpeta 2 fotos')->firstOrFail();
         $medalla = Product::where('name', 'Medalla')->firstOrFail();
 
-        $action = app(CreateOrderDraft::class);
+        $action = app(CreateOrderDraftAction::class);
 
-        $action->handle([
-            'classroom_id' => $sextoB->id,
-            'child_name' => 'Felipe',
-            'client_name' => 'Laura Benítez',
-            'client_phone' => '3804000012',
-            'attended_photo_session' => true,
-            'total_price' => 60000,
-            'payment_plan' => 4,
-            'due_date' => now()->addDays(30)->format('Y-m-d'),
-            'products' => [
+        $action->handle(new OrderDraftCreationData(
+            classroomId: $sextoB->id,
+            childName: 'Felipe',
+            clientName: 'Laura Benítez',
+            clientPhone: '3804000012',
+            attendedPhotoSession: true,
+            totalPrice: 60000,
+            paymentPlan: 4,
+            dueDate: now()->addDays(30)->format('Y-m-d'),
+            products: [
                 [
                     'combo_id' => $combo1->id,
                     'product_id' => $molduraAncha->id,
@@ -53,12 +54,18 @@ class DemoDraftSeeder extends Seeder
                 ['combo_id' => $combo1->id, 'product_id' => $carpeta->id, 'note' => 'Felipe'],
                 ['combo_id' => $combo1->id, 'product_id' => $medalla->id, 'note' => 'Felipe'],
             ],
-        ]);
+        ));
 
-        $action->handle([
-            'classroom_id' => $salaDe5->id,
-            'child_name' => 'Guadalupe',
-            'products' => [],
-        ]);
+        $action->handle(new OrderDraftCreationData(
+            classroomId: $salaDe5->id,
+            childName: 'Guadalupe',
+            clientName: null,
+            clientPhone: null,
+            attendedPhotoSession: null,
+            totalPrice: null,
+            paymentPlan: null,
+            dueDate: null,
+            products: [],
+        ));
     }
 }

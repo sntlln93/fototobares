@@ -7,16 +7,21 @@ namespace App\Contracts;
 /**
  * Contract for single-responsibility Actions: one thing, one entrypoint.
  *
- * Every action receives its inputs as a single associative array so the
- * contract can share one signature across heterogeneous actions (PHP method
- * signatures are invariant). Actions keep their own specific return type via
- * covariance — hence no native return type here, only the docblock.
+ * Every action receives its inputs as a DtoContract so the contract can
+ * share one signature across heterogeneous actions (PHP method signatures
+ * are invariant). Each implementation binds the generic TParams to its own
+ * DTO via `@implements ActionContract<ItsData>`, so PHPStan narrows $params
+ * inside handle() without a runtime check. Actions keep their own specific
+ * return type via covariance — hence no native return type here, only the
+ * docblock.
+ *
+ * @template TParams of DtoContract
  */
 interface ActionContract
 {
     /**
-     * @param  array<string, mixed>  $params
+     * @param  TParams  $params
      * @return mixed
      */
-    public function handle(array $params);
+    public function handle(DtoContract $params);
 }

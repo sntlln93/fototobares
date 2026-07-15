@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\BO;
 
-use App\Actions\Orders\CancelOrder;
-use App\Actions\Orders\CreateOrder;
-use App\Actions\Orders\UpdateOrder;
-use App\Actions\Orders\UpdateOrderClient;
+use App\Actions\Orders\CancelOrderAction;
+use App\Actions\Orders\CreateOrderAction;
+use App\Actions\Orders\UpdateOrderAction;
+use App\Actions\Orders\UpdateOrderClientAction;
+use App\Data\Orders\OrderUpdateData;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\BO\CancelOrderRequest;
 use App\Http\Requests\BO\StoreOrderRequest;
@@ -100,12 +101,12 @@ class OrderController extends Controller
         ]);
     }
 
-    public function store(StoreOrderRequest $request, CreateOrder $action): RedirectResponse
+    public function store(StoreOrderRequest $request, CreateOrderAction $action): RedirectResponse
     {
         /** @var string $redirect_to */
         $redirect_to = request()->query('redirectTo', route('orders.index'));
 
-        $action->handle($request->validated());
+        $action->handle($request->toData());
 
         return redirect($redirect_to);
     }
@@ -145,7 +146,7 @@ class OrderController extends Controller
         ]);
     }
 
-    public function update(StoreOrderRequest $request, Order $order, UpdateOrder $action): RedirectResponse
+    public function update(StoreOrderRequest $request, Order $order, UpdateOrderAction $action): RedirectResponse
     {
         if ($order->cancelled_at !== null) {
             return back()->withErrors(['order' => 'No se puede editar un pedido cancelado.']);
@@ -155,7 +156,7 @@ class OrderController extends Controller
             return back()->withErrors(['order' => 'No se puede editar este pedido. La primera cuota ha sido pagada completamente.']);
         }
 
-        $action->handle(['order' => $order, 'data' => $request->validated()]);
+        $action->handle(new OrderUpdateData($order, $request->toData()));
 
         return redirect()->route('orders.show', ['order' => $order->id])
             ->with('success', 'Pedido actualizado exitosamente');
@@ -177,24 +178,24 @@ class OrderController extends Controller
      * Cancel an order: each product goes back to stock (its supplies are
      * returned) or to the recycling bin, chosen per product.
      */
-    public function cancel(CancelOrderRequest $request, Order $order, CancelOrder $action): RedirectResponse
+    public function cancel(CancelOrderRequest $request, Order $order, CancelOrderAction $action): RedirectResponse
     {
         /** @var User|null $user */
         $user = $request->user();
 
-        $action->handle(['order' => $order, 'data' => $request->validated(), 'user' => $user]);
+        $action->handle($request->toData($order, $user));
 
         return redirect()->route('orders.show', ['order' => $order->id])
             ->with('success', 'Pedido cancelado');
     }
 
-    public function updateClient(UpdateOrderClientRequest $request, Order $order, UpdateOrderClient $action): RedirectResponse
+    public function updateClient(UpdateOrderClientRequest $request, Order $order, UpdateOrderClientAction $action): RedirectResponse
     {
         if ($order->cancelled_at !== null) {
             return back()->withErrors(['order' => 'No se puede editar un pedido cancelado.']);
         }
 
-        $action->handle(['order' => $order, 'data' => $request->validated()]);
+        $action->handle($request->toData($order));
 
         return back()->with('success', 'Datos del cliente actualizados exitosamente');
     }

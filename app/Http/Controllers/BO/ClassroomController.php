@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\BO;
 
-use App\Actions\Classrooms\CreateClassroom;
-use App\Actions\Classrooms\DeleteClassroom;
-use App\Actions\Classrooms\UpdateClassroom;
+use App\Actions\Classrooms\CreateClassroomAction;
+use App\Actions\Classrooms\DeleteClassroomAction;
+use App\Actions\Classrooms\UpdateClassroomAction;
+use App\Data\Classrooms\ClassroomDeletionData;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\BO\StoreClassroomRequest;
 use App\Http\Requests\BO\UpdateClassroomRequest;
@@ -70,23 +71,23 @@ class ClassroomController extends Controller
         ]);
     }
 
-    public function store(StoreClassroomRequest $request, CreateClassroom $action): RedirectResponse
+    public function store(StoreClassroomRequest $request, CreateClassroomAction $action): RedirectResponse
     {
-        $validated = $request->validated();
+        $data = $request->toData();
 
-        $action->handle($validated);
+        $action->handle($data);
 
-        return redirect(route('schools.show', ['school' => $validated['school_id']]));
+        return redirect(route('schools.show', ['school' => $data->schoolId]));
     }
 
-    public function update(UpdateClassroomRequest $request, Classroom $classroom, UpdateClassroom $action): RedirectResponse
+    public function update(UpdateClassroomRequest $request, Classroom $classroom, UpdateClassroomAction $action): RedirectResponse
     {
-        $action->handle(['classroom' => $classroom, 'data' => $request->validated()]);
+        $action->handle($request->toData($classroom));
 
         return redirect(route('schools.show', ['school' => $classroom->school_id]));
     }
 
-    public function destroy(Classroom $classroom, DeleteClassroom $action): RedirectResponse
+    public function destroy(Classroom $classroom, DeleteClassroomAction $action): RedirectResponse
     {
         $hasOrders = Order::withTrashed()
             ->where('classroom_id', $classroom->id)
@@ -98,7 +99,7 @@ class ClassroomController extends Controller
 
         $school_id = $classroom->school_id;
 
-        $action->handle(['classroom' => $classroom]);
+        $action->handle(new ClassroomDeletionData($classroom));
 
         return redirect()->route('schools.show', ['school' => $school_id]);
     }

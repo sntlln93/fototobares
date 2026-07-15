@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\BO;
 
-use App\Actions\Combos\DeleteCombo;
+use App\Actions\Combos\DeleteComboAction;
+use App\Data\Combos\ComboDeletionData;
+use App\Data\Combos\ComboProductData;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\BO\StoreComboRequest;
 use App\Http\Resources\ComboResource;
@@ -38,15 +40,15 @@ class ComboController extends Controller
 
     public function store(StoreComboRequest $request): RedirectResponse
     {
-        $validated = $request->validated();
+        $data = $request->toData();
 
         $combo = Combo::create([
-            'name' => $validated['name'],
-            'suggested_price' => $validated['suggested_price'],
-            'default_payments' => $validated['default_payments'],
+            'name' => $data->name,
+            'suggested_price' => $data->suggestedPrice,
+            'default_payments' => $data->defaultPayments,
         ]);
 
-        $combo->products()->attach($this->pivotData($validated['products']));
+        $combo->products()->attach($this->pivotData($data->products));
 
         return redirect()->route('combos.index');
     }
@@ -63,37 +65,37 @@ class ComboController extends Controller
 
     public function update(StoreComboRequest $request, Combo $combo): RedirectResponse
     {
-        $validated = $request->validated();
+        $data = $request->toData();
 
         $combo->update([
-            'name' => $validated['name'],
-            'suggested_price' => $validated['suggested_price'],
-            'default_payments' => $validated['default_payments'],
+            'name' => $data->name,
+            'suggested_price' => $data->suggestedPrice,
+            'default_payments' => $data->defaultPayments,
         ]);
 
-        $combo->products()->sync($this->pivotData($validated['products']));
+        $combo->products()->sync($this->pivotData($data->products));
 
         return redirect()->route('combos.index');
     }
 
-    public function destroy(Combo $combo, DeleteCombo $action): RedirectResponse
+    public function destroy(Combo $combo, DeleteComboAction $action): RedirectResponse
     {
-        $action->handle(['combo' => $combo]);
+        $action->handle(new ComboDeletionData($combo));
 
         return redirect()->route('combos.index');
     }
 
     /**
-     * @param  array<int, array{id: int, quantity: int, subtract_value: int, variants?: array<string, mixed>|null}>  $products
+     * @param  list<ComboProductData>  $products
      * @return Collection<int, array{quantity: int, subtract_value: int, variants: array<string, mixed>|null}>
      */
     private function pivotData(array $products): Collection
     {
-        return (new Collection($products))->mapWithKeys(function (array $product) {
-            return [$product['id'] => [
-                'quantity' => $product['quantity'],
-                'subtract_value' => $product['subtract_value'],
-                'variants' => $product['variants'] ?? null,
+        return (new Collection($products))->mapWithKeys(function (ComboProductData $product) {
+            return [$product->id => [
+                'quantity' => $product->quantity,
+                'subtract_value' => $product->subtractValue,
+                'variants' => $product->variants,
             ]];
         });
     }

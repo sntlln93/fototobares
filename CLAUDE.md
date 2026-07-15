@@ -63,6 +63,7 @@ Underlying tools if you need one directly: `sail composer pint` / `sail composer
 - Prefer shadcn/ui for frontend components.
 - Generate PDFs, printables and images client-side (canvas) — no server-side generation.
 - Work should be done sequentially with per-module commits.
+- DTOs must always be named as nouns to reflect that they are passive data containers. Bad: DeleteSchoolData, UpdateUser. Good: DeletedSchoolData, SchoolDeletionData.
 
 ## Commit format
 

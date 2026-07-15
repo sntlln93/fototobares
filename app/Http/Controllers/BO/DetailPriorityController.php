@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\BO;
 
-use App\Actions\Orders\SetDetailPriority;
+use App\Actions\Orders\SetDetailPriorityAction;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\BO\UpdateDetailPriorityRequest;
 use App\Models\Order;
@@ -16,23 +16,13 @@ class DetailPriorityController extends Controller
      * Flag (or unflag) a detail of an order as priority, so the workshop
      * produces it first.
      */
-    public function update(UpdateDetailPriorityRequest $request, Order $order, SetDetailPriority $action): RedirectResponse
+    public function update(UpdateDetailPriorityRequest $request, Order $order, SetDetailPriorityAction $action): RedirectResponse
     {
-        $validated = $request->validated();
+        $data = $request->toData($order);
 
-        /** @var int $detailId */
-        $detailId = $validated['detail_id'];
+        $action->handle($data);
 
-        /** @var bool $priority */
-        $priority = $validated['priority'];
-
-        $action->handle([
-            'order' => $order,
-            'detail_id' => $detailId,
-            'priority' => $priority,
-        ]);
-
-        $message = $priority
+        $message = $data->priority
             ? 'Producto marcado como prioritario'
             : 'Prioridad quitada';
 

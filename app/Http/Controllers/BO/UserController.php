@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\BO;
 
-use App\Actions\Users\CreateUser;
-use App\Actions\Users\DeleteUser;
-use App\Actions\Users\UpdateUser;
+use App\Actions\Users\CreateUserAction;
+use App\Actions\Users\DeleteUserAction;
+use App\Actions\Users\UpdateUserAction;
+use App\Data\Users\UserDeletionData;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\BO\StoreUserRequest;
 use App\Http\Requests\BO\UpdateUserRequest;
@@ -41,9 +42,9 @@ class UserController extends Controller
         ]);
     }
 
-    public function store(StoreUserRequest $request, CreateUser $action): RedirectResponse
+    public function store(StoreUserRequest $request, CreateUserAction $action): RedirectResponse
     {
-        $action->handle($request->validated());
+        $action->handle($request->toData());
 
         return redirect()->route('users.index')->with('success', 'Usuario creado exitosamente');
     }
@@ -63,14 +64,14 @@ class UserController extends Controller
         ]);
     }
 
-    public function update(UpdateUserRequest $request, User $user, UpdateUser $action): RedirectResponse
+    public function update(UpdateUserRequest $request, User $user, UpdateUserAction $action): RedirectResponse
     {
-        $action->handle(['user' => $user, 'data' => $request->validated()]);
+        $action->handle($request->toData($user));
 
         return redirect()->route('users.index')->with('success', 'Usuario actualizado exitosamente');
     }
 
-    public function destroy(Request $request, User $user, DeleteUser $action): RedirectResponse
+    public function destroy(Request $request, User $user, DeleteUserAction $action): RedirectResponse
     {
         if ($request->user()?->id === $user->id) {
             return back()->withErrors(['user' => 'No podés eliminar tu propio usuario.']);
@@ -80,7 +81,7 @@ class UserController extends Controller
             return back()->withErrors(['user' => 'No se puede eliminar: el usuario es encargado de al menos una escuela.']);
         }
 
-        $action->handle(['user' => $user]);
+        $action->handle(new UserDeletionData($user));
 
         return redirect()->route('users.index')->with('success', 'Usuario eliminado');
     }
