@@ -31,7 +31,7 @@ class StoreProductRequest extends FormRequest
             'unit_price' => ['required', 'numeric', 'min:1'],
             'max_payments' => ['required', 'numeric', 'min:1'],
             'product_type_id' => ['required', 'exists:product_types,id'],
-            'has_photo' => ['required', 'boolean'],
+            'has_photo' => ['sometimes', 'boolean'],
 
             'variants' => ['sometimes', 'nullable', 'array'],
             'variants.*.label' => ['required', 'string', 'max:50', 'distinct'],
@@ -80,7 +80,7 @@ class StoreProductRequest extends FormRequest
          *     unit_price: int|float|string,
          *     max_payments: int|float|string,
          *     product_type_id: int|string,
-         *     has_photo: bool,
+         *     has_photo?: bool,
          *     variants?: array<int, array{
          *         label: string,
          *         type: string,
@@ -97,7 +97,7 @@ class StoreProductRequest extends FormRequest
             maxPayments: (int) $validated['max_payments'],
             productTypeId: (int) $validated['product_type_id'],
             variants: $validated['variants'] ?? null,
-            hasPhoto: (bool) $validated['has_photo'],
+            hasPhoto: (bool) ($validated['has_photo'] ?? false),
         );
     }
 }
