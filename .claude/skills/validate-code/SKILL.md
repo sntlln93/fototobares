@@ -20,7 +20,7 @@ matching tools, all through Sail:
 | --- | --- | --- |
 | Backend (`*.php`, `composer.*`, `database/`, `routes/`) | pint (fixes), phpstan | + pest |
 | Frontend (`resources/**`, `package.json`, build configs) | prettier (writes), eslint (fixes), tsc | + vitest |
-| E2E (`e2e/`, `playwright.config.ts`) | prettier (writes), tsc -p e2e | + playwright (host, resets the dev DB) |
+| E2E (`e2e/`, `playwright.config.ts`) | prettier (writes), tsc -p e2e | (playwright is **CI-only** — a local run resets the dev DB) |
 
 ## Rules
 

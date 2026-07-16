@@ -5,7 +5,8 @@
 #
 # Usage: bash .claude/skills/validate-code/scripts/validate-code.sh [--full]
 #   --full | --pr   also run the test suites of the touched side(s)
-#                   (vitest / pest, and playwright when e2e files changed)
+#                   (vitest / pest; playwright runs in CI only, never here —
+#                   a local run resets the dev database)
 
 set -uo pipefail
 
@@ -85,8 +86,9 @@ fi
 if $FULL; then
     $backend && run "pest" "$SAIL" php ./vendor/bin/pest
     $frontend && run "vitest" "$SAIL" npm run test
-    # Playwright runs on the host (not Sail) and resets the dev database
-    $e2e && run "playwright" npx playwright test
+    # Playwright is CI-only: a local run resets the dev database. The e2e
+    # required check covers it on every PR.
+    $e2e && echo "==> playwright: skipped locally (runs in CI; local run would reset the dev DB)" && echo
 fi
 
 if [ ${#failures[@]} -gt 0 ]; then

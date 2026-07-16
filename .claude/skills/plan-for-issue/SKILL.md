@@ -242,9 +242,8 @@ Expected output: ...
 bash .claude/skills/validate-code/scripts/validate-code.sh --full
 ```
 
-[Add `npm run test:e2e` (HOST, needs Sail up, resets the dev DB) only when the
-issue touches flows covered by the e2e suite and e2e files themselves did not
-change — otherwise `--full` already runs it.]
+[e2e is CI-only: never include a local `npm run test:e2e` (it resets the dev
+DB). The `e2e` required check covers it on every PR.]
 
 Expected: All pass, no warnings.
 ````
