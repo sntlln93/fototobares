@@ -27,6 +27,7 @@ class ProductFactory extends Factory
             'max_payments' => 1,
             'financed_price' => null,
             'product_type_id' => fn () => ProductType::where('name', 'taza')->firstOrFail()->id,
+            'has_photo' => false,
         ];
     }
 

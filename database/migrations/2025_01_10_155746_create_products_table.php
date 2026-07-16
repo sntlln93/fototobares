@@ -17,6 +17,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->json('variants')->nullable();
+            $table->boolean('has_photo')->default(false);
             $table->integer('unit_price');
             $table->integer('max_payments');
             $table->integer('financed_price')->nullable();
