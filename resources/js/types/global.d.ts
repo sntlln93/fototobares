@@ -117,6 +117,8 @@ declare global {
         production_enabled?: boolean;
         priority?: boolean | null;
         recycled_to?: 'stock' | 'reciclaje' | null;
+        /** Whether this detail has any stock movements to reverse on cancellation */
+        has_returnable_stock?: boolean;
         /** Stages of the product's chain, ordered by position */
         statuses?: ProductionStatus[];
     }

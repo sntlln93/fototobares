@@ -68,10 +68,13 @@ export function CancelOrderModal({
                     Cancelar pedido #{order.id}
                 </h2>
                 <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                    Elegí a dónde vuelve cada producto. Si vuelve a stock, sus
-                    insumos se devuelven al inventario; si va a reciclaje, queda
-                    listado en el módulo de reciclaje y lo ya producido queda en
-                    stock.
+                    Elegí a dónde vuelve cada producto.{' '}
+                    <strong>Reciclaje</strong> deja el producto listado en el
+                    módulo de reciclaje y lo que ya se produjo permanece en
+                    stock. <strong>Stock</strong> devuelve al inventario los
+                    insumos que se habían descontado durante la producción (si
+                    el producto nunca arrancó producción o no tiene insumos, no
+                    hay nada que devolver).
                 </p>
 
                 <ul className="mt-4 space-y-2">
@@ -80,7 +83,14 @@ export function CancelOrderModal({
                             key={product.order_detail_id}
                             className="flex items-center justify-between gap-2 rounded-md border border-input px-3 py-2"
                         >
-                            <span className="text-sm">{product.name}</span>
+                            <div className="flex flex-col">
+                                <span className="text-sm">{product.name}</span>
+                                {!product.has_returnable_stock && (
+                                    <span className="text-xs text-muted-foreground">
+                                        Sin insumos para devolver a stock
+                                    </span>
+                                )}
+                            </div>
                             <Select
                                 value={destinations[product.order_detail_id]}
                                 onValueChange={(value) =>
@@ -98,7 +108,12 @@ export function CancelOrderModal({
                                     <SelectItem value="reciclaje">
                                         Reciclaje
                                     </SelectItem>
-                                    <SelectItem value="stock">Stock</SelectItem>
+                                    <SelectItem
+                                        value="stock"
+                                        disabled={!product.has_returnable_stock}
+                                    >
+                                        Stock
+                                    </SelectItem>
                                 </SelectContent>
                             </Select>
                         </li>
