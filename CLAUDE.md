@@ -54,6 +54,7 @@ Underlying tools if you need one directly: `sail composer pint` / `sail composer
 
 - Never create commits or push without explicit approval. Never push directly to `develop`.
   - **Standing exception (owner-approved 2026-07-16)**: inside the autonomous issue flow orchestrated by the `leader` agent (`.claude/agents/`), the `implementer` and `test-writer` subagents have standing approval to stage (by name), commit and push to the issue's **feature branch only**. The `leader` may open the PR against `develop`. Merging is always human; every other rule in this section still applies.
+- If an autonomous issue run is stopped and later resumed, ask the owner how to continue — through the flow's subagents per the handoff, or directly — instead of deciding alone. Resuming in the main thread silently skips the flow's gates (`code-reviewer`) and forfeits the subagents' standing commit permission, so it is the owner's call, not a judgement to make from a stale constraint.
 - Use the `prepare-commit` skill to structure commit messages before requesting approval.
 - Never mention the agent in commits, comments or project messages.
 - Never use `git add .` or `git add -A`. Always add to staging by explicitly naming the file.
