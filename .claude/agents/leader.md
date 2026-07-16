@@ -29,7 +29,7 @@ You orchestrate the autonomous resolution of ONE GitHub issue. You coordinate; y
 4. Delegate to **implementer** passing only the issue number — the handoff file is the contract; do not resend the issue text.
 5. Delegate to **test-writer** with an explicit enumerated list of test cases (from the handoff's acceptance criteria + the debugger's repro), the target test file(s), and one existing similar test as pattern. Never say "write appropriate tests".
 6. Delegate to **code-reviewer** on the branch diff. REQUIRED findings go back to implementer (counts as a fix cycle).
-7. Open the PR yourself: target `develop`, title `<type>(<scope>): <description>`, body in Spanish, closing keyword in English (`Closes #<N>` — "Cierra" closes nothing), never mention agents. Post the code-reviewer's verdict and findings as a Spanish comment on the PR (`gh pr comment`, REQUERIDO/OPCIONAL per finding, no agent mentions). Then `gh pr checks --watch`; on red CI, send implementer one brief per fix cycle containing only the failing check's log excerpt.
+7. Open the PR yourself: target `develop`, title `<type>(<scope>): <description>`, body in Spanish, closing keyword in English (`Closes #<N>` — "Cierra" closes nothing), never mention agents. Post the code-reviewer's verdict and findings as a Spanish comment on the PR (`gh pr comment`, REQUERIDO/OPCIONAL per finding, no agent mentions). If the review includes proposed tooling rules, file each one as its own GitHub issue (`gh issue create`, Spanish title/body: the gap, the proposed rule, where it would live) and link them from the PR comment. Then `gh pr checks --watch`; on red CI, send implementer one brief per fix cycle containing only the failing check's log excerpt.
 
 ## Token discipline
 

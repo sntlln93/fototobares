@@ -1,6 +1,6 @@
 ---
 name: code-review
-description: Reviews the current branch's diff against develop with the project checklist (correctness, layering, DTOs, frontend rules, diff security) and produces a ranked verdict. With --pr <number>, also posts the report as a Spanish PR comment.
+description: Reviews the current branch's diff against develop, intent-first (does it solve what the issue asks?), plus semantic correctness, test quality and diff security — skipping everything Pint/PHPStan/ESLint/tsc/ArchTest already enforce. With --pr <number>, also posts the report as a Spanish PR comment.
 ---
 
 # Code review
@@ -9,11 +9,15 @@ Review the diff of the current branch against `origin/develop` (`git diff origin
 
 ## Checklist
 
-1. **Correctness**: logic errors, broken edge cases, regressions in behavior the diff touches, missing eager loads (`Model::shouldBeStrict()` makes lazy loading throw — every Resource must eager-load what it serializes).
-2. **Layering**: thin controllers (FormRequest injected, never `$request->validate()`), business logic in Actions/Services, complex queries in scopes/query classes, thin models.
-3. **Conventions**: DTOs named as nouns, `declare(strict_types=1)`, code/comments in English, UI copy in Spanish.
-4. **Frontend**: no page-level horizontal scroll on any viewport, files ≤ 250 lines / components ≤ 150, logic in hooks, no hand-added `useMemo`/`useCallback`/`memo` (React Compiler), prefer shadcn/ui primitives.
+1. **Intent (primary check)**: read the issue (`gh issue view <N> --comments`) and, when it exists, `.claude/handoffs/<N>.md`. Does the diff solve what the issue asks? Are the acceptance criteria satisfied in the code, not just checked off? Anything requested but missing? Anything present that was not requested (scope creep)? A handoff that drifted from the issue is itself a REQUIRED finding.
+2. **Semantic correctness**: logic errors, edge cases and regressions that compile and pass — what no tool catches. Assume `validate-code --full` ran green: do NOT re-check formatting, types, naming/layering conventions or size limits (Pint, PHPStan, ESLint `max-lines`, tsc and `tests/Arch/ArchTest.php` already enforce them). If you spot an enforceable convention the tooling misses, write it under **Proposed rules** instead of hand-checking it.
+3. **Test quality**: new/changed tests must pin behavior — they should fail if the fix were reverted. Flag tautological tests and tests that mirror the implementation instead of asserting the requirement.
+4. **What tooling cannot see**: page-level horizontal scroll on any viewport, UI copy in Spanish, eager loads on paths `PageSmokeTest` does not visit (non-GET requests, conditional serialization).
 5. **Diff security**: any secret/credential, or any change under `.github/**`, `Dockerfile`, `docker/**` or `.env*`, is an automatic REQUIRED finding flagged **ESCALATE**.
+
+## Proposed rules
+
+When check (2) reveals an enforceable gap in the tooling, add a `## Reglas propuestas` section to the report: one line per rule — what to enforce, where (`tests/Arch/ArchTest.php` / ESLint / Pint config) and a one-line sketch of the rule. These are not findings against the diff and never block the verdict; they are routed to GitHub issues so they are not lost.
 
 ## Report format
 
