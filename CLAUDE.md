@@ -53,6 +53,7 @@ Underlying tools if you need one directly: `sail composer pint` / `sail composer
 ## Agent rules
 
 - Never create commits or push without explicit approval. Never push directly to `develop`.
+  - **Standing exception (owner-approved 2026-07-16)**: inside the autonomous issue flow orchestrated by the `leader` agent (`.claude/agents/`), the `implementer` and `test-writer` subagents have standing approval to stage (by name), commit and push to the issue's **feature branch only**. The `leader` may open the PR against `develop`. Merging is always human; every other rule in this section still applies.
 - Use the `prepare-commit` skill to structure commit messages before requesting approval.
 - Never mention the agent in commits, comments or project messages.
 - Never use `git add .` or `git add -A`. Always add to staging by explicitly naming the file.
