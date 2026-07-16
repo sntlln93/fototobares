@@ -15,6 +15,8 @@ use App\Http\Resources\ClassroomStudentResource;
 use App\Models\Classroom;
 use App\Models\Order;
 use App\Models\OrderDraft;
+use App\Models\Product;
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -68,6 +70,8 @@ class ClassroomController extends Controller
             'classroom' => $classroom->load('teacher', 'school'),
             'students' => ClassroomStudentResource::collection($paginator),
             'filters' => ['search' => $search],
+            'assignableEditors' => User::assignableEditors()->get(['id', 'name']),
+            'photoProducts' => Product::where('has_photo', true)->get(['id', 'name']),
         ]);
     }
 

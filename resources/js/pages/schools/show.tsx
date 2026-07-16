@@ -1,3 +1,8 @@
+import {
+    AssignableEditor,
+    BulkAssignEditorDialog,
+    PhotoProduct,
+} from '@/features/editor-assignment/BulkAssignEditorDialog';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
@@ -8,10 +13,14 @@ import { SchoolShowData, useSchoolShow } from './hooks/use-school-show';
 
 export default function School({
     school,
+    assignableEditors,
+    photoProducts,
 }: PageProps<{
     school: {
         data: SchoolShowData;
     };
+    assignableEditors: AssignableEditor[];
+    photoProducts: PhotoProduct[];
 }>) {
     const controller = useSchoolShow();
 
@@ -33,6 +42,14 @@ export default function School({
             <ClassroomModals controller={controller} />
 
             <SchoolInfoCard school={school.data} />
+
+            <div className="flex justify-end px-6 pt-4">
+                <BulkAssignEditorDialog
+                    assignableEditors={assignableEditors}
+                    photoProducts={photoProducts}
+                    schoolId={school.data.id}
+                />
+            </div>
 
             <ClassroomsTable school={school.data} controller={controller} />
         </AppLayout>

@@ -14,6 +14,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreSchoolRequest;
 use App\Http\Resources\SchoolResource;
 use App\Models\Order;
+use App\Models\Product;
 use App\Models\School;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
@@ -113,6 +114,8 @@ class SchoolController extends Controller
                 'address',
                 'user',
             ])),
+            'assignableEditors' => User::assignableEditors()->get(['id', 'name']),
+            'photoProducts' => Product::where('has_photo', true)->get(['id', 'name']),
         ]);
     }
 }
