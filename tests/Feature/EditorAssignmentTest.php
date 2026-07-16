@@ -359,21 +359,35 @@ it('bulk rejects self-assignment', function () {
     expect(EditorOrderDetailAssignment::query()->exists())->toBeFalse();
 });
 
-it('bulk requires at least one of school_id or classroom_id', function () {
+it('bulk requires exactly one of school_id or classroom_id', function () {
     actingAsRole(UserRole::Office);
 
+    $school = School::factory()->create();
+    $classroom = Classroom::factory()->create(['school_id' => $school->id]);
     $product = Product::factory()->create(['has_photo' => true]);
     $editor = User::factory()->withRole(UserRole::Editor)->create();
+
+    $order = Order::factory()->create(['classroom_id' => $classroom->id]);
+    $detail = OrderDetail::factory()->enabled()->create([
+        'order_id' => $order->id,
+        'product_id' => $product->id,
+    ]);
 
     post(route('editor-assignments.bulk'), [
         'editor_id' => $editor->id,
         'product_ids' => [$product->id],
     ])->assertSessionHasErrors(['school_id', 'classroom_id']);
 
-    // NOTE: sending both school_id and classroom_id is not currently rejected
-    // by BulkAssignEditorRequest (only `required_without` is enforced on each
-    // field, no mutual-exclusivity rule) — reported back instead of asserted
-    // here, since production code is out of scope for this test task.
+    expect(EditorOrderDetailAssignment::where('order_detail_id', $detail->id)->exists())->toBeFalse();
+
+    post(route('editor-assignments.bulk'), [
+        'editor_id' => $editor->id,
+        'product_ids' => [$product->id],
+        'school_id' => $school->id,
+        'classroom_id' => $classroom->id,
+    ])->assertSessionHasErrors(['school_id', 'classroom_id']);
+
+    expect(EditorOrderDetailAssignment::where('order_detail_id', $detail->id)->exists())->toBeFalse();
 });
 
 it('denies editor and taller from bulk assigning', function (UserRole $role) {
