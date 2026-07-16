@@ -29,7 +29,7 @@ An issue is ready for the autonomous flow when:
 2. Evaluate against the definition of ready.
 3. **Propose, don't interrogate**: draft the missing sections you can infer from the issue (acceptance criteria, scope) and present them to the owner to confirm, edit or reject — grouped, one issue at a time. Ask open questions only for what cannot be inferred.
 4. Outcome:
-   - **Ready** → post ONE structured comment in Spanish (`## Criterios de aceptación`, `## Decisiones tomadas`, `## Fuera de alcance`, plus `## Reproducción` for bugs), then add the `ready-for-agent` label and remove `needs-triage` if present.
+   - **Ready** → post ONE structured comment in Spanish (`## Criterios de aceptación`, `## Decisiones tomadas`, `## Fuera de alcance`, plus `## Reproducción` for bugs). Then ask the owner directly: "¿Marco #N como `ready-for-agent`?" — add the label (and remove `needs-triage`) only on an explicit yes to that exact question. The owner having confirmed the drafted sections is NOT that permission.
    - **Blocked** → add the `blocked` label and post a short Spanish comment naming exactly which decision is missing and whose it is. Never `ready-for-agent`.
 5. Create the labels on first use (`gh label create`). Never mention agents in issue comments.
 
@@ -42,4 +42,4 @@ An issue is ready for the autonomous flow when:
 
 ## Hard rule
 
-`ready-for-agent` is the leader's mandatory intake gate and is granted ONLY by interactive triage with the owner's confirmation — never by the scan, never inferred. Do not add it unless the definition of ready is genuinely met and the owner confirmed the recorded answers.
+`ready-for-agent` is the leader's mandatory intake gate. It is applied ONLY with the owner's absolute and exclusive permission: an explicit yes to the direct question "¿Marco #N como `ready-for-agent`?" at the end of interactive triage. Never by the scan, never inferred from content confirmations, never on any agent's say-so. No explicit permission → no label, regardless of how complete the issue looks.
