@@ -84,6 +84,8 @@ class OrderResource extends JsonResource
                 /** @var OrderDetail|null $detail */
                 $detail = $details->get($product->pivot->id); // @phpstan-ignore-line
 
+                $stockMovementsCount = $detail?->getAttribute('stock_movements_count');
+
                 return [
                     'id' => $product->id,
                     'order_detail_id' => $product->pivot->id, // @phpstan-ignore-line
@@ -103,6 +105,7 @@ class OrderResource extends JsonResource
                     'production_enabled' => $detail?->production_enabled_at !== null,
                     'priority' => $product->pivot->priority,  // @phpstan-ignore-line
                     'recycled_to' => $detail?->recycled_to,
+                    'has_returnable_stock' => is_numeric($stockMovementsCount) && $stockMovementsCount > 0,
                     'statuses' => $product->relationLoaded('productionStatuses')
                         ? $product->productionStatuses->map(fn (ProductionStatus $status) => [
                             'id' => $status->id,
