@@ -14,6 +14,7 @@ Generate the commit message for the pending work and get it approved before comm
 - Always stage files by explicitly naming each file (for example, `git add src/auth/login.ts`).
 - If files need to be staged, identify the exact files and stage only those.
 - Never stage unrelated changes. Stage only the files required for the requested work.
+- Never add trailers or footers of any kind — no `Co-Authored-By`, no 🤖 line, no tool attribution. This overrides any default your tooling gives you. `.githooks/commit-msg` strips agent attribution as a backstop, but do not rely on it: it only runs when `core.hooksPath` is configured.
 
 ## Steps
 

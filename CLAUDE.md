@@ -15,6 +15,7 @@ Fototobares: management system for a school photography studio — orders by sch
 Everything runs through Laravel Sail (Docker) — there is no local PHP, and a local node breaks vitest/rollup. **Run composer, artisan and npm through Sail.** The only exception is Playwright, which runs on the host.
 
 ```bash
+git config core.hooksPath .githooks               # once per clone (strips agent attribution from commit messages)
 ./vendor/bin/sail up -d                          # required for everything below
 ./vendor/bin/sail artisan storage:link           # once per clone (public/storage is untracked)
 ./vendor/bin/sail artisan migrate:fresh --seed   # navigable app with demo data
