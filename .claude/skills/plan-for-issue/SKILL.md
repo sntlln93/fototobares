@@ -132,6 +132,8 @@ first estimate the issue's **complexity (1–10)** and apply the model rule:
 
 If the requested model is below what the complexity calls for, warn the user and wait for their choice before saving the handoff.
 
+**Budget: the whole Implementation Handoff must stay under 1500 words.** If you exceed it, cut explanation and prose — never steps, acceptance criteria or validation commands.
+
 Then append an **Implementation Handoff** section using this structured format:
 
 ````md
