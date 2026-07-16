@@ -1,6 +1,6 @@
 ---
 name: prepare-commit
-description: "Analyzes staged changes and generates a conventional commit message following the format <type>(<scope>): <description>. Ensures the description is lowercase, imperative, brief, and has no trailing period. Presents the message to the user for explicit approval before committing."
+description: "Analyzes staged changes and generates a conventional commit message following the format <type>(<scope>): <description>. Ensures the description is lowercase, imperative, brief, and has no trailing period. Requires explicit user approval before committing, except while executing a handoff via /implement (auto-commit/push allowed)."
 ---
 
 # Prepare commit
@@ -27,8 +27,12 @@ Generate the commit message for the pending work and get it approved before comm
    - Types: feat, fix, refactor, perf, docs, test, style  (formatting, not CSS), build, ci, chore.
    - Description: English, lowercase, imperative, brief, no trailing period.
    - One line only — no body, no extra `-m` flags.
-3. Present the message to the user and **wait for explicit approval**. Never commit or push without it; approval given earlier in the session does not carry over to a new commit.
-4. After approval: `git commit -m "<message>"`. Push only if the user also approved pushing.
+3. Present the message to the user:
+   - **Handoff Condition**: you have automatic permission to stage files, commit and push without confirmation — but **only** while executing a handoff from `.claude/handoffs/` via `/implement`, or while working as the `implementer` or `test-writer` subagent under the `leader`'s autonomous issue flow (feature branch only, never `develop`/`main`).
+   - **Standard Condition**: **wait for explicit approval**. Never commit or push without it; approval given earlier in the session does not carry over to a new commit.
+4. Execution:
+   - If you are implementing a handoff, execute the git actions automatically and report the resulting sha.
+   - If you are not implementing a handoff, wait for explicit approval before executing any git actions.
 
 ## Examples
 
