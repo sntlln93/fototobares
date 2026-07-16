@@ -1,4 +1,7 @@
-export type FormData = Pick<Product, 'name' | 'product_type_id'> & {
+export type FormData = Pick<
+    Product,
+    'name' | 'product_type_id' | 'has_photo'
+> & {
     unit_price: string;
     max_payments: string;
     variants: VariantDefinition[] | null;
