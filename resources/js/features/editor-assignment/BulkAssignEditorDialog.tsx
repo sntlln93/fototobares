@@ -17,6 +17,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import { usePage } from '@inertiajs/react';
 import { UserCog } from 'lucide-react';
 import { useState } from 'react';
 import { PhotoProductsChecklist } from './PhotoProductsChecklist';
@@ -48,6 +49,10 @@ export function BulkAssignEditorDialog({
         schoolId,
         classroomId,
     });
+    const { auth } = usePage().props;
+    const selectableEditors = assignableEditors.filter(
+        (editor) => editor.id !== auth.user.id,
+    );
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
@@ -76,7 +81,7 @@ export function BulkAssignEditorDialog({
                             <SelectValue placeholder="Elegir editor..." />
                         </SelectTrigger>
                         <SelectContent>
-                            {assignableEditors.map((editor) => (
+                            {selectableEditors.map((editor) => (
                                 <SelectItem
                                     value={String(editor.id)}
                                     key={editor.id}

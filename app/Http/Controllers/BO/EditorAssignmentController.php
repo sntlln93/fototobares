@@ -7,7 +7,7 @@ namespace App\Http\Controllers\BO;
 use App\Actions\EditorAssignments\AssignEditorAction;
 use App\Actions\EditorAssignments\BulkAssignEditorAction;
 use App\Actions\EditorAssignments\UnassignEditorAction;
-use App\Data\EditorAssignments\EditorAssignmentData;
+use App\Data\EditorAssignments\EditorUnassignmentData;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\BO\AssignEditorRequest;
 use App\Http\Requests\BO\BulkAssignEditorRequest;
@@ -42,11 +42,7 @@ class EditorAssignmentController extends Controller
      */
     public function destroy(OrderDetail $orderDetail, UnassignEditorAction $action): RedirectResponse
     {
-        $action->handle(new EditorAssignmentData(
-            orderDetailId: $orderDetail->id,
-            editorId: 0,
-            assignedBy: 0,
-        ));
+        $action->handle(new EditorUnassignmentData(orderDetailId: $orderDetail->id));
 
         return back()->with('success', 'Editor desasignado');
     }

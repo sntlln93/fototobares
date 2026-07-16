@@ -33,8 +33,8 @@ class BulkAssignEditorRequest extends FormRequest
             ],
             'product_ids' => ['required', 'array', 'min:1'],
             'product_ids.*' => ['integer', 'exists:products,id'],
-            'school_id' => ['nullable', 'integer', 'exists:schools,id', 'required_without:classroom_id'],
-            'classroom_id' => ['nullable', 'integer', 'exists:classrooms,id', 'required_without:school_id'],
+            'school_id' => ['nullable', 'integer', 'exists:schools,id', 'required_without:classroom_id', 'prohibits:classroom_id'],
+            'classroom_id' => ['nullable', 'integer', 'exists:classrooms,id', 'required_without:school_id', 'prohibits:school_id'],
         ];
     }
 

@@ -6,20 +6,19 @@ namespace App\Actions\EditorAssignments;
 
 use App\Contracts\ActionContract;
 use App\Contracts\DtoContract;
-use App\Data\EditorAssignments\EditorAssignmentData;
+use App\Data\EditorAssignments\EditorUnassignmentData;
 use App\Models\EditorOrderDetailAssignment;
 
 /**
- * @implements ActionContract<EditorAssignmentData>
+ * @implements ActionContract<EditorUnassignmentData>
  */
 class UnassignEditorAction implements ActionContract
 {
     /**
      * Remove the editor assignment of an order detail. Idempotent: no
-     * error if the detail has no assignment. Only `orderDetailId` is
-     * read; `editorId`/`assignedBy` are irrelevant for this action.
+     * error if the detail has no assignment.
      *
-     * @param  EditorAssignmentData  $params
+     * @param  EditorUnassignmentData  $params
      */
     public function handle(DtoContract $params): void
     {
