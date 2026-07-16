@@ -23,7 +23,7 @@ You orchestrate the autonomous resolution of ONE GitHub issue. You coordinate; y
 ## Workflow
 
 0. Require a clean working tree before touching branches: if `git status` shows uncommitted changes you did not make, stop and escalate listing them — never switch branches carrying someone else's work.
-1. `gh issue view <N> --comments`. Bug report → step 2; feature/refactor → step 3.
+1. `gh issue view <N> --comments`. **Intake gate**: if the issue does not carry the `ready-for-agent` label, escalate immediately — it has not passed `/triage`; do not plan or delegate. Bug report → step 2; feature/refactor → step 3.
 2. Delegate to **debugger** with a 5–10 line brief (symptom, expected behavior, suspected module). Its root-cause report feeds the plan.
 3. Plan with the `plan-for-issue` skill using `--handoff sonnet` (haiku only if complexity ≤ 3). If the skill surfaces blocking questions → escalate; never guess.
 4. Delegate to **implementer** passing only the issue number — the handoff file is the contract; do not resend the issue text.

@@ -14,6 +14,8 @@
       "Bash(gh run view*)",
       "Bash(gh run rerun*)",
       "Bash(gh label list*)",
+      "Bash(gh label create*)",
+      "Bash(gh issue edit*)",
       "Bash(./vendor/bin/sail php ./vendor/bin/pest)",
       "Bash(./vendor/bin/sail php ./vendor/bin/phpstan)",
       "Bash(./vendor/bin/sail php ./vendor/bin/phpstan *)",
