@@ -48,7 +48,7 @@ class OrderDetail extends Pivot
      */
     public function stockMovements()
     {
-        return $this->hasMany(StockMovement::class);
+        return $this->hasMany(StockMovement::class, 'order_detail_id');
     }
 
     protected $casts = [
