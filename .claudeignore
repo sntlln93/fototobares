@@ -1,0 +1,18 @@
+coverage/
+nohup.out
+storage/framework/
+storage/logs/
+test-results/
+
+# Excluir la carpeta temporal de despliegues
+.claude/docs/tmp/
+
+# Excluir documentos de análisis y transcripciones pesadas
+.claude/docs/notas manuales reunión con cliente 9-jul.md
+.claude/docs/transcripciones reunión con cliente 9-jul.md
+
+# Excluir documentos de arquitectura y testing (mantener solo status.md)
+.claude/docs/base_context.md
+.claude/docs/checklist_testeo_manual.md
+.claude/docs/plan_suite_tests.md
+
