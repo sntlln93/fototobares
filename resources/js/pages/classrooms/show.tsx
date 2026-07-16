@@ -5,6 +5,11 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
+import {
+    AssignableEditor,
+    BulkAssignEditorDialog,
+    PhotoProduct,
+} from '@/features/editor-assignment/BulkAssignEditorDialog';
 import { Searchbar } from '@/features/searchbar';
 import AppLayout from '@/layouts/app-layout';
 import { cn } from '@/lib/utils';
@@ -17,10 +22,14 @@ export default function ClassroomShow({
     classroom,
     students,
     filters,
+    assignableEditors,
+    photoProducts,
 }: PageProps<{
     classroom: Classroom & { teacher?: Teacher; school: School };
     students: Paginated<ClassroomStudent>;
     filters: { search: string | null };
+    assignableEditors: AssignableEditor[];
+    photoProducts: PhotoProduct[];
 }>) {
     const breadcrumbs: BreadcrumbItem[] = [
         {
@@ -87,24 +96,31 @@ export default function ClassroomShow({
             </section>
 
             <section className="p-6">
-                <div className="mb-4 flex items-center justify-between">
+                <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
                     <h2 className="text-2xl font-bold">
                         Alumnos ({students.data.length})
                     </h2>
-                    <Link
-                        href={route('photos.index', {
-                            classroom: classroom.id,
-                        })}
-                        className={cn(
-                            buttonVariants({
-                                size: 'sm',
-                            }),
-                            'gap-2',
-                        )}
-                    >
-                        <ImagePlus className="h-4 w-4" />
-                        Gestionar fotos
-                    </Link>
+                    <div className="flex flex-wrap gap-2">
+                        <BulkAssignEditorDialog
+                            assignableEditors={assignableEditors}
+                            photoProducts={photoProducts}
+                            classroomId={classroom.id}
+                        />
+                        <Link
+                            href={route('photos.index', {
+                                classroom: classroom.id,
+                            })}
+                            className={cn(
+                                buttonVariants({
+                                    size: 'sm',
+                                }),
+                                'gap-2',
+                            )}
+                        >
+                            <ImagePlus className="h-4 w-4" />
+                            Gestionar fotos
+                        </Link>
+                    </div>
                 </div>
 
                 <div className="mb-4">

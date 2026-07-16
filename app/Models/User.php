@@ -7,6 +7,7 @@ namespace App\Models;
 use App\Enums\UserRole;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -57,5 +58,20 @@ class User extends Authenticatable
         }
 
         return false;
+    }
+
+    /**
+     * Users that can be assigned as editor of an order detail: the
+     * `editor` role, or `administración` (which may assign to others but
+     * never to itself).
+     *
+     * @param  Builder<User>  $query
+     * @return Builder<User>
+     */
+    public function scopeAssignableEditors(Builder $query): Builder
+    {
+        return $query->whereHas('roles', function ($roles) {
+            $roles->whereIn('name', [UserRole::Editor->value, UserRole::Admin->value]);
+        });
     }
 }

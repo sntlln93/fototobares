@@ -9,6 +9,7 @@ use App\Http\Controllers\BO\DeliveryController;
 use App\Http\Controllers\BO\DetailPriorityController;
 use App\Http\Controllers\BO\DetailProductionStatusController;
 use App\Http\Controllers\BO\DetailVariantController;
+use App\Http\Controllers\BO\EditorAssignmentController;
 use App\Http\Controllers\BO\NoteController;
 use App\Http\Controllers\BO\OrderController;
 use App\Http\Controllers\BO\OrderDraftController;
@@ -53,6 +54,10 @@ Route::middleware(['auth', 'role:master,administración,oficina'])->group(functi
         Route::post('/', [NoteController::class, 'store'])->name('notes.store');
         Route::delete('/{note}', [NoteController::class, 'destroy'])->name('notes.destroy');
     });
+
+    Route::post('/editor-assignments', [EditorAssignmentController::class, 'store'])->name('editor-assignments.store');
+    Route::post('/editor-assignments/bulk', [EditorAssignmentController::class, 'bulkStore'])->name('editor-assignments.bulk');
+    Route::delete('/editor-assignments/{orderDetail}', [EditorAssignmentController::class, 'destroy'])->name('editor-assignments.destroy');
 });
 
 // Fotos: también accesibles para el rol editor
