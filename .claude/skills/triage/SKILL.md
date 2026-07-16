@@ -28,10 +28,13 @@ An issue is ready for the autonomous flow when:
 1. Read `gh issue view <N> --comments`.
 2. Evaluate against the definition of ready.
 3. **Propose, don't interrogate**: draft the missing sections you can infer from the issue (acceptance criteria, scope) and present them to the owner to confirm, edit or reject — grouped, one issue at a time. Ask open questions only for what cannot be inferred.
-4. Outcome:
+4. **Split check (complex issues)**: if the issue bundles multiple deliverables or exceeds what one run handles well, assess splitting it into 2+ smaller issues — propose it ONLY when feasible AND the derived issues are order-independent: each implementable in any order and mergeable on its own, with no dependency chain between them. If any sequencing exists, do not propose a split. Present the division to the owner with each derived issue drafted (title, definition-of-ready sections) and the independence rationale; **only the owner approves the split**. On approval:
+   - Create each derived issue (`gh issue create`): Spanish title/body in the definition-of-ready format, the matching **type** label (`bug`/`feat`/`enhancement`/…), and a "Derivado de #N" reference. Never `ready-for-agent` at creation — then ask the standard question per derived issue ("¿Marco #M como `ready-for-agent`?"); the split approval is NOT that permission.
+   - Parent: post a Spanish comment listing the derived issues and close it as superseded.
+5. Outcome (for the issue being triaged, or each derived issue after a split):
    - **Ready** → post ONE structured comment in Spanish (`## Criterios de aceptación`, `## Decisiones tomadas`, `## Fuera de alcance`, plus `## Reproducción` for bugs). Then ask the owner directly: "¿Marco #N como `ready-for-agent`?" — add the label (and remove `needs-triage`) only on an explicit yes to that exact question. The owner having confirmed the drafted sections is NOT that permission.
    - **Blocked** → add the `blocked` label and post a short Spanish comment naming exactly which decision is missing and whose it is. Never `ready-for-agent`.
-5. Create the labels on first use (`gh label create`). Never mention agents in issue comments.
+6. Create the labels on first use (`gh label create`). Never mention agents in issue comments.
 
 ## Scan mode (`/triage`, no arguments)
 
