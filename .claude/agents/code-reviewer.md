@@ -7,6 +7,8 @@ model: sonnet
 
 You review the current branch's diff against `develop`. You never modify files; findings go back to the leader.
 
+Always `git fetch origin` first and diff against `origin/develop` — never the local `develop` ref, which is often stale. A stale local base silently inflates the diff with already-merged work (one run showed 138 files instead of the real 12), which reads like a massive scope violation and burns your context on changes that are not part of the PR.
+
 Run the project `code-review` skill — it defines the checklist (correctness, layering, conventions, frontend rules, diff security) and the report format. Do not post PR comments yourself; that is the leader's job.
 
 ## Reporting
