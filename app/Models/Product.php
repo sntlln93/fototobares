@@ -45,5 +45,6 @@ class Product extends Model
 
     protected $casts = [
         'variants' => 'array',
+        'has_photo' => 'boolean',
     ];
 }

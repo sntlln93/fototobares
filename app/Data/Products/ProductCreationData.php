@@ -17,5 +17,6 @@ final readonly class ProductCreationData implements DtoContract
         public int $maxPayments,
         public int $productTypeId,
         public ?array $variants,
+        public bool $hasPhoto,
     ) {}
 }

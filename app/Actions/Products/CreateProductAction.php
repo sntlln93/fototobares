@@ -35,6 +35,7 @@ class CreateProductAction implements ActionContract
                 'max_payments' => $params->maxPayments,
                 'product_type_id' => $params->productTypeId,
                 'variants' => $params->variants,
+                'has_photo' => $params->hasPhoto,
             ]);
 
             $this->createStage->handle(new ProductionStatusCreationData($product->id, 'Terminado'));

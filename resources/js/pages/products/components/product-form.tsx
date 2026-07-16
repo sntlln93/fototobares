@@ -1,5 +1,6 @@
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -98,6 +99,20 @@ export function ProductForm({
                 />
 
                 <InputError message={errors.max_payments} className="mt-2" />
+            </div>
+
+            <div className="mt-6 flex items-center gap-2">
+                <Checkbox
+                    id="has_photo"
+                    checked={data.has_photo}
+                    onCheckedChange={(checked) =>
+                        setData('has_photo', checked === true)
+                    }
+                />
+
+                <Label htmlFor="has_photo">Incluye foto</Label>
+
+                <InputError message={errors.has_photo} className="mt-2" />
             </div>
 
             <VariantsEditor form={form} />

@@ -59,6 +59,7 @@ class ProductController extends Controller
             'max_payments' => $data->maxPayments,
             'product_type_id' => $data->productTypeId,
             'variants' => $data->variants,
+            'has_photo' => $data->hasPhoto,
         ]);
 
         return redirect()->route('products.index');

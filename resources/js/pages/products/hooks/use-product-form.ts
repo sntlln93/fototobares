@@ -10,6 +10,7 @@ export function useProductForm(product?: Product) {
         max_payments: product ? String(product.max_payments) : '0',
         product_type_id: product?.product_type_id ?? 0,
         variants: product?.variants ?? null,
+        has_photo: product?.has_photo ?? false,
     });
 
     const submit: FormEventHandler = (e) => {

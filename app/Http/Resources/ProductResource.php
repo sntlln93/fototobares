@@ -31,6 +31,7 @@ class ProductResource extends JsonResource
             'financed_price' => $this->resource->financed_price,
             'product_type_id' => $this->resource->product_type_id,
             'variants' => $this->resource->variants ?? [],
+            'has_photo' => $this->resource->has_photo,
         ];
     }
 }

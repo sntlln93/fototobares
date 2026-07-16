@@ -104,6 +104,7 @@ declare global {
         type: ProductType;
         /** Nullable in the database: products without variants exist */
         variants?: VariantDefinition[] | null;
+        has_photo: boolean;
     }
 
     interface OrderProduct extends Product {
