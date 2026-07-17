@@ -21,6 +21,7 @@ class StorePhotoRequest extends FormRequest
     {
         return [
             'photo' => ['required', 'image', 'max:5120'], // 5MB
+            'number' => ['nullable', 'integer', 'min:1'],
         ];
     }
 }
