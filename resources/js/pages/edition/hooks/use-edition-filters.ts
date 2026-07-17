@@ -28,7 +28,6 @@ function matchesSearch(row: EditionRowData, query: string): boolean {
         row.photo_number ?? '',
         row.child_name ?? '',
         row.variant_search,
-        row.diseno ?? '',
     ].join(' ');
 
     return normalize(haystack).includes(normalize(query));
@@ -84,19 +83,24 @@ function filterSchools(
             classrooms: school.classrooms
                 .map((classroom) => ({
                     ...classroom,
-                    rows: recomputeFirstOfOrder(
-                        classroom.rows.filter((row) =>
-                            matchesRow(
-                                row,
-                                school.id,
-                                classroom.id,
-                                filters,
-                                canManage,
+                    photoProductGroups: classroom.photoProductGroups
+                        .map((group) => ({
+                            ...group,
+                            rows: recomputeFirstOfOrder(
+                                group.rows.filter((row) =>
+                                    matchesRow(
+                                        row,
+                                        school.id,
+                                        classroom.id,
+                                        filters,
+                                        canManage,
+                                    ),
+                                ),
                             ),
-                        ),
-                    ),
+                        }))
+                        .filter((group) => group.rows.length > 0),
                 }))
-                .filter((classroom) => classroom.rows.length > 0),
+                .filter((classroom) => classroom.photoProductGroups.length > 0),
         }))
         .filter((school) => school.classrooms.length > 0);
 }
@@ -128,7 +132,11 @@ export function useEditionFilters(
             ),
     );
 
-    const allRows = schools.flatMap((s) => s.classrooms.flatMap((c) => c.rows));
+    const allRows = schools.flatMap((s) =>
+        s.classrooms.flatMap((c) =>
+            c.photoProductGroups.flatMap((g) => g.rows),
+        ),
+    );
 
     const editorOptions = dedupeById(
         allRows

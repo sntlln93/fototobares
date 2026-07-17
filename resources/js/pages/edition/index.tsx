@@ -34,12 +34,16 @@ export default function Edition({
     photoProducts: PhotoProduct[];
 }>) {
     const hasRows = schools.some((school) =>
-        school.classrooms.some((classroom) => classroom.rows.length > 0),
+        school.classrooms.some((classroom) =>
+            classroom.photoProductGroups.some((group) => group.rows.length > 0),
+        ),
     );
 
     const filters = useEditionFilters(schools, canManage);
     const hasFilteredRows = filters.filteredSchools.some((school) =>
-        school.classrooms.some((classroom) => classroom.rows.length > 0),
+        school.classrooms.some((classroom) =>
+            classroom.photoProductGroups.some((group) => group.rows.length > 0),
+        ),
     );
 
     return (
