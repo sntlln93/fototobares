@@ -24,5 +24,22 @@ export function useEditingStatusTransition() {
         );
     };
 
-    return { transition };
+    const revert = (orderDetailId: number) => {
+        router.post(
+            route('editing-status.revert', { orderDetail: orderDetailId }),
+            {},
+            {
+                preserveScroll: true,
+                preserveState: true,
+                onSuccess: () => toast.success('Transición revertida'),
+                onError: (errors) =>
+                    toast.error(
+                        Object.values(errors)[0] ??
+                            'No se pudo revertir la transición',
+                    ),
+            },
+        );
+    };
+
+    return { transition, revert };
 }

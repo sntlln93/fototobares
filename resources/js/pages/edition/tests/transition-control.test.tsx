@@ -14,6 +14,7 @@ describe('TransitionControl', () => {
             <TransitionControl
                 orderDetailId={1}
                 allowedTargets={['ok', 'a_corregir']}
+                canRevert={false}
             />,
         );
 
@@ -31,6 +32,7 @@ describe('TransitionControl', () => {
             <TransitionControl
                 orderDetailId={2}
                 allowedTargets={['editada']}
+                canRevert={false}
             />,
         );
 
@@ -40,7 +42,11 @@ describe('TransitionControl', () => {
 
     it('renders nothing when there are no allowed targets', () => {
         const { container } = render(
-            <TransitionControl orderDetailId={3} allowedTargets={[]} />,
+            <TransitionControl
+                orderDetailId={3}
+                allowedTargets={[]}
+                canRevert={false}
+            />,
         );
 
         expect(container.firstChild).toBeNull();

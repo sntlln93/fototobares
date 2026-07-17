@@ -29,6 +29,7 @@ const makeRow = (overrides: Partial<EditionRowData> = {}): EditionRowData => ({
     note: 'Nota de fila',
     allowed_targets: [],
     is_first_of_order: true,
+    can_revert: false,
     editor: null,
     modelo_cuadro: 'Moldura fina',
     color: 'Negro',
