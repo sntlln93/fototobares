@@ -267,4 +267,64 @@ describe('useEditionFilters', () => {
             { id: 11, name: '1ro B' },
         ]);
     });
+
+    it('recomputes is_first_of_order when a filter removes the original first row of an order', () => {
+        // order_id 200: originalFirst is the designated first row (backend
+        // computed against the full unfiltered classroom); sibling shares
+        // the same order but is a different product, so filtering by
+        // productName keeps only the sibling.
+        const originalFirst = makeRow({
+            id: 5,
+            order_id: 200,
+            photo_size: 'Foto 15x21',
+            child_name: 'Mica Díaz',
+            is_first_of_order: true,
+        });
+        const sibling = makeRow({
+            id: 6,
+            order_id: 200,
+            photo_size: 'Foto 10x15',
+            child_name: 'Mica Díaz',
+            is_first_of_order: false,
+        });
+        const schoolWithSplitOrder: EditionSchool = {
+            id: 3,
+            name: 'Escuela C',
+            classrooms: [
+                { id: 30, name: '3ro A', rows: [originalFirst, sibling] },
+            ],
+        };
+
+        const { result } = renderHook(() =>
+            useEditionFilters([schoolWithSplitOrder], true),
+        );
+
+        act(() => result.current.setProductName('Foto 10x15'));
+
+        expect(result.current.filteredSchools).toEqual([
+            {
+                ...schoolWithSplitOrder,
+                classrooms: [
+                    {
+                        id: 30,
+                        name: '3ro A',
+                        rows: [{ ...sibling, is_first_of_order: true }],
+                    },
+                ],
+            },
+        ]);
+    });
+
+    it('clears classroomId when switching to a school that does not contain it', () => {
+        const { result } = renderHook(() => useEditionFilters(schools, true));
+
+        act(() => result.current.setClassroomId(11)); // 1ro B, in Escuela A
+
+        expect(result.current.classroomId).toBe(11);
+
+        act(() => result.current.setSchoolId(2)); // Escuela B doesn't have classroom 11
+
+        expect(result.current.classroomId).toBeNull();
+        expect(result.current.filteredSchools).toEqual([schoolB]);
+    });
 });

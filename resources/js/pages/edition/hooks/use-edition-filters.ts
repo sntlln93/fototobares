@@ -53,6 +53,26 @@ function matchesRow(
     );
 }
 
+/**
+ * Recomputes is_first_of_order on the surviving rows of a classroom: the
+ * first surviving row of each order_id (in the existing sorted order) gets
+ * true, the rest false. The backend flag was computed against the full
+ * unfiltered classroom, so filtering can drop the original "first" row
+ * while keeping a sibling of the same order.
+ */
+function recomputeFirstOfOrder(rows: EditionRowData[]): EditionRowData[] {
+    const seenOrderIds = new Set<number>();
+
+    return rows.map((row) => {
+        const isFirstOfOrder = !seenOrderIds.has(row.order_id);
+        seenOrderIds.add(row.order_id);
+
+        return isFirstOfOrder === row.is_first_of_order
+            ? row
+            : { ...row, is_first_of_order: isFirstOfOrder };
+    });
+}
+
 function filterSchools(
     schools: EditionSchool[],
     filters: EditionFilterState,
@@ -64,13 +84,15 @@ function filterSchools(
             classrooms: school.classrooms
                 .map((classroom) => ({
                     ...classroom,
-                    rows: classroom.rows.filter((row) =>
-                        matchesRow(
-                            row,
-                            school.id,
-                            classroom.id,
-                            filters,
-                            canManage,
+                    rows: recomputeFirstOfOrder(
+                        classroom.rows.filter((row) =>
+                            matchesRow(
+                                row,
+                                school.id,
+                                classroom.id,
+                                filters,
+                                canManage,
+                            ),
                         ),
                     ),
                 }))
@@ -128,11 +150,25 @@ export function useEditionFilters(
         canManage,
     );
 
+    // Switching to a school that doesn't contain the currently selected
+    // classroom would otherwise silently yield "Sin resultados".
+    function handleSetSchoolId(newSchoolId: number | null) {
+        setSchoolId(newSchoolId);
+
+        if (newSchoolId === null) return;
+
+        const stillValid = schools
+            .find((school) => school.id === newSchoolId)
+            ?.classrooms.some((c) => c.id === classroomId);
+
+        if (!stillValid) setClassroomId(null);
+    }
+
     return {
         search,
         setSearch,
         schoolId,
-        setSchoolId,
+        setSchoolId: handleSetSchoolId,
         classroomId,
         setClassroomId,
         editorId,
@@ -146,5 +182,3 @@ export function useEditionFilters(
         filteredSchools,
     };
 }
-
-export { matchesRow, matchesSearch, normalize };

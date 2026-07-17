@@ -205,32 +205,34 @@ class EditionController extends Controller
             $row['editor'] = $editor !== null ? ['id' => $editor->id, 'name' => $editor->name] : null;
         }
 
-        if ($isFirstOfOrder) {
-            $mural = $orderActiveDetails->first(fn (OrderDetail $d) => $d->product?->type?->name === 'mural');
-            $banda = $orderActiveDetails->first(fn (OrderDetail $d) => $d->product?->type?->name === 'banda');
+        // Order-level fields are serialized on every row (not just the
+        // "first of order" one) because client-side filtering can hide the
+        // designated first row while keeping a sibling row of the same
+        // order; is_first_of_order is recomputed on the surviving rows.
+        $mural = $orderActiveDetails->first(fn (OrderDetail $d) => $d->product?->type?->name === 'mural');
+        $banda = $orderActiveDetails->first(fn (OrderDetail $d) => $d->product?->type?->name === 'banda');
 
-            $row['modelo_cuadro'] = $mural?->product?->name;
-            $row['color'] = $mural !== null ? $this->variantLabel($mural->variant, 'Color') : null;
-            // Not one of the "accessory columns" (carpeta/banda/medalla/taza
-            // presence flags): visible to every role, unlike $isManager below.
-            $row['banda_talle'] = $banda !== null ? $this->variantLabel($banda->variant, 'Talle') : null;
-            $row['observaciones_generales'] = $order->notes->map(fn (Note $note) => [
-                'id' => $note->id,
-                'body' => $note->body,
-                'created_at' => $note->created_at->format('d/m/Y H:i'),
-            ])->values()->all();
+        $row['modelo_cuadro'] = $mural?->product?->name;
+        $row['color'] = $mural !== null ? $this->variantLabel($mural->variant, 'Color') : null;
+        // Not one of the "accessory columns" (carpeta/banda/medalla/taza
+        // presence flags): visible to every role, unlike $isManager below.
+        $row['banda_talle'] = $banda !== null ? $this->variantLabel($banda->variant, 'Talle') : null;
+        $row['observaciones_generales'] = $order->notes->map(fn (Note $note) => [
+            'id' => $note->id,
+            'body' => $note->body,
+            'created_at' => $note->created_at->format('d/m/Y H:i'),
+        ])->values()->all();
 
-            if ($isManager) {
-                $row['accessories'] = [
-                    'carpeta' => $orderActiveDetails->contains(fn (OrderDetail $d) => $d->product?->type?->name === 'carpeta'),
-                    'banda' => $banda !== null,
-                    'medalla' => $orderActiveDetails->contains(fn (OrderDetail $d) => $d->product?->type?->name === 'medalla'),
-                    'taza' => $orderActiveDetails->contains(fn (OrderDetail $d) => $d->product?->type?->name === 'taza'),
-                    // Not in the product catalog yet (#177): rendered inert.
-                    'guantes' => false,
-                    'escarapela' => false,
-                ];
-            }
+        if ($isManager) {
+            $row['accessories'] = [
+                'carpeta' => $orderActiveDetails->contains(fn (OrderDetail $d) => $d->product?->type?->name === 'carpeta'),
+                'banda' => $banda !== null,
+                'medalla' => $orderActiveDetails->contains(fn (OrderDetail $d) => $d->product?->type?->name === 'medalla'),
+                'taza' => $orderActiveDetails->contains(fn (OrderDetail $d) => $d->product?->type?->name === 'taza'),
+                // Not in the product catalog yet (#177): rendered inert.
+                'guantes' => false,
+                'escarapela' => false,
+            ];
         }
 
         return $row;

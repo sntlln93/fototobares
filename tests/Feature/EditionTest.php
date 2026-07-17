@@ -263,6 +263,32 @@ it('derives diseño from the "Tipo de foto" variant entry, null when absent', fu
     });
 });
 
+// photo_number and variant_search columns (search filters, #194)
+
+it('exposes photo_number and variant_search for client-side search filtering', function () {
+    actingAsRole(UserRole::Office);
+
+    $order = Order::factory()->create(['photo_number' => 42]);
+    $product = Product::factory()->create(['has_photo' => true]);
+    $detail = OrderDetail::factory()->create([
+        'order_id' => $order->id,
+        'product_id' => $product->id,
+        'variant' => [
+            ['label' => 'Tipo de foto', 'value' => ['label' => 'Grupo']],
+            ['label' => 'Color', 'value' => ['label' => 'Celeste']],
+        ],
+    ]);
+
+    get(route('edition.index'))->assertInertia(function (Assert $page) use ($detail) {
+        $schools = $page->toArray()['props']['schools'];
+        $row = findEditionRow($schools, $detail->id);
+
+        expect($row['photo_number'])->toBe(42)
+            ->and($row['variant_search'])->toContain('Grupo')
+            ->and($row['variant_search'])->toContain('Celeste');
+    });
+});
+
 // modelo cuadro / color / banda talle derived columns (criterion 3 backend note)
 
 it('derives modelo cuadro and color from the order mural, and banda talle for every role', function () {
