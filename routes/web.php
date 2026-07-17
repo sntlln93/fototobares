@@ -68,6 +68,7 @@ Route::middleware(['auth', 'role:master,administración,oficina,editor'])->group
     Route::post('/classrooms/{classroom}/photos', [PhotoController::class, 'store'])->name('photos.store');
     Route::delete('/photos/{photo}', [PhotoController::class, 'destroy'])->name('photos.destroy');
     Route::post('/order-details/{orderDetail}/editing-status', [EditingStatusController::class, 'store'])->name('editing-status.store');
+    Route::post('/order-details/{orderDetail}/editing-status/revert', [EditingStatusController::class, 'revert'])->name('editing-status.revert');
     Route::get('/edition', [EditionController::class, 'index'])->name('edition.index');
 });
 
