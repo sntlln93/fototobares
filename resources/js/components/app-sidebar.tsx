@@ -14,6 +14,7 @@ import { Link, usePage } from '@inertiajs/react';
 import {
     Group,
     Home,
+    Images,
     ListOrdered,
     Package,
     PackageOpen,
@@ -29,6 +30,7 @@ import { NavUser } from './nav-user';
 const SALES = ['master', 'administración', 'oficina'];
 const PRODUCTION = ['master', 'administración', 'oficina', 'taller'];
 const MANAGEMENT = ['master', 'administración'];
+const EDITION = ['master', 'administración', 'oficina', 'editor'];
 
 const routeables = [
     { name: 'Dashboard', route: 'dashboard', icon: Home, roles: null },
@@ -46,6 +48,12 @@ const routeables = [
         route: 'tracking.index',
         icon: Rss,
         roles: PRODUCTION,
+    },
+    {
+        name: 'Edición',
+        route: 'edition.index',
+        icon: Images,
+        roles: EDITION,
     },
     {
         name: 'Stockeables',
