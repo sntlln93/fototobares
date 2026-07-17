@@ -229,4 +229,29 @@ describe('EditionRow', () => {
         expect(screen.getByText('—')).toBeTruthy();
         expect(container.querySelector('[title]')).toBeNull();
     });
+
+    it('applies the same order-link classes to rows sharing an order_seq', () => {
+        const { container: containerZero } = renderRow(
+            makeRow({ order_seq: 0 }),
+            false,
+        );
+        const { container: containerSix } = renderRow(
+            makeRow({ order_seq: 6 }),
+            false,
+        );
+        const { container: containerOne } = renderRow(
+            makeRow({ order_seq: 1 }),
+            false,
+        );
+
+        const rowZero = within(containerZero).getByRole('row');
+        const rowSix = within(containerSix).getByRole('row');
+        const rowOne = within(containerOne).getByRole('row');
+
+        // order_seq 0 and 6 are equal mod 6, so they share the same palette entry.
+        expect(rowZero.className).toContain('border-l-blue-400');
+        expect(rowSix.className).toContain('border-l-blue-400');
+        // order_seq 1 maps to a different palette entry.
+        expect(rowOne.className).not.toContain('border-l-blue-400');
+    });
 });

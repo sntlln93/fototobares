@@ -134,4 +134,61 @@ describe('ClassroomTable', () => {
         expect(screen.getByText('3')).toBeTruthy();
         expect(screen.getByText('Foto 15x21')).toBeTruthy();
     });
+
+    it('renders one sub-table heading per photo-product group', () => {
+        const multiGroupClassroom: EditionClassroom = {
+            ...classroom,
+            photoProductGroups: [
+                ...classroom.photoProductGroups,
+                {
+                    product_id: 2,
+                    product_name: 'Foto 10x15',
+                    variant_columns: ['Tipo de foto'],
+                    rows: [
+                        {
+                            id: 2,
+                            order_id: 11,
+                            order_seq: 1,
+                            photo_size: 'Foto 10x15',
+                            variants: {
+                                'Tipo de foto': { label: 'Grupal' },
+                            },
+                            child_name: 'Nico',
+                            photo_number: 13,
+                            variant_search: 'Grupal',
+                            editing_status: 'pendiente',
+                            note: null,
+                            allowed_targets: [],
+                            is_first_of_order: true,
+                            editor: null,
+                            modelo_cuadro: null,
+                            color: null,
+                            banda_talle: null,
+                            observaciones_generales: [],
+                            accessories: {
+                                carpeta: false,
+                                banda: false,
+                                medalla: false,
+                                taza: false,
+                                guantes: false,
+                                escarapela: false,
+                            },
+                        },
+                    ],
+                },
+            ],
+        };
+
+        render(
+            <ClassroomTable
+                classroom={multiGroupClassroom}
+                canManage={true}
+                editors={editors}
+                photoProducts={photoProducts}
+            />,
+        );
+
+        expect(screen.getByText('Foto 15x21')).toBeTruthy();
+        expect(screen.getByText('Foto 10x15')).toBeTruthy();
+    });
 });
