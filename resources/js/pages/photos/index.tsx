@@ -11,10 +11,9 @@ export default function PhotoIndex({
     photos: Photo[];
 }) {
     const {
-        data,
-        processing,
         fileInputRef,
-        previewUrl,
+        uploads,
+        processing,
         handleFileChange,
         submit,
         handleDelete,
@@ -30,8 +29,7 @@ export default function PhotoIndex({
                         submit={submit}
                         handleFileChange={handleFileChange}
                         fileInputRef={fileInputRef}
-                        previewUrl={previewUrl}
-                        photoFile={data.photo}
+                        uploads={uploads}
                         processing={processing}
                         totalPhotos={photos.length}
                     />
