@@ -17,6 +17,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('order_detail_id')->constrained('order_details')->cascadeOnDelete();
             $table->string('status');
+            $table->boolean('is_revert')->default(false);
             $table->foreignId('changed_by')->constrained('users');
             $table->timestamp('changed_at');
             $table->timestamps();

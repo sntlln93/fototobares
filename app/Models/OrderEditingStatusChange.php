@@ -13,6 +13,7 @@ class OrderEditingStatusChange extends Model
     protected $casts = [
         'status' => EditingStatus::class,
         'changed_at' => 'datetime',
+        'is_revert' => 'boolean',
     ];
 
     /**
