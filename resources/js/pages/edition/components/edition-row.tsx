@@ -35,19 +35,11 @@ const STATUS_VARIANTS: Record<
 
 const yesNo = (value: boolean | undefined) => (value ? 'Sí' : 'No');
 
-// Repeating palette applied by order_seq so every row of the same order
-// shares a left-border + subtle background, including across sub-tables.
-const ORDER_LINK_CLASSES = [
-    'border-l-blue-400 bg-blue-50/70 dark:bg-blue-950/20',
-    'border-l-emerald-400 bg-emerald-50/70 dark:bg-emerald-950/20',
-    'border-l-amber-400 bg-amber-50/70 dark:bg-amber-950/20',
-    'border-l-purple-400 bg-purple-50/70 dark:bg-purple-950/20',
-    'border-l-rose-400 bg-rose-50/70 dark:bg-rose-950/20',
-    'border-l-cyan-400 bg-cyan-50/70 dark:bg-cyan-950/20',
-];
-
-function orderLinkClassName(orderSeq: number): string {
-    return ORDER_LINK_CLASSES[orderSeq % ORDER_LINK_CLASSES.length];
+function rowClassName(isHighlighted: boolean): string {
+    return cn(
+        'border-l-4 border-l-transparent',
+        isHighlighted && 'border-l-blue-400 bg-blue-50/70 dark:bg-blue-950/20',
+    );
 }
 
 function VariantCell({ value }: { value: EditionVariantValue | null }) {
@@ -77,17 +69,23 @@ export function EditionRow({
     variantColumns,
     canManage,
     editors,
+    isHighlighted,
+    onHoverChange,
 }: {
     row: EditionRowData;
     variantColumns: string[];
     canManage: boolean;
     editors: AssignableEditor[];
+    isHighlighted: boolean;
+    onHoverChange: (orderSeq: number | null) => void;
 }) {
     const first = row.is_first_of_order;
 
     return (
         <TableRow
-            className={cn('border-l-4', orderLinkClassName(row.order_seq))}
+            className={rowClassName(isHighlighted)}
+            onMouseEnter={() => onHoverChange(row.order_seq)}
+            onMouseLeave={() => onHoverChange(null)}
         >
             <TableCell>
                 {row.photo_number !== null ? (
