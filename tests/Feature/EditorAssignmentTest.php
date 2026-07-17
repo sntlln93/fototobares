@@ -2,11 +2,13 @@
 
 declare(strict_types=1);
 
+use App\Enums\EditingStatus;
 use App\Enums\UserRole;
 use App\Models\Classroom;
 use App\Models\EditorOrderDetailAssignment;
 use App\Models\Order;
 use App\Models\OrderDetail;
+use App\Models\OrderEditingStatusChange;
 use App\Models\Product;
 use App\Models\School;
 use App\Models\User;
@@ -406,3 +408,119 @@ it('denies editor and taller from bulk assigning', function (UserRole $role) {
     'editor' => [UserRole::Editor],
     'taller' => [UserRole::Worker],
 ]);
+
+// Non-pendiente guard (criterion 9)
+
+it('rejects individual assign on a detail that is not pendiente anymore', function () {
+    $actor = actingAsRole(UserRole::Office);
+
+    $product = Product::factory()->create(['has_photo' => true]);
+    $detail = OrderDetail::factory()->create(['product_id' => $product->id]);
+    $editor = User::factory()->withRole(UserRole::Editor)->create();
+
+    OrderEditingStatusChange::create([
+        'order_detail_id' => $detail->id,
+        'status' => EditingStatus::Editada,
+        'changed_by' => $actor->id,
+        'changed_at' => now(),
+    ]);
+
+    post(route('editor-assignments.store'), [
+        'order_detail_id' => $detail->id,
+        'editor_id' => $editor->id,
+    ])->assertSessionHasErrors();
+
+    expect(EditorOrderDetailAssignment::where('order_detail_id', $detail->id)->exists())->toBeFalse();
+});
+
+it('rejects individual unassign on a detail that is not pendiente anymore', function () {
+    $actor = actingAsRole(UserRole::Office);
+
+    $product = Product::factory()->create(['has_photo' => true]);
+    $detail = OrderDetail::factory()->create(['product_id' => $product->id]);
+    $editor = User::factory()->withRole(UserRole::Editor)->create();
+
+    EditorOrderDetailAssignment::create([
+        'order_detail_id' => $detail->id,
+        'editor_id' => $editor->id,
+        'assigned_by' => $actor->id,
+        'assigned_at' => now(),
+    ]);
+
+    OrderEditingStatusChange::create([
+        'order_detail_id' => $detail->id,
+        'status' => EditingStatus::Editada,
+        'changed_by' => $actor->id,
+        'changed_at' => now(),
+    ]);
+
+    delete(route('editor-assignments.destroy', $detail))->assertSessionHasErrors();
+
+    expect(EditorOrderDetailAssignment::where('order_detail_id', $detail->id)->exists())->toBeTrue();
+});
+
+it('bulk skips non-pendiente rows and flashes a warning', function () {
+    $actor = actingAsRole(UserRole::Office);
+
+    $classroom = Classroom::factory()->create();
+    $product = Product::factory()->create(['has_photo' => true]);
+    $order = Order::factory()->create(['classroom_id' => $classroom->id]);
+    $editor = User::factory()->withRole(UserRole::Editor)->create();
+    $otherEditor = User::factory()->withRole(UserRole::Editor)->create();
+
+    $pendingDetail = OrderDetail::factory()->enabled()->create([
+        'order_id' => $order->id,
+        'product_id' => $product->id,
+    ]);
+    $editedDetail = OrderDetail::factory()->enabled()->create([
+        'order_id' => $order->id,
+        'product_id' => $product->id,
+    ]);
+
+    EditorOrderDetailAssignment::create([
+        'order_detail_id' => $editedDetail->id,
+        'editor_id' => $otherEditor->id,
+        'assigned_by' => $actor->id,
+        'assigned_at' => now(),
+    ]);
+
+    OrderEditingStatusChange::create([
+        'order_detail_id' => $editedDetail->id,
+        'status' => EditingStatus::Editada,
+        'changed_by' => $actor->id,
+        'changed_at' => now(),
+    ]);
+
+    post(route('editor-assignments.bulk'), [
+        'editor_id' => $editor->id,
+        'product_ids' => [$product->id],
+        'classroom_id' => $classroom->id,
+    ])->assertSessionHasNoErrors()
+        ->assertSessionHas('warning');
+
+    expect(EditorOrderDetailAssignment::where('order_detail_id', $pendingDetail->id)->first()?->editor_id)
+        ->toBe($editor->id)
+        ->and(EditorOrderDetailAssignment::where('order_detail_id', $editedDetail->id)->first()?->editor_id)
+        ->toBe($otherEditor->id);
+});
+
+it('bulk flashes no warning when every in-scope detail is still pendiente', function () {
+    actingAsRole(UserRole::Office);
+
+    $classroom = Classroom::factory()->create();
+    $product = Product::factory()->create(['has_photo' => true]);
+    $order = Order::factory()->create(['classroom_id' => $classroom->id]);
+    $editor = User::factory()->withRole(UserRole::Editor)->create();
+
+    OrderDetail::factory()->enabled()->create([
+        'order_id' => $order->id,
+        'product_id' => $product->id,
+    ]);
+
+    post(route('editor-assignments.bulk'), [
+        'editor_id' => $editor->id,
+        'product_ids' => [$product->id],
+        'classroom_id' => $classroom->id,
+    ])->assertSessionHasNoErrors()
+        ->assertSessionMissing('warning');
+});
