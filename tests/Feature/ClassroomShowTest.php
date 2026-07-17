@@ -5,7 +5,9 @@ declare(strict_types=1);
 use App\Models\Classroom;
 use App\Models\Client;
 use App\Models\Order;
+use App\Models\OrderDetail;
 use App\Models\OrderDraft;
+use App\Models\Product;
 use Inertia\Testing\AssertableInertia as Assert;
 
 use function Pest\Laravel\get;
@@ -76,5 +78,35 @@ it('counts both orders and drafts in the pagination total', function () {
 
     get(route('classrooms.show', ['classroom' => $classroom->id]))->assertInertia(
         fn (Assert $page) => $page->where('students.meta.total', 5),
+    );
+});
+
+it('reports no assignable details when the classroom has none in scope', function () {
+    $classroom = Classroom::factory()->create();
+
+    $product = Product::factory()->create(['has_photo' => false]);
+    $order = Order::factory()->create(['classroom_id' => $classroom->id]);
+    OrderDetail::factory()->enabled()->create([
+        'order_id' => $order->id,
+        'product_id' => $product->id,
+    ]);
+
+    get(route('classrooms.show', ['classroom' => $classroom->id]))->assertInertia(
+        fn (Assert $page) => $page->where('hasAssignableDetails', false),
+    );
+});
+
+it('reports assignable details when the classroom has at least one in scope', function () {
+    $classroom = Classroom::factory()->create();
+
+    $product = Product::factory()->create(['has_photo' => true]);
+    $order = Order::factory()->create(['classroom_id' => $classroom->id]);
+    OrderDetail::factory()->enabled()->create([
+        'order_id' => $order->id,
+        'product_id' => $product->id,
+    ]);
+
+    get(route('classrooms.show', ['classroom' => $classroom->id]))->assertInertia(
+        fn (Assert $page) => $page->where('hasAssignableDetails', true),
     );
 });
