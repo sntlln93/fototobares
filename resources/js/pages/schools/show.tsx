@@ -15,12 +15,14 @@ export default function School({
     school,
     assignableEditors,
     photoProducts,
+    hasAssignableDetails,
 }: PageProps<{
     school: {
         data: SchoolShowData;
     };
     assignableEditors: AssignableEditor[];
     photoProducts: PhotoProduct[];
+    hasAssignableDetails: boolean;
 }>) {
     const controller = useSchoolShow();
 
@@ -44,11 +46,13 @@ export default function School({
             <SchoolInfoCard school={school.data} />
 
             <div className="flex justify-end px-6 pt-4">
-                <BulkAssignEditorDialog
-                    assignableEditors={assignableEditors}
-                    photoProducts={photoProducts}
-                    schoolId={school.data.id}
-                />
+                {hasAssignableDetails && (
+                    <BulkAssignEditorDialog
+                        assignableEditors={assignableEditors}
+                        photoProducts={photoProducts}
+                        schoolId={school.data.id}
+                    />
+                )}
             </div>
 
             <ClassroomsTable school={school.data} controller={controller} />

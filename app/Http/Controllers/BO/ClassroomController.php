@@ -14,6 +14,7 @@ use App\Http\Requests\BO\UpdateClassroomRequest;
 use App\Http\Resources\ClassroomStudentResource;
 use App\Models\Classroom;
 use App\Models\Order;
+use App\Models\OrderDetail;
 use App\Models\OrderDraft;
 use App\Models\Product;
 use App\Models\User;
@@ -72,6 +73,10 @@ class ClassroomController extends Controller
             'filters' => ['search' => $search],
             'assignableEditors' => User::assignableEditors()->get(['id', 'name']),
             'photoProducts' => Product::where('has_photo', true)->get(['id', 'name']),
+            'hasAssignableDetails' => OrderDetail::query()
+                ->assignableToEditor()
+                ->whereHas('order', fn ($query) => $query->where('classroom_id', $classroom->id))
+                ->exists(),
         ]);
     }
 

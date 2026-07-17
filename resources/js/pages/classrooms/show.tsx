@@ -24,12 +24,14 @@ export default function ClassroomShow({
     filters,
     assignableEditors,
     photoProducts,
+    hasAssignableDetails,
 }: PageProps<{
     classroom: Classroom & { teacher?: Teacher; school: School };
     students: Paginated<ClassroomStudent>;
     filters: { search: string | null };
     assignableEditors: AssignableEditor[];
     photoProducts: PhotoProduct[];
+    hasAssignableDetails: boolean;
 }>) {
     const breadcrumbs: BreadcrumbItem[] = [
         {
@@ -101,11 +103,13 @@ export default function ClassroomShow({
                         Alumnos ({students.data.length})
                     </h2>
                     <div className="flex flex-wrap gap-2">
-                        <BulkAssignEditorDialog
-                            assignableEditors={assignableEditors}
-                            photoProducts={photoProducts}
-                            classroomId={classroom.id}
-                        />
+                        {hasAssignableDetails && (
+                            <BulkAssignEditorDialog
+                                assignableEditors={assignableEditors}
+                                photoProducts={photoProducts}
+                                classroomId={classroom.id}
+                            />
+                        )}
                         <Link
                             href={route('photos.index', {
                                 classroom: classroom.id,
