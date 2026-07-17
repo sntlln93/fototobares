@@ -361,3 +361,65 @@ it('appends a full history through the editing status cycle', function () {
         ])
         ->and($detail->refresh()->currentEditingStatus())->toBe(EditingStatus::Ok);
 });
+
+// EditingStatus::allowedTargets() — single source of truth for the
+// transition matrix (refactored for #177's board), unit-tested directly
+// against every branch, not just through the HTTP endpoint above.
+
+it('computes the allowed targets for every branch of the transition matrix', function (
+    EditingStatus $current,
+    bool $isManager,
+    bool $isAssignedEditor,
+    bool $productionEnabled,
+    array $expected,
+) {
+    expect(EditingStatus::allowedTargets($current, $isManager, $isAssignedEditor, $productionEnabled))
+        ->toBe($expected);
+})->with([
+    // Pendiente -> Editada only for the assigned editor once production is enabled
+    'pendiente, assigned editor, production enabled' => [
+        EditingStatus::Pendiente, false, true, true, [EditingStatus::Editada],
+    ],
+    'pendiente, assigned editor, production not enabled' => [
+        EditingStatus::Pendiente, false, true, false, [],
+    ],
+    'pendiente, not the assigned editor, production enabled' => [
+        EditingStatus::Pendiente, false, false, true, [],
+    ],
+    'pendiente, manager (never assigned)' => [
+        EditingStatus::Pendiente, true, false, true, [],
+    ],
+
+    // Editada -> {Ok, ACorregir} only for a manager
+    'editada, manager' => [
+        EditingStatus::Editada, true, false, true, [EditingStatus::Ok, EditingStatus::ACorregir],
+    ],
+    'editada, assigned editor (not a manager)' => [
+        EditingStatus::Editada, false, true, true, [],
+    ],
+    'editada, neither manager nor assigned editor' => [
+        EditingStatus::Editada, false, false, true, [],
+    ],
+
+    // Ok -> ACorregir only for a manager
+    'ok, manager' => [
+        EditingStatus::Ok, true, false, true, [EditingStatus::ACorregir],
+    ],
+    'ok, assigned editor (not a manager)' => [
+        EditingStatus::Ok, false, true, true, [],
+    ],
+    'ok, neither manager nor assigned editor' => [
+        EditingStatus::Ok, false, false, true, [],
+    ],
+
+    // ACorregir -> Editada only for the assigned editor
+    'a_corregir, assigned editor' => [
+        EditingStatus::ACorregir, false, true, true, [EditingStatus::Editada],
+    ],
+    'a_corregir, manager (not the assigned editor)' => [
+        EditingStatus::ACorregir, true, false, true, [],
+    ],
+    'a_corregir, neither manager nor assigned editor' => [
+        EditingStatus::ACorregir, false, false, true, [],
+    ],
+]);

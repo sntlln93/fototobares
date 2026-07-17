@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 
 class OrderDetail extends Pivot
@@ -62,12 +63,28 @@ class OrderDetail extends Pivot
     }
 
     /**
+     * @return HasOne<EditorOrderDetailAssignment, $this>
+     */
+    public function editorAssignment()
+    {
+        return $this->hasOne(EditorOrderDetailAssignment::class, 'order_detail_id');
+    }
+
+    /**
      * Current editing status: the latest entry in the append-only history,
-     * or `Pendiente` when the detail has none.
+     * or `Pendiente` when the detail has none. Reads the `editingStatusChanges`
+     * relation from memory when it has been eager-loaded (avoids an N+1 query
+     * per row), falling back to a fresh query otherwise.
      */
     public function currentEditingStatus(): EditingStatus
     {
-        $latest = $this->editingStatusChanges()->orderByDesc('changed_at')->orderByDesc('id')->first();
+        if ($this->relationLoaded('editingStatusChanges')) {
+            $latest = $this->editingStatusChanges
+                ->sortBy([['changed_at', 'desc'], ['id', 'desc']])
+                ->first();
+        } else {
+            $latest = $this->editingStatusChanges()->orderByDesc('changed_at')->orderByDesc('id')->first();
+        }
 
         if ($latest === null) {
             return EditingStatus::Pendiente;

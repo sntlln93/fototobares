@@ -10,6 +10,7 @@ use App\Http\Controllers\BO\DetailPriorityController;
 use App\Http\Controllers\BO\DetailProductionStatusController;
 use App\Http\Controllers\BO\DetailVariantController;
 use App\Http\Controllers\BO\EditingStatusController;
+use App\Http\Controllers\BO\EditionController;
 use App\Http\Controllers\BO\EditorAssignmentController;
 use App\Http\Controllers\BO\NoteController;
 use App\Http\Controllers\BO\OrderController;
@@ -67,6 +68,7 @@ Route::middleware(['auth', 'role:master,administración,oficina,editor'])->group
     Route::post('/classrooms/{classroom}/photos', [PhotoController::class, 'store'])->name('photos.store');
     Route::delete('/photos/{photo}', [PhotoController::class, 'destroy'])->name('photos.destroy');
     Route::post('/order-details/{orderDetail}/editing-status', [EditingStatusController::class, 'store'])->name('editing-status.store');
+    Route::get('/edition', [EditionController::class, 'index'])->name('edition.index');
 });
 
 // Producción y stock: también accesibles para el rol taller
