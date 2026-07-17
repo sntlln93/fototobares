@@ -1,5 +1,11 @@
 import { Badge } from '@/components/ui/badge';
 import { TableCell, TableRow } from '@/components/ui/table';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { AssignableEditor } from '@/features/editor-assignment/BulkAssignEditorDialog';
 import { AssignmentControl } from './assignment-control';
 import { EditingStatusValue, EditionRowData } from './classroom-table';
@@ -91,23 +97,45 @@ export function EditionRow({
                     </TableCell>
                 </>
             )}
-            <TableCell className="max-w-50 truncate">{row.note}</TableCell>
+            <TableCell className="max-w-50 truncate">
+                {row.note ? (
+                    <TooltipProvider delayDuration={0}>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <span>{row.note}</span>
+                            </TooltipTrigger>
+                            <TooltipContent className="max-w-70 wrap-break-word whitespace-pre-wrap">
+                                <p>{row.note}</p>
+                            </TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
+                ) : (
+                    row.note
+                )}
+            </TableCell>
             <TableCell className="max-w-50">
                 {!first ? (
                     ''
                 ) : row.observaciones_generales &&
                   row.observaciones_generales.length > 0 ? (
-                    <ul className="flex flex-col gap-0.5 text-xs text-gray-500">
-                        {row.observaciones_generales.map((note) => (
-                            <li
-                                key={note.id}
-                                className="truncate"
-                                title={note.body}
-                            >
-                                {note.body}
-                            </li>
-                        ))}
-                    </ul>
+                    <TooltipProvider delayDuration={0}>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <ul className="flex flex-col gap-0.5 text-xs text-gray-500">
+                                    {row.observaciones_generales.map((note) => (
+                                        <li key={note.id} className="truncate">
+                                            {note.body}
+                                        </li>
+                                    ))}
+                                </ul>
+                            </TooltipTrigger>
+                            <TooltipContent className="max-w-70 wrap-break-word whitespace-pre-wrap">
+                                {row.observaciones_generales.map((note) => (
+                                    <p key={note.id}>{note.body}</p>
+                                ))}
+                            </TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
                 ) : (
                     '—'
                 )}
