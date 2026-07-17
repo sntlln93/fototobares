@@ -205,9 +205,13 @@ class EditionController extends Controller
 
         if ($isFirstOfOrder) {
             $mural = $orderActiveDetails->first(fn (OrderDetail $d) => $d->product?->type?->name === 'mural');
+            $banda = $orderActiveDetails->first(fn (OrderDetail $d) => $d->product?->type?->name === 'banda');
 
             $row['modelo_cuadro'] = $mural?->product?->name;
             $row['color'] = $mural !== null ? $this->variantLabel($mural->variant, 'Color') : null;
+            // Not one of the "accessory columns" (carpeta/banda/medalla/taza
+            // presence flags): visible to every role, unlike $isManager below.
+            $row['banda_talle'] = $banda !== null ? $this->variantLabel($banda->variant, 'Talle') : null;
             $row['observaciones_generales'] = $order->notes->map(fn (Note $note) => [
                 'id' => $note->id,
                 'body' => $note->body,
@@ -215,9 +219,6 @@ class EditionController extends Controller
             ])->values()->all();
 
             if ($isManager) {
-                $banda = $orderActiveDetails->first(fn (OrderDetail $d) => $d->product?->type?->name === 'banda');
-
-                $row['banda_talle'] = $banda !== null ? $this->variantLabel($banda->variant, 'Talle') : null;
                 $row['accessories'] = [
                     'carpeta' => $orderActiveDetails->contains(fn (OrderDetail $d) => $d->product?->type?->name === 'carpeta'),
                     'banda' => $banda !== null,
