@@ -171,6 +171,7 @@ describe('useEditionFilters', () => {
                 classrooms: [
                     {
                         ...classroom10,
+                        order_count: 1,
                         photoProductGroups: [
                             { ...groupFoto10x15InA, rows: [row2] },
                         ],
@@ -211,6 +212,7 @@ describe('useEditionFilters', () => {
                 classrooms: [
                     {
                         ...classroom10,
+                        order_count: 1,
                         photoProductGroups: [
                             { ...groupFoto10x15InA, rows: [row2] },
                         ],
@@ -279,6 +281,7 @@ describe('useEditionFilters', () => {
                 classrooms: [
                     {
                         ...classroom10,
+                        order_count: 1,
                         photoProductGroups: [
                             { ...groupFoto15x21InA, rows: [row1] },
                         ],
@@ -308,6 +311,7 @@ describe('useEditionFilters', () => {
                 classrooms: [
                     {
                         ...classroom10,
+                        order_count: 1,
                         photoProductGroups: [
                             { ...groupFoto10x15InA, rows: [row2] },
                         ],
@@ -335,6 +339,7 @@ describe('useEditionFilters', () => {
                 classrooms: [
                     {
                         ...classroom10,
+                        order_count: 1,
                         photoProductGroups: [
                             { ...groupFoto10x15InA, rows: [row2] },
                         ],
@@ -358,9 +363,76 @@ describe('useEditionFilters', () => {
                 classrooms: [
                     {
                         ...classroom10,
+                        order_count: 1,
                         photoProductGroups: [
                             { ...groupFoto10x15InA, rows: [row2] },
                         ],
+                    },
+                ],
+            },
+        ]);
+    });
+
+    it('recomputes order_count to the surviving distinct orders after filtering', () => {
+        // classroom40 has 3 distinct orders (400, 401, 402) spread across two
+        // groups: groupKeep holds two orders (400, 401), groupDrop holds one
+        // (402, a different product). Filtering by productName drops
+        // groupDrop entirely, so order_count must fall from 3 to 2 — NOT the
+        // original fixture's order_count.
+        const orderA = makeRow({
+            id: 7,
+            order_id: 400,
+            photo_size: 'Foto 15x21',
+            child_name: 'Uno',
+        });
+        const orderB = makeRow({
+            id: 8,
+            order_id: 401,
+            photo_size: 'Foto 15x21',
+            child_name: 'Dos',
+        });
+        const orderC = makeRow({
+            id: 9,
+            order_id: 402,
+            photo_size: 'Foto 10x15',
+            child_name: 'Tres',
+        });
+        const groupKeep = makeGroup({
+            product_id: 1,
+            product_name: 'Foto 15x21',
+            rows: [orderA, orderB],
+        });
+        const groupDrop = makeGroup({
+            product_id: 2,
+            product_name: 'Foto 10x15',
+            rows: [orderC],
+        });
+        const classroom40 = makeClassroom({
+            id: 40,
+            name: '4to A',
+            order_count: 3,
+            photoProductGroups: [groupKeep, groupDrop],
+        });
+        const schoolWithThreeOrders: EditionSchool = {
+            id: 4,
+            name: 'Escuela D',
+            classrooms: [classroom40],
+        };
+
+        const { result } = renderHook(() =>
+            useEditionFilters([schoolWithThreeOrders], true),
+        );
+
+        act(() => result.current.setProductName('Foto 15x21'));
+
+        expect(result.current.filteredSchools).toEqual([
+            {
+                ...schoolWithThreeOrders,
+                classrooms: [
+                    {
+                        ...classroom40,
+                        order_count: 2,
+                        photoProductGroups: [groupKeep],
                     },
                 ],
             },

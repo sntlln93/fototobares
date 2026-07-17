@@ -109,65 +109,87 @@ export function ClassroomTable({
             </header>
 
             <div className="flex flex-col gap-6 p-4">
-                {classroom.photoProductGroups.map((group) => (
-                    <div key={group.product_id} className="flex flex-col gap-2">
-                        <h4 className="font-medium text-muted-foreground">
-                            {group.product_name}
-                        </h4>
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>Pedido</TableHead>
-                                    <TableHead>Niño</TableHead>
-                                    {group.variant_columns.map((label) => (
-                                        <TableHead key={label}>
-                                            {label}
-                                        </TableHead>
-                                    ))}
-                                    {canManage && (
-                                        <>
-                                            <TableHead>Modelo cuadro</TableHead>
-                                            <TableHead>Color</TableHead>
-                                            <TableHead>Talle banda</TableHead>
-                                            <TableHead>Carpeta</TableHead>
-                                            <TableHead>Banda</TableHead>
-                                            <TableHead>Medalla</TableHead>
-                                            <TableHead>Taza</TableHead>
-                                            <TableHead>Guantes</TableHead>
-                                            <TableHead>Escarapela</TableHead>
-                                        </>
-                                    )}
-                                    <TableHead>Notas</TableHead>
-                                    <TableHead>
-                                        Observaciones generales
-                                    </TableHead>
-                                    <TableHead>Estado</TableHead>
-                                    {canManage && (
-                                        <TableHead>Editor asignado</TableHead>
-                                    )}
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {group.rows.map((row) => (
-                                    <EditionRow
-                                        key={row.id}
-                                        row={row}
-                                        variantColumns={group.variant_columns}
-                                        canManage={canManage}
-                                        editors={editors}
-                                    />
-                                ))}
-                            </TableBody>
-                        </Table>
-                    </div>
-                ))}
-            </div>
+                {classroom.photoProductGroups.map((group, index) => {
+                    const isLastGroup =
+                        index === classroom.photoProductGroups.length - 1;
+                    const showTotals =
+                        isLastGroup && canManage && classroom.totals;
 
-            {canManage && classroom.totals && (
-                <Table>
-                    <TotalsFooter totals={classroom.totals} />
-                </Table>
-            )}
+                    return (
+                        <div
+                            key={group.product_id}
+                            className="flex flex-col gap-2"
+                        >
+                            <h4 className="font-medium text-muted-foreground">
+                                {group.product_name}
+                            </h4>
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>Pedido</TableHead>
+                                        <TableHead>Niño</TableHead>
+                                        {group.variant_columns.map((label) => (
+                                            <TableHead key={label}>
+                                                {label}
+                                            </TableHead>
+                                        ))}
+                                        {canManage && (
+                                            <>
+                                                <TableHead>
+                                                    Modelo cuadro
+                                                </TableHead>
+                                                <TableHead>Color</TableHead>
+                                                <TableHead>
+                                                    Talle banda
+                                                </TableHead>
+                                                <TableHead>Carpeta</TableHead>
+                                                <TableHead>Banda</TableHead>
+                                                <TableHead>Medalla</TableHead>
+                                                <TableHead>Taza</TableHead>
+                                                <TableHead>Guantes</TableHead>
+                                                <TableHead>
+                                                    Escarapela
+                                                </TableHead>
+                                            </>
+                                        )}
+                                        <TableHead>Notas</TableHead>
+                                        <TableHead>
+                                            Observaciones generales
+                                        </TableHead>
+                                        <TableHead>Estado</TableHead>
+                                        {canManage && (
+                                            <TableHead>
+                                                Editor asignado
+                                            </TableHead>
+                                        )}
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {group.rows.map((row) => (
+                                        <EditionRow
+                                            key={row.id}
+                                            row={row}
+                                            variantColumns={
+                                                group.variant_columns
+                                            }
+                                            canManage={canManage}
+                                            editors={editors}
+                                        />
+                                    ))}
+                                </TableBody>
+                                {showTotals && classroom.totals && (
+                                    <TotalsFooter
+                                        totals={classroom.totals}
+                                        leadingColSpan={
+                                            2 + group.variant_columns.length + 3
+                                        }
+                                    />
+                                )}
+                            </Table>
+                        </div>
+                    );
+                })}
+            </div>
         </div>
     );
 }

@@ -7,11 +7,17 @@ import { EditionAccessoryTotals } from './classroom-table';
  * Manager-only view: aligned under the accessory columns, which only render
  * for `canManage`.
  */
-export function TotalsFooter({ totals }: { totals: EditionAccessoryTotals }) {
+export function TotalsFooter({
+    totals,
+    leadingColSpan,
+}: {
+    totals: EditionAccessoryTotals;
+    leadingColSpan: number;
+}) {
     return (
         <TableFooter>
             <TableRow>
-                <TableCell colSpan={7}>Totales</TableCell>
+                <TableCell colSpan={leadingColSpan}>Totales</TableCell>
                 <TableCell>{totals.carpeta}</TableCell>
                 <TableCell>{totals.banda}</TableCell>
                 <TableCell>{totals.medalla}</TableCell>
