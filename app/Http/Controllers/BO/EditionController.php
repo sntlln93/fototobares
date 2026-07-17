@@ -192,6 +192,8 @@ class EditionController extends Controller
             'photo_size' => $detail->product?->name,
             'diseno' => $this->variantLabel($detail->variant, 'Tipo de foto'),
             'child_name' => $order->child_name,
+            'photo_number' => $order->photo_number,
+            'variant_search' => $this->variantSearch($detail->variant),
             'editing_status' => $current->value,
             'note' => $detail->note,
             'allowed_targets' => array_map(fn (EditingStatus $status) => $status->value, $allowedTargets),
@@ -274,5 +276,19 @@ class EditionController extends Controller
         }
 
         return null;
+    }
+
+    /**
+     * Joins every non-null variant value label into a single searchable
+     * string, e.g. the "Tipo de foto" value for the photo product itself.
+     *
+     * @param  array<int, array{label: string, type?: string, value: array{label: string, color?: string}|null}>|null  $variant
+     */
+    private function variantSearch(?array $variant): string
+    {
+        return collect($variant ?? [])
+            ->map(fn (array $entry) => $entry['value']['label'] ?? null)
+            ->filter()
+            ->implode(' ');
     }
 }
