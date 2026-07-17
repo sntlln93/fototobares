@@ -14,6 +14,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreSchoolRequest;
 use App\Http\Resources\SchoolResource;
 use App\Models\Order;
+use App\Models\OrderDetail;
 use App\Models\Product;
 use App\Models\School;
 use App\Models\User;
@@ -116,6 +117,13 @@ class SchoolController extends Controller
             ])),
             'assignableEditors' => User::assignableEditors()->get(['id', 'name']),
             'photoProducts' => Product::where('has_photo', true)->get(['id', 'name']),
+            'hasAssignableDetails' => OrderDetail::query()
+                ->assignableToEditor()
+                ->whereHas('order', fn ($query) => $query->whereHas(
+                    'classroom',
+                    fn ($classroom) => $classroom->where('school_id', $school->id),
+                ))
+                ->exists(),
         ]);
     }
 }
