@@ -104,6 +104,23 @@ class OrderDetail extends Pivot
         return $query->whereDoesntHave('editingStatusChanges');
     }
 
+    /**
+     * Details assignable to an editor: photo product, production enabled,
+     * not delivered, not recycled, and belonging to a non-cancelled order.
+     *
+     * @param  Builder<OrderDetail>  $query
+     * @return Builder<OrderDetail>
+     */
+    public function scopeAssignableToEditor(Builder $query): Builder
+    {
+        return $query
+            ->whereHas('product', fn ($query) => $query->where('has_photo', true))
+            ->whereNotNull('production_enabled_at')
+            ->whereNull('delivered_at')
+            ->whereNull('recycled_to')
+            ->whereHas('order', fn ($query) => $query->whereNull('cancelled_at'));
+    }
+
     protected $casts = [
         'variant' => 'array',
         'priority' => 'boolean',

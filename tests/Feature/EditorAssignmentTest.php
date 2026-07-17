@@ -22,7 +22,7 @@ it('assigns an editor to a photo detail', function (UserRole $role) {
     $actor = actingAsRole($role);
 
     $product = Product::factory()->create(['has_photo' => true]);
-    $detail = OrderDetail::factory()->create(['product_id' => $product->id]);
+    $detail = OrderDetail::factory()->enabled()->create(['product_id' => $product->id]);
     $editor = User::factory()->withRole(UserRole::Editor)->create();
 
     post(route('editor-assignments.store'), [
@@ -45,7 +45,7 @@ it('accepts an editor_id belonging to a user with the administración role', fun
     actingAsRole(UserRole::Office);
 
     $product = Product::factory()->create(['has_photo' => true]);
-    $detail = OrderDetail::factory()->create(['product_id' => $product->id]);
+    $detail = OrderDetail::factory()->enabled()->create(['product_id' => $product->id]);
     $admin = User::factory()->withRole(UserRole::Admin)->create();
 
     post(route('editor-assignments.store'), [
@@ -61,7 +61,7 @@ it('overwrites the previous assignment on reassignment', function () {
     actingAsRole(UserRole::Office);
 
     $product = Product::factory()->create(['has_photo' => true]);
-    $detail = OrderDetail::factory()->create(['product_id' => $product->id]);
+    $detail = OrderDetail::factory()->enabled()->create(['product_id' => $product->id]);
     $firstEditor = User::factory()->withRole(UserRole::Editor)->create();
     $secondEditor = User::factory()->withRole(UserRole::Editor)->create();
 
@@ -125,6 +125,70 @@ it('rejects assigning a detail whose product does not admit photo editing', func
         'order_detail_id' => $detail->id,
         'editor_id' => $editor->id,
     ])->assertSessionHasErrors();
+
+    expect(EditorOrderDetailAssignment::where('order_detail_id', $detail->id)->exists())->toBeFalse();
+});
+
+it('rejects assigning a detail not enabled for production', function () {
+    actingAsRole(UserRole::Office);
+
+    $product = Product::factory()->create(['has_photo' => true]);
+    $detail = OrderDetail::factory()->create(['product_id' => $product->id]);
+    $editor = User::factory()->withRole(UserRole::Editor)->create();
+
+    post(route('editor-assignments.store'), [
+        'order_detail_id' => $detail->id,
+        'editor_id' => $editor->id,
+    ])->assertSessionHasErrors('order_detail_id');
+
+    expect(EditorOrderDetailAssignment::where('order_detail_id', $detail->id)->exists())->toBeFalse();
+});
+
+it('rejects assigning a delivered detail', function () {
+    actingAsRole(UserRole::Office);
+
+    $product = Product::factory()->create(['has_photo' => true]);
+    $detail = OrderDetail::factory()->enabled()->delivered()->create(['product_id' => $product->id]);
+    $editor = User::factory()->withRole(UserRole::Editor)->create();
+
+    post(route('editor-assignments.store'), [
+        'order_detail_id' => $detail->id,
+        'editor_id' => $editor->id,
+    ])->assertSessionHasErrors('order_detail_id');
+
+    expect(EditorOrderDetailAssignment::where('order_detail_id', $detail->id)->exists())->toBeFalse();
+});
+
+it('rejects assigning a recycled detail', function () {
+    actingAsRole(UserRole::Office);
+
+    $product = Product::factory()->create(['has_photo' => true]);
+    $detail = OrderDetail::factory()->enabled()->recycled()->create(['product_id' => $product->id]);
+    $editor = User::factory()->withRole(UserRole::Editor)->create();
+
+    post(route('editor-assignments.store'), [
+        'order_detail_id' => $detail->id,
+        'editor_id' => $editor->id,
+    ])->assertSessionHasErrors('order_detail_id');
+
+    expect(EditorOrderDetailAssignment::where('order_detail_id', $detail->id)->exists())->toBeFalse();
+});
+
+it('rejects assigning a detail whose order is cancelled', function () {
+    actingAsRole(UserRole::Office);
+
+    $product = Product::factory()->create(['has_photo' => true]);
+    $cancelledOrder = Order::factory()->cancelled()->create();
+    $detail = OrderDetail::factory()->enabled()->create([
+        'order_id' => $cancelledOrder->id,
+        'product_id' => $product->id,
+    ]);
+    $editor = User::factory()->withRole(UserRole::Editor)->create();
+
+    post(route('editor-assignments.store'), [
+        'order_detail_id' => $detail->id,
+        'editor_id' => $editor->id,
+    ])->assertSessionHasErrors('order_detail_id');
 
     expect(EditorOrderDetailAssignment::where('order_detail_id', $detail->id)->exists())->toBeFalse();
 });

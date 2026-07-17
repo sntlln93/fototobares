@@ -18,9 +18,10 @@ use Illuminate\Validation\ValidationException;
 class AssignEditorAction implements ActionContract
 {
     /**
-     * Assign (or reassign) an editor to an order detail. The detail's
-     * product must be editable by photo (`has_photo`); reassigning
-     * overwrites the previous assignment (unique per detail, no history).
+     * Assign (or reassign) an editor to an order detail. The detail must be
+     * assignable (`OrderDetail::assignableToEditor`, the same scope used by
+     * the bulk path); reassigning overwrites the previous assignment
+     * (unique per detail, no history).
      *
      * @param  EditorAssignmentData  $params
      *
@@ -28,11 +29,16 @@ class AssignEditorAction implements ActionContract
      */
     public function handle(DtoContract $params): void
     {
-        $detail = OrderDetail::with('product')->findOrFail($params->orderDetailId);
+        $detail = OrderDetail::findOrFail($params->orderDetailId);
 
-        if ($detail->product?->has_photo !== true) {
+        $isAssignable = OrderDetail::query()
+            ->assignableToEditor()
+            ->whereKey($params->orderDetailId)
+            ->exists();
+
+        if (! $isAssignable) {
             throw ValidationException::withMessages([
-                'order_detail_id' => 'Este producto no admite edición de foto.',
+                'order_detail_id' => 'Esta fila no admite asignación de editor.',
             ]);
         }
 

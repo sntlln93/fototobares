@@ -28,13 +28,9 @@ class BulkAssignEditorAction implements ActionContract
     public function handle(DtoContract $params): BulkEditorAssignmentResult
     {
         $inScope = OrderDetail::query()
-            ->whereHas('product', fn ($query) => $query->where('has_photo', true)->whereIn('id', $params->productIds))
-            ->whereNotNull('production_enabled_at')
-            ->whereNull('delivered_at')
-            ->whereNull('recycled_to')
+            ->assignableToEditor()
+            ->whereHas('product', fn ($query) => $query->whereIn('id', $params->productIds))
             ->whereHas('order', function ($query) use ($params) {
-                $query->whereNull('cancelled_at');
-
                 if ($params->classroomId !== null) {
                     $query->where('classroom_id', $params->classroomId);
                 } else {
