@@ -21,6 +21,8 @@ const makeRow = (overrides: Partial<EditionRowData> = {}): EditionRowData => ({
     photo_size: 'Foto 15x21',
     diseno: 'Individual',
     child_name: 'Lola',
+    photo_number: 12,
+    variant_search: 'Individual',
     editing_status: 'pendiente',
     note: 'Nota de fila',
     allowed_targets: [],

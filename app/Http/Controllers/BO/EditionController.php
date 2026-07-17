@@ -192,6 +192,8 @@ class EditionController extends Controller
             'photo_size' => $detail->product?->name,
             'diseno' => $this->variantLabel($detail->variant, 'Tipo de foto'),
             'child_name' => $order->child_name,
+            'photo_number' => $order->photo_number,
+            'variant_search' => $this->variantSearch($detail->variant),
             'editing_status' => $current->value,
             'note' => $detail->note,
             'allowed_targets' => array_map(fn (EditingStatus $status) => $status->value, $allowedTargets),
@@ -203,32 +205,34 @@ class EditionController extends Controller
             $row['editor'] = $editor !== null ? ['id' => $editor->id, 'name' => $editor->name] : null;
         }
 
-        if ($isFirstOfOrder) {
-            $mural = $orderActiveDetails->first(fn (OrderDetail $d) => $d->product?->type?->name === 'mural');
-            $banda = $orderActiveDetails->first(fn (OrderDetail $d) => $d->product?->type?->name === 'banda');
+        // Order-level fields are serialized on every row (not just the
+        // "first of order" one) because client-side filtering can hide the
+        // designated first row while keeping a sibling row of the same
+        // order; is_first_of_order is recomputed on the surviving rows.
+        $mural = $orderActiveDetails->first(fn (OrderDetail $d) => $d->product?->type?->name === 'mural');
+        $banda = $orderActiveDetails->first(fn (OrderDetail $d) => $d->product?->type?->name === 'banda');
 
-            $row['modelo_cuadro'] = $mural?->product?->name;
-            $row['color'] = $mural !== null ? $this->variantLabel($mural->variant, 'Color') : null;
-            // Not one of the "accessory columns" (carpeta/banda/medalla/taza
-            // presence flags): visible to every role, unlike $isManager below.
-            $row['banda_talle'] = $banda !== null ? $this->variantLabel($banda->variant, 'Talle') : null;
-            $row['observaciones_generales'] = $order->notes->map(fn (Note $note) => [
-                'id' => $note->id,
-                'body' => $note->body,
-                'created_at' => $note->created_at->format('d/m/Y H:i'),
-            ])->values()->all();
+        $row['modelo_cuadro'] = $mural?->product?->name;
+        $row['color'] = $mural !== null ? $this->variantLabel($mural->variant, 'Color') : null;
+        // Not one of the "accessory columns" (carpeta/banda/medalla/taza
+        // presence flags): visible to every role, unlike $isManager below.
+        $row['banda_talle'] = $banda !== null ? $this->variantLabel($banda->variant, 'Talle') : null;
+        $row['observaciones_generales'] = $order->notes->map(fn (Note $note) => [
+            'id' => $note->id,
+            'body' => $note->body,
+            'created_at' => $note->created_at->format('d/m/Y H:i'),
+        ])->values()->all();
 
-            if ($isManager) {
-                $row['accessories'] = [
-                    'carpeta' => $orderActiveDetails->contains(fn (OrderDetail $d) => $d->product?->type?->name === 'carpeta'),
-                    'banda' => $banda !== null,
-                    'medalla' => $orderActiveDetails->contains(fn (OrderDetail $d) => $d->product?->type?->name === 'medalla'),
-                    'taza' => $orderActiveDetails->contains(fn (OrderDetail $d) => $d->product?->type?->name === 'taza'),
-                    // Not in the product catalog yet (#177): rendered inert.
-                    'guantes' => false,
-                    'escarapela' => false,
-                ];
-            }
+        if ($isManager) {
+            $row['accessories'] = [
+                'carpeta' => $orderActiveDetails->contains(fn (OrderDetail $d) => $d->product?->type?->name === 'carpeta'),
+                'banda' => $banda !== null,
+                'medalla' => $orderActiveDetails->contains(fn (OrderDetail $d) => $d->product?->type?->name === 'medalla'),
+                'taza' => $orderActiveDetails->contains(fn (OrderDetail $d) => $d->product?->type?->name === 'taza'),
+                // Not in the product catalog yet (#177): rendered inert.
+                'guantes' => false,
+                'escarapela' => false,
+            ];
         }
 
         return $row;
@@ -274,5 +278,19 @@ class EditionController extends Controller
         }
 
         return null;
+    }
+
+    /**
+     * Joins every non-null variant value label into a single searchable
+     * string, e.g. the "Tipo de foto" value for the photo product itself.
+     *
+     * @param  array<int, array{label: string, type?: string, value: array{label: string, color?: string}|null}>|null  $variant
+     */
+    private function variantSearch(?array $variant): string
+    {
+        return collect($variant ?? [])
+            ->map(fn (array $entry) => $entry['value']['label'] ?? null)
+            ->filter()
+            ->implode(' ');
     }
 }
