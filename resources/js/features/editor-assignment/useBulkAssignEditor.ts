@@ -14,12 +14,12 @@ export function useBulkAssignEditor({
         classroom_id: classroomId ?? null,
     });
 
-    const submit = (onSuccess: () => void) => {
+    const submit = (onSuccess: (warning: string | null) => void) => {
         form.post(route('editor-assignments.bulk'), {
             preserveScroll: true,
-            onSuccess: () => {
+            onSuccess: (page) => {
                 form.reset();
-                onSuccess();
+                onSuccess(page.props.flash?.warning ?? null);
             },
         });
     };

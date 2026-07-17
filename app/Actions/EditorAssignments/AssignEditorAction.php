@@ -7,6 +7,7 @@ namespace App\Actions\EditorAssignments;
 use App\Contracts\ActionContract;
 use App\Contracts\DtoContract;
 use App\Data\EditorAssignments\EditorAssignmentData;
+use App\Enums\EditingStatus;
 use App\Models\EditorOrderDetailAssignment;
 use App\Models\OrderDetail;
 use Illuminate\Validation\ValidationException;
@@ -32,6 +33,12 @@ class AssignEditorAction implements ActionContract
         if ($detail->product?->has_photo !== true) {
             throw ValidationException::withMessages([
                 'order_detail_id' => 'Este producto no admite edición de foto.',
+            ]);
+        }
+
+        if ($detail->currentEditingStatus() !== EditingStatus::Pendiente) {
+            throw ValidationException::withMessages([
+                'order_detail_id' => 'Esta foto ya está editada y no se puede reasignar.',
             ]);
         }
 

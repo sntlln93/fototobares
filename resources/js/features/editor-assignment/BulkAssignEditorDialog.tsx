@@ -20,6 +20,7 @@ import {
 import { usePage } from '@inertiajs/react';
 import { UserCog } from 'lucide-react';
 import { useState } from 'react';
+import { toast } from 'sonner';
 import { PhotoProductsChecklist } from './PhotoProductsChecklist';
 import { useBulkAssignEditor } from './useBulkAssignEditor';
 
@@ -104,7 +105,12 @@ export function BulkAssignEditorDialog({
                 <DialogFooter>
                     <Button
                         disabled={processing}
-                        onClick={() => submit(() => setOpen(false))}
+                        onClick={() =>
+                            submit((warning) => {
+                                setOpen(false);
+                                if (warning) toast.warning(warning);
+                            })
+                        }
                     >
                         Asignar
                     </Button>
