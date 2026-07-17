@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import {
     ClassroomTable,
@@ -190,5 +190,105 @@ describe('ClassroomTable', () => {
 
         expect(screen.getByText('Foto 15x21')).toBeTruthy();
         expect(screen.getByText('Foto 10x15')).toBeTruthy();
+    });
+
+    it('highlights every row sharing an order_seq across sub-tables on hover, leaving other orders untouched', () => {
+        const linkedClassroom: EditionClassroom = {
+            ...classroom,
+            photoProductGroups: [
+                ...classroom.photoProductGroups,
+                {
+                    product_id: 2,
+                    product_name: 'Foto 10x15',
+                    variant_columns: ['Tipo de foto'],
+                    rows: [
+                        {
+                            id: 2,
+                            order_id: 10,
+                            order_seq: 0,
+                            photo_size: 'Foto 10x15',
+                            variants: {
+                                'Tipo de foto': { label: 'Grupal' },
+                            },
+                            child_name: 'Lola',
+                            photo_number: 13,
+                            variant_search: 'Grupal',
+                            editing_status: 'pendiente',
+                            note: null,
+                            allowed_targets: [],
+                            is_first_of_order: true,
+                            editor: null,
+                            modelo_cuadro: null,
+                            color: null,
+                            banda_talle: null,
+                            observaciones_generales: [],
+                            accessories: {
+                                carpeta: false,
+                                banda: false,
+                                medalla: false,
+                                taza: false,
+                                guantes: false,
+                                escarapela: false,
+                            },
+                        },
+                        {
+                            id: 3,
+                            order_id: 11,
+                            order_seq: 5,
+                            photo_size: 'Foto 10x15',
+                            variants: {
+                                'Tipo de foto': { label: 'Grupal' },
+                            },
+                            child_name: 'Nico',
+                            photo_number: 14,
+                            variant_search: 'Grupal',
+                            editing_status: 'pendiente',
+                            note: null,
+                            allowed_targets: [],
+                            is_first_of_order: true,
+                            editor: null,
+                            modelo_cuadro: null,
+                            color: null,
+                            banda_talle: null,
+                            observaciones_generales: [],
+                            accessories: {
+                                carpeta: false,
+                                banda: false,
+                                medalla: false,
+                                taza: false,
+                                guantes: false,
+                                escarapela: false,
+                            },
+                        },
+                    ],
+                },
+            ],
+        };
+
+        render(
+            <ClassroomTable
+                classroom={linkedClassroom}
+                canManage={true}
+                editors={editors}
+                photoProducts={photoProducts}
+            />,
+        );
+
+        const firstGroupRow = screen.getByText('12').closest('tr')!;
+        const secondGroupMatchingRow = screen.getByText('13').closest('tr')!;
+        const secondGroupOtherRow = screen.getByText('14').closest('tr')!;
+
+        expect(firstGroupRow.className).not.toContain('border-l-blue-400');
+        expect(secondGroupMatchingRow.className).not.toContain(
+            'border-l-blue-400',
+        );
+
+        fireEvent.mouseEnter(firstGroupRow);
+
+        expect(firstGroupRow.className).toContain('border-l-blue-400');
+        expect(secondGroupMatchingRow.className).toContain('border-l-blue-400');
+        expect(secondGroupOtherRow.className).not.toContain(
+            'border-l-blue-400',
+        );
     });
 });

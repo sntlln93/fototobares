@@ -45,7 +45,16 @@ const makeRow = (overrides: Partial<EditionRowData> = {}): EditionRowData => ({
     ...overrides,
 });
 
-function renderRow(row: EditionRowData, canManage: boolean) {
+function renderRow(
+    row: EditionRowData,
+    canManage: boolean,
+    options: {
+        isHighlighted?: boolean;
+        onHoverChange?: (orderSeq: number | null) => void;
+    } = {},
+) {
+    const { isHighlighted = false, onHoverChange = () => {} } = options;
+
     return render(
         <table>
             <tbody>
@@ -54,6 +63,8 @@ function renderRow(row: EditionRowData, canManage: boolean) {
                     variantColumns={variantColumns}
                     canManage={canManage}
                     editors={editors}
+                    isHighlighted={isHighlighted}
+                    onHoverChange={onHoverChange}
                 />
             </tbody>
         </table>,
@@ -134,6 +145,8 @@ describe('EditionRow', () => {
                         variantColumns={variantColumns}
                         canManage={false}
                         editors={editors}
+                        isHighlighted={false}
+                        onHoverChange={() => {}}
                     />
                 </tbody>
             </table>,
@@ -230,28 +243,41 @@ describe('EditionRow', () => {
         expect(container.querySelector('[title]')).toBeNull();
     });
 
-    it('applies the same order-link classes to rows sharing an order_seq', () => {
-        const { container: containerZero } = renderRow(
-            makeRow({ order_seq: 0 }),
-            false,
-        );
-        const { container: containerSix } = renderRow(
-            makeRow({ order_seq: 6 }),
-            false,
-        );
-        const { container: containerOne } = renderRow(
-            makeRow({ order_seq: 1 }),
-            false,
-        );
+    it('renders no order-grouping mark by default (no hover)', () => {
+        const { container } = renderRow(makeRow({ order_seq: 3 }), false);
 
-        const rowZero = within(containerZero).getByRole('row');
-        const rowSix = within(containerSix).getByRole('row');
-        const rowOne = within(containerOne).getByRole('row');
+        const row = within(container).getByRole('row');
+        expect(row.className).not.toContain('border-l-blue-400');
+        expect(row.className).not.toContain('bg-blue-50');
+    });
 
-        // order_seq 0 and 6 are equal mod 6, so they share the same palette entry.
-        expect(rowZero.className).toContain('border-l-blue-400');
-        expect(rowSix.className).toContain('border-l-blue-400');
-        // order_seq 1 maps to a different palette entry.
-        expect(rowOne.className).not.toContain('border-l-blue-400');
+    it('calls onHoverChange with the order_seq on mouse enter, and null on mouse leave', () => {
+        const onHoverChange = vi.fn();
+        const { container } = renderRow(makeRow({ order_seq: 4 }), false, {
+            onHoverChange,
+        });
+
+        const row = within(container).getByRole('row');
+
+        fireEvent.mouseEnter(row);
+        expect(onHoverChange).toHaveBeenCalledWith(4);
+
+        fireEvent.mouseLeave(row);
+        expect(onHoverChange).toHaveBeenCalledWith(null);
+    });
+
+    it('carries the highlight classes when isHighlighted is true, and not when false', () => {
+        const { container: highlighted } = renderRow(makeRow(), false, {
+            isHighlighted: true,
+        });
+        const { container: notHighlighted } = renderRow(makeRow(), false, {
+            isHighlighted: false,
+        });
+
+        const highlightedRow = within(highlighted).getByRole('row');
+        const notHighlightedRow = within(notHighlighted).getByRole('row');
+
+        expect(highlightedRow.className).toContain('border-l-blue-400');
+        expect(notHighlightedRow.className).not.toContain('border-l-blue-400');
     });
 });
