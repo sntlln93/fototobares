@@ -138,29 +138,29 @@ class EditionController extends Controller
                 $classroom = $firstOrder->classroom;
 
                 $sortedRows = $classroomDetails->sortBy([['order_id', 'asc'], ['id', 'asc']])->values();
-                $firstRowIds = $sortedRows->unique('order_id')->pluck('id')->all();
 
-                $rows = $sortedRows
-                    ->map(fn (OrderDetail $detail) => $this->mapRow(
-                        $detail,
-                        in_array($detail->id, $firstRowIds, true),
-                        $activeDetailsByOrder->get($detail->order_id) ?? collect(),
-                        $isManager,
-                        $actor,
-                    ))
-                    ->values()
-                    ->all();
+                /** @var Collection<int, int> $orderIds */
+                $orderIds = $sortedRows->pluck('order_id')->unique()->values();
+
+                /** @var Collection<int, int> $orderSeqByOrderId */
+                $orderSeqByOrderId = $orderIds->flip();
+
+                $photoProductGroups = $this->groupByPhotoProduct(
+                    $sortedRows,
+                    $orderSeqByOrderId,
+                    $activeDetailsByOrder,
+                    $isManager,
+                    $actor,
+                );
 
                 $classroomGroup = [
                     'id' => $classroom->id,
                     'name' => $classroom->name,
-                    'rows' => $rows,
+                    'order_count' => $orderIds->count(),
+                    'photoProductGroups' => $photoProductGroups,
                 ];
 
                 if ($isManager) {
-                    /** @var Collection<int, int> $orderIds */
-                    $orderIds = $sortedRows->pluck('order_id')->unique()->values();
-
                     $classroomGroup['totals'] = $this->accessoryTotals($orderIds, $activeDetailsByOrder);
                 }
 
@@ -172,10 +172,61 @@ class EditionController extends Controller
     }
 
     /**
+     * Sub-groups a classroom's sorted rows by photo product ("Producto con
+     * foto"), each carrying the sorted union of its rows' variant labels as
+     * dynamic columns.
+     *
+     * @param  Collection<int, OrderDetail>  $sortedRows
+     * @param  Collection<int, int>  $orderSeqByOrderId
+     * @param  Collection<int|string, Collection<int, OrderDetail>>  $activeDetailsByOrder
+     * @return array<int, array<string, mixed>>
+     */
+    private function groupByPhotoProduct(Collection $sortedRows, Collection $orderSeqByOrderId, Collection $activeDetailsByOrder, bool $isManager, User $actor): array
+    {
+        return $sortedRows
+            ->groupBy(fn (OrderDetail $detail) => $detail->product_id)
+            ->map(function (Collection $groupRows) use ($orderSeqByOrderId, $activeDetailsByOrder, $isManager, $actor) {
+                $groupRows = $groupRows->values();
+                $firstRowIds = $groupRows->unique('order_id')->pluck('id')->all();
+
+                $rows = $groupRows
+                    ->map(fn (OrderDetail $detail) => $this->mapRow(
+                        $detail,
+                        in_array($detail->id, $firstRowIds, true),
+                        $orderSeqByOrderId->get($detail->order_id, 0),
+                        $activeDetailsByOrder->get($detail->order_id) ?? collect(),
+                        $isManager,
+                        $actor,
+                    ))
+                    ->values();
+
+                $variantColumns = $groupRows
+                    ->flatMap(fn (OrderDetail $detail) => array_keys($this->variantsMap($detail->variant)))
+                    ->unique()
+                    ->sort()
+                    ->values()
+                    ->all();
+
+                /** @var OrderDetail $firstGroupDetail */
+                $firstGroupDetail = $groupRows->first();
+
+                return [
+                    'product_id' => $firstGroupDetail->product_id,
+                    'product_name' => $firstGroupDetail->product?->name,
+                    'variant_columns' => $variantColumns,
+                    'rows' => $rows->all(),
+                ];
+            })
+            ->sortBy('product_name')
+            ->values()
+            ->all();
+    }
+
+    /**
      * @param  Collection<int, OrderDetail>  $orderActiveDetails
      * @return array<string, mixed>
      */
-    private function mapRow(OrderDetail $detail, bool $isFirstOfOrder, Collection $orderActiveDetails, bool $isManager, User $actor): array
+    private function mapRow(OrderDetail $detail, bool $isFirstOfOrder, int $orderSeq, Collection $orderActiveDetails, bool $isManager, User $actor): array
     {
         /** @var Order $order */
         $order = $detail->order;
@@ -189,8 +240,9 @@ class EditionController extends Controller
         $row = [
             'id' => $detail->id,
             'order_id' => $detail->order_id,
+            'order_seq' => $orderSeq,
             'photo_size' => $detail->product?->name,
-            'diseno' => $this->variantLabel($detail->variant, 'Tipo de foto'),
+            'variants' => $this->variantsMap($detail->variant),
             'child_name' => $order->child_name,
             'photo_number' => $order->photo_number,
             'variant_search' => $this->variantSearch($detail->variant),
@@ -200,23 +252,6 @@ class EditionController extends Controller
             'is_first_of_order' => $isFirstOfOrder,
         ];
 
-        if ($isManager) {
-            $editor = $detail->editorAssignment?->editor;
-            $row['editor'] = $editor !== null ? ['id' => $editor->id, 'name' => $editor->name] : null;
-        }
-
-        // Order-level fields are serialized on every row (not just the
-        // "first of order" one) because client-side filtering can hide the
-        // designated first row while keeping a sibling row of the same
-        // order; is_first_of_order is recomputed on the surviving rows.
-        $mural = $orderActiveDetails->first(fn (OrderDetail $d) => $d->product?->type?->name === 'mural');
-        $banda = $orderActiveDetails->first(fn (OrderDetail $d) => $d->product?->type?->name === 'banda');
-
-        $row['modelo_cuadro'] = $mural?->product?->name;
-        $row['color'] = $mural !== null ? $this->variantLabel($mural->variant, 'Color') : null;
-        // Not one of the "accessory columns" (carpeta/banda/medalla/taza
-        // presence flags): visible to every role, unlike $isManager below.
-        $row['banda_talle'] = $banda !== null ? $this->variantLabel($banda->variant, 'Talle') : null;
         $row['observaciones_generales'] = $order->notes->map(fn (Note $note) => [
             'id' => $note->id,
             'body' => $note->body,
@@ -224,6 +259,21 @@ class EditionController extends Controller
         ])->values()->all();
 
         if ($isManager) {
+            $editor = $detail->editorAssignment?->editor;
+            $row['editor'] = $editor !== null ? ['id' => $editor->id, 'name' => $editor->name] : null;
+
+            // Order-level fields are serialized on every row (not just the
+            // "first of order" one) because client-side filtering can hide
+            // the designated first row while keeping a sibling row of the
+            // same order; is_first_of_order is recomputed on the surviving
+            // rows.
+            $mural = $orderActiveDetails->first(fn (OrderDetail $d) => $d->product?->type?->name === 'mural');
+            $banda = $orderActiveDetails->first(fn (OrderDetail $d) => $d->product?->type?->name === 'banda');
+
+            $row['modelo_cuadro'] = $mural?->product?->name;
+            $row['color'] = $mural !== null ? $this->variantLabel($mural->variant, 'Color') : null;
+            $row['banda_talle'] = $banda !== null ? $this->variantLabel($banda->variant, 'Talle') : null;
+
             $row['accessories'] = [
                 'carpeta' => $orderActiveDetails->contains(fn (OrderDetail $d) => $d->product?->type?->name === 'carpeta'),
                 'banda' => $banda !== null,
@@ -236,6 +286,25 @@ class EditionController extends Controller
         }
 
         return $row;
+    }
+
+    /**
+     * Builds a `{label: {label, color}|null}` map from a variant snapshot,
+     * keyed by each entry's label (e.g. "Tipo de foto", "Color"), used to
+     * render one dynamic column per photo-product group.
+     *
+     * @param  array<int, array{label: string, type?: string, value: array{label: string, color?: string}|null}>|null  $variant
+     * @return array<string, array{label: string, color?: string}|null>
+     */
+    private function variantsMap(?array $variant): array
+    {
+        $map = [];
+
+        foreach ($variant ?? [] as $entry) {
+            $map[$entry['label']] = $entry['value'];
+        }
+
+        return $map;
     }
 
     /**

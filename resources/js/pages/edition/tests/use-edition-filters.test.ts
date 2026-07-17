@@ -1,6 +1,11 @@
 import { act, renderHook } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
-import { EditionRowData, EditionSchool } from '../components/classroom-table';
+import {
+    EditionClassroom,
+    EditionPhotoProductGroup,
+    EditionRowData,
+    EditionSchool,
+} from '../components/classroom-table';
 import { useEditionFilters } from '../hooks/use-edition-filters';
 
 const vale = { id: 1, name: 'Vale' };
@@ -10,8 +15,9 @@ function makeRow(overrides: Partial<EditionRowData>): EditionRowData {
     return {
         id: 0,
         order_id: 0,
+        order_seq: 0,
         photo_size: null,
-        diseno: null,
+        variants: {},
         child_name: null,
         photo_number: null,
         variant_search: '',
@@ -24,12 +30,38 @@ function makeRow(overrides: Partial<EditionRowData>): EditionRowData {
     };
 }
 
-// School A / 1ro A: two rows, distinct editors and products
+function makeGroup(
+    overrides: Partial<EditionPhotoProductGroup> & {
+        rows: EditionRowData[];
+    },
+): EditionPhotoProductGroup {
+    return {
+        product_id: 0,
+        product_name: null,
+        variant_columns: [],
+        ...overrides,
+    };
+}
+
+function makeClassroom(
+    overrides: Partial<EditionClassroom> & {
+        photoProductGroups: EditionPhotoProductGroup[];
+    },
+): EditionClassroom {
+    return {
+        id: 0,
+        name: '',
+        order_count: 0,
+        ...overrides,
+    };
+}
+
+// School A / 1ro A: two rows in distinct photo-product groups, distinct
+// editors and products
 const row1 = makeRow({
     id: 1,
     order_id: 100,
     photo_size: 'Foto 15x21',
-    diseno: 'Individual',
     child_name: 'José Pérez',
     photo_number: 101,
     variant_search: 'Vertical Celeste',
@@ -39,7 +71,6 @@ const row2 = makeRow({
     id: 2,
     order_id: 101,
     photo_size: 'Foto 10x15',
-    diseno: 'Grupal',
     child_name: 'Ana López',
     photo_number: 102,
     variant_search: 'Horizontal Blanco',
@@ -51,7 +82,6 @@ const row3 = makeRow({
     id: 3,
     order_id: 102,
     photo_size: 'Foto 15x21',
-    diseno: 'Individual',
     child_name: 'Niño Torres',
     photo_number: 103,
     variant_search: 'Vertical Blanco',
@@ -63,26 +93,62 @@ const row4 = makeRow({
     id: 4,
     order_id: 103,
     photo_size: 'Foto 10x15',
-    diseno: 'Individual',
     child_name: 'Luca Gómez',
     photo_number: 104,
     variant_search: 'Horizontal Celeste',
     editor: vale,
 });
 
+const groupFoto15x21InA = makeGroup({
+    product_id: 1,
+    product_name: 'Foto 15x21',
+    rows: [row1],
+});
+const groupFoto10x15InA = makeGroup({
+    product_id: 2,
+    product_name: 'Foto 10x15',
+    rows: [row2],
+});
+const groupFoto15x21InB = makeGroup({
+    product_id: 1,
+    product_name: 'Foto 15x21',
+    rows: [row3],
+});
+const groupFoto10x15InC = makeGroup({
+    product_id: 2,
+    product_name: 'Foto 10x15',
+    rows: [row4],
+});
+
+const classroom10 = makeClassroom({
+    id: 10,
+    name: '1ro A',
+    order_count: 2,
+    photoProductGroups: [groupFoto15x21InA, groupFoto10x15InA],
+});
+const classroom11 = makeClassroom({
+    id: 11,
+    name: '1ro B',
+    order_count: 1,
+    photoProductGroups: [groupFoto15x21InB],
+});
+const classroom20 = makeClassroom({
+    id: 20,
+    name: '2do A',
+    order_count: 1,
+    photoProductGroups: [groupFoto10x15InC],
+});
+
 const schoolA: EditionSchool = {
     id: 1,
     name: 'Escuela A',
-    classrooms: [
-        { id: 10, name: '1ro A', rows: [row1, row2] },
-        { id: 11, name: '1ro B', rows: [row3] },
-    ],
+    classrooms: [classroom10, classroom11],
 };
 
 const schoolB: EditionSchool = {
     id: 2,
     name: 'Escuela B',
-    classrooms: [{ id: 20, name: '2do A', rows: [row4] }],
+    classrooms: [classroom20],
 };
 
 const schools: EditionSchool[] = [schoolA, schoolB];
@@ -102,7 +168,15 @@ describe('useEditionFilters', () => {
         expect(result.current.filteredSchools).toEqual([
             {
                 ...schoolA,
-                classrooms: [{ id: 10, name: '1ro A', rows: [row2] }],
+                classrooms: [
+                    {
+                        ...classroom10,
+                        order_count: 1,
+                        photoProductGroups: [
+                            { ...groupFoto10x15InA, rows: [row2] },
+                        ],
+                    },
+                ],
             },
         ]);
     });
@@ -115,20 +189,35 @@ describe('useEditionFilters', () => {
         expect(result.current.filteredSchools).toEqual([
             {
                 ...schoolA,
-                classrooms: [{ id: 11, name: '1ro B', rows: [row3] }],
+                classrooms: [
+                    {
+                        ...classroom11,
+                        photoProductGroups: [
+                            { ...groupFoto15x21InB, rows: [row3] },
+                        ],
+                    },
+                ],
             },
         ]);
     });
 
-    it('filters by a photo-variant value present in diseno', () => {
+    it('filters by a photo-variant value present in variant_search', () => {
         const { result } = renderHook(() => useEditionFilters(schools, true));
 
-        act(() => result.current.setSearch('Grupal'));
+        act(() => result.current.setSearch('Horizontal Blanco'));
 
         expect(result.current.filteredSchools).toEqual([
             {
                 ...schoolA,
-                classrooms: [{ id: 10, name: '1ro A', rows: [row2] }],
+                classrooms: [
+                    {
+                        ...classroom10,
+                        order_count: 1,
+                        photoProductGroups: [
+                            { ...groupFoto10x15InA, rows: [row2] },
+                        ],
+                    },
+                ],
             },
         ]);
     });
@@ -141,7 +230,14 @@ describe('useEditionFilters', () => {
         expect(result.current.filteredSchools).toEqual([
             {
                 ...schoolA,
-                classrooms: [{ id: 11, name: '1ro B', rows: [row3] }],
+                classrooms: [
+                    {
+                        ...classroom11,
+                        photoProductGroups: [
+                            { ...groupFoto15x21InB, rows: [row3] },
+                        ],
+                    },
+                ],
             },
         ]);
     });
@@ -162,7 +258,14 @@ describe('useEditionFilters', () => {
         expect(result.current.filteredSchools).toEqual([
             {
                 ...schoolA,
-                classrooms: [{ id: 11, name: '1ro B', rows: [row3] }],
+                classrooms: [
+                    {
+                        ...classroom11,
+                        photoProductGroups: [
+                            { ...groupFoto15x21InB, rows: [row3] },
+                        ],
+                    },
+                ],
             },
         ]);
     });
@@ -175,7 +278,15 @@ describe('useEditionFilters', () => {
         expect(result.current.filteredSchools).toEqual([
             {
                 ...schoolA,
-                classrooms: [{ id: 10, name: '1ro A', rows: [row1] }],
+                classrooms: [
+                    {
+                        ...classroom10,
+                        order_count: 1,
+                        photoProductGroups: [
+                            { ...groupFoto15x21InA, rows: [row1] },
+                        ],
+                    },
+                ],
             },
             schoolB,
         ]);
@@ -197,7 +308,15 @@ describe('useEditionFilters', () => {
         expect(result.current.filteredSchools).toEqual([
             {
                 ...schoolA,
-                classrooms: [{ id: 10, name: '1ro A', rows: [row2] }],
+                classrooms: [
+                    {
+                        ...classroom10,
+                        order_count: 1,
+                        photoProductGroups: [
+                            { ...groupFoto10x15InA, rows: [row2] },
+                        ],
+                    },
+                ],
             },
             schoolB,
         ]);
@@ -212,11 +331,20 @@ describe('useEditionFilters', () => {
         });
 
         // "Blanco" alone also matches row3 (Vertical Blanco), but its
-        // photo_size is Foto 15x21, so the productName filter excludes it
+        // photo_size is Foto 15x21, so the productName filter excludes it.
+        // School B's row4 fails the "Blanco" search, so it drops entirely.
         expect(result.current.filteredSchools).toEqual([
             {
                 ...schoolA,
-                classrooms: [{ id: 10, name: '1ro A', rows: [row2] }],
+                classrooms: [
+                    {
+                        ...classroom10,
+                        order_count: 1,
+                        photoProductGroups: [
+                            { ...groupFoto10x15InA, rows: [row2] },
+                        ],
+                    },
+                ],
             },
         ]);
     });
@@ -232,7 +360,81 @@ describe('useEditionFilters', () => {
         expect(result.current.filteredSchools).toEqual([
             {
                 ...schoolA,
-                classrooms: [{ id: 10, name: '1ro A', rows: [row2] }],
+                classrooms: [
+                    {
+                        ...classroom10,
+                        order_count: 1,
+                        photoProductGroups: [
+                            { ...groupFoto10x15InA, rows: [row2] },
+                        ],
+                    },
+                ],
+            },
+        ]);
+    });
+
+    it('recomputes order_count to the surviving distinct orders after filtering', () => {
+        // classroom40 has 3 distinct orders (400, 401, 402) spread across two
+        // groups: groupKeep holds two orders (400, 401), groupDrop holds one
+        // (402, a different product). Filtering by productName drops
+        // groupDrop entirely, so order_count must fall from 3 to 2 — NOT the
+        // original fixture's order_count.
+        const orderA = makeRow({
+            id: 7,
+            order_id: 400,
+            photo_size: 'Foto 15x21',
+            child_name: 'Uno',
+        });
+        const orderB = makeRow({
+            id: 8,
+            order_id: 401,
+            photo_size: 'Foto 15x21',
+            child_name: 'Dos',
+        });
+        const orderC = makeRow({
+            id: 9,
+            order_id: 402,
+            photo_size: 'Foto 10x15',
+            child_name: 'Tres',
+        });
+        const groupKeep = makeGroup({
+            product_id: 1,
+            product_name: 'Foto 15x21',
+            rows: [orderA, orderB],
+        });
+        const groupDrop = makeGroup({
+            product_id: 2,
+            product_name: 'Foto 10x15',
+            rows: [orderC],
+        });
+        const classroom40 = makeClassroom({
+            id: 40,
+            name: '4to A',
+            order_count: 3,
+            photoProductGroups: [groupKeep, groupDrop],
+        });
+        const schoolWithThreeOrders: EditionSchool = {
+            id: 4,
+            name: 'Escuela D',
+            classrooms: [classroom40],
+        };
+
+        const { result } = renderHook(() =>
+            useEditionFilters([schoolWithThreeOrders], true),
+        );
+
+        act(() => result.current.setProductName('Foto 15x21'));
+
+        expect(result.current.filteredSchools).toEqual([
+            {
+                ...schoolWithThreeOrders,
+                classrooms: [
+                    {
+                        ...classroom40,
+                        order_count: 2,
+                        photoProductGroups: [groupKeep],
+                    },
+                ],
             },
         ]);
     });
@@ -271,8 +473,8 @@ describe('useEditionFilters', () => {
     it('recomputes is_first_of_order when a filter removes the original first row of an order', () => {
         // order_id 200: originalFirst is the designated first row (backend
         // computed against the full unfiltered classroom); sibling shares
-        // the same order but is a different product, so filtering by
-        // productName keeps only the sibling.
+        // the same order but is a different product (different group), so
+        // filtering by productName keeps only the sibling's group.
         const originalFirst = makeRow({
             id: 5,
             order_id: 200,
@@ -287,12 +489,26 @@ describe('useEditionFilters', () => {
             child_name: 'Mica Díaz',
             is_first_of_order: false,
         });
+        const groupOriginal = makeGroup({
+            product_id: 1,
+            product_name: 'Foto 15x21',
+            rows: [originalFirst],
+        });
+        const groupSibling = makeGroup({
+            product_id: 2,
+            product_name: 'Foto 10x15',
+            rows: [sibling],
+        });
+        const classroomWithSplitOrder = makeClassroom({
+            id: 30,
+            name: '3ro A',
+            order_count: 1,
+            photoProductGroups: [groupOriginal, groupSibling],
+        });
         const schoolWithSplitOrder: EditionSchool = {
             id: 3,
             name: 'Escuela C',
-            classrooms: [
-                { id: 30, name: '3ro A', rows: [originalFirst, sibling] },
-            ],
+            classrooms: [classroomWithSplitOrder],
         };
 
         const { result } = renderHook(() =>
@@ -306,9 +522,13 @@ describe('useEditionFilters', () => {
                 ...schoolWithSplitOrder,
                 classrooms: [
                     {
-                        id: 30,
-                        name: '3ro A',
-                        rows: [{ ...sibling, is_first_of_order: true }],
+                        ...classroomWithSplitOrder,
+                        photoProductGroups: [
+                            {
+                                ...groupSibling,
+                                rows: [{ ...sibling, is_first_of_order: true }],
+                            },
+                        ],
                     },
                 ],
             },

@@ -14,12 +14,14 @@ vi.stubGlobal(
 );
 
 const editors = [{ id: 1, name: 'Vale' }];
+const variantColumns = ['Tipo de foto'];
 
 const makeRow = (overrides: Partial<EditionRowData> = {}): EditionRowData => ({
     id: 1,
     order_id: 10,
+    order_seq: 0,
     photo_size: 'Foto 15x21',
-    diseno: 'Individual',
+    variants: { 'Tipo de foto': { label: 'Individual' } },
     child_name: 'Lola',
     photo_number: 12,
     variant_search: 'Individual',
@@ -47,18 +49,31 @@ function renderRow(row: EditionRowData, canManage: boolean) {
     return render(
         <table>
             <tbody>
-                <EditionRow row={row} canManage={canManage} editors={editors} />
+                <EditionRow
+                    row={row}
+                    variantColumns={variantColumns}
+                    canManage={canManage}
+                    editors={editors}
+                />
             </tbody>
         </table>,
     );
 }
 
 describe('EditionRow', () => {
-    it('renders the reduced column set for the editor role: no assigned-editor and no accessory columns', () => {
+    it('renders one cell per variant_columns label, from the variants map', () => {
         renderRow(makeRow(), false);
 
-        // banda_talle is present for every role
-        expect(screen.getByText('M')).toBeTruthy();
+        expect(screen.getByText('Individual')).toBeTruthy();
+    });
+
+    it('renders the reduced column set for the editor role: no non-photo columns and no assigned-editor', () => {
+        renderRow(makeRow(), false);
+
+        // modelo cuadro / color / banda talle are manager-only now
+        expect(screen.queryByText('Moldura fina')).toBeNull();
+        expect(screen.queryByText('Negro')).toBeNull();
+        expect(screen.queryByText('M')).toBeNull();
         // Accessory Sí/No cells never render outside canManage
         expect(screen.queryByText('Sí')).toBeNull();
         expect(screen.queryByText('No')).toBeNull();
@@ -66,9 +81,11 @@ describe('EditionRow', () => {
         expect(screen.queryByRole('combobox')).toBeNull();
     });
 
-    it('renders the full column set for a manager role: accessory flags and assignment control', () => {
+    it('renders the full column set for a manager role: non-photo columns, accessory flags and assignment control', () => {
         renderRow(makeRow(), true);
 
+        expect(screen.getByText('Moldura fina')).toBeTruthy();
+        expect(screen.getByText('Negro')).toBeTruthy();
         expect(screen.getByText('M')).toBeTruthy();
         expect(screen.getAllByText('Sí')).toHaveLength(2); // carpeta, medalla
         expect(screen.getAllByText('No')).toHaveLength(4); // banda, taza, guantes, escarapela
@@ -92,9 +109,12 @@ describe('EditionRow', () => {
         expect(within(row).queryByText('Sí')).toBeNull();
         expect(within(row).queryByText('No')).toBeNull();
 
-        expect(cells[4].textContent).toBe(''); // modelo cuadro
-        expect(cells[5].textContent).toBe(''); // color
-        expect(cells[6].textContent).toBe(''); // banda talle
+        // Cells: 0 Pedido, 1 Niño, 2 Tipo de foto (variant), 3 modelo cuadro,
+        // 4 color, 5 banda talle, 6-11 accessories, 12 Notas, 13
+        // Observaciones, 14 Estado, 15 Editor asignado
+        expect(cells[3].textContent).toBe(''); // modelo cuadro
+        expect(cells[4].textContent).toBe(''); // color
+        expect(cells[5].textContent).toBe(''); // banda talle
     });
 
     it('renders order-level cells on the first row of the order', () => {
@@ -103,6 +123,35 @@ describe('EditionRow', () => {
         expect(screen.getByText('Moldura fina')).toBeTruthy();
         expect(screen.getByText('Negro')).toBeTruthy();
         expect(screen.getByText('M')).toBeTruthy();
+    });
+
+    it('renders the Pedido cell from photo_number, linking to the order', () => {
+        render(
+            <table>
+                <tbody>
+                    <EditionRow
+                        row={makeRow({ photo_number: 99, order_id: 55 })}
+                        variantColumns={variantColumns}
+                        canManage={false}
+                        editors={editors}
+                    />
+                </tbody>
+            </table>,
+        );
+
+        const link = screen.getByText('99');
+        expect(link.closest('a')?.getAttribute('href')).toBe(
+            'http://localhost/orders.show/55',
+        );
+    });
+
+    it('renders — in the Pedido cell when photo_number is null', () => {
+        const { container } = renderRow(makeRow({ photo_number: null }), false);
+
+        const row = within(container).getByRole('row');
+        const cells = within(row).getAllByRole('cell');
+
+        expect(cells[0].textContent).toBe('—');
     });
 
     it('Notas cell shows the full note in the tooltip content when opened, not a native title', () => {
@@ -179,5 +228,30 @@ describe('EditionRow', () => {
 
         expect(screen.getByText('—')).toBeTruthy();
         expect(container.querySelector('[title]')).toBeNull();
+    });
+
+    it('applies the same order-link classes to rows sharing an order_seq', () => {
+        const { container: containerZero } = renderRow(
+            makeRow({ order_seq: 0 }),
+            false,
+        );
+        const { container: containerSix } = renderRow(
+            makeRow({ order_seq: 6 }),
+            false,
+        );
+        const { container: containerOne } = renderRow(
+            makeRow({ order_seq: 1 }),
+            false,
+        );
+
+        const rowZero = within(containerZero).getByRole('row');
+        const rowSix = within(containerSix).getByRole('row');
+        const rowOne = within(containerOne).getByRole('row');
+
+        // order_seq 0 and 6 are equal mod 6, so they share the same palette entry.
+        expect(rowZero.className).toContain('border-l-blue-400');
+        expect(rowSix.className).toContain('border-l-blue-400');
+        // order_seq 1 maps to a different palette entry.
+        expect(rowOne.className).not.toContain('border-l-blue-400');
     });
 });

@@ -7,8 +7,13 @@ import {
     TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { AssignableEditor } from '@/features/editor-assignment/BulkAssignEditorDialog';
+import { cn } from '@/lib/utils';
 import { AssignmentControl } from './assignment-control';
-import { EditingStatusValue, EditionRowData } from './classroom-table';
+import {
+    EditingStatusValue,
+    EditionRowData,
+    EditionVariantValue,
+} from './classroom-table';
 import { TransitionControl } from './transition-control';
 
 const STATUS_LABELS: Record<EditingStatusValue, string> = {
@@ -30,41 +35,87 @@ const STATUS_VARIANTS: Record<
 
 const yesNo = (value: boolean | undefined) => (value ? 'Sí' : 'No');
 
+// Repeating palette applied by order_seq so every row of the same order
+// shares a left-border + subtle background, including across sub-tables.
+const ORDER_LINK_CLASSES = [
+    'border-l-blue-400 bg-blue-50/70 dark:bg-blue-950/20',
+    'border-l-emerald-400 bg-emerald-50/70 dark:bg-emerald-950/20',
+    'border-l-amber-400 bg-amber-50/70 dark:bg-amber-950/20',
+    'border-l-purple-400 bg-purple-50/70 dark:bg-purple-950/20',
+    'border-l-rose-400 bg-rose-50/70 dark:bg-rose-950/20',
+    'border-l-cyan-400 bg-cyan-50/70 dark:bg-cyan-950/20',
+];
+
+function orderLinkClassName(orderSeq: number): string {
+    return ORDER_LINK_CLASSES[orderSeq % ORDER_LINK_CLASSES.length];
+}
+
+function VariantCell({ value }: { value: EditionVariantValue | null }) {
+    if (!value) return <>—</>;
+
+    return (
+        <span className="inline-flex items-center gap-1">
+            {value.color && (
+                <span
+                    className="h-3 w-3 rounded-full border border-black/10"
+                    style={{ backgroundColor: value.color }}
+                />
+            )}
+            {value.label}
+        </span>
+    );
+}
+
 /**
  * One row per photo-editable order detail. Order-level columns (modelo
  * cuadro, color, talle banda, accesorios, observaciones generales) only
- * render on the first row of each order — blank on the rest — to avoid
- * repeating order data across its rows.
+ * render on the first row of each order within its photo-product group —
+ * blank on the rest — to avoid repeating order data across its rows.
  */
 export function EditionRow({
     row,
+    variantColumns,
     canManage,
     editors,
 }: {
     row: EditionRowData;
+    variantColumns: string[];
     canManage: boolean;
     editors: AssignableEditor[];
 }) {
     const first = row.is_first_of_order;
 
     return (
-        <TableRow>
+        <TableRow
+            className={cn('border-l-4', orderLinkClassName(row.order_seq))}
+        >
             <TableCell>
-                <a
-                    href={route('orders.show', { order: row.order_id })}
-                    className="underline-offset-2 hover:underline"
-                >
-                    #{row.order_id}
-                </a>
+                {row.photo_number !== null ? (
+                    <a
+                        href={route('orders.show', { order: row.order_id })}
+                        className="underline-offset-2 hover:underline"
+                    >
+                        {row.photo_number}
+                    </a>
+                ) : (
+                    '—'
+                )}
             </TableCell>
             <TableCell>{row.child_name ?? '—'}</TableCell>
-            <TableCell>{row.photo_size ?? '—'}</TableCell>
-            <TableCell>{row.diseno ?? '—'}</TableCell>
-            <TableCell>{first ? (row.modelo_cuadro ?? '—') : ''}</TableCell>
-            <TableCell>{first ? (row.color ?? '—') : ''}</TableCell>
-            <TableCell>{first ? (row.banda_talle ?? '—') : ''}</TableCell>
+            {variantColumns.map((label) => (
+                <TableCell key={label}>
+                    <VariantCell value={row.variants[label] ?? null} />
+                </TableCell>
+            ))}
             {canManage && (
                 <>
+                    <TableCell>
+                        {first ? (row.modelo_cuadro ?? '—') : ''}
+                    </TableCell>
+                    <TableCell>{first ? (row.color ?? '—') : ''}</TableCell>
+                    <TableCell>
+                        {first ? (row.banda_talle ?? '—') : ''}
+                    </TableCell>
                     <TableCell>
                         {first && row.accessories
                             ? yesNo(row.accessories.carpeta)

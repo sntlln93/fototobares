@@ -28,7 +28,6 @@ function matchesSearch(row: EditionRowData, query: string): boolean {
         row.photo_number ?? '',
         row.child_name ?? '',
         row.variant_search,
-        row.diseno ?? '',
     ].join(' ');
 
     return normalize(haystack).includes(normalize(query));
@@ -73,6 +72,13 @@ function recomputeFirstOfOrder(rows: EditionRowData[]): EditionRowData[] {
     });
 }
 
+/** Counts distinct order_ids across a set of surviving photo-product groups. */
+function countDistinctOrders(groups: { rows: EditionRowData[] }[]): number {
+    return new Set(
+        groups.flatMap((group) => group.rows.map((row) => row.order_id)),
+    ).size;
+}
+
 function filterSchools(
     schools: EditionSchool[],
     filters: EditionFilterState,
@@ -82,21 +88,31 @@ function filterSchools(
         .map((school) => ({
             ...school,
             classrooms: school.classrooms
-                .map((classroom) => ({
-                    ...classroom,
-                    rows: recomputeFirstOfOrder(
-                        classroom.rows.filter((row) =>
-                            matchesRow(
-                                row,
-                                school.id,
-                                classroom.id,
-                                filters,
-                                canManage,
+                .map((classroom) => {
+                    const photoProductGroups = classroom.photoProductGroups
+                        .map((group) => ({
+                            ...group,
+                            rows: recomputeFirstOfOrder(
+                                group.rows.filter((row) =>
+                                    matchesRow(
+                                        row,
+                                        school.id,
+                                        classroom.id,
+                                        filters,
+                                        canManage,
+                                    ),
+                                ),
                             ),
-                        ),
-                    ),
-                }))
-                .filter((classroom) => classroom.rows.length > 0),
+                        }))
+                        .filter((group) => group.rows.length > 0);
+
+                    return {
+                        ...classroom,
+                        photoProductGroups,
+                        order_count: countDistinctOrders(photoProductGroups),
+                    };
+                })
+                .filter((classroom) => classroom.photoProductGroups.length > 0),
         }))
         .filter((school) => school.classrooms.length > 0);
 }
@@ -128,7 +144,11 @@ export function useEditionFilters(
             ),
     );
 
-    const allRows = schools.flatMap((s) => s.classrooms.flatMap((c) => c.rows));
+    const allRows = schools.flatMap((s) =>
+        s.classrooms.flatMap((c) =>
+            c.photoProductGroups.flatMap((g) => g.rows),
+        ),
+    );
 
     const editorOptions = dedupeById(
         allRows

@@ -25,32 +25,41 @@ const photoProducts = [{ id: 1, name: 'Foto 15x21' }];
 const classroom: EditionClassroom = {
     id: 1,
     name: '5 A',
-    rows: [
+    order_count: 3,
+    photoProductGroups: [
         {
-            id: 1,
-            order_id: 10,
-            photo_size: 'Foto 15x21',
-            diseno: 'Individual',
-            child_name: 'Lola',
-            photo_number: 12,
-            variant_search: 'Individual',
-            editing_status: 'pendiente',
-            note: null,
-            allowed_targets: [],
-            is_first_of_order: true,
-            editor: null,
-            modelo_cuadro: 'Moldura fina',
-            color: 'Negro',
-            banda_talle: 'M',
-            observaciones_generales: [],
-            accessories: {
-                carpeta: true,
-                banda: false,
-                medalla: false,
-                taza: false,
-                guantes: false,
-                escarapela: false,
-            },
+            product_id: 1,
+            product_name: 'Foto 15x21',
+            variant_columns: ['Tipo de foto'],
+            rows: [
+                {
+                    id: 1,
+                    order_id: 10,
+                    order_seq: 0,
+                    photo_size: 'Foto 15x21',
+                    variants: { 'Tipo de foto': { label: 'Individual' } },
+                    child_name: 'Lola',
+                    photo_number: 12,
+                    variant_search: 'Individual',
+                    editing_status: 'pendiente',
+                    note: null,
+                    allowed_targets: [],
+                    is_first_of_order: true,
+                    editor: null,
+                    modelo_cuadro: 'Moldura fina',
+                    color: 'Negro',
+                    banda_talle: 'M',
+                    observaciones_generales: [],
+                    accessories: {
+                        carpeta: true,
+                        banda: false,
+                        medalla: false,
+                        taza: false,
+                        guantes: false,
+                        escarapela: false,
+                    },
+                },
+            ],
         },
     ],
     totals: {
@@ -64,6 +73,9 @@ const classroom: EditionClassroom = {
 };
 
 const MANAGER_ONLY_HEADERS = [
+    'Modelo cuadro',
+    'Color',
+    'Talle banda',
     'Carpeta',
     'Banda',
     'Medalla',
@@ -106,6 +118,77 @@ describe('ClassroomTable', () => {
         expect(screen.queryByText('Totales')).toBeNull();
         // Columns common to every role still render
         expect(screen.getByText('Pedido')).toBeTruthy();
-        expect(screen.getByText('Talle banda')).toBeTruthy();
+        expect(screen.getByText('Tipo de foto')).toBeTruthy();
+    });
+
+    it('renders the classroom badge from order_count and the product name as the group heading', () => {
+        render(
+            <ClassroomTable
+                classroom={classroom}
+                canManage={true}
+                editors={editors}
+                photoProducts={photoProducts}
+            />,
+        );
+
+        expect(screen.getByText('3')).toBeTruthy();
+        expect(screen.getByText('Foto 15x21')).toBeTruthy();
+    });
+
+    it('renders one sub-table heading per photo-product group', () => {
+        const multiGroupClassroom: EditionClassroom = {
+            ...classroom,
+            photoProductGroups: [
+                ...classroom.photoProductGroups,
+                {
+                    product_id: 2,
+                    product_name: 'Foto 10x15',
+                    variant_columns: ['Tipo de foto'],
+                    rows: [
+                        {
+                            id: 2,
+                            order_id: 11,
+                            order_seq: 1,
+                            photo_size: 'Foto 10x15',
+                            variants: {
+                                'Tipo de foto': { label: 'Grupal' },
+                            },
+                            child_name: 'Nico',
+                            photo_number: 13,
+                            variant_search: 'Grupal',
+                            editing_status: 'pendiente',
+                            note: null,
+                            allowed_targets: [],
+                            is_first_of_order: true,
+                            editor: null,
+                            modelo_cuadro: null,
+                            color: null,
+                            banda_talle: null,
+                            observaciones_generales: [],
+                            accessories: {
+                                carpeta: false,
+                                banda: false,
+                                medalla: false,
+                                taza: false,
+                                guantes: false,
+                                escarapela: false,
+                            },
+                        },
+                    ],
+                },
+            ],
+        };
+
+        render(
+            <ClassroomTable
+                classroom={multiGroupClassroom}
+                canManage={true}
+                editors={editors}
+                photoProducts={photoProducts}
+            />,
+        );
+
+        expect(screen.getByText('Foto 15x21')).toBeTruthy();
+        expect(screen.getByText('Foto 10x15')).toBeTruthy();
     });
 });

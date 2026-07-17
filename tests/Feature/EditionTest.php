@@ -12,6 +12,7 @@ use App\Models\OrderEditingStatusChange;
 use App\Models\Product;
 use App\Models\School;
 use App\Models\User;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Inertia\Testing\AssertableInertia as Assert;
 
@@ -19,7 +20,7 @@ use function Pest\Laravel\get;
 
 /**
  * Locates a mapped row by order_detail id inside the schools -> classrooms
- * -> rows Inertia payload.
+ * -> photoProductGroups -> rows Inertia payload.
  *
  * @param  array<int, array<string, mixed>>  $schools
  * @return array<string, mixed>
@@ -28,15 +29,32 @@ function findEditionRow(array $schools, int $detailId): ?array
 {
     foreach ($schools as $school) {
         foreach ($school['classrooms'] as $classroom) {
-            foreach ($classroom['rows'] as $row) {
-                if ($row['id'] === $detailId) {
-                    return $row;
+            foreach ($classroom['photoProductGroups'] as $group) {
+                foreach ($group['rows'] as $row) {
+                    if ($row['id'] === $detailId) {
+                        return $row;
+                    }
                 }
             }
         }
     }
 
     return null;
+}
+
+/**
+ * Flattens every row across every photo-product group of every classroom of
+ * every school in the Inertia payload.
+ *
+ * @param  array<int, array<string, mixed>>  $schools
+ * @return Collection<int, array<string, mixed>>
+ */
+function flattenEditionRows(array $schools): Collection
+{
+    return collect($schools)
+        ->pluck('classrooms')->flatten(1)
+        ->pluck('photoProductGroups')->flatten(1)
+        ->pluck('rows')->flatten(1);
 }
 
 // Route access (criterion 4 of #177, behavior beyond RoleAccessTest's matrix)
@@ -74,10 +92,7 @@ it('lists one row per photo-editable order detail and excludes non-photo product
 
     get(route('edition.index'))->assertInertia(function (Assert $page) use ($detail1, $detail2) {
         $schools = $page->toArray()['props']['schools'];
-        $rowIds = collect($schools)
-            ->pluck('classrooms')->flatten(1)
-            ->pluck('rows')->flatten(1)
-            ->pluck('id');
+        $rowIds = flattenEditionRows($schools)->pluck('id');
 
         expect($rowIds->all())->toEqualCanonicalizing([$detail1->id, $detail2->id]);
     });
@@ -98,10 +113,7 @@ it('excludes delivered details, recycled details and details of cancelled orders
 
     get(route('edition.index'))->assertInertia(function (Assert $page) use ($visible, $delivered, $recycled, $cancelled) {
         $schools = $page->toArray()['props']['schools'];
-        $rowIds = collect($schools)
-            ->pluck('classrooms')->flatten(1)
-            ->pluck('rows')->flatten(1)
-            ->pluck('id');
+        $rowIds = flattenEditionRows($schools)->pluck('id');
 
         expect($rowIds->all())->toBe([$visible->id])
             ->and($rowIds->all())->not->toContain($delivered->id, $recycled->id, $cancelled->id);
@@ -137,10 +149,7 @@ it('scopes the editor role to only their own assigned rows', function () {
 
     get(route('edition.index'))->assertInertia(function (Assert $page) use ($ownDetail, $otherEditorDetail, $unassignedDetail) {
         $schools = $page->toArray()['props']['schools'];
-        $rowIds = collect($schools)
-            ->pluck('classrooms')->flatten(1)
-            ->pluck('rows')->flatten(1)
-            ->pluck('id');
+        $rowIds = flattenEditionRows($schools)->pluck('id');
 
         expect($rowIds->all())->toBe([$ownDetail->id])
             ->and($rowIds->all())->not->toContain($otherEditorDetail->id, $unassignedDetail->id);
@@ -238,28 +247,42 @@ it('counts accessory totals once per order, not once per photo row', function ()
     });
 });
 
-// diseño derived column (criterion 3 backend note)
+// Dynamic variant columns (#193): the "variants" map replaces the hardcoded
+// diseño/tamaño columns, and the group's variant_columns is the sorted union
+// of its rows' variant labels.
 
-it('derives diseño from the "Tipo de foto" variant entry, null when absent', function () {
+it('exposes a variants map keyed by variant label, and derives variant_columns as their sorted union', function () {
     actingAsRole(UserRole::Office);
 
+    $classroom = Classroom::factory()->create();
     $product = Product::factory()->create(['has_photo' => true]);
-    $withDiseno = OrderDetail::factory()->create([
+    $withVariantOrder = Order::factory()->create(['classroom_id' => $classroom->id]);
+    $withoutVariantOrder = Order::factory()->create(['classroom_id' => $classroom->id]);
+    $withVariant = OrderDetail::factory()->create([
+        'order_id' => $withVariantOrder->id,
         'product_id' => $product->id,
         'variant' => [
             ['label' => 'Tipo de foto', 'value' => ['label' => 'Grupo']],
         ],
     ]);
-    $withoutDiseno = OrderDetail::factory()->create([
+    $withoutVariant = OrderDetail::factory()->create([
+        'order_id' => $withoutVariantOrder->id,
         'product_id' => $product->id,
         'variant' => [],
     ]);
 
-    get(route('edition.index'))->assertInertia(function (Assert $page) use ($withDiseno, $withoutDiseno) {
+    get(route('edition.index'))->assertInertia(function (Assert $page) use ($product, $withVariant, $withoutVariant) {
         $schools = $page->toArray()['props']['schools'];
 
-        expect(findEditionRow($schools, $withDiseno->id)['diseno'])->toBe('Grupo')
-            ->and(findEditionRow($schools, $withoutDiseno->id)['diseno'])->toBeNull();
+        expect(findEditionRow($schools, $withVariant->id)['variants'])->toBe(['Tipo de foto' => ['label' => 'Grupo']])
+            ->and(findEditionRow($schools, $withoutVariant->id)['variants'])->toBe([]);
+
+        $group = collect($schools)->pluck('classrooms')->flatten(1)
+            ->pluck('photoProductGroups')->flatten(1)
+            ->firstWhere('product_id', $product->id);
+
+        expect($group['product_name'])->toBe($product->name)
+            ->and($group['variant_columns'])->toBe(['Tipo de foto']);
     });
 });
 
@@ -289,9 +312,10 @@ it('exposes photo_number and variant_search for client-side search filtering', f
     });
 });
 
-// modelo cuadro / color / banda talle derived columns (criterion 3 backend note)
+// modelo cuadro / color / banda talle derived columns (criterion 3 backend
+// note; #193 moved all three under canManage gating)
 
-it('derives modelo cuadro and color from the order mural, and banda talle for every role', function () {
+it('derives modelo cuadro, color and banda talle from the order mural/banda, manager-only', function () {
     $editor = User::factory()->withRole(UserRole::Editor)->create();
     $manager = User::factory()->withRole(UserRole::Office)->create();
 
@@ -330,12 +354,14 @@ it('derives modelo cuadro and color from the order mural, and banda talle for ev
             ->and($row['banda_talle'])->toBe('M');
     });
 
-    // Editor view: banda talle still present, unlike accessories/editor
+    // Editor view: modelo cuadro, color and banda talle are all manager-only
     test()->actingAs($editor);
     get(route('edition.index'))->assertInertia(function (Assert $page) use ($photoDetail) {
         $row = findEditionRow($page->toArray()['props']['schools'], $photoDetail->id);
 
-        expect($row['banda_talle'])->toBe('M');
+        expect($row)->not->toHaveKey('modelo_cuadro')
+            ->and($row)->not->toHaveKey('color')
+            ->and($row)->not->toHaveKey('banda_talle');
     });
 });
 
@@ -365,7 +391,7 @@ it('reflects the current editing status per row, defaulting to pendiente', funct
 
 // Grouping by school -> classroom (structural sanity, ties #177's core shape)
 
-it('groups rows by school and then by classroom', function () {
+it('groups rows by school, classroom and photo product, with an order_count per classroom', function () {
     actingAsRole(UserRole::Office);
 
     $school = School::factory()->create();
@@ -374,7 +400,7 @@ it('groups rows by school and then by classroom', function () {
     $order = Order::factory()->create(['classroom_id' => $classroom->id]);
     $detail = OrderDetail::factory()->create(['order_id' => $order->id, 'product_id' => $product->id]);
 
-    get(route('edition.index'))->assertInertia(function (Assert $page) use ($school, $classroom, $detail) {
+    get(route('edition.index'))->assertInertia(function (Assert $page) use ($school, $classroom, $product, $detail) {
         $schools = $page->toArray()['props']['schools'];
         $schoolGroup = collect($schools)->firstWhere('id', $school->id);
 
@@ -383,7 +409,41 @@ it('groups rows by school and then by classroom', function () {
         $classroomGroup = collect($schoolGroup['classrooms'])->firstWhere('id', $classroom->id);
 
         expect($classroomGroup)->not->toBeNull()
-            ->and(collect($classroomGroup['rows'])->pluck('id')->all())->toBe([$detail->id]);
+            ->and($classroomGroup['order_count'])->toBe(1);
+
+        $productGroup = collect($classroomGroup['photoProductGroups'])->firstWhere('product_id', $product->id);
+
+        expect($productGroup)->not->toBeNull()
+            ->and(collect($productGroup['rows'])->pluck('id')->all())->toBe([$detail->id]);
+    });
+});
+
+// order_seq: stable per-order index within the classroom, shared across
+// photo-product groups (#193 visual linking)
+
+it('assigns the same order_seq to every row of the same order, across photo-product groups', function () {
+    actingAsRole(UserRole::Office);
+
+    $classroom = Classroom::factory()->create();
+    $productA = Product::factory()->create(['has_photo' => true]);
+    $productB = Product::factory()->create(['has_photo' => true]);
+
+    $orderOne = Order::factory()->create(['classroom_id' => $classroom->id]);
+    $orderTwo = Order::factory()->create(['classroom_id' => $classroom->id]);
+
+    $oneA = OrderDetail::factory()->create(['order_id' => $orderOne->id, 'product_id' => $productA->id]);
+    $oneB = OrderDetail::factory()->create(['order_id' => $orderOne->id, 'product_id' => $productB->id]);
+    $twoA = OrderDetail::factory()->create(['order_id' => $orderTwo->id, 'product_id' => $productA->id]);
+
+    get(route('edition.index'))->assertInertia(function (Assert $page) use ($oneA, $oneB, $twoA) {
+        $schools = $page->toArray()['props']['schools'];
+
+        $rowOneA = findEditionRow($schools, $oneA->id);
+        $rowOneB = findEditionRow($schools, $oneB->id);
+        $rowTwoA = findEditionRow($schools, $twoA->id);
+
+        expect($rowOneA['order_seq'])->toBe($rowOneB['order_seq'])
+            ->and($rowOneA['order_seq'])->not->toBe($rowTwoA['order_seq']);
     });
 });
 
