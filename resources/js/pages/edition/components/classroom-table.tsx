@@ -11,6 +11,7 @@ import {
     BulkAssignEditorDialog,
     PhotoProduct,
 } from '@/features/editor-assignment/BulkAssignEditorDialog';
+import { useState } from 'react';
 import { EditionRow } from './edition-row';
 import { TotalsFooter } from './totals-footer';
 
@@ -92,6 +93,8 @@ export function ClassroomTable({
     editors: AssignableEditor[];
     photoProducts: PhotoProduct[];
 }) {
+    const [hoveredOrderSeq, setHoveredOrderSeq] = useState<number | null>(null);
+
     return (
         <div className="rounded-xl border border-input">
             <header className="flex flex-wrap items-center justify-between gap-2 border-b border-input p-4">
@@ -174,6 +177,12 @@ export function ClassroomTable({
                                             }
                                             canManage={canManage}
                                             editors={editors}
+                                            isHighlighted={
+                                                hoveredOrderSeq !== null &&
+                                                hoveredOrderSeq ===
+                                                    row.order_seq
+                                            }
+                                            onHoverChange={setHoveredOrderSeq}
                                         />
                                     ))}
                                 </TableBody>
