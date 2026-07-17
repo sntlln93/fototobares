@@ -40,6 +40,8 @@ export interface EditionRowData {
     photo_size: string | null;
     diseno: string | null;
     child_name: string | null;
+    photo_number: number | null;
+    variant_search: string;
     editing_status: EditingStatusValue;
     note: string | null;
     allowed_targets: EditingStatusValue[];
