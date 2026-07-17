@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Undo2 } from 'lucide-react';
 import { useEditingStatusTransition } from '../hooks/use-editing-status-transition';
 import { EditingStatusValue } from './classroom-table';
 
@@ -12,19 +12,23 @@ const TARGET_LABELS: Record<EditingStatusValue, string> = {
 
 /**
  * Renders one button per legal target status for the current row and
- * actor — `allowed_targets` already reflects role/assignment gating, so an
- * empty list (nothing reachable) simply renders nothing.
+ * actor — `allowed_targets` already reflects role/assignment gating — plus,
+ * for the author of the row's latest transition, a button to revert it
+ * (`canRevert`). Renders nothing only when there is neither a legal target
+ * nor a revert available.
  */
 export function TransitionControl({
     orderDetailId,
     allowedTargets,
+    canRevert,
 }: {
     orderDetailId: number;
     allowedTargets: EditingStatusValue[];
+    canRevert: boolean;
 }) {
-    const { transition } = useEditingStatusTransition();
+    const { transition, revert } = useEditingStatusTransition();
 
-    if (allowedTargets.length === 0) {
+    if (allowedTargets.length === 0 && !canRevert) {
         return null;
     }
 
@@ -42,6 +46,17 @@ export function TransitionControl({
                     <ArrowRight className="ml-1 h-3 w-3" />
                 </Button>
             ))}
+            {canRevert && (
+                <Button
+                    size="sm"
+                    variant="ghost"
+                    title="Revertir última transición"
+                    onClick={() => revert(orderDetailId)}
+                >
+                    <Undo2 className="mr-1 h-3 w-3" />
+                    Revertir
+                </Button>
+            )}
         </div>
     );
 }

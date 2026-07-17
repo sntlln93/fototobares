@@ -53,6 +53,7 @@ export interface EditionRowData {
     note: string | null;
     allowed_targets: EditingStatusValue[];
     is_first_of_order: boolean;
+    can_revert: boolean;
     editor?: { id: number; name: string } | null;
     modelo_cuadro?: string | null;
     color?: string | null;

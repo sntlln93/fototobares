@@ -25,6 +25,7 @@ function makeRow(overrides: Partial<EditionRowData>): EditionRowData {
         note: null,
         allowed_targets: [],
         is_first_of_order: true,
+        can_revert: false,
         editor: null,
         ...overrides,
     };

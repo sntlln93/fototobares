@@ -197,6 +197,7 @@ export function EditionRow({
                     <TransitionControl
                         orderDetailId={row.id}
                         allowedTargets={row.allowed_targets}
+                        canRevert={row.can_revert}
                     />
                 </div>
             </TableCell>

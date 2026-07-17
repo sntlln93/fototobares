@@ -237,6 +237,10 @@ class EditionController extends Controller
 
         $allowedTargets = EditingStatus::allowedTargets($current, $isManager, $isAssignedEditor, $productionEnabled);
 
+        $latestChange = $detail->editingStatusChanges
+            ->sortBy([['changed_at', 'desc'], ['id', 'desc']])
+            ->first();
+
         $row = [
             'id' => $detail->id,
             'order_id' => $detail->order_id,
@@ -250,6 +254,7 @@ class EditionController extends Controller
             'note' => $detail->note,
             'allowed_targets' => array_map(fn (EditingStatus $status) => $status->value, $allowedTargets),
             'is_first_of_order' => $isFirstOfOrder,
+            'can_revert' => $latestChange !== null && $latestChange->changed_by === $actor->id,
         ];
 
         $row['observaciones_generales'] = $order->notes->map(fn (Note $note) => [
