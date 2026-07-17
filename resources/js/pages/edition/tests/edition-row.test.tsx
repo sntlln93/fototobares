@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { EditionRowData } from '../components/classroom-table';
 import { EditionRow } from '../components/edition-row';
@@ -103,13 +103,23 @@ describe('EditionRow', () => {
         expect(screen.getByText('M')).toBeTruthy();
     });
 
-    it('Notas cell exposes the full note through a tooltip trigger, not a native title', () => {
+    it('Notas cell shows the full note in the tooltip content when opened, not a native title', () => {
         const { container } = renderRow(
             makeRow({ note: 'Nota muy larga de producto' }),
             false,
         );
 
-        expect(screen.getByText('Nota muy larga de producto')).toBeTruthy();
+        // TooltipContent is not mounted until the tooltip opens.
+        expect(screen.queryByRole('tooltip')).toBeNull();
+        expect(container.querySelector('[title]')).toBeNull();
+
+        fireEvent.focus(screen.getByText('Nota muy larga de producto'));
+
+        // The opened TooltipContent carries the full note text.
+        const tooltip = screen.getByRole('tooltip');
+        expect(
+            within(tooltip).getByText('Nota muy larga de producto'),
+        ).toBeTruthy();
         expect(container.querySelector('[title]')).toBeNull();
     });
 
@@ -126,7 +136,7 @@ describe('EditionRow', () => {
         expect(container.querySelector('[title]')).toBeNull();
     });
 
-    it('Observaciones generales shows every note body and drops the native title', () => {
+    it('Observaciones generales shows every note body in the tooltip content when opened, and drops the native title', () => {
         const { container } = renderRow(
             makeRow({
                 is_first_of_order: true,
@@ -146,8 +156,16 @@ describe('EditionRow', () => {
             false,
         );
 
-        expect(screen.getByText('Primera observación')).toBeTruthy();
-        expect(screen.getByText('Segunda observación')).toBeTruthy();
+        // TooltipContent is not mounted until the tooltip opens.
+        expect(screen.queryByRole('tooltip')).toBeNull();
+        expect(container.querySelector('[title]')).toBeNull();
+
+        fireEvent.focus(screen.getByRole('list'));
+
+        // The opened TooltipContent carries every note body.
+        const tooltip = screen.getByRole('tooltip');
+        expect(within(tooltip).getByText('Primera observación')).toBeTruthy();
+        expect(within(tooltip).getByText('Segunda observación')).toBeTruthy();
         expect(container.querySelector('[title]')).toBeNull();
     });
 
