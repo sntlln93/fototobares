@@ -22,7 +22,7 @@ it('assigns an editor to a photo detail', function (UserRole $role) {
     $actor = actingAsRole($role);
 
     $product = Product::factory()->create(['has_photo' => true]);
-    $detail = OrderDetail::factory()->create(['product_id' => $product->id]);
+    $detail = OrderDetail::factory()->enabled()->create(['product_id' => $product->id]);
     $editor = User::factory()->withRole(UserRole::Editor)->create();
 
     post(route('editor-assignments.store'), [
@@ -45,7 +45,7 @@ it('accepts an editor_id belonging to a user with the administración role', fun
     actingAsRole(UserRole::Office);
 
     $product = Product::factory()->create(['has_photo' => true]);
-    $detail = OrderDetail::factory()->create(['product_id' => $product->id]);
+    $detail = OrderDetail::factory()->enabled()->create(['product_id' => $product->id]);
     $admin = User::factory()->withRole(UserRole::Admin)->create();
 
     post(route('editor-assignments.store'), [
@@ -61,7 +61,7 @@ it('overwrites the previous assignment on reassignment', function () {
     actingAsRole(UserRole::Office);
 
     $product = Product::factory()->create(['has_photo' => true]);
-    $detail = OrderDetail::factory()->create(['product_id' => $product->id]);
+    $detail = OrderDetail::factory()->enabled()->create(['product_id' => $product->id]);
     $firstEditor = User::factory()->withRole(UserRole::Editor)->create();
     $secondEditor = User::factory()->withRole(UserRole::Editor)->create();
 
