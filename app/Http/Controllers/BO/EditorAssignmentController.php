@@ -32,9 +32,15 @@ class EditorAssignmentController extends Controller
      */
     public function bulkStore(BulkAssignEditorRequest $request, BulkAssignEditorAction $action): RedirectResponse
     {
-        $count = $action->handle($request->toData());
+        $result = $action->handle($request->toData());
 
-        return back()->with('success', "$count producto(s) asignados al editor");
+        $response = back()->with('success', "{$result->assigned} producto(s) asignados al editor");
+
+        if ($result->skipped > 0) {
+            $response->with('warning', "{$result->skipped} foto(s) ya están editadas y no se pueden reasignar/desasignar");
+        }
+
+        return $response;
     }
 
     /**

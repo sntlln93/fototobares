@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\EditingStatus;
 use Database\Factories\OrderDetailFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -49,6 +51,40 @@ class OrderDetail extends Pivot
     public function stockMovements()
     {
         return $this->hasMany(StockMovement::class, 'order_detail_id');
+    }
+
+    /**
+     * @return HasMany<OrderEditingStatusChange, $this>
+     */
+    public function editingStatusChanges()
+    {
+        return $this->hasMany(OrderEditingStatusChange::class, 'order_detail_id');
+    }
+
+    /**
+     * Current editing status: the latest entry in the append-only history,
+     * or `Pendiente` when the detail has none.
+     */
+    public function currentEditingStatus(): EditingStatus
+    {
+        $latest = $this->editingStatusChanges()->orderByDesc('changed_at')->orderByDesc('id')->first();
+
+        if ($latest === null) {
+            return EditingStatus::Pendiente;
+        }
+
+        return $latest->status;
+    }
+
+    /**
+     * Details still `pendiente`: no rows in the editing status history.
+     *
+     * @param  Builder<OrderDetail>  $query
+     * @return Builder<OrderDetail>
+     */
+    public function scopePending(Builder $query): Builder
+    {
+        return $query->whereDoesntHave('editingStatusChanges');
     }
 
     protected $casts = [

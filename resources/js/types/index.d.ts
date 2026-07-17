@@ -14,6 +14,7 @@ export type PageProps<
         user: User;
         roles: string[];
     };
+    flash?: { warning?: string | null };
 };
 
 export interface BreadcrumbItem {
