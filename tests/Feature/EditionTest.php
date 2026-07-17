@@ -12,6 +12,7 @@ use App\Models\OrderEditingStatusChange;
 use App\Models\Product;
 use App\Models\School;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 use Inertia\Testing\AssertableInertia as Assert;
 
 use function Pest\Laravel\get;
@@ -358,4 +359,122 @@ it('groups rows by school and then by classroom', function () {
         expect($classroomGroup)->not->toBeNull()
             ->and(collect($classroomGroup['rows'])->pluck('id')->all())->toBe([$detail->id]);
     });
+});
+
+// allowed_targets per row wiring (code-review F1, REQUIRED 2)
+
+it('reports no allowed targets for a manager viewing a pendiente row', function () {
+    actingAsRole(UserRole::Office);
+
+    $product = Product::factory()->create(['has_photo' => true]);
+    $detail = OrderDetail::factory()->enabled()->create(['product_id' => $product->id]);
+
+    get(route('edition.index'))->assertInertia(function (Assert $page) use ($detail) {
+        $row = findEditionRow($page->toArray()['props']['schools'], $detail->id);
+
+        expect($row['allowed_targets'])->toBe([]);
+    });
+});
+
+it('allows the assigned editor to move a pendiente row to editada once production is enabled', function () {
+    $editor = User::factory()->withRole(UserRole::Editor)->create();
+    $manager = User::factory()->withRole(UserRole::Office)->create();
+    $product = Product::factory()->create(['has_photo' => true]);
+    $detail = OrderDetail::factory()->enabled()->create(['product_id' => $product->id]);
+
+    EditorOrderDetailAssignment::create([
+        'order_detail_id' => $detail->id,
+        'editor_id' => $editor->id,
+        'assigned_by' => $manager->id,
+        'assigned_at' => now(),
+    ]);
+
+    test()->actingAs($editor);
+
+    get(route('edition.index'))->assertInertia(function (Assert $page) use ($detail) {
+        $row = findEditionRow($page->toArray()['props']['schools'], $detail->id);
+
+        expect($row['allowed_targets'])->toBe(['editada']);
+    });
+});
+
+it('reports no allowed targets for the assigned editor on a pendiente row without production enabled', function () {
+    $editor = User::factory()->withRole(UserRole::Editor)->create();
+    $manager = User::factory()->withRole(UserRole::Office)->create();
+    $product = Product::factory()->create(['has_photo' => true]);
+    $detail = OrderDetail::factory()->create(['product_id' => $product->id]);
+
+    EditorOrderDetailAssignment::create([
+        'order_detail_id' => $detail->id,
+        'editor_id' => $editor->id,
+        'assigned_by' => $manager->id,
+        'assigned_at' => now(),
+    ]);
+
+    test()->actingAs($editor);
+
+    get(route('edition.index'))->assertInertia(function (Assert $page) use ($detail) {
+        $row = findEditionRow($page->toArray()['props']['schools'], $detail->id);
+
+        expect($row['allowed_targets'])->toBe([]);
+    });
+});
+
+it('allows the assigned editor to move an a_corregir row back to editada', function () {
+    $editor = User::factory()->withRole(UserRole::Editor)->create();
+    $manager = User::factory()->withRole(UserRole::Office)->create();
+    $product = Product::factory()->create(['has_photo' => true]);
+    $detail = OrderDetail::factory()->enabled()->create(['product_id' => $product->id]);
+
+    EditorOrderDetailAssignment::create([
+        'order_detail_id' => $detail->id,
+        'editor_id' => $editor->id,
+        'assigned_by' => $manager->id,
+        'assigned_at' => now(),
+    ]);
+    OrderEditingStatusChange::create([
+        'order_detail_id' => $detail->id,
+        'status' => EditingStatus::ACorregir,
+        'changed_by' => $manager->id,
+        'changed_at' => now(),
+    ]);
+
+    test()->actingAs($editor);
+
+    get(route('edition.index'))->assertInertia(function (Assert $page) use ($detail) {
+        $row = findEditionRow($page->toArray()['props']['schools'], $detail->id);
+
+        expect($row['editing_status'])->toBe('a_corregir')
+            ->and($row['allowed_targets'])->toBe(['editada']);
+    });
+});
+
+// N+1 guard (code-review F1, REQUIRED 1): eager-loading `editingStatusChanges`
+// must yield a single query for the whole board, not one per row.
+
+it('does not issue a per-row editing status query when building the board', function () {
+    $manager = actingAsRole(UserRole::Office);
+
+    $product = Product::factory()->create(['has_photo' => true]);
+    $details = OrderDetail::factory()->count(3)->create(['product_id' => $product->id]);
+
+    foreach ($details as $detail) {
+        OrderEditingStatusChange::create([
+            'order_detail_id' => $detail->id,
+            'status' => EditingStatus::Editada,
+            'changed_by' => $manager->id,
+            'changed_at' => now(),
+        ]);
+    }
+
+    $statusQueries = 0;
+    DB::listen(function ($query) use (&$statusQueries) {
+        if (str_contains($query->sql, 'order_editing_status_changes')) {
+            $statusQueries++;
+        }
+    });
+
+    get(route('edition.index'))->assertOk();
+
+    expect($statusQueries)->toBe(1);
 });
