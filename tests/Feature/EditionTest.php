@@ -535,6 +535,50 @@ it('allows the assigned editor to move an a_corregir row back to editada', funct
     });
 });
 
+// can_revert per row (#191): only the author of the latest editing-status
+// change may revert it.
+
+it('reports can_revert true for the author of the latest change and false for a different actor', function () {
+    $author = User::factory()->withRole(UserRole::Office)->create();
+    $otherManager = User::factory()->withRole(UserRole::Admin)->create();
+    $product = Product::factory()->create(['has_photo' => true]);
+    $detail = OrderDetail::factory()->enabled()->create(['product_id' => $product->id]);
+
+    OrderEditingStatusChange::create([
+        'order_detail_id' => $detail->id,
+        'status' => EditingStatus::Editada,
+        'changed_by' => $author->id,
+        'changed_at' => now(),
+    ]);
+
+    test()->actingAs($author);
+    get(route('edition.index'))->assertInertia(function (Assert $page) use ($detail) {
+        $row = findEditionRow($page->toArray()['props']['schools'], $detail->id);
+
+        expect($row['can_revert'])->toBeTrue();
+    });
+
+    test()->actingAs($otherManager);
+    get(route('edition.index'))->assertInertia(function (Assert $page) use ($detail) {
+        $row = findEditionRow($page->toArray()['props']['schools'], $detail->id);
+
+        expect($row['can_revert'])->toBeFalse();
+    });
+});
+
+it('reports can_revert false for a row with no editing status history', function () {
+    actingAsRole(UserRole::Office);
+
+    $product = Product::factory()->create(['has_photo' => true]);
+    $detail = OrderDetail::factory()->enabled()->create(['product_id' => $product->id]);
+
+    get(route('edition.index'))->assertInertia(function (Assert $page) use ($detail) {
+        $row = findEditionRow($page->toArray()['props']['schools'], $detail->id);
+
+        expect($row['can_revert'])->toBeFalse();
+    });
+});
+
 // N+1 guard (code-review F1, REQUIRED 1): eager-loading `editingStatusChanges`
 // must yield a single query for the whole board, not one per row.
 

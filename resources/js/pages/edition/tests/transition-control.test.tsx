@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { TransitionControl } from '../components/transition-control';
 
@@ -51,5 +51,71 @@ describe('TransitionControl', () => {
 
         expect(container.firstChild).toBeNull();
         expect(screen.queryByRole('button')).toBeNull();
+    });
+
+    it('renders a Revertir button when canRevert is true, alongside allowed-target buttons', () => {
+        render(
+            <TransitionControl
+                orderDetailId={4}
+                allowedTargets={['ok', 'a_corregir']}
+                canRevert={true}
+            />,
+        );
+
+        const buttons = screen.getAllByRole('button');
+
+        expect(buttons).toHaveLength(3);
+        expect(screen.getByRole('button', { name: /Revertir/ })).toBeTruthy();
+        expect(screen.getByRole('button', { name: /Ok/ })).toBeTruthy();
+        expect(screen.getByRole('button', { name: /A corregir/ })).toBeTruthy();
+    });
+
+    it('does not render Revertir when canRevert is false', () => {
+        render(
+            <TransitionControl
+                orderDetailId={5}
+                allowedTargets={['editada']}
+                canRevert={false}
+            />,
+        );
+
+        expect(screen.queryByRole('button', { name: /Revertir/ })).toBeNull();
+    });
+
+    it('renders the control with only the Revertir button when allowedTargets is empty but canRevert is true', () => {
+        const { container } = render(
+            <TransitionControl
+                orderDetailId={6}
+                allowedTargets={[]}
+                canRevert={true}
+            />,
+        );
+
+        expect(container.firstChild).not.toBeNull();
+        expect(screen.getAllByRole('button')).toHaveLength(1);
+        expect(screen.getByRole('button', { name: /Revertir/ })).toBeTruthy();
+    });
+
+    it('calls router.post against editing-status.revert for the given orderDetailId when Revertir is clicked', async () => {
+        const { router } = await import('@inertiajs/react');
+
+        render(
+            <TransitionControl
+                orderDetailId={7}
+                allowedTargets={[]}
+                canRevert={true}
+            />,
+        );
+
+        fireEvent.click(screen.getByRole('button', { name: /Revertir/ }));
+
+        expect(router.post).toHaveBeenCalledWith(
+            'http://localhost/editing-status.revert',
+            {},
+            expect.objectContaining({
+                preserveScroll: true,
+                preserveState: true,
+            }),
+        );
     });
 });

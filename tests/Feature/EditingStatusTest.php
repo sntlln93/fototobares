@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use App\Actions\EditingStatus\RevertEditingStatusAction;
+use App\Data\EditingStatus\RevertEditingStatusData;
 use App\Enums\EditingStatus;
 use App\Enums\UserRole;
 use App\Models\EditorOrderDetailAssignment;
@@ -9,6 +11,7 @@ use App\Models\OrderDetail;
 use App\Models\OrderEditingStatusChange;
 use App\Models\Product;
 use App\Models\User;
+use Illuminate\Validation\ValidationException;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\post;
@@ -423,3 +426,204 @@ it('computes the allowed targets for every branch of the transition matrix', fun
         EditingStatus::ACorregir, false, false, true, [],
     ],
 ]);
+
+// RevertEditingStatusAction (#191)
+
+it('lets the assigned editor revert a pendiente to editada transition', function () {
+    $editor = User::factory()->withRole(UserRole::Editor)->create();
+    $product = Product::factory()->create(['has_photo' => true]);
+    $detail = OrderDetail::factory()->enabled()->create(['product_id' => $product->id]);
+
+    EditorOrderDetailAssignment::create([
+        'order_detail_id' => $detail->id,
+        'editor_id' => $editor->id,
+        'assigned_by' => $editor->id,
+        'assigned_at' => now(),
+    ]);
+
+    $editada = seedEditingStatus($detail, EditingStatus::Editada, $editor);
+
+    app(RevertEditingStatusAction::class)->handle(new RevertEditingStatusData(
+        orderDetailId: $detail->id,
+        revertedById: $editor->id,
+    ));
+
+    $changes = OrderEditingStatusChange::where('order_detail_id', $detail->id)->orderBy('id')->get();
+    $latest = $changes->last();
+
+    expect($changes)->toHaveCount(2)
+        ->and($changes->first()->id)->toBe($editada->id)
+        ->and($latest->status)->toBe(EditingStatus::Pendiente)
+        ->and($latest->is_revert)->toBeTrue()
+        ->and($detail->refresh()->currentEditingStatus())->toBe(EditingStatus::Pendiente);
+});
+
+it('lets a manager revert an editada to ok transition back to editada', function (UserRole $role) {
+    $manager = actingAsRole($role);
+
+    $product = Product::factory()->create(['has_photo' => true]);
+    $detail = OrderDetail::factory()->enabled()->create(['product_id' => $product->id]);
+
+    seedEditingStatus($detail, EditingStatus::Editada, $manager);
+    seedEditingStatus($detail, EditingStatus::Ok, $manager);
+
+    app(RevertEditingStatusAction::class)->handle(new RevertEditingStatusData(
+        orderDetailId: $detail->id,
+        revertedById: $manager->id,
+    ));
+
+    $latest = OrderEditingStatusChange::where('order_detail_id', $detail->id)->orderBy('id')->get()->last();
+
+    expect(OrderEditingStatusChange::where('order_detail_id', $detail->id)->count())->toBe(3)
+        ->and($latest->status)->toBe(EditingStatus::Editada)
+        ->and($latest->is_revert)->toBeTrue();
+})->with([
+    'master' => [UserRole::Master],
+    'administración' => [UserRole::Admin],
+    'oficina' => [UserRole::Office],
+]);
+
+it('lets a manager revert an ok to a_corregir transition back to ok', function (UserRole $role) {
+    $manager = actingAsRole($role);
+
+    $product = Product::factory()->create(['has_photo' => true]);
+    $detail = OrderDetail::factory()->enabled()->create(['product_id' => $product->id]);
+
+    seedEditingStatus($detail, EditingStatus::Ok, $manager);
+    seedEditingStatus($detail, EditingStatus::ACorregir, $manager);
+
+    app(RevertEditingStatusAction::class)->handle(new RevertEditingStatusData(
+        orderDetailId: $detail->id,
+        revertedById: $manager->id,
+    ));
+
+    $latest = OrderEditingStatusChange::where('order_detail_id', $detail->id)->orderBy('id')->get()->last();
+
+    expect(OrderEditingStatusChange::where('order_detail_id', $detail->id)->count())->toBe(3)
+        ->and($latest->status)->toBe(EditingStatus::Ok)
+        ->and($latest->is_revert)->toBeTrue();
+})->with([
+    'master' => [UserRole::Master],
+    'administración' => [UserRole::Admin],
+    'oficina' => [UserRole::Office],
+]);
+
+it('reverting the latest entry of a multi-step history lands on the second-to-latest status', function () {
+    $editor = User::factory()->withRole(UserRole::Editor)->create();
+    $manager = User::factory()->withRole(UserRole::Office)->create();
+    $product = Product::factory()->create(['has_photo' => true]);
+    $detail = OrderDetail::factory()->enabled()->create(['product_id' => $product->id]);
+
+    seedEditingStatus($detail, EditingStatus::Editada, $editor);
+    seedEditingStatus($detail, EditingStatus::Ok, $manager);
+    seedEditingStatus($detail, EditingStatus::ACorregir, $manager);
+
+    app(RevertEditingStatusAction::class)->handle(new RevertEditingStatusData(
+        orderDetailId: $detail->id,
+        revertedById: $manager->id,
+    ));
+
+    $latest = OrderEditingStatusChange::where('order_detail_id', $detail->id)->orderBy('id')->get()->last();
+
+    expect($latest->status)->toBe(EditingStatus::Ok)
+        ->and($latest->is_revert)->toBeTrue();
+});
+
+it('rejects a revert attempted by an editor who is not the author of the latest entry, appending no row', function () {
+    $author = User::factory()->withRole(UserRole::Editor)->create();
+    $otherEditor = User::factory()->withRole(UserRole::Editor)->create();
+    $product = Product::factory()->create(['has_photo' => true]);
+    $detail = OrderDetail::factory()->enabled()->create(['product_id' => $product->id]);
+
+    seedEditingStatus($detail, EditingStatus::Editada, $author);
+
+    expect(fn () => app(RevertEditingStatusAction::class)->handle(new RevertEditingStatusData(
+        orderDetailId: $detail->id,
+        revertedById: $otherEditor->id,
+    )))->toThrow(ValidationException::class);
+
+    expect(OrderEditingStatusChange::where('order_detail_id', $detail->id)->count())->toBe(1);
+});
+
+it('rejects a revert attempted by a manager who is not the author of the latest entry, appending no row', function () {
+    $author = actingAsRole(UserRole::Office);
+    $otherManager = User::factory()->withRole(UserRole::Admin)->create();
+    $product = Product::factory()->create(['has_photo' => true]);
+    $detail = OrderDetail::factory()->enabled()->create(['product_id' => $product->id]);
+
+    seedEditingStatus($detail, EditingStatus::Editada, $author);
+    seedEditingStatus($detail, EditingStatus::Ok, $author);
+
+    expect(fn () => app(RevertEditingStatusAction::class)->handle(new RevertEditingStatusData(
+        orderDetailId: $detail->id,
+        revertedById: $otherManager->id,
+    )))->toThrow(ValidationException::class);
+
+    expect(OrderEditingStatusChange::where('order_detail_id', $detail->id)->count())->toBe(2);
+});
+
+it('rejects reverting a detail with no history, appending no row', function () {
+    $actor = actingAsRole(UserRole::Office);
+    $product = Product::factory()->create(['has_photo' => true]);
+    $detail = OrderDetail::factory()->enabled()->create(['product_id' => $product->id]);
+
+    expect(fn () => app(RevertEditingStatusAction::class)->handle(new RevertEditingStatusData(
+        orderDetailId: $detail->id,
+        revertedById: $actor->id,
+    )))->toThrow(ValidationException::class);
+
+    expect(OrderEditingStatusChange::where('order_detail_id', $detail->id)->exists())->toBeFalse();
+});
+
+it('never mutates pre-existing history rows on revert', function () {
+    $editor = User::factory()->withRole(UserRole::Editor)->create();
+    $manager = User::factory()->withRole(UserRole::Office)->create();
+    $product = Product::factory()->create(['has_photo' => true]);
+    $detail = OrderDetail::factory()->enabled()->create(['product_id' => $product->id]);
+
+    $editada = seedEditingStatus($detail, EditingStatus::Editada, $editor);
+    $ok = seedEditingStatus($detail, EditingStatus::Ok, $manager);
+
+    $editadaBefore = $editada->refresh()->only(['id', 'status', 'changed_by', 'is_revert']);
+    $okBefore = $ok->refresh()->only(['id', 'status', 'changed_by', 'is_revert']);
+
+    app(RevertEditingStatusAction::class)->handle(new RevertEditingStatusData(
+        orderDetailId: $detail->id,
+        revertedById: $manager->id,
+    ));
+
+    $after = OrderEditingStatusChange::where('order_detail_id', $detail->id)->orderBy('id')->get();
+
+    expect($after)->toHaveCount(3)
+        ->and($after->get(0)->only(['id', 'status', 'changed_by', 'is_revert']))->toBe($editadaBefore)
+        ->and($after->get(1)->only(['id', 'status', 'changed_by', 'is_revert']))->toBe($okBefore)
+        ->and($after->get(2)->is_revert)->toBeTrue()
+        ->and($after->get(2)->status)->toBe(EditingStatus::Editada);
+});
+
+it('reverts the latest transition through the HTTP endpoint as the authoring user', function () {
+    $editor = User::factory()->withRole(UserRole::Editor)->create();
+    $product = Product::factory()->create(['has_photo' => true]);
+    $detail = OrderDetail::factory()->enabled()->create(['product_id' => $product->id]);
+
+    EditorOrderDetailAssignment::create([
+        'order_detail_id' => $detail->id,
+        'editor_id' => $editor->id,
+        'assigned_by' => $editor->id,
+        'assigned_at' => now(),
+    ]);
+
+    seedEditingStatus($detail, EditingStatus::Editada, $editor);
+
+    actingAs($editor);
+
+    post(route('editing-status.revert', $detail))
+        ->assertSessionHasNoErrors()
+        ->assertRedirect();
+
+    $changes = OrderEditingStatusChange::where('order_detail_id', $detail->id)->orderBy('id')->get();
+
+    expect($changes)->toHaveCount(2)
+        ->and($changes->last()->status)->toBe(EditingStatus::Pendiente)
+        ->and($changes->last()->is_revert)->toBeTrue();
+});
