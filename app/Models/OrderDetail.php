@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 
 class OrderDetail extends Pivot
@@ -59,6 +60,14 @@ class OrderDetail extends Pivot
     public function editingStatusChanges()
     {
         return $this->hasMany(OrderEditingStatusChange::class, 'order_detail_id');
+    }
+
+    /**
+     * @return HasOne<EditorOrderDetailAssignment, $this>
+     */
+    public function editorAssignment()
+    {
+        return $this->hasOne(EditorOrderDetailAssignment::class, 'order_detail_id');
     }
 
     /**

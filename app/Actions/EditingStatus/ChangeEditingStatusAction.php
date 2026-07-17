@@ -67,54 +67,42 @@ class ChangeEditingStatusAction implements ActionContract
         bool $isManager,
         bool $isAssignedEditor,
     ): void {
-        if ($current === EditingStatus::Pendiente && $target === EditingStatus::Editada) {
+        // Structurally reachable targets from $current, ignoring gating (all gates forced open).
+        $structurallyReachable = EditingStatus::allowedTargets($current, isManager: true, isAssignedEditor: true, productionEnabled: true);
+
+        if (! in_array($target, $structurallyReachable, true)) {
+            throw ValidationException::withMessages([
+                'status' => 'Esta transición de estado no está permitida.',
+            ]);
+        }
+
+        $productionEnabled = $detail->production_enabled_at !== null;
+        $permitted = EditingStatus::allowedTargets($current, $isManager, $isAssignedEditor, $productionEnabled);
+
+        if (in_array($target, $permitted, true)) {
+            return;
+        }
+
+        if ($current === EditingStatus::Pendiente) {
             if (! $isAssignedEditor) {
                 throw ValidationException::withMessages([
                     'status' => 'Solo el editor asignado puede editar esta foto.',
                 ]);
             }
 
-            if ($detail->production_enabled_at === null) {
-                throw ValidationException::withMessages([
-                    'status' => 'Esta foto todavía no tiene la producción habilitada.',
-                ]);
-            }
-
-            return;
+            throw ValidationException::withMessages([
+                'status' => 'Esta foto todavía no tiene la producción habilitada.',
+            ]);
         }
 
-        if ($current === EditingStatus::Editada && in_array($target, [EditingStatus::Ok, EditingStatus::ACorregir], true)) {
-            if (! $isManager) {
-                throw ValidationException::withMessages([
-                    'status' => 'No tenés permiso para cambiar este estado de edición.',
-                ]);
-            }
-
-            return;
-        }
-
-        if ($current === EditingStatus::Ok && $target === EditingStatus::ACorregir) {
-            if (! $isManager) {
-                throw ValidationException::withMessages([
-                    'status' => 'No tenés permiso para cambiar este estado de edición.',
-                ]);
-            }
-
-            return;
-        }
-
-        if ($current === EditingStatus::ACorregir && $target === EditingStatus::Editada) {
-            if (! $isAssignedEditor) {
-                throw ValidationException::withMessages([
-                    'status' => 'Solo el editor asignado puede editar esta foto.',
-                ]);
-            }
-
-            return;
+        if ($current === EditingStatus::ACorregir) {
+            throw ValidationException::withMessages([
+                'status' => 'Solo el editor asignado puede editar esta foto.',
+            ]);
         }
 
         throw ValidationException::withMessages([
-            'status' => 'Esta transición de estado no está permitida.',
+            'status' => 'No tenés permiso para cambiar este estado de edición.',
         ]);
     }
 }
