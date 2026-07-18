@@ -14,6 +14,7 @@ import { Ban, Edit2, User } from 'lucide-react';
 import { useState } from 'react';
 import { useEditClientForm } from '../hooks/use-edit-client-form';
 import { EditClientModal } from './edit-client-modal';
+import { OrderPhotoUpload } from './order-photo-upload';
 
 const STATUS_STYLES: Record<string, string> = {
     'sin habilitar': 'bg-zinc-400 hover:bg-zinc-400',
@@ -125,6 +126,7 @@ export function OrderInfoCard({ order, onCancel }: OrderInfoCardProps) {
                             />
                         </a>
                     )}
+                    <OrderPhotoUpload order={order} />
                     <CardDescription>
                         Total: {formatPrice(order.total_price)}
                     </CardDescription>

@@ -50,6 +50,47 @@ it('rejects a filename without a number', function () {
     ])->assertSessionHasErrors('photo');
 });
 
+it('uses an explicit number over the filename', function () {
+    Storage::fake('public');
+    actingAsRole(UserRole::Editor);
+
+    $classroom = Classroom::factory()->create();
+
+    post(route('photos.store', $classroom), [
+        'photo' => UploadedFile::fake()->image('retrato.jpg'),
+        'number' => 7,
+    ])->assertSessionHasNoErrors();
+
+    $photo = Photo::where('classroom_id', $classroom->id)->first();
+
+    expect($photo?->number)->toBe(7);
+});
+
+it('rejects a duplicated explicit number in the classroom', function () {
+    Storage::fake('public');
+    actingAsRole(UserRole::Editor);
+
+    $classroom = Classroom::factory()->create();
+    Photo::factory()->create(['classroom_id' => $classroom->id, 'number' => 7]);
+
+    post(route('photos.store', $classroom), [
+        'photo' => UploadedFile::fake()->image('foto.jpg'),
+        'number' => 7,
+    ])->assertSessionHasErrors('photo');
+});
+
+it('rejects an explicit number below 1', function () {
+    Storage::fake('public');
+    actingAsRole(UserRole::Editor);
+
+    $classroom = Classroom::factory()->create();
+
+    post(route('photos.store', $classroom), [
+        'photo' => UploadedFile::fake()->image('foto.jpg'),
+        'number' => 0,
+    ])->assertSessionHasErrors('number');
+});
+
 it('renumbers the remaining photos after deleting one', function () {
     Storage::fake('public');
     actingAsRole(UserRole::Editor);

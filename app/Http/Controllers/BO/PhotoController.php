@@ -33,12 +33,16 @@ class PhotoController extends Controller
         /** @var UploadedFile $photo */
         $photo = $request->file('photo');
 
-        // Extract number from filename (e.g., "001.jpg" -> 1, "photo_042.png" -> 42)
-        if (! preg_match('/(\d+)/', $photo->getClientOriginalName(), $matches)) {
-            return back()->withErrors(['photo' => 'El nombre del archivo debe contener un número (ej: 001.jpg, foto_025.png)']);
-        }
+        if ($request->filled('number')) {
+            $photoNumber = (int) $request->integer('number');
+        } else {
+            // Extract number from filename (e.g., "001.jpg" -> 1, "photo_042.png" -> 42)
+            if (! preg_match('/(\d+)/', $photo->getClientOriginalName(), $matches)) {
+                return back()->withErrors(['photo' => 'El nombre del archivo debe contener un número (ej: 001.jpg, foto_025.png)']);
+            }
 
-        $photoNumber = (int) $matches[1];
+            $photoNumber = (int) $matches[1];
+        }
 
         // Reject a number already used in this classroom
         $existingPhoto = Photo::where('classroom_id', $classroom->id)
