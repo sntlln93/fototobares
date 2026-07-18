@@ -46,7 +46,6 @@ class ClassroomController extends Controller
         // sheet, where drafts and orders share the same sequence.
         $students = $orders->toBase()->concat($drafts->toBase())
             ->sortBy(fn (Order|OrderDraft $row): array => [
-                $row->photo_number === null ? 1 : 0,
                 (int) $row->photo_number,
                 $row->created_at?->getTimestamp() ?? 0,
                 $row->id,

@@ -52,8 +52,7 @@ class CreateOrderAction implements ActionContract
             // regardless of whether the child attended the photo session.
             // Completing a draft in its own classroom keeps the number it
             // already got.
-            $photoNumber = ($draft !== null && $draft->photo_number !== null
-                    && $draft->classroom_id === $classroomId)
+            $photoNumber = ($draft !== null && $draft->classroom_id === $classroomId)
                 ? $draft->photo_number
                 : $this->allocatePhotoNumber->handle(new PhotoNumberAllocationData($classroomId));
 

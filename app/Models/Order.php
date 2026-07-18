@@ -219,10 +219,6 @@ class Order extends Model
      */
     public function photo(): ?Photo
     {
-        if ($this->photo_number === null) {
-            return null;
-        }
-
         return Photo::query()
             ->where('classroom_id', $this->classroom_id)
             ->where('number', $this->photo_number)
