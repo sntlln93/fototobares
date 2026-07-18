@@ -7,6 +7,9 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Factory } from 'lucide-react';
+import { useState } from 'react';
+import { getStageRollback } from '../production-stage';
+import { StageRollbackConfirmation } from './stage-rollback-confirmation';
 
 const PENDING = 'none';
 
@@ -24,6 +27,12 @@ export function ProductionStatusControl({
     firstInstallmentPaid: boolean;
     onChange: (statusId: number | null) => void;
 }) {
+    const [pendingRollback, setPendingRollback] = useState<{
+        targetId: number | null;
+        stepsBack: number;
+        targetName: string;
+    } | null>(null);
+
     if (!product.production_enabled) {
         if (!firstInstallmentPaid) {
             return (
@@ -49,31 +58,64 @@ export function ProductionStatusControl({
 
     const statuses = product.statuses ?? [];
 
+    const handleValueChange = (value: string) => {
+        const targetId = value === PENDING ? null : Number(value);
+        const rollback = getStageRollback(
+            statuses,
+            product.production_status_id,
+            targetId,
+        );
+
+        if (rollback.isRollback) {
+            setPendingRollback({
+                targetId,
+                stepsBack: rollback.stepsBack,
+                targetName: rollback.targetName,
+            });
+
+            return;
+        }
+
+        onChange(targetId);
+    };
+
     return (
-        <Select
-            value={
-                product.production_status_id
-                    ? String(product.production_status_id)
-                    : PENDING
-            }
-            onValueChange={(value) =>
-                onChange(value === PENDING ? null : Number(value))
-            }
-        >
-            <SelectTrigger
-                className="mt-2 h-8 w-fit gap-2 text-xs"
-                aria-label={`Estado de fabricación de ${product.name}`}
+        <>
+            <Select
+                value={
+                    product.production_status_id
+                        ? String(product.production_status_id)
+                        : PENDING
+                }
+                onValueChange={handleValueChange}
             >
-                <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-                <SelectItem value={PENDING}>Sin empezar</SelectItem>
-                {statuses.map((status) => (
-                    <SelectItem key={status.id} value={String(status.id)}>
-                        {status.name}
-                    </SelectItem>
-                ))}
-            </SelectContent>
-        </Select>
+                <SelectTrigger
+                    className="mt-2 h-8 w-fit gap-2 text-xs"
+                    aria-label={`Estado de fabricación de ${product.name}`}
+                >
+                    <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectItem value={PENDING}>Sin empezar</SelectItem>
+                    {statuses.map((status) => (
+                        <SelectItem key={status.id} value={String(status.id)}>
+                            {status.name}
+                        </SelectItem>
+                    ))}
+                </SelectContent>
+            </Select>
+
+            <StageRollbackConfirmation
+                show={pendingRollback !== null}
+                productName={product.name}
+                stepsBack={pendingRollback?.stepsBack ?? 0}
+                targetName={pendingRollback?.targetName ?? ''}
+                onConfirm={() => {
+                    if (pendingRollback) onChange(pendingRollback.targetId);
+                    setPendingRollback(null);
+                }}
+                onCancel={() => setPendingRollback(null)}
+            />
+        </>
     );
 }
