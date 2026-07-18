@@ -89,4 +89,72 @@ describe('ProductionStatusControl', () => {
 
         expect(onChange).toHaveBeenCalledWith(21);
     });
+
+    it('asks for confirmation before rolling back to an earlier stage', () => {
+        const onChange = vi.fn();
+        render(
+            <ProductionStatusControl
+                product={makeProduct({
+                    production_status: 'Pegado',
+                    production_status_id: 22,
+                })}
+                firstInstallmentPaid={true}
+                onChange={onChange}
+            />,
+        );
+
+        const trigger = screen.getByRole('combobox');
+        fireEvent.keyDown(trigger, { key: 'Enter' });
+        fireEvent.click(screen.getByRole('option', { name: 'Impreso' }));
+
+        expect(
+            screen.getByText(/¿Estás seguro que querés retroceder/),
+        ).toBeTruthy();
+        expect(onChange).not.toHaveBeenCalled();
+    });
+
+    it('rolls back once the confirmation is accepted', () => {
+        const onChange = vi.fn();
+        render(
+            <ProductionStatusControl
+                product={makeProduct({
+                    production_status: 'Pegado',
+                    production_status_id: 22,
+                })}
+                firstInstallmentPaid={true}
+                onChange={onChange}
+            />,
+        );
+
+        const trigger = screen.getByRole('combobox');
+        fireEvent.keyDown(trigger, { key: 'Enter' });
+        fireEvent.click(screen.getByRole('option', { name: 'Impreso' }));
+
+        fireEvent.click(screen.getByText('Retroceder'));
+
+        expect(onChange).toHaveBeenCalledWith(21);
+    });
+
+    it('keeps the current stage when the rollback is cancelled', () => {
+        const onChange = vi.fn();
+        render(
+            <ProductionStatusControl
+                product={makeProduct({
+                    production_status: 'Pegado',
+                    production_status_id: 22,
+                })}
+                firstInstallmentPaid={true}
+                onChange={onChange}
+            />,
+        );
+
+        const trigger = screen.getByRole('combobox');
+        fireEvent.keyDown(trigger, { key: 'Enter' });
+        fireEvent.click(screen.getByRole('option', { name: 'Impreso' }));
+
+        fireEvent.click(screen.getByText('Cancelar'));
+
+        expect(onChange).not.toHaveBeenCalled();
+        expect(trigger.textContent).toContain('Pegado');
+    });
 });
