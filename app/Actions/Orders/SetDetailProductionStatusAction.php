@@ -24,7 +24,9 @@ class SetDetailProductionStatusAction implements ActionContract
      * Change a detail's production status from the order page. Production is
      * gated by the first installment: until it is paid nothing gets enabled.
      * A null status enables the detail as "sin empezar" (it enters /tracking);
-     * a stage delegates to the tracking flow, which deducts stock.
+     * a stage delegates to the tracking flow, which deducts stock. Disabling
+     * clears production_enabled_at only, removing the detail from /tracking
+     * without touching its stage or stock.
      *
      * @param  DetailProductionStatusSettingData  $params
      *
@@ -49,6 +51,12 @@ class SetDetailProductionStatusAction implements ActionContract
             throw ValidationException::withMessages([
                 'detail_id' => 'No se encontró el producto en este pedido.',
             ]);
+        }
+
+        if ($params->disableProduction) {
+            $this->markDisabled($detail);
+
+            return;
         }
 
         if (! $order->firstInstallmentPaid()) {
@@ -81,6 +89,17 @@ class SetDetailProductionStatusAction implements ActionContract
     {
         $detail->production_enabled_at ??= now();
         $detail->production_status_id = null;
+        $detail->status_updated_at = now();
+        $detail->save();
+    }
+
+    /**
+     * Disable the detail: it leaves /tracking, but its reached stage is
+     * preserved so re-enabling resumes from it. No stock movement happens.
+     */
+    private function markDisabled(OrderDetail $detail): void
+    {
+        $detail->production_enabled_at = null;
         $detail->status_updated_at = now();
         $detail->save();
     }

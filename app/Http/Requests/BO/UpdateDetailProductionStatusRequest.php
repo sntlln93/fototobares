@@ -28,12 +28,13 @@ class UpdateDetailProductionStatusRequest extends FormRequest
         return [
             'detail_id' => ['required', 'integer'],
             'production_status_id' => ['nullable', 'integer', 'exists:production_statuses,id'],
+            'disable_production' => ['sometimes', 'boolean'],
         ];
     }
 
     public function toData(Order $order, ?User $user): DetailProductionStatusSettingData
     {
-        /** @var array{detail_id: int|string, production_status_id: int|string|null} $validated */
+        /** @var array{detail_id: int|string, production_status_id: int|string|null, disable_production?: bool} $validated */
         $validated = $this->validated();
 
         return new DetailProductionStatusSettingData(
@@ -41,6 +42,7 @@ class UpdateDetailProductionStatusRequest extends FormRequest
             detailId: (int) $validated['detail_id'],
             statusId: isset($validated['production_status_id']) ? (int) $validated['production_status_id'] : null,
             user: $user,
+            disableProduction: $validated['disable_production'] ?? false,
         );
     }
 }
