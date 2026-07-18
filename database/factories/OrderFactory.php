@@ -27,7 +27,7 @@ class OrderFactory extends Factory
             'due_date' => now()->addMonth()->format('Y-m-d'),
             'child_name' => fake()->firstName(),
             'attended_photo_session' => true,
-            'photo_number' => null,
+            'photo_number' => fake()->numberBetween(1, 9999),
         ];
     }
 

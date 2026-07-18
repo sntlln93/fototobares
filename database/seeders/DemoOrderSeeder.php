@@ -123,8 +123,8 @@ class DemoOrderSeeder extends Seeder
         $this->addDetail($order, $medalla, null, 'Isabella', enabled: true);
         $order->payments()->create(['amount' => 9000, 'type' => 'efectivo', 'paid_on' => now()->subDays(5)->toDateString()]);
 
-        // 9. Did not attend the photo session: no photo number assigned
-        $order = $this->makeOrder($sextoA, 'Irina Sosa', '3804000009', 'Simón', null, 18000, 1, 12, attended: false);
+        // 9. Did not attend the photo session but still gets a photo number
+        $order = $this->makeOrder($sextoA, 'Irina Sosa', '3804000009', 'Simón', 9, 18000, 1, 12, attended: false);
         $this->addDetail($order, $carpeta, null, 'Simón', enabled: true);
         $order->payments()->create(['amount' => 18000, 'type' => 'efectivo', 'paid_on' => now()->subDays(2)->toDateString()]);
 
