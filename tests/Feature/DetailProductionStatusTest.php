@@ -6,6 +6,7 @@ use App\Enums\UserRole;
 use App\Models\Order;
 use App\Models\OrderDetail;
 use App\Models\Stockable;
+use App\Models\StockMovement;
 use Inertia\Testing\AssertableInertia as Assert;
 
 use function Pest\Laravel\get;
@@ -183,6 +184,200 @@ it('rejects a cancelled order', function () {
         'detail_id' => $detail->id,
         'production_status_id' => null,
     ])->assertSessionHasErrors('order');
+
+    expect($detail->refresh()->production_enabled_at)->toBeNull();
+});
+
+it('disables production, clearing production_enabled_at', function () {
+    actingAsRole(UserRole::Office);
+
+    $order = orderWithFirstInstallmentPaid();
+    $detail = OrderDetail::factory()->create(['order_id' => $order->id]);
+
+    put(route('orders.production-status', $order), [
+        'detail_id' => $detail->id,
+        'production_status_id' => null,
+    ]);
+
+    put(route('orders.production-status', $order), [
+        'detail_id' => $detail->id,
+        'production_status_id' => null,
+        'disable_production' => true,
+    ])->assertSessionHasNoErrors();
+
+    expect($detail->refresh()->production_enabled_at)->toBeNull();
+});
+
+it('preserves the reached stage when disabling production', function () {
+    actingAsRole(UserRole::Office);
+
+    $product = productWithChain(['Impreso', 'Pegado']);
+    $planchas = Stockable::factory()->create(['quantity' => 10]);
+    stageOf($product, 2)->stockables()->attach($planchas->id, ['quantity' => -2]);
+
+    $order = orderWithFirstInstallmentPaid();
+    $detail = OrderDetail::factory()->create(['order_id' => $order->id, 'product_id' => $product->id]);
+
+    put(route('orders.production-status', $order), [
+        'detail_id' => $detail->id,
+        'production_status_id' => stageOf($product, 2)->id,
+    ]);
+
+    put(route('orders.production-status', $order), [
+        'detail_id' => $detail->id,
+        'production_status_id' => stageOf($product, 2)->id,
+        'disable_production' => true,
+    ])->assertSessionHasNoErrors();
+
+    $detail->refresh();
+    expect($detail->production_enabled_at)->toBeNull()
+        ->and($detail->production_status_id)->toBe(stageOf($product, 2)->id);
+});
+
+it('creates no stock movement when disabling production', function () {
+    actingAsRole(UserRole::Office);
+
+    $product = productWithChain(['Impreso', 'Pegado']);
+    $planchas = Stockable::factory()->create(['quantity' => 10]);
+    stageOf($product, 2)->stockables()->attach($planchas->id, ['quantity' => -2]);
+
+    $order = orderWithFirstInstallmentPaid();
+    $detail = OrderDetail::factory()->create(['order_id' => $order->id, 'product_id' => $product->id]);
+
+    put(route('orders.production-status', $order), [
+        'detail_id' => $detail->id,
+        'production_status_id' => stageOf($product, 2)->id,
+    ]);
+
+    $countBeforeDisable = StockMovement::count();
+
+    put(route('orders.production-status', $order), [
+        'detail_id' => $detail->id,
+        'production_status_id' => stageOf($product, 2)->id,
+        'disable_production' => true,
+    ])->assertSessionHasNoErrors();
+
+    expect(StockMovement::count())->toBe($countBeforeDisable)
+        ->and($planchas->refresh()->quantity)->toBe(8);
+});
+
+it('removes a disabled detail from tracking', function () {
+    actingAsRole(UserRole::Office);
+
+    $order = orderWithFirstInstallmentPaid();
+    $detail = OrderDetail::factory()->create(['order_id' => $order->id]);
+
+    put(route('orders.production-status', $order), [
+        'detail_id' => $detail->id,
+        'production_status_id' => null,
+    ]);
+
+    get(route('tracking.index'))->assertInertia(
+        fn (Assert $page) => $page->has('details', 1),
+    );
+
+    put(route('orders.production-status', $order), [
+        'detail_id' => $detail->id,
+        'production_status_id' => null,
+        'disable_production' => true,
+    ]);
+
+    get(route('tracking.index'))->assertInertia(
+        fn (Assert $page) => $page->has('details', 0),
+    );
+});
+
+it('re-enables a disabled detail without creating duplicate stock movements', function () {
+    actingAsRole(UserRole::Office);
+
+    $order = orderWithFirstInstallmentPaid();
+    $detail = OrderDetail::factory()->create(['order_id' => $order->id]);
+
+    $countBeforeRoundTrip = StockMovement::count();
+
+    put(route('orders.production-status', $order), [
+        'detail_id' => $detail->id,
+        'production_status_id' => null,
+        'disable_production' => true,
+    ])->assertSessionHasNoErrors();
+
+    put(route('orders.production-status', $order), [
+        'detail_id' => $detail->id,
+        'production_status_id' => null,
+    ])->assertSessionHasNoErrors();
+
+    expect(StockMovement::count())->toBe($countBeforeRoundTrip)
+        ->and($detail->refresh()->production_enabled_at)->not->toBeNull();
+});
+
+it('restores the preserved stage when re-enabling a detail disabled at that stage', function () {
+    actingAsRole(UserRole::Office);
+
+    $product = productWithChain(['Impreso', 'Pegado']);
+    $planchas = Stockable::factory()->create(['quantity' => 10]);
+    stageOf($product, 2)->stockables()->attach($planchas->id, ['quantity' => -2]);
+
+    $order = orderWithFirstInstallmentPaid();
+    $detail = OrderDetail::factory()->create(['order_id' => $order->id, 'product_id' => $product->id]);
+
+    put(route('orders.production-status', $order), [
+        'detail_id' => $detail->id,
+        'production_status_id' => stageOf($product, 2)->id,
+    ]);
+
+    put(route('orders.production-status', $order), [
+        'detail_id' => $detail->id,
+        'production_status_id' => stageOf($product, 2)->id,
+        'disable_production' => true,
+    ]);
+
+    $countBeforeReEnable = StockMovement::count();
+
+    put(route('orders.production-status', $order), [
+        'detail_id' => $detail->id,
+        'production_status_id' => null,
+    ])->assertSessionHasNoErrors();
+
+    $detail->refresh();
+    expect($detail->production_status_id)->toBe(stageOf($product, 2)->id)
+        ->and($detail->production_enabled_at)->not->toBeNull()
+        ->and(StockMovement::count())->toBe($countBeforeReEnable);
+});
+
+it('rejects disabling production on a cancelled order', function () {
+    actingAsRole(UserRole::Office);
+
+    $order = Order::factory()->cancelled()->create();
+    $detail = OrderDetail::factory()->create(['order_id' => $order->id]);
+
+    put(route('orders.production-status', $order), [
+        'detail_id' => $detail->id,
+        'production_status_id' => null,
+        'disable_production' => true,
+    ])->assertSessionHasErrors('order');
+});
+
+it('disables production even when the first installment is no longer paid', function () {
+    actingAsRole(UserRole::Office);
+
+    $order = Order::factory()->create(['total_price' => 64000, 'payment_plan' => 4]);
+    $order->payments()->create(['amount' => 16000, 'type' => 'efectivo', 'paid_on' => now()->toDateString()]);
+    $detail = OrderDetail::factory()->create(['order_id' => $order->id]);
+
+    put(route('orders.production-status', $order), [
+        'detail_id' => $detail->id,
+        'production_status_id' => null,
+    ]);
+
+    // The installment is no longer considered paid once refunded below
+    // the gate threshold, but the disable branch runs before that gate.
+    $order->payments()->delete();
+
+    put(route('orders.production-status', $order), [
+        'detail_id' => $detail->id,
+        'production_status_id' => null,
+        'disable_production' => true,
+    ])->assertSessionHasNoErrors();
 
     expect($detail->refresh()->production_enabled_at)->toBeNull();
 });

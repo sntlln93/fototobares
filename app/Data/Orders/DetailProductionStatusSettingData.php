@@ -15,5 +15,6 @@ final readonly class DetailProductionStatusSettingData implements DtoContract
         public int $detailId,
         public ?int $statusId,
         public ?User $user,
+        public bool $disableProduction = false,
     ) {}
 }

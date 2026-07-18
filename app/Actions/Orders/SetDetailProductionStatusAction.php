@@ -24,7 +24,9 @@ class SetDetailProductionStatusAction implements ActionContract
      * Change a detail's production status from the order page. Production is
      * gated by the first installment: until it is paid nothing gets enabled.
      * A null status enables the detail as "sin empezar" (it enters /tracking);
-     * a stage delegates to the tracking flow, which deducts stock.
+     * a stage delegates to the tracking flow, which deducts stock. Disabling
+     * clears production_enabled_at only, removing the detail from /tracking
+     * without touching its stage or stock.
      *
      * @param  DetailProductionStatusSettingData  $params
      *
@@ -51,6 +53,12 @@ class SetDetailProductionStatusAction implements ActionContract
             ]);
         }
 
+        if ($params->disableProduction) {
+            $this->markDisabled($detail);
+
+            return;
+        }
+
         if (! $order->firstInstallmentPaid()) {
             throw ValidationException::withMessages([
                 'order' => 'La fabricación se habilita cuando la primera cuota está paga.',
@@ -75,12 +83,31 @@ class SetDetailProductionStatusAction implements ActionContract
     /**
      * Enable the detail with no stage yet: it shows up in /tracking as
      * "sin empezar". Already-deducted stock stays deducted, mirroring
-     * backward moves on the tracking board.
+     * backward moves on the tracking board. If the detail was disabled (its
+     * stage preserved for exactly this purpose), re-enabling resumes at that
+     * stage instead of clearing it; only an already-enabled detail explicitly
+     * set to "sin empezar" gets its stage cleared.
      */
     private function markPending(OrderDetail $detail): void
     {
+        $wasEnabled = $detail->production_enabled_at !== null;
         $detail->production_enabled_at ??= now();
-        $detail->production_status_id = null;
+
+        if ($wasEnabled) {
+            $detail->production_status_id = null;
+        }
+
+        $detail->status_updated_at = now();
+        $detail->save();
+    }
+
+    /**
+     * Disable the detail: it leaves /tracking, but its reached stage is
+     * preserved so re-enabling resumes from it. No stock movement happens.
+     */
+    private function markDisabled(OrderDetail $detail): void
+    {
+        $detail->production_enabled_at = null;
         $detail->status_updated_at = now();
         $detail->save();
     }

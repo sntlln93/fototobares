@@ -16,6 +16,7 @@ export function DetailItem({
     onTogglePriority,
     firstInstallmentPaid,
     onStatusChange,
+    onDisableProduction,
     canEditVariant,
 }: {
     orderId: number;
@@ -24,6 +25,7 @@ export function DetailItem({
     onTogglePriority: () => void;
     firstInstallmentPaid: boolean;
     onStatusChange: (statusId: number | null) => void;
+    onDisableProduction: () => void;
     canEditVariant: boolean;
 }) {
     const [showEditVariant, setShowEditVariant] = useState(false);
@@ -108,6 +110,7 @@ export function DetailItem({
                             product={product}
                             firstInstallmentPaid={firstInstallmentPaid}
                             onChange={onStatusChange}
+                            onDisable={onDisableProduction}
                         />
                         <Button
                             variant="ghost"
