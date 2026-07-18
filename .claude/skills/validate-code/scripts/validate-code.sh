@@ -52,17 +52,23 @@ echo "Changed sides: backend=$backend frontend=$frontend e2e=$e2e (full=$FULL)"
 echo
 
 failures=()
+# Output is captured, not streamed: a passing tool prints its whole file/test
+# list, which is pure noise that an agent then re-reads on every later turn.
+# On success only the label is emitted; on failure, the tail of the log.
 run() {
     local label=$1
     shift
-    echo "==> $label"
-    if "$@"; then
-        echo "    OK"
+    local log
+    log=$(mktemp)
+    if "$@" >"$log" 2>&1; then
+        echo "==> $label: OK"
     else
-        echo "    FAILED"
+        echo "==> $label: FAILED"
+        tail -n "${VALIDATE_LOG_LINES:-40}" "$log"
+        echo
         failures+=("$label")
     fi
-    echo
+    rm -f "$log"
 }
 
 if $backend; then
