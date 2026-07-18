@@ -34,6 +34,7 @@ class ClassroomController extends Controller
         $orders = Order::where('classroom_id', $classroom->id)
             ->with('client')
             ->withCount('products')
+            ->withSum('payments', 'amount')
             ->search($search)
             ->get();
 

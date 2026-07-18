@@ -37,6 +37,7 @@ const makeStudent = (
     products_count: 2,
     total_price: 15000,
     payment_plan: 3,
+    paid_installments: 1,
     due_date: '1 de ago 2026',
     ...overrides,
 });
