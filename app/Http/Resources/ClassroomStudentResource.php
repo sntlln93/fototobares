@@ -35,6 +35,7 @@ class ClassroomStudentResource extends JsonResource
                 'products_count' => count($row->products ?? []),
                 'total_price' => $row->total_price,
                 'payment_plan' => $row->payment_plan,
+                'paid_installments' => 0,
                 'due_date' => $row->due_date?->isoFormat('D [de] MMM Y'),
             ];
         }
@@ -55,7 +56,33 @@ class ClassroomStudentResource extends JsonResource
             'products_count' => is_numeric($productsCount) ? (int) $productsCount : 0,
             'total_price' => $row->total_price,
             'payment_plan' => $row->payment_plan,
+            'paid_installments' => $this->paidInstallments($row),
             'due_date' => $row->due_date->isoFormat('D [de] MMM Y'),
         ];
+    }
+
+    /**
+     * Installments actually covered by payments, capped at the plan.
+     * Mirrors the semantics of `Order::firstInstallmentPaid()`.
+     */
+    private function paidInstallments(Order $order): int
+    {
+        $plan = (int) $order->payment_plan;
+
+        if ($plan <= 0) {
+            return 0;
+        }
+
+        $paidAttribute = $order->getAttribute('payments_sum_amount');
+        $paid = is_numeric($paidAttribute) ? (int) $paidAttribute : 0;
+
+        $totalPrice = (int) $order->total_price;
+        $installment = $totalPrice / $plan;
+
+        if ($installment == 0) {
+            return 0;
+        }
+
+        return min($plan, (int) floor($paid / $installment));
     }
 }

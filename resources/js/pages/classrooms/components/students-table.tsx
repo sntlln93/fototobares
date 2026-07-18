@@ -23,6 +23,7 @@ export interface ClassroomStudent {
     products_count: number;
     total_price: number;
     payment_plan: number;
+    paid_installments: number;
     due_date: string | null;
 }
 
@@ -97,12 +98,36 @@ export function StudentsTable({ students, search }: StudentsTableProps) {
                             {formatPrice(student.total_price)}
                         </TableCell>
                         <TableCell>
-                            {student.payment_plan > 0
-                                ? `${student.payment_plan} (${formatPrice(
-                                      student.total_price /
-                                          student.payment_plan,
-                                  )})`
-                                : '—'}
+                            {student.payment_plan > 0 ? (
+                                <div className="flex flex-col gap-1">
+                                    <span>
+                                        {student.payment_plan} (
+                                        {formatPrice(
+                                            student.total_price /
+                                                student.payment_plan,
+                                        )}
+                                        )
+                                    </span>
+                                    <div className="flex flex-wrap gap-1">
+                                        {Array.from({
+                                            length: student.payment_plan,
+                                        }).map((_, index) => (
+                                            <span
+                                                key={index}
+                                                className={cn(
+                                                    'size-3 rounded-sm',
+                                                    index <
+                                                        student.paid_installments
+                                                        ? 'bg-primary'
+                                                        : 'border bg-transparent',
+                                                )}
+                                            />
+                                        ))}
+                                    </div>
+                                </div>
+                            ) : (
+                                '—'
+                            )}
                         </TableCell>
                         <TableCell>{student.due_date ?? '—'}</TableCell>
                         <TableCell>
