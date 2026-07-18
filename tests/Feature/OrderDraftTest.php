@@ -64,13 +64,13 @@ it('allocates the next number shared with orders', function () {
     expect(OrderDraft::latest('id')->first()?->photo_number)->toBe(2);
 });
 
-it('does not assign a photo number when the child did not attend the session', function () {
+it('assigns a photo number even when the child did not attend the session', function () {
     $classroom = Classroom::factory()->create();
 
     post(route('drafts.store'), validDraftPayload($classroom, ['attended_photo_session' => false]))
         ->assertSessionHasNoErrors();
 
-    expect(OrderDraft::latest('id')->first()?->photo_number)->toBeNull();
+    expect(OrderDraft::latest('id')->first()?->photo_number)->toBe(1);
 });
 
 it('interleaves orders and drafts within a classroom, following creation order', function () {
@@ -138,7 +138,7 @@ it('allocates a fresh number when completing a draft into a different classroom'
     expect(Order::latest('id')->first()?->photo_number)->toBe(2);
 });
 
-it('does not assign a photo number when completing a draft with attended_photo_session false', function () {
+it('keeps the draft photo number when completing a draft with attended_photo_session false', function () {
     $classroom = Classroom::factory()->create();
     $product = Product::factory()->create();
     $draft = OrderDraft::factory()->create(['classroom_id' => $classroom->id, 'photo_number' => 7]);
@@ -148,7 +148,7 @@ it('does not assign a photo number when completing a draft with attended_photo_s
         'draft_id' => $draft->id,
     ])->assertSessionHasNoErrors();
 
-    expect(Order::latest('id')->first()?->photo_number)->toBeNull();
+    expect(Order::latest('id')->first()?->photo_number)->toBe(7);
 });
 
 it('exposes the photo number on the drafts index', function () {

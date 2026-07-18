@@ -50,7 +50,7 @@ it('assigns the next photo number within the classroom', function () {
     expect(Order::latest('id')->first()?->photo_number)->toBe(6);
 });
 
-it('does not assign a photo number when the child did not attend the session', function () {
+it('assigns a photo number even when the child did not attend the session', function () {
     actingAsRole();
 
     $classroom = Classroom::factory()->create();
@@ -61,7 +61,7 @@ it('does not assign a photo number when the child did not attend the session', f
         'attended_photo_session' => false,
     ])->assertSessionHasNoErrors();
 
-    expect(Order::latest('id')->first()?->photo_number)->toBeNull();
+    expect(Order::latest('id')->first()?->photo_number)->toBe(1);
 });
 
 it('consumes the draft when an order is created from it', function () {

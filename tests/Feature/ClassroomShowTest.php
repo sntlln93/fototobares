@@ -17,22 +17,20 @@ beforeEach(function () {
     actingAsRole();
 });
 
-it('interleaves orders and drafts sorted by photo number, nulls last', function () {
+it('interleaves orders and drafts sorted by photo number', function () {
     $classroom = Classroom::factory()->create();
 
     $second = Order::factory()->create(['classroom_id' => $classroom->id, 'photo_number' => 2]);
-    $unnumbered = Order::factory()->create(['classroom_id' => $classroom->id, 'photo_number' => null]);
     $draft = OrderDraft::factory()->create(['classroom_id' => $classroom->id, 'photo_number' => 1]);
 
     get(route('classrooms.show', ['classroom' => $classroom->id]))->assertInertia(
         fn (Assert $page) => $page
             ->component('classrooms/show')
-            ->has('students.data', 3)
+            ->has('students.data', 2)
             ->where('students.data.0.id', $draft->id)
             ->where('students.data.0.kind', 'draft')
             ->where('students.data.1.id', $second->id)
-            ->where('students.data.1.kind', 'order')
-            ->where('students.data.2.id', $unnumbered->id),
+            ->where('students.data.1.kind', 'order'),
     );
 });
 
