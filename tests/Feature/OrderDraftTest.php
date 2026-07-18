@@ -73,6 +73,17 @@ it('assigns a photo number even when the child did not attend the session', func
     expect(OrderDraft::latest('id')->first()?->photo_number)->toBe(1);
 });
 
+it('allocates a photo number when attendance is unspecified (null)', function () {
+    $classroom = Classroom::factory()->create();
+
+    Order::factory()->create(['classroom_id' => $classroom->id, 'photo_number' => 1]);
+
+    post(route('drafts.store'), validDraftPayload($classroom, ['attended_photo_session' => null]))
+        ->assertSessionHasNoErrors();
+
+    expect(OrderDraft::latest('id')->first()?->photo_number)->toBe(2);
+});
+
 it('interleaves orders and drafts within a classroom, following creation order', function () {
     $sextoA = Classroom::factory()->create();
     $sextoB = Classroom::factory()->create();

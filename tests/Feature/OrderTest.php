@@ -64,6 +64,25 @@ it('assigns a photo number even when the child did not attend the session', func
     expect(Order::latest('id')->first()?->photo_number)->toBe(1);
 });
 
+it('assigns a photo number when attendance is unspecified (null)', function () {
+    actingAsRole();
+
+    $classroom = Classroom::factory()->create();
+    $product = Product::factory()->create();
+
+    Order::factory()->create([
+        'classroom_id' => $classroom->id,
+        'photo_number' => 5,
+    ]);
+
+    post(route('orders.store'), [
+        ...validOrderPayload($classroom, $product),
+        'attended_photo_session' => null,
+    ])->assertSessionHasNoErrors();
+
+    expect(Order::latest('id')->first()?->photo_number)->toBe(6);
+});
+
 it('consumes the draft when an order is created from it', function () {
     actingAsRole();
 
