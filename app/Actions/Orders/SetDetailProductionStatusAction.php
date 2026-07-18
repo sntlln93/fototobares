@@ -83,12 +83,20 @@ class SetDetailProductionStatusAction implements ActionContract
     /**
      * Enable the detail with no stage yet: it shows up in /tracking as
      * "sin empezar". Already-deducted stock stays deducted, mirroring
-     * backward moves on the tracking board.
+     * backward moves on the tracking board. If the detail was disabled (its
+     * stage preserved for exactly this purpose), re-enabling resumes at that
+     * stage instead of clearing it; only an already-enabled detail explicitly
+     * set to "sin empezar" gets its stage cleared.
      */
     private function markPending(OrderDetail $detail): void
     {
+        $wasEnabled = $detail->production_enabled_at !== null;
         $detail->production_enabled_at ??= now();
-        $detail->production_status_id = null;
+
+        if ($wasEnabled) {
+            $detail->production_status_id = null;
+        }
+
         $detail->status_updated_at = now();
         $detail->save();
     }

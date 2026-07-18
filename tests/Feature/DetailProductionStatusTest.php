@@ -310,6 +310,40 @@ it('re-enables a disabled detail without creating duplicate stock movements', fu
         ->and($detail->refresh()->production_enabled_at)->not->toBeNull();
 });
 
+it('restores the preserved stage when re-enabling a detail disabled at that stage', function () {
+    actingAsRole(UserRole::Office);
+
+    $product = productWithChain(['Impreso', 'Pegado']);
+    $planchas = Stockable::factory()->create(['quantity' => 10]);
+    stageOf($product, 2)->stockables()->attach($planchas->id, ['quantity' => -2]);
+
+    $order = orderWithFirstInstallmentPaid();
+    $detail = OrderDetail::factory()->create(['order_id' => $order->id, 'product_id' => $product->id]);
+
+    put(route('orders.production-status', $order), [
+        'detail_id' => $detail->id,
+        'production_status_id' => stageOf($product, 2)->id,
+    ]);
+
+    put(route('orders.production-status', $order), [
+        'detail_id' => $detail->id,
+        'production_status_id' => stageOf($product, 2)->id,
+        'disable_production' => true,
+    ]);
+
+    $countBeforeReEnable = StockMovement::count();
+
+    put(route('orders.production-status', $order), [
+        'detail_id' => $detail->id,
+        'production_status_id' => null,
+    ])->assertSessionHasNoErrors();
+
+    $detail->refresh();
+    expect($detail->production_status_id)->toBe(stageOf($product, 2)->id)
+        ->and($detail->production_enabled_at)->not->toBeNull()
+        ->and(StockMovement::count())->toBe($countBeforeReEnable);
+});
+
 it('rejects disabling production on a cancelled order', function () {
     actingAsRole(UserRole::Office);
 
