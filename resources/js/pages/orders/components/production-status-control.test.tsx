@@ -164,4 +164,116 @@ describe('ProductionStatusControl', () => {
         expect(onChange).not.toHaveBeenCalled();
         expect(trigger.textContent).toContain('Pegado');
     });
+
+    it('offers to disable production for an enabled detail', () => {
+        const onChange = vi.fn();
+        const onDisable = vi.fn();
+        render(
+            <ProductionStatusControl
+                product={makeProduct()}
+                firstInstallmentPaid={true}
+                onChange={onChange}
+                onDisable={onDisable}
+            />,
+        );
+
+        expect(screen.getByText('Deshabilitar fabricación')).toBeTruthy();
+    });
+
+    it('does not offer to disable production for a not-enabled detail', () => {
+        const onChange = vi.fn();
+        const onDisable = vi.fn();
+        render(
+            <ProductionStatusControl
+                product={makeProduct({ production_enabled: false })}
+                firstInstallmentPaid={true}
+                onChange={onChange}
+                onDisable={onDisable}
+            />,
+        );
+
+        expect(screen.getByText('Habilitar fabricación')).toBeTruthy();
+        expect(screen.queryByText('Deshabilitar fabricación')).toBeNull();
+    });
+
+    it('disables immediately when the detail has no stage yet', () => {
+        const onChange = vi.fn();
+        const onDisable = vi.fn();
+        render(
+            <ProductionStatusControl
+                product={makeProduct()}
+                firstInstallmentPaid={true}
+                onChange={onChange}
+                onDisable={onDisable}
+            />,
+        );
+
+        fireEvent.click(screen.getByText('Deshabilitar fabricación'));
+
+        expect(onDisable).toHaveBeenCalledTimes(1);
+        expect(screen.queryByText(/¿Deshabilitar la fabricación/)).toBeNull();
+    });
+
+    it('asks for confirmation before disabling a detail with a reached stage', () => {
+        const onChange = vi.fn();
+        const onDisable = vi.fn();
+        render(
+            <ProductionStatusControl
+                product={makeProduct({
+                    production_status: 'Impreso',
+                    production_status_id: 21,
+                })}
+                firstInstallmentPaid={true}
+                onChange={onChange}
+                onDisable={onDisable}
+            />,
+        );
+
+        fireEvent.click(screen.getByText('Deshabilitar fabricación'));
+
+        expect(screen.getByText(/¿Deshabilitar la fabricación/)).toBeTruthy();
+        expect(onDisable).not.toHaveBeenCalled();
+    });
+
+    it('disables the detail once the confirmation is accepted', () => {
+        const onChange = vi.fn();
+        const onDisable = vi.fn();
+        render(
+            <ProductionStatusControl
+                product={makeProduct({
+                    production_status: 'Impreso',
+                    production_status_id: 21,
+                })}
+                firstInstallmentPaid={true}
+                onChange={onChange}
+                onDisable={onDisable}
+            />,
+        );
+
+        fireEvent.click(screen.getByText('Deshabilitar fabricación'));
+        fireEvent.click(screen.getByText('Deshabilitar'));
+
+        expect(onDisable).toHaveBeenCalledTimes(1);
+    });
+
+    it('leaves the detail enabled when the disable confirmation is cancelled', () => {
+        const onChange = vi.fn();
+        const onDisable = vi.fn();
+        render(
+            <ProductionStatusControl
+                product={makeProduct({
+                    production_status: 'Impreso',
+                    production_status_id: 21,
+                })}
+                firstInstallmentPaid={true}
+                onChange={onChange}
+                onDisable={onDisable}
+            />,
+        );
+
+        fireEvent.click(screen.getByText('Deshabilitar fabricación'));
+        fireEvent.click(screen.getByText('Cancelar'));
+
+        expect(onDisable).not.toHaveBeenCalled();
+    });
 });
