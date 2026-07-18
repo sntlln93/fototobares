@@ -97,10 +97,23 @@ it('still finds an order by its number', function () {
     expect(searchedOrderIds((string) $order->id))->toContain($order->id);
 });
 
-it('does not match phones on a short numeric term, which is an order number', function () {
+it('matches phones on a 3-digit numeric fragment', function () {
+    $order = orderFor('Carla López', '3804380999');
+
+    expect(searchedOrderIds('380'))->toBe([$order->id]);
+});
+
+it('matches an order by a leading-zero phone fragment', function () {
+    $order = orderFor('Carla López', '3804000001');
+    orderFor('Otro Cliente', '3804999999');
+
+    expect(searchedOrderIds('001'))->toBe([$order->id]);
+});
+
+it('does not match phones on a 2-digit numeric term, below the minimum', function () {
     orderFor('Carla López', '3804380999');
 
-    expect(searchedOrderIds('380'))->toBe([]);
+    expect(searchedOrderIds('38'))->toBe([]);
 });
 
 it('returns nothing when no order matches', function () {

@@ -16,9 +16,6 @@ class OrderDraft extends Model
     /** @use HasFactory<OrderDraftFactory> */
     use HasFactory;
 
-    /** Below this many digits a search term is a draft number, not a phone. */
-    private const MIN_PHONE_DIGITS = 4;
-
     /**
      * @return BelongsTo<Classroom, $this>
      */
@@ -43,8 +40,7 @@ class OrderDraft extends Model
         }
 
         $like = '%'.addcslashes($term, '%_\\').'%';
-        $digits = Phone::localDigits($term);
-        $phone = strlen($digits) >= self::MIN_PHONE_DIGITS ? '%'.$digits.'%' : null;
+        $phone = Phone::searchPattern($term);
 
         return $query->where(function (Builder $query) use ($like, $phone) {
             $query->where('order_drafts.id', 'like', $like)
