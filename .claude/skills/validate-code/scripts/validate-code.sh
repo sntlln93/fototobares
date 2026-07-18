@@ -54,17 +54,50 @@ echo
 failures=()
 # Output is captured, not streamed: a passing tool prints its whole file/test
 # list, which is pure noise that an agent then re-reads on every later turn.
-# On success only the label is emitted; on failure, the tail of the log.
+# On success only the label is emitted; on failure, a per-tool filtered log
+# (falling back to the raw tail when the filter matches nothing).
+filter_log() {
+    local filter=$1 log=$2
+    case "$filter" in
+        phpstan)
+            # Drop PHPStan's fixed preamble/table borders — keep only
+            # "path:line:message" lines — and strip the container path prefix.
+            grep -E '^[^:]+:[0-9]+:' "$log" | sed -E 's#^/var/www/html/##'
+            ;;
+        tsc)
+            grep -E 'error TS' "$log"
+            ;;
+        eslint)
+            sed -E 's/^[[:space:]]+//; s/[[:space:]]{2,}/ /g' "$log"
+            ;;
+        vitest)
+            grep -E '^::error' "$log"
+            ;;
+        pest)
+            sed -E $'s/\x1b\\[[0-9;]*[a-zA-Z]//g' "$log"
+            ;;
+        raw | *)
+            cat "$log"
+            ;;
+    esac
+}
+
 run() {
-    local label=$1
-    shift
+    local label=$1 filter=$2
+    shift 2
     local log
     log=$(mktemp)
     if "$@" >"$log" 2>&1; then
         echo "==> $label: OK"
     else
         echo "==> $label: FAILED"
-        tail -n "${VALIDATE_LOG_LINES:-40}" "$log"
+        local filtered
+        filtered=$(filter_log "$filter" "$log")
+        if [ -z "$filtered" ]; then
+            tail -n "${VALIDATE_LOG_LINES:-40}" "$log"
+        else
+            echo "$filtered" | head -n "${VALIDATE_LOG_LINES:-40}"
+        fi
         echo
         failures+=("$label")
     fi
@@ -72,26 +105,26 @@ run() {
 }
 
 if $backend; then
-    run "pint" "$SAIL" php ./vendor/bin/pint
-    run "phpstan" "$SAIL" php ./vendor/bin/phpstan analyse
+    run "pint" "raw" "$SAIL" php ./vendor/bin/pint
+    run "phpstan" "phpstan" "$SAIL" php ./vendor/bin/phpstan analyse --error-format=raw --no-progress
 fi
 
 if $frontend || $e2e; then
-    run "prettier (write)" "$SAIL" npm run format
+    run "prettier (write)" "raw" "$SAIL" npm run format
 fi
 
 if $frontend; then
-    run "eslint (fix)" "$SAIL" npm run lint -- --max-warnings=0
-    run "tsc" "$SAIL" npx tsc --noEmit
+    run "eslint (fix)" "eslint" "$SAIL" npm run lint -- --max-warnings=0
+    run "tsc" "tsc" "$SAIL" npx tsc --noEmit
 fi
 
 if $e2e; then
-    run "tsc (e2e)" "$SAIL" npx tsc -p e2e --noEmit
+    run "tsc (e2e)" "tsc" "$SAIL" npx tsc -p e2e --noEmit
 fi
 
 if $FULL; then
-    $backend && run "pest" "$SAIL" php ./vendor/bin/pest
-    $frontend && run "vitest" "$SAIL" npm run test
+    $backend && run "pest" "pest" "$SAIL" php ./vendor/bin/pest --compact --colors=never
+    $frontend && run "vitest" "vitest" "$SAIL" npm run test -- --reporter=github-actions
     # Playwright is CI-only: a local run resets the dev database. The e2e
     # required check covers it on every PR.
     $e2e && echo "==> playwright: skipped locally (runs in CI; local run would reset the dev DB)" && echo

@@ -29,3 +29,11 @@ matching tools, all through Sail:
 - Requires Sail up (`./vendor/bin/sail up -d`); the script aborts early if not.
 - pint/prettier/eslint write fixes in place — review what they changed before
   staging.
+- On a failure, the script prints a log filtered per tool (phpstan, tsc,
+  eslint, vitest, pest each get their own filter; pint/prettier pass through
+  raw), trimmed to `VALIDATE_LOG_LINES` (default 40) from the **start** of the
+  filtered text — root-cause errors sit at the top. If a filter matches
+  nothing, it falls back to the tail of the raw log instead of an empty block.
+- `--full` runs the test suites too and can exceed the default 120s Bash
+  timeout — run it with an extended timeout (600000 ms) or expect it to move
+  to the background.
