@@ -2,16 +2,15 @@
 
 declare(strict_types=1);
 
+namespace Database\Seeders;
+
 use App\Models\Combo;
 use App\Models\Product;
-use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Seeder;
 
-return new class extends Migration
+class ComboSeeder extends Seeder
 {
-    /**
-     * Run the migrations.
-     */
-    public function up(): void
+    public function run(): void
     {
         $products = Product::all();
         $variants = [
@@ -70,12 +69,4 @@ return new class extends Migration
             $products->firstWhere('name', 'Taza')?->id => ['quantity' => 1, 'subtract_value' => 5000, 'variants' => null],
         ]);
     }
-
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
-    {
-        //
-    }
-};
+}
