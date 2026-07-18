@@ -7,6 +7,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Combobox } from '@/components/ui/combobox';
+import { formatPrice } from '@/lib/utils';
 import { AlertCircle, PlusIcon } from 'lucide-react';
 import { ComboWithProducts } from '../form';
 import { groupDetails } from '../grouping';
@@ -34,6 +35,7 @@ export function ProductsStep({ form, products, combos }: ProductsStepProps) {
         handleEditProduct,
         handleRemoveProduct,
         handleRemoveCombo,
+        breakdown,
     } = form;
 
     const { comboGroups, extras } = groupDetails(data.order_details, combos);
@@ -83,6 +85,10 @@ export function ProductsStep({ form, products, combos }: ProductsStepProps) {
                         <PlusIcon />
                     </Button>
                 </Combobox>
+
+                <div className="mt-3 text-right text-sm font-medium">
+                    Total: {formatPrice(breakdown.total)}
+                </div>
 
                 {comboGroups.map(({ combo, items }) => (
                     <DetailGroup
