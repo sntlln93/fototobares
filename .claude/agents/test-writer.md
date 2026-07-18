@@ -23,6 +23,13 @@ You turn an explicit list of test cases into passing tests. Your brief MUST cont
 
 If a render still fails, re-read the actual stack trace before theorizing. Do not mock away a shadcn component to dodge an error you have not explained — that silently weakens the test.
 
+## Waiting for long commands
+
+Suites and `validate-code` can exceed the 120s Bash timeout and get moved to the background. When that happens, **end your turn and wait for the completion notification.** Do not chase the job:
+
+- Never `cat` or `Read` a task's `.output` file — it is a full JSONL transcript and floods your context. If you must peek, `tail -n 40` it, once.
+- Never poll with `sleep`, `until [ -s … ]`, `ps aux | grep`, or `tail -f` (which just hangs until the timeout). Past runs spent 12% of all tool calls doing this.
+
 ## Reporting
 
 To the leader, ~10 lines max: cases covered (mapped to the brief's list), suite result summary, commit sha.
