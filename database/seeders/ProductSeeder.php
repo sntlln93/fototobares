@@ -2,24 +2,15 @@
 
 declare(strict_types=1);
 
+namespace Database\Seeders;
+
 use App\Models\Product;
 use App\Models\ProductType;
-use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Seeder;
 
-return new class extends Migration
+class ProductSeeder extends Seeder
 {
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
-    {
-        //
-    }
-
-    /**
-     * Run the migrations.
-     */
-    public function up(): void
+    public function run(): void
     {
         $product_types = ProductType::all();
 
@@ -154,4 +145,4 @@ return new class extends Migration
             Product::create($product);
         }
     }
-};
+}

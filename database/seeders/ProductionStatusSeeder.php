@@ -2,17 +2,19 @@
 
 declare(strict_types=1);
 
-use Illuminate\Database\Migrations\Migration;
+namespace Database\Seeders;
+
+use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
-return new class extends Migration
+class ProductionStatusSeeder extends Seeder
 {
     /**
      * Every product owns its production chain. Seeded products get the
      * real chains dictated by the business; products created later
      * start with a single final stage (see CreateProduct action).
      */
-    public function up(): void
+    public function run(): void
     {
         $chainsByType = [
             'mural' => ['Sin foto', 'Impreso', 'Pegado', 'Pintado', 'Laqueado', 'Embolsado'],
@@ -50,4 +52,4 @@ return new class extends Migration
             }
         }
     }
-};
+}
