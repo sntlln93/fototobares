@@ -25,9 +25,6 @@ class Order extends Model
 
     use SoftDeletes;
 
-    /** Below this many digits a search term is an order number, not a phone. */
-    private const MIN_PHONE_DIGITS = 4;
-
     /**
      * @return BelongsTo<Client, $this>
      */
@@ -84,9 +81,10 @@ class Order extends Model
      * child, client and — the WhatsApp use case — the client's phone, matched
      * digit by digit so separators and the +549 prefix don't get in the way.
      *
-     * The phone is only searched with at least MIN_PHONE_DIGITS digits, or a
-     * short numeric search (an order number) would match every phone
-     * containing those digits.
+     * The phone is only searched when `Phone::searchPattern` returns a
+     * pattern (see its docblock for the minimum-digits and normalization
+     * rules), so a short numeric search (an order number) doesn't
+     * necessarily match every phone containing those digits.
      *
      * @param  Builder<Order>  $query
      * @return Builder<Order>
@@ -100,8 +98,7 @@ class Order extends Model
         }
 
         $like = '%'.addcslashes($term, '%_\\').'%';
-        $digits = Phone::localDigits($term);
-        $phone = strlen($digits) >= self::MIN_PHONE_DIGITS ? '%'.$digits.'%' : null;
+        $phone = Phone::searchPattern($term);
 
         return $query->where(function (Builder $query) use ($like, $phone) {
             $query->where('orders.id', 'like', $like)

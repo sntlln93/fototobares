@@ -12,25 +12,35 @@ namespace App\Support;
  */
 class Phone
 {
+    /** Below this many digits a numeric search term is too short to match a phone. */
+    private const MIN_SEARCH_DIGITS = 3;
+
     /**
-     * The dialable part of a number: digits only, without the country code
-     * (54), the mobile 9, or the domestic trunk 0.
+     * The SQL `LIKE` pattern to match a phone-search term, or `null` when the
+     * term has too few digits to search the phone column.
+     *
+     * Prefix/trunk stripping (country code 54, mobile 9, domestic trunk 0)
+     * only applies when what remains is still a full 10-digit local number —
+     * that's the "looks like a complete number" case. Anything shorter is a
+     * fragment and is matched literally, digit by digit, leading zeros kept.
      */
-    public static function localDigits(string $phone): string
+    public static function searchPattern(string $term): ?string
     {
-        $digits = preg_replace('/\D/', '', $phone) ?? '';
+        $digits = preg_replace('/\D/', '', $term) ?? '';
 
-        if (str_starts_with($digits, '549')) {
+        if (str_starts_with($digits, '549') && strlen($digits) >= 13) {
             $digits = substr($digits, 3);
-        } elseif (str_starts_with($digits, '54')) {
+        } elseif (str_starts_with($digits, '54') && strlen($digits) >= 12) {
             $digits = substr($digits, 2);
-        }
-
-        if (str_starts_with($digits, '0')) {
+        } elseif (str_starts_with($digits, '0') && strlen($digits) >= 11) {
             $digits = substr($digits, 1);
         }
 
-        return $digits;
+        if (strlen($digits) < self::MIN_SEARCH_DIGITS) {
+            return null;
+        }
+
+        return '%'.$digits.'%';
     }
 
     /**
