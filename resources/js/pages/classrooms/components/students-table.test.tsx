@@ -107,4 +107,66 @@ describe('StudentsTable', () => {
 
         expect(screen.getAllByRole('row')).toHaveLength(3); // header + 2 rows
     });
+
+    it('renders one filled square per paid installment and the rest empty', () => {
+        const { container } = render(
+            <StudentsTable
+                students={[
+                    makeStudent({ payment_plan: 3, paid_installments: 1 }),
+                ]}
+            />,
+        );
+
+        const squares = container.querySelectorAll('span.rounded-sm');
+        const filled = container.querySelectorAll('span.bg-primary');
+
+        expect(squares).toHaveLength(3);
+        expect(filled).toHaveLength(1);
+        expect(squares.length - filled.length).toBe(2);
+    });
+
+    it('fills every square when the plan is fully paid', () => {
+        const { container } = render(
+            <StudentsTable
+                students={[
+                    makeStudent({ payment_plan: 4, paid_installments: 4 }),
+                ]}
+            />,
+        );
+
+        const squares = container.querySelectorAll('span.rounded-sm');
+        const filled = container.querySelectorAll('span.bg-primary');
+
+        expect(squares).toHaveLength(4);
+        expect(filled).toHaveLength(4);
+    });
+
+    it('renders no squares and a dash when there is no payment plan', () => {
+        const { container } = render(
+            <StudentsTable
+                students={[
+                    makeStudent({ payment_plan: 0, paid_installments: 0 }),
+                ]}
+            />,
+        );
+
+        const row = screen.getAllByRole('row')[1];
+
+        expect(container.querySelectorAll('span.rounded-sm')).toHaveLength(0);
+        expect(within(row).getByText('—')).toBeTruthy();
+    });
+
+    it('still shows the plan count and per-installment price alongside the squares', () => {
+        const { getAllByRole } = render(
+            <StudentsTable
+                students={[
+                    makeStudent({ payment_plan: 3, paid_installments: 1 }),
+                ]}
+            />,
+        );
+
+        const dataRow = getAllByRole('row')[1];
+
+        expect(within(dataRow).getByText(/3 \(/)).toBeTruthy();
+    });
 });

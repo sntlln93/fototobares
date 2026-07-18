@@ -7,6 +7,7 @@ use App\Models\Client;
 use App\Models\Order;
 use App\Models\OrderDetail;
 use App\Models\OrderDraft;
+use App\Models\Payment;
 use App\Models\Product;
 use Inertia\Testing\AssertableInertia as Assert;
 
@@ -109,4 +110,86 @@ it('reports assignable details when the classroom has at least one in scope', fu
     get(route('classrooms.show', ['classroom' => $classroom->id]))->assertInertia(
         fn (Assert $page) => $page->where('hasAssignableDetails', true),
     );
+});
+
+it('reports zero paid installments for an order with no payments', function () {
+    $classroom = Classroom::factory()->create();
+    $order = Order::factory()->create(['classroom_id' => $classroom->id]);
+
+    $response = get(route('classrooms.show', ['classroom' => $classroom->id]));
+    $response->assertOk();
+    /** @var array<int, array<string, mixed>> $students */
+    $students = $response->viewData('page')['props']['students']['data'];
+    $row = collect($students)->firstOrFail(fn (array $row) => (int) $row['id'] === $order->id);
+
+    expect($row['paid_installments'])->toBe(0);
+});
+
+it('reports one paid installment for an order with a single installment payment', function () {
+    $classroom = Classroom::factory()->create();
+    $order = Order::factory()->create(['classroom_id' => $classroom->id]);
+    Payment::factory()->create(['order_id' => $order->id, 'amount' => 16000]);
+
+    $response = get(route('classrooms.show', ['classroom' => $classroom->id]));
+    $response->assertOk();
+    /** @var array<int, array<string, mixed>> $students */
+    $students = $response->viewData('page')['props']['students']['data'];
+    $row = collect($students)->firstOrFail(fn (array $row) => (int) $row['id'] === $order->id);
+
+    expect($row['paid_installments'])->toBe(1);
+});
+
+it('reports all installments paid for a fully paid order', function () {
+    $classroom = Classroom::factory()->create();
+    $order = Order::factory()->create(['classroom_id' => $classroom->id]);
+    Payment::factory()->create(['order_id' => $order->id, 'amount' => 64000]);
+
+    $response = get(route('classrooms.show', ['classroom' => $classroom->id]));
+    $response->assertOk();
+    /** @var array<int, array<string, mixed>> $students */
+    $students = $response->viewData('page')['props']['students']['data'];
+    $row = collect($students)->firstOrFail(fn (array $row) => (int) $row['id'] === $order->id);
+
+    expect($row['paid_installments'])->toBe(4);
+});
+
+it('caps paid installments at the payment plan when overpaid', function () {
+    $classroom = Classroom::factory()->create();
+    $order = Order::factory()->create(['classroom_id' => $classroom->id]);
+    Payment::factory()->create(['order_id' => $order->id, 'amount' => 80000]);
+
+    $response = get(route('classrooms.show', ['classroom' => $classroom->id]));
+    $response->assertOk();
+    /** @var array<int, array<string, mixed>> $students */
+    $students = $response->viewData('page')['props']['students']['data'];
+    $row = collect($students)->firstOrFail(fn (array $row) => (int) $row['id'] === $order->id);
+
+    expect($row['paid_installments'])->toBe(4);
+});
+
+it('reports zero paid installments for a partial payment below one installment', function () {
+    $classroom = Classroom::factory()->create();
+    $order = Order::factory()->create(['classroom_id' => $classroom->id]);
+    Payment::factory()->create(['order_id' => $order->id, 'amount' => 8000]);
+
+    $response = get(route('classrooms.show', ['classroom' => $classroom->id]));
+    $response->assertOk();
+    /** @var array<int, array<string, mixed>> $students */
+    $students = $response->viewData('page')['props']['students']['data'];
+    $row = collect($students)->firstOrFail(fn (array $row) => (int) $row['id'] === $order->id);
+
+    expect($row['paid_installments'])->toBe(0);
+});
+
+it('reports zero paid installments for a draft', function () {
+    $classroom = Classroom::factory()->create();
+    $draft = OrderDraft::factory()->create(['classroom_id' => $classroom->id]);
+
+    $response = get(route('classrooms.show', ['classroom' => $classroom->id]));
+    $response->assertOk();
+    /** @var array<int, array<string, mixed>> $students */
+    $students = $response->viewData('page')['props']['students']['data'];
+    $row = collect($students)->firstOrFail(fn (array $row) => (int) $row['id'] === $draft->id);
+
+    expect($row['paid_installments'])->toBe(0);
 });
