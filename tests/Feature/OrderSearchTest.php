@@ -103,6 +103,13 @@ it('matches phones on a 3-digit numeric fragment', function () {
     expect(searchedOrderIds('380'))->toBe([$order->id]);
 });
 
+it('matches an order by a leading-zero phone fragment', function () {
+    $order = orderFor('Carla López', '3804000001');
+    orderFor('Otro Cliente', '3804999999');
+
+    expect(searchedOrderIds('001'))->toBe([$order->id]);
+});
+
 it('does not match phones on a 2-digit numeric term, below the minimum', function () {
     orderFor('Carla López', '3804380999');
 

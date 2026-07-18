@@ -69,6 +69,20 @@ it('matches a draft by phone digits', function () {
     expect(array_map(fn (array $row) => (int) $row['id'], $students))->toBe([$draft->id]);
 });
 
+it('matches a draft by a leading-zero phone fragment', function () {
+    $classroom = Classroom::factory()->create();
+
+    $draft = OrderDraft::factory()->create(['classroom_id' => $classroom->id, 'client_phone' => '3804000001']);
+    OrderDraft::factory()->create(['classroom_id' => $classroom->id, 'client_phone' => '3804999999']);
+
+    $response = get(route('classrooms.show', ['classroom' => $classroom->id, 'search' => '001']));
+    $response->assertOk();
+    /** @var array<int, array<string, mixed>> $students */
+    $students = $response->viewData('page')['props']['students']['data'];
+
+    expect(array_map(fn (array $row) => (int) $row['id'], $students))->toBe([$draft->id]);
+});
+
 it('counts both orders and drafts in the pagination total', function () {
     $classroom = Classroom::factory()->create();
 
