@@ -9,6 +9,7 @@ import {
 import { Factory } from 'lucide-react';
 import { useState } from 'react';
 import { getStageRollback } from '../production-stage';
+import { ProductionDisableConfirmation } from './production-disable-confirmation';
 import { StageRollbackConfirmation } from './stage-rollback-confirmation';
 
 const PENDING = 'none';
@@ -22,11 +23,14 @@ export function ProductionStatusControl({
     product,
     firstInstallmentPaid,
     onChange,
+    onDisable,
 }: {
     product: OrderProduct;
     firstInstallmentPaid: boolean;
     onChange: (statusId: number | null) => void;
+    onDisable: () => void;
 }) {
+    const [confirmingDisable, setConfirmingDisable] = useState(false);
     const [pendingRollback, setPendingRollback] = useState<{
         targetId: number | null;
         stepsBack: number;
@@ -79,31 +83,56 @@ export function ProductionStatusControl({
         onChange(targetId);
     };
 
+    const handleDisableClick = () => {
+        if (product.production_status_id === null) {
+            onDisable();
+
+            return;
+        }
+
+        setConfirmingDisable(true);
+    };
+
     return (
         <>
-            <Select
-                value={
-                    product.production_status_id
-                        ? String(product.production_status_id)
-                        : PENDING
-                }
-                onValueChange={handleValueChange}
-            >
-                <SelectTrigger
-                    className="mt-2 h-8 w-fit gap-2 text-xs"
-                    aria-label={`Estado de fabricación de ${product.name}`}
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+                <Select
+                    value={
+                        product.production_status_id
+                            ? String(product.production_status_id)
+                            : PENDING
+                    }
+                    onValueChange={handleValueChange}
                 >
-                    <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                    <SelectItem value={PENDING}>Sin empezar</SelectItem>
-                    {statuses.map((status) => (
-                        <SelectItem key={status.id} value={String(status.id)}>
-                            {status.name}
-                        </SelectItem>
-                    ))}
-                </SelectContent>
-            </Select>
+                    <SelectTrigger
+                        className="h-8 w-fit gap-2 text-xs"
+                        aria-label={`Estado de fabricación de ${product.name}`}
+                    >
+                        <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value={PENDING}>Sin empezar</SelectItem>
+                        {statuses.map((status) => (
+                            <SelectItem
+                                key={status.id}
+                                value={String(status.id)}
+                            >
+                                {status.name}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+
+                <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-auto px-2 py-1 text-xs"
+                    onClick={handleDisableClick}
+                >
+                    <Factory className="mr-1 h-3 w-3" />
+                    Deshabilitar fabricación
+                </Button>
+            </div>
 
             <StageRollbackConfirmation
                 show={pendingRollback !== null}
@@ -115,6 +144,16 @@ export function ProductionStatusControl({
                     setPendingRollback(null);
                 }}
                 onCancel={() => setPendingRollback(null)}
+            />
+
+            <ProductionDisableConfirmation
+                show={confirmingDisable}
+                productName={product.name}
+                onConfirm={() => {
+                    setConfirmingDisable(false);
+                    onDisable();
+                }}
+                onCancel={() => setConfirmingDisable(false)}
             />
         </>
     );

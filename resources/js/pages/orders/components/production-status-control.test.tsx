@@ -25,6 +25,7 @@ describe('ProductionStatusControl', () => {
                 product={makeProduct({ production_enabled: false })}
                 firstInstallmentPaid={false}
                 onChange={onChange}
+                onDisable={() => {}}
             />,
         );
 
@@ -41,6 +42,7 @@ describe('ProductionStatusControl', () => {
                 product={makeProduct({ production_enabled: false })}
                 firstInstallmentPaid={true}
                 onChange={onChange}
+                onDisable={() => {}}
             />,
         );
 
@@ -59,6 +61,7 @@ describe('ProductionStatusControl', () => {
                 })}
                 firstInstallmentPaid={true}
                 onChange={onChange}
+                onDisable={() => {}}
             />,
         );
 
@@ -78,6 +81,7 @@ describe('ProductionStatusControl', () => {
                 product={makeProduct()}
                 firstInstallmentPaid={true}
                 onChange={onChange}
+                onDisable={() => {}}
             />,
         );
 
@@ -100,6 +104,7 @@ describe('ProductionStatusControl', () => {
                 })}
                 firstInstallmentPaid={true}
                 onChange={onChange}
+                onDisable={() => {}}
             />,
         );
 
@@ -123,6 +128,7 @@ describe('ProductionStatusControl', () => {
                 })}
                 firstInstallmentPaid={true}
                 onChange={onChange}
+                onDisable={() => {}}
             />,
         );
 
@@ -145,6 +151,7 @@ describe('ProductionStatusControl', () => {
                 })}
                 firstInstallmentPaid={true}
                 onChange={onChange}
+                onDisable={() => {}}
             />,
         );
 

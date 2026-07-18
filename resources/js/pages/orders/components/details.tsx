@@ -11,7 +11,9 @@ import { DetailItem } from './detail-item';
 
 export function Details({ order }: { order: Order }) {
     const { toggle } = useDetailPriority(order.id);
-    const { setStatus } = useDetailProductionStatus(order.id);
+    const { setStatus, disableProduction } = useDetailProductionStatus(
+        order.id,
+    );
     const products = order.products || [];
     const isCancelled = Boolean(order.cancelled_at);
 
@@ -43,6 +45,9 @@ export function Details({ order }: { order: Order }) {
                             )}
                             onStatusChange={(statusId) =>
                                 setStatus(product.order_detail_id, statusId)
+                            }
+                            onDisableProduction={() =>
+                                disableProduction(product.order_detail_id)
                             }
                             canEditVariant={
                                 !isCancelled &&
