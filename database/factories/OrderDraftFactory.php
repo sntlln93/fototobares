@@ -20,7 +20,7 @@ class OrderDraftFactory extends Factory
     {
         return [
             'classroom_id' => Classroom::factory(),
-            'photo_number' => null,
+            'photo_number' => fake()->numberBetween(1, 9999),
             'child_name' => fake()->firstName(),
             'client_name' => fake()->name(),
             'client_phone' => '3804123456',

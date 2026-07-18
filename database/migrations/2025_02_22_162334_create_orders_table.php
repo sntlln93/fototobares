@@ -25,7 +25,7 @@ return new class extends Migration
             $table->integer('total_price');
             $table->integer('payment_plan');
             $table->date('due_date');
-            $table->integer('photo_number')->nullable();
+            $table->integer('photo_number');
             $table->timestamp('cancelled_at')->nullable();
             $table->softDeletes();
             $table->timestamps();

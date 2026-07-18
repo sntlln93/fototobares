@@ -105,6 +105,19 @@ export function ClientStep({ form }: { form: OrderFormController }) {
                             />
                             No
                         </label>
+                        <label className="flex cursor-pointer items-center">
+                            <input
+                                type="radio"
+                                name="attended_photo_session"
+                                value="null"
+                                checked={data.attended_photo_session === null}
+                                onChange={() =>
+                                    setData('attended_photo_session', null)
+                                }
+                                className="mr-2"
+                            />
+                            Sin especificar
+                        </label>
                     </div>
                 </div>
 

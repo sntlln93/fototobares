@@ -49,16 +49,12 @@ class CreateOrderAction implements ActionContract
 
             // Photos are numbered by classroom following the order in which
             // orders are taken: assign the next photo number automatically,
-            // unless the child did not attend the photo session. Completing a
-            // draft in its own classroom keeps the number it already got.
-            $photoNumber = null;
-
-            if ($attended !== false) {
-                $photoNumber = ($draft !== null && $draft->photo_number !== null
-                        && $draft->classroom_id === $classroomId)
-                    ? $draft->photo_number
-                    : $this->allocatePhotoNumber->handle(new PhotoNumberAllocationData($classroomId));
-            }
+            // regardless of whether the child attended the photo session.
+            // Completing a draft in its own classroom keeps the number it
+            // already got.
+            $photoNumber = ($draft !== null && $draft->classroom_id === $classroomId)
+                ? $draft->photo_number
+                : $this->allocatePhotoNumber->handle(new PhotoNumberAllocationData($classroomId));
 
             $order = Order::create([
                 'client_id' => $client->id,

@@ -24,9 +24,7 @@ class CreateOrderDraftAction implements ActionContract
     public function handle(DtoContract $params): OrderDraft
     {
         return DB::transaction(function () use ($params) {
-            $photoNumber = $params->attendedPhotoSession !== false
-                ? $this->allocatePhotoNumber->handle(new PhotoNumberAllocationData($params->classroomId))
-                : null;
+            $photoNumber = $this->allocatePhotoNumber->handle(new PhotoNumberAllocationData($params->classroomId));
 
             $attributes = [
                 'classroom_id' => $params->classroomId,
