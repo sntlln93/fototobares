@@ -32,7 +32,7 @@ class StoreSchoolRequest extends FormRequest
             'school.level' => ['required'],
             'principal' => ['nullable'],
             'principal.name' => ['sometimes'],
-            'principal.phone' => ['present_with:principal.name', 'numeric'],
+            'principal.phone' => ['nullable', 'numeric'],
             'address' => ['required'],
             'address.street' => ['sometimes'],
             'address.number' => ['sometimes'],
