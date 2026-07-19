@@ -1,8 +1,22 @@
 import { cleanup } from '@testing-library/react';
-import { afterEach, vi } from 'vitest';
+import { afterEach, beforeEach, vi } from 'vitest';
 
-// Without vitest globals, testing-library cannot register its own cleanup
-afterEach(() => cleanup());
+// 1. Limpiar mocks y DOM después de cada test
+afterEach(() => {
+    cleanup();
+    vi.restoreAllMocks(); // Restaura el comportamiento original de spys/mocks
+    vi.clearAllMocks(); // Limpia el historial de llamadas (.toHaveBeenCalled())
+
+    // Limpieza crítica para evitar persistencia de layouts entre archivos
+    document.body.innerHTML = '';
+    localStorage.clear();
+    sessionStorage.clear();
+});
+
+// 2. Opcional: Forzar recarga de módulos si mutas estados internos
+beforeEach(() => {
+    vi.resetModules();
+});
 
 // jsdom does not implement ResizeObserver, required by the masonry layout
 vi.stubGlobal(
@@ -24,6 +38,7 @@ Element.prototype.releasePointerCapture = vi.fn();
 // useIsMobile hook and other responsive components
 Object.defineProperty(window, 'matchMedia', {
     writable: true,
+    configurable: true, // Permitir que Vitest lo limpie/sobreescriba si es necesario
     value: vi.fn().mockImplementation((query: string) => ({
         matches: false,
         media: query,
