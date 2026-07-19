@@ -65,7 +65,6 @@ describe('OrdersTable', () => {
         expect(within(row).getByText('12')).toBeTruthy();
         expect(within(row).getByText('Maylén Ortiz')).toBeTruthy();
         expect(within(row).getByText('Marta López')).toBeTruthy();
-        expect(within(row).getByText(price(15000))).toBeTruthy();
         expect(within(row).getByText(`3 (${price(5000)})`)).toBeTruthy();
         expect(within(row).getByText(/Sala Roja/)).toBeTruthy();
 
@@ -113,7 +112,7 @@ describe('OrdersTable', () => {
         expect(onDelete).not.toHaveBeenCalled();
     });
 
-    it('sorts by order number and price from the header buttons', () => {
+    it('sorts by order number from the header button', () => {
         render(<OrdersTable orders={[]} onDelete={vi.fn()} />);
 
         const headers = screen.getAllByRole('columnheader');
@@ -125,9 +124,7 @@ describe('OrdersTable', () => {
         fireEvent.click(within(header('N° de orden')).getByRole('button'));
         expect(sort).toHaveBeenCalledWith('photo_number', 'orders.index');
 
-        fireEvent.click(within(header('Precio')).getByRole('button'));
-        expect(sort).toHaveBeenCalledWith('total_price', 'orders.index');
-
+        expect(screen.queryByText('Precio')).toBeNull();
         expect(screen.queryByText('Vencimiento')).toBeNull();
     });
 

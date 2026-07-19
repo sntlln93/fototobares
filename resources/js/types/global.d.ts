@@ -166,6 +166,8 @@ declare global {
         status?: OrderStatus | null;
         paid_total?: number;
         balance?: number;
+        paid_installments?: number;
+        current_installment_fraction?: number;
         can_edit?: boolean;
         can_delete?: boolean;
         first_installment_paid?: boolean;
