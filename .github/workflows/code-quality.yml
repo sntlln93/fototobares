@@ -59,10 +59,10 @@ jobs:
         uses: ./.github/actions/setup-node
 
       - name: ✨ Prettier
-        run: npm run format -- --check
+        run: npm run format:check
 
       - name: 🔍 ESLint
-        run: npm run lint -- --max-warnings=0
+        run: npm run lint:check
 
       - name: 🛠️ TypeScript checks
         run: npx tsc --noEmit
