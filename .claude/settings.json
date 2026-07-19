@@ -33,8 +33,8 @@
       "Bash(docker compose config)",
       "Bash(docker info)",
       "Bash(docker info *)",
-      "Bash(bash .claude/skills/validate-code/scripts/validate-code.sh)",
-      "Bash(bash .claude/skills/validate-code/scripts/validate-code.sh *)"
+      "Bash(bash .claude/skills/run-forensics/scripts/run-forensics.sh)",
+      "Bash(bash .claude/skills/run-forensics/scripts/run-forensics.sh *)"
     ],
     "deny": [
       "Bash(git push --force*)",
