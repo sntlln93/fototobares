@@ -66,7 +66,7 @@ class StickerController extends Controller
             ->values();
 
         return Inertia::render('stickers/print', [
-            'orders' => StickerResource::collection($orders),
+            'orders' => StickerResource::collection($orders)->resolve(),
         ]);
     }
 }
