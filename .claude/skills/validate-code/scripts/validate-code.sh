@@ -124,7 +124,7 @@ fi
 
 if $FULL; then
     $backend && run "pest" "pest" "$SAIL" php ./vendor/bin/pest --compact --colors=never
-    $frontend && run "vitest" "vitest" "$SAIL" npm run test -- --reporter=github-actions
+    $frontend && run "vitest" "vitest" "$SAIL" npm run test -- --reporter=github-actions --no-isolate
     # Playwright is CI-only: a local run resets the dev database. The e2e
     # required check covers it on every PR.
     $e2e && echo "==> playwright: skipped locally (runs in CI; local run would reset the dev DB)" && echo
