@@ -173,7 +173,6 @@ class DashboardController extends Controller
     {
         $pairs = collect($variant ?? [])
             ->map(fn (array $entry) => [$entry['label'], $entry['value']['label'] ?? null])
-            ->filter(fn (array $pair) => $pair[1] !== null)
             ->sortBy(fn (array $pair) => $pair[0])
             ->values()
             ->all();
@@ -182,16 +181,15 @@ class DashboardController extends Controller
     }
 
     /**
-     * Build the human-readable label for a variant snapshot list.
+     * Build the human-readable label for a variant snapshot list, matching
+     * the "a definir" convention used elsewhere for pending values (#113).
      *
      * @param  array<int, array{label: string, type: string, value: array{label: string, color?: string|null}|null}>|null  $variant
      */
     private function variantDisplayLabel(?array $variant): string
     {
         $labels = collect($variant ?? [])
-            ->map(fn (array $entry) => $entry['value']['label'] ?? null)
-            ->filter()
-            ->values()
+            ->map(fn (array $entry) => $entry['value']['label'] ?? "{$entry['label']}: a definir")
             ->all();
 
         return $labels === [] ? 'Sin variante' : implode(' · ', $labels);

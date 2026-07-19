@@ -158,21 +158,16 @@ it('excludes cancelled orders and recycled details from production stats', funct
     );
 });
 
-it('groups details with empty or pending variant under Sin variante', function () {
+it('groups details with empty variant under Sin variante', function () {
     actingAsRole();
 
     $product = Product::factory()->create(['name' => 'Banda']);
     $order = Order::factory()->create();
 
-    OrderDetail::factory()->create([
+    OrderDetail::factory()->count(2)->create([
         'order_id' => $order->id,
         'product_id' => $product->id,
         'variant' => [],
-    ]);
-    OrderDetail::factory()->create([
-        'order_id' => $order->id,
-        'product_id' => $product->id,
-        'variant' => [['label' => 'Color', 'type' => 'color', 'value' => null]],
     ]);
 
     get(route('dashboard'))->assertInertia(
@@ -180,6 +175,33 @@ it('groups details with empty or pending variant under Sin variante', function (
             ->has('productionStats.0.variants', 1)
             ->where('productionStats.0.variants.0.label', 'Sin variante')
             ->where('productionStats.0.variants.0.count', 2),
+    );
+});
+
+it('lists pending variant values as a definir instead of folding them into Sin variante', function () {
+    actingAsRole();
+
+    $product = Product::factory()->create(['name' => 'Taza']);
+    $order = Order::factory()->create();
+
+    OrderDetail::factory()->count(2)->create([
+        'order_id' => $order->id,
+        'product_id' => $product->id,
+        'variant' => [],
+    ]);
+    OrderDetail::factory()->create([
+        'order_id' => $order->id,
+        'product_id' => $product->id,
+        'variant' => [['label' => 'Banda', 'type' => 'text', 'value' => null]],
+    ]);
+
+    get(route('dashboard'))->assertInertia(
+        fn (Assert $page) => $page
+            ->has('productionStats.0.variants', 2)
+            ->where('productionStats.0.variants.0.label', 'Sin variante')
+            ->where('productionStats.0.variants.0.count', 2)
+            ->where('productionStats.0.variants.1.label', 'Banda: a definir')
+            ->where('productionStats.0.variants.1.count', 1),
     );
 });
 
