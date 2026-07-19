@@ -60,6 +60,12 @@ describe('highlightPhoneSegments', () => {
         ).toEqual(['3804000003']);
     });
 
+    it('highlights a leading-zero fragment in full', () => {
+        expect(matched(highlightPhoneSegments('3804000001', '0001'))).toEqual([
+            '0001',
+        ]);
+    });
+
     it('marks nothing when the digits do not match', () => {
         expect(
             matched(highlightPhoneSegments('3804000003', '3804111111')),

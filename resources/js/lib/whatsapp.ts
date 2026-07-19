@@ -20,6 +20,29 @@ export function localPhoneDigits(phone: string): string {
 }
 
 /**
+ * Digits to match against when searching a phone column. Mirrors the
+ * backend `App\Support\Phone::searchPattern()`'s conditional stripping:
+ * the country code (54), the mobile 9, and the domestic trunk 0 are only
+ * stripped when what remains is still a full local number (length
+ * thresholds); shorter fragments are matched literally, leading zeros
+ * kept. Distinct from `localPhoneDigits`, which always strips those
+ * prefixes to build a dialable number.
+ */
+export function phoneSearchDigits(phone: string): string {
+    let digits = phone.replace(/\D/g, '');
+
+    if (digits.startsWith('549') && digits.length >= 13) {
+        digits = digits.slice(3);
+    } else if (digits.startsWith('54') && digits.length >= 12) {
+        digits = digits.slice(2);
+    } else if (digits.startsWith('0') && digits.length >= 11) {
+        digits = digits.slice(1);
+    }
+
+    return digits;
+}
+
+/**
  * Normalizes a locally-stored Argentine phone number to the
  * international digits-only format WhatsApp links expect (549...).
  * Returns null when the number is too short to be dialable.

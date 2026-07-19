@@ -1,4 +1,4 @@
-import { localPhoneDigits } from '@/lib/whatsapp';
+import { phoneSearchDigits } from '@/lib/whatsapp';
 
 export interface HighlightSegment {
     text: string;
@@ -75,7 +75,7 @@ export function highlightPhoneSegments(
     phone: string,
     term: string | null | undefined,
 ): HighlightSegment[] {
-    const needle = localPhoneDigits(term?.trim() ?? '');
+    const needle = phoneSearchDigits(term?.trim() ?? '');
 
     if (!needle) {
         return [{ text: phone, match: false }];
