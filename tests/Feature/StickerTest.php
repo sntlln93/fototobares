@@ -97,6 +97,28 @@ it('prints the sticker sheet for a finished order', function () {
     );
 });
 
+it('excludes recycled details from a finished order sticker', function () {
+    $order = finishedOrder();
+    $activeProductName = $order->details()->firstOrFail()->product->name;
+
+    $recycledProduct = productWithChain(['Reciclado']);
+    OrderDetail::factory()->create([
+        'order_id' => $order->id,
+        'product_id' => $recycledProduct->id,
+        'production_status_id' => stageOf($recycledProduct, 1)->id,
+        'production_enabled_at' => now(),
+        'recycled_to' => 'reciclaje',
+    ]);
+
+    get(route('stickers.print', ['ids' => [$order->id]]))->assertInertia(
+        fn (Assert $page) => $page
+            ->component('stickers/print')
+            ->has('orders', 1)
+            ->has('orders.0.products', 1)
+            ->where('orders.0.products.0.name', $activeProductName),
+    );
+});
+
 it('filters out not-finished orders even when their id is requested', function () {
     $finished = finishedOrder();
     $notFinished = notFinishedOrder();
