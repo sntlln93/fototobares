@@ -205,3 +205,60 @@ it('reports zero paid installments for a draft', function () {
 
     expect($row['paid_installments'])->toBe(0);
 });
+
+it('reports a zero current installment fraction for an order with no payments', function () {
+    $classroom = Classroom::factory()->create();
+    $order = Order::factory()->create(['classroom_id' => $classroom->id]);
+
+    $response = get(route('classrooms.show', ['classroom' => $classroom->id]));
+    $response->assertOk();
+    /** @var array<int, array<string, mixed>> $students */
+    $students = $response->viewData('page')['props']['students']['data'];
+    $row = collect($students)->firstOrFail(fn (array $row) => (int) $row['id'] === $order->id);
+
+    expect($row['current_installment_fraction'])->toEqual(0.0);
+});
+
+it('reports a half current installment fraction for a partial payment below one installment', function () {
+    $classroom = Classroom::factory()->create();
+    $order = Order::factory()->create(['classroom_id' => $classroom->id]);
+    Payment::factory()->create(['order_id' => $order->id, 'amount' => 8000]);
+
+    $response = get(route('classrooms.show', ['classroom' => $classroom->id]));
+    $response->assertOk();
+    /** @var array<int, array<string, mixed>> $students */
+    $students = $response->viewData('page')['props']['students']['data'];
+    $row = collect($students)->firstOrFail(fn (array $row) => (int) $row['id'] === $order->id);
+
+    expect($row['paid_installments'])->toBe(0)
+        ->and($row['current_installment_fraction'])->toBe(0.5);
+});
+
+it('reports the fraction of the second installment after paying one full plus a remainder', function () {
+    $classroom = Classroom::factory()->create();
+    $order = Order::factory()->create(['classroom_id' => $classroom->id]);
+    Payment::factory()->create(['order_id' => $order->id, 'amount' => 24000]);
+
+    $response = get(route('classrooms.show', ['classroom' => $classroom->id]));
+    $response->assertOk();
+    /** @var array<int, array<string, mixed>> $students */
+    $students = $response->viewData('page')['props']['students']['data'];
+    $row = collect($students)->firstOrFail(fn (array $row) => (int) $row['id'] === $order->id);
+
+    expect($row['paid_installments'])->toBe(1)
+        ->and($row['current_installment_fraction'])->toBe(0.5);
+});
+
+it('reports a zero current installment fraction for a fully paid order', function () {
+    $classroom = Classroom::factory()->create();
+    $order = Order::factory()->create(['classroom_id' => $classroom->id]);
+    Payment::factory()->create(['order_id' => $order->id, 'amount' => 64000]);
+
+    $response = get(route('classrooms.show', ['classroom' => $classroom->id]));
+    $response->assertOk();
+    /** @var array<int, array<string, mixed>> $students */
+    $students = $response->viewData('page')['props']['students']['data'];
+    $row = collect($students)->firstOrFail(fn (array $row) => (int) $row['id'] === $order->id);
+
+    expect($row['current_installment_fraction'])->toEqual(0.0);
+});

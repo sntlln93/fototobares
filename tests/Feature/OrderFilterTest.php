@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Models\Classroom;
 use App\Models\Client;
 use App\Models\Order;
+use App\Models\Payment;
 use App\Models\School;
 
 use function Pest\Laravel\get;
@@ -138,4 +139,20 @@ it('echoes null filters when nothing is applied', function () {
             ->where('filters.school_id', null)
             ->where('filters.classroom_id', null)
             ->where('filters.search', null));
+});
+
+it('exposes paid installments and the current installment fraction on each order row', function () {
+    $classroom = Classroom::factory()->create();
+    $order = Order::factory()->create(['classroom_id' => $classroom->id]);
+    Payment::factory()->create(['order_id' => $order->id, 'amount' => 8000]);
+
+    $response = get(route('orders.index', ['classroom_id' => $classroom->id]));
+    $response->assertOk();
+
+    /** @var array<int, array<string, mixed>> $orders */
+    $orders = $response->viewData('page')['props']['orders']['data'];
+    $row = collect($orders)->firstOrFail(fn (array $row) => (int) $row['id'] === $order->id);
+
+    expect($row['paid_installments'])->toBe(0)
+        ->and($row['current_installment_fraction'])->toBe(0.5);
 });
