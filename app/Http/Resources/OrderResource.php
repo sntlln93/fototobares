@@ -20,13 +20,6 @@ use Illuminate\Support\Facades\Storage;
 class OrderResource extends JsonResource
 {
     /**
-     * Last production position by product, cached for the request.
-     *
-     * @var array<int, int>|null
-     */
-    private static ?array $lastPositions = null;
-
-    /**
      * Transform the resource into an array.
      *
      * @return array<string, mixed>
@@ -53,7 +46,7 @@ class OrderResource extends JsonResource
             'photo_number' => $this->photo_number,
             'photo_url' => $photo !== null ? Storage::url($photo->file_path) : null,
             'cancelled_at' => $this->cancelled_at?->format('d/m/Y'),
-            'status' => $this->aggregateStatus($details),
+            'status' => $this->aggregateStatus(),
             'paid_total' => $this->whenLoaded('payments', fn () => $this->sumPayments()),
             'balance' => $this->whenLoaded('payments', fn () => $this->total_price - $this->sumPayments()),
             'can_edit' => $this->canEdit(),
@@ -142,76 +135,5 @@ class OrderResource extends JsonResource
         }
 
         return ! $this->firstInstallmentPaid();
-    }
-
-    /**
-     * @param  Collection<int|string, OrderDetail>  $details
-     */
-    private function aggregateStatus($details): ?string
-    {
-        if ($this->cancelled_at !== null) {
-            return 'cancelado';
-        }
-
-        if ($details->isEmpty()) {
-            return null;
-        }
-
-        $active = $details->filter(fn (OrderDetail $detail) => $detail->recycled_to === null);
-
-        if ($active->isEmpty()) {
-            return null;
-        }
-
-        $delivered = $active->filter(fn (OrderDetail $detail) => $detail->delivered_at !== null);
-
-        if ($delivered->count() === $active->count()) {
-            return 'entregado';
-        }
-
-        if ($delivered->isNotEmpty()) {
-            return 'entregado parcial';
-        }
-
-        if ($active->every(fn (OrderDetail $detail) => $detail->production_enabled_at === null)) {
-            return 'sin habilitar';
-        }
-
-        if ($active->every(fn (OrderDetail $detail) => $detail->production_status_id === null)) {
-            return 'pendiente';
-        }
-
-        $lastPositions = self::lastPositions();
-
-        $allFinished = $active->every(function (OrderDetail $detail) use ($lastPositions) {
-            $status = $detail->productionStatus;
-
-            if ($status === null) {
-                return false;
-            }
-
-            return $status->position === ($lastPositions[$status->product_id] ?? null);
-        });
-
-        return $allFinished ? 'terminado' : 'en producción';
-    }
-
-    /**
-     * @return array<int, int>
-     */
-    private static function lastPositions(): array
-    {
-        if (self::$lastPositions === null) {
-            /** @var array<int, int> $positions */
-            $positions = ProductionStatus::query()
-                ->selectRaw('product_id, MAX(position) as last_position')
-                ->groupBy('product_id')
-                ->pluck('last_position', 'product_id')
-                ->all();
-
-            self::$lastPositions = $positions;
-        }
-
-        return self::$lastPositions;
     }
 }

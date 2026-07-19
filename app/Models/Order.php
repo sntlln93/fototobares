@@ -26,6 +26,13 @@ class Order extends Model
     use SoftDeletes;
 
     /**
+     * Last production position by product, cached for the request.
+     *
+     * @var array<int, int>|null
+     */
+    private static ?array $lastPositions = null;
+
+    /**
      * @return BelongsTo<Client, $this>
      */
     public function client()
@@ -220,6 +227,89 @@ class Order extends Model
             ->where('classroom_id', $this->classroom_id)
             ->where('number', $this->photo_number)
             ->first();
+    }
+
+    /**
+     * Aggregate production status derived from the loaded `details`
+     * (cancelado/entregado/entregado parcial/sin habilitar/pendiente/en
+     * producción/terminado). Returns null when `details` isn't loaded or
+     * there are no active (non-recycled) details, avoiding a lazy load.
+     */
+    public function aggregateStatus(): ?string
+    {
+        if ($this->cancelled_at !== null) {
+            return 'cancelado';
+        }
+
+        if (! $this->relationLoaded('details')) {
+            return null;
+        }
+
+        $active = $this->details->filter(fn (OrderDetail $detail) => $detail->recycled_to === null);
+
+        if ($active->isEmpty()) {
+            return null;
+        }
+
+        $delivered = $active->filter(fn (OrderDetail $detail) => $detail->delivered_at !== null);
+
+        if ($delivered->count() === $active->count()) {
+            return 'entregado';
+        }
+
+        if ($delivered->isNotEmpty()) {
+            return 'entregado parcial';
+        }
+
+        if ($active->every(fn (OrderDetail $detail) => $detail->production_enabled_at === null)) {
+            return 'sin habilitar';
+        }
+
+        if ($active->every(fn (OrderDetail $detail) => $detail->production_status_id === null)) {
+            return 'pendiente';
+        }
+
+        $lastPositions = self::lastPositions();
+
+        $allFinished = $active->every(function (OrderDetail $detail) use ($lastPositions) {
+            $status = $detail->productionStatus;
+
+            if ($status === null) {
+                return false;
+            }
+
+            return $status->position === ($lastPositions[$status->product_id] ?? null);
+        });
+
+        return $allFinished ? 'terminado' : 'en producción';
+    }
+
+    /**
+     * Whether the order's aggregate status is "terminado". Requires
+     * `details.productionStatus` to be loaded (see `aggregateStatus()`).
+     */
+    public function isFinished(): bool
+    {
+        return $this->aggregateStatus() === 'terminado';
+    }
+
+    /**
+     * @return array<int, int>
+     */
+    private static function lastPositions(): array
+    {
+        if (self::$lastPositions === null) {
+            /** @var array<int, int> $positions */
+            $positions = ProductionStatus::query()
+                ->selectRaw('product_id, MAX(position) as last_position')
+                ->groupBy('product_id')
+                ->pluck('last_position', 'product_id')
+                ->all();
+
+            self::$lastPositions = $positions;
+        }
+
+        return self::$lastPositions;
     }
 
     protected $casts = [

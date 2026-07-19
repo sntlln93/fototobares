@@ -1,5 +1,5 @@
+import { nextStatusFor, toggleGroup, toggleId } from '@/hooks/use-selection';
 import { describe, expect, it } from 'vitest';
-import { nextStatusFor, toggleGroup, toggleId } from '../hooks/use-selection';
 
 describe('toggleId', () => {
     it('adds an unselected id', () => {

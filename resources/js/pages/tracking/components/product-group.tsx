@@ -14,9 +14,9 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
+import { nextStatusFor } from '@/hooks/use-selection';
 import { capitalize } from '@/lib/utils';
 import { useState } from 'react';
-import { nextStatusFor } from '../hooks/use-selection';
 import { DetailCard } from './detail-card';
 import { DetailRow } from './detail-row';
 

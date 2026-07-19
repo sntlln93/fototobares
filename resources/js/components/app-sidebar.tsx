@@ -18,6 +18,7 @@ import {
     ListOrdered,
     Package,
     PackageOpen,
+    Printer,
     Recycle,
     Rss,
     School,
@@ -43,6 +44,12 @@ const routeables = [
         roles: SALES,
     },
     { name: 'Escuelas', route: 'schools.index', icon: School, roles: SALES },
+    {
+        name: 'Etiquetas',
+        route: 'stickers.index',
+        icon: Printer,
+        roles: SALES,
+    },
     {
         name: 'Seguimiento',
         route: 'tracking.index',
