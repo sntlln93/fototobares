@@ -3,11 +3,13 @@ import { BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
 import { OverdueOrdersCard } from './dashboard/components/overdue-orders-card';
 import { ProductionCard } from './dashboard/components/production-card';
+import { ProductionStatsCard } from './dashboard/components/production-stats-card';
 import { StatsGrid } from './dashboard/components/stats-grid';
 import { StockAlertsCard } from './dashboard/components/stock-alerts-card';
 import {
     Metrics,
     OverdueOrder,
+    ProductionStat,
     useDashboard,
 } from './dashboard/hooks/use-dashboard';
 
@@ -22,10 +24,12 @@ export default function Dashboard({
     metrics,
     overdueOrders,
     stockAlerts,
+    productionStats,
 }: PageProps<{
     metrics: Metrics;
     overdueOrders: OverdueOrder[];
     stockAlerts: Stockable[];
+    productionStats: ProductionStat[];
 }>) {
     const { production, productionTotal } = useDashboard(metrics);
 
@@ -46,6 +50,8 @@ export default function Dashboard({
                     />
                     <StockAlertsCard stockAlerts={stockAlerts} />
                 </div>
+
+                <ProductionStatsCard productionStats={productionStats} />
 
                 <OverdueOrdersCard overdueOrders={overdueOrders} />
             </section>
