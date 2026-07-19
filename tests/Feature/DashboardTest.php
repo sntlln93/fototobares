@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Models\Order;
 use App\Models\OrderDetail;
 use App\Models\Payment;
+use App\Models\Product;
 use App\Models\Stockable;
 use Inertia\Testing\AssertableInertia as Assert;
 
@@ -102,6 +103,58 @@ it('lists an order that fell behind on a later installment', function () {
             ->has('overdueOrders', 1)
             ->where('overdueOrders.0.id', $behind->id)
             ->where('overdueOrders.0.balance', 15000),
+    );
+});
+
+it('aggregates production stats by product and variant', function () {
+    actingAsRole();
+
+    $product = Product::factory()->create(['name' => 'Banda']);
+    $order = Order::factory()->create();
+
+    $negro = [['label' => 'Color', 'type' => 'color', 'value' => ['label' => 'Negro', 'color' => '#000000']]];
+    $blanco = [['label' => 'Color', 'type' => 'color', 'value' => ['label' => 'Blanco', 'color' => '#ffffff']]];
+
+    OrderDetail::factory()->count(2)->create([
+        'order_id' => $order->id,
+        'product_id' => $product->id,
+        'variant' => $negro,
+    ]);
+    OrderDetail::factory()->create([
+        'order_id' => $order->id,
+        'product_id' => $product->id,
+        'variant' => $blanco,
+    ]);
+
+    get(route('dashboard'))->assertInertia(
+        fn (Assert $page) => $page
+            ->where('productionStats.0.product', 'Banda')
+            ->where('productionStats.0.total', 3)
+            ->has('productionStats.0.variants', 2)
+            ->where('productionStats.0.variants.0.label', 'Negro')
+            ->where('productionStats.0.variants.0.count', 2)
+            ->where('productionStats.0.variants.1.label', 'Blanco')
+            ->where('productionStats.0.variants.1.count', 1),
+    );
+});
+
+it('excludes cancelled orders and recycled details from production stats', function () {
+    actingAsRole();
+
+    $product = Product::factory()->create(['name' => 'Banda']);
+
+    $order = Order::factory()->create();
+    OrderDetail::factory()->create(['order_id' => $order->id, 'product_id' => $product->id]);
+
+    $cancelledOrder = Order::factory()->cancelled()->create();
+    OrderDetail::factory()->create(['order_id' => $cancelledOrder->id, 'product_id' => $product->id]);
+
+    OrderDetail::factory()->recycled()->create(['order_id' => $order->id, 'product_id' => $product->id]);
+
+    get(route('dashboard'))->assertInertia(
+        fn (Assert $page) => $page
+            ->where('productionStats.0.product', 'Banda')
+            ->where('productionStats.0.total', 1),
     );
 });
 
