@@ -1,6 +1,6 @@
 ---
-name: plan-for-issue
-description: Creates a concise, low-token implementation plan for a GitHub issue. With --handoff <model>, also generates a structured Implementation Handoff in .claude/handoffs/ that /implement executes with objective validation.
+name: canvass-the-scene
+description: Creates a concise, low-token implementation plan for a GitHub issue. With --handoff <model>, also generates a structured Implementation Handoff in .claude/handoffs/ that /serve-warrant executes with objective validation.
 ---
 
 # Plan for issue
@@ -8,8 +8,8 @@ description: Creates a concise, low-token implementation plan for a GitHub issue
 ## Usage
 
 ```text
-/plan-for-issue #150
-/plan-for-issue #150 --handoff haiku
+/canvass-the-scene #150
+/canvass-the-scene #150 --handoff haiku
 ```
 
 `--handoff <model>` is optional. When provided, generates an **Implementation Handoff** structured for objective validation and saves it to `.claude/handoffs/<issue_number>.md`.
@@ -18,7 +18,7 @@ description: Creates a concise, low-token implementation plan for a GitHub issue
 
 ## Implementation Guidelines
 
-When the user executes `/plan-for-issue <issue_number>`, follow these rules.
+When the user executes `/canvass-the-scene <issue_number>`, follow these rules.
 
 ### 1. No Autonomous Exploration
 
@@ -223,7 +223,7 @@ Expected output: ...
 - Avoid unrelated refactors.
 - Do not modify public APIs unless explicitly required.
 - All validation commands must pass before marking a step complete.
-- Git policy (handoff mode): stage files by name (never `git add .`/`-A`), commit per the per-step **Commit** convention and push without asking — but creating the PR is always the owner's call (or the `leader` agent's, inside the autonomous issue flow, per the standing exception in CLAUDE.md's Agent rules).
+- Git policy (handoff mode): stage files by name (never `git add .`/`-A`), commit per the per-step **Commit** convention and push without asking — but creating the PR is always the owner's call (or the `detective` agent's, inside the autonomous issue flow, per the standing exception in CLAUDE.md's Agent rules).
 - PR (when suggested at the end): target `develop` (squash merge), body in Spanish, closing keyword in English (`Closes #<issue_number>` — "Cierra" closes nothing).
 
 ---
@@ -233,19 +233,15 @@ Expected output: ...
 - All steps completed and validated.
 - No unrelated changes.
 - All acceptance criteria marked `[x]`.
-- `validate-code --full` passes (backend, frontend, or both as applicable).
+- `run-forensics --full` passes (backend, frontend, or both as applicable).
 
 ---
 
 ## Final Validation Commands
 
-```bash
-# Single source of truth for the quality gate — detects the touched side(s):
-bash .claude/skills/validate-code/scripts/validate-code.sh --full
-```
+Invoke the `run-forensics` skill with `--full` (single source of truth for the quality gate — it detects the touched side(s) itself).
 
-[e2e is CI-only: never include a local `npm run test:e2e` (it resets the dev
-DB). The `e2e` required check covers it on every PR.]
+[e2e is CI-only: never include a local `npm run test:e2e` (it resets the dev DB). The `e2e` required check covers it on every PR.]
 
 Expected: All pass, no warnings.
 ````

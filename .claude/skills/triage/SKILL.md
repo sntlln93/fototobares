@@ -45,4 +45,4 @@ An issue is ready for the autonomous flow when:
 
 ## Hard rule
 
-`ready-for-agent` is the leader's mandatory intake gate. It is applied ONLY with the owner's absolute and exclusive permission: an explicit yes to the direct question "¿Marco #N como `ready-for-agent`?" at the end of interactive triage. Never by the scan, never inferred from content confirmations, never on any agent's say-so. No explicit permission → no label, regardless of how complete the issue looks.
+`ready-for-agent` is the detective's mandatory intake gate. It is applied ONLY with the owner's absolute and exclusive permission: an explicit yes to the direct question "¿Marco #N como `ready-for-agent`?" at the end of interactive triage. Never by the scan, never inferred from content confirmations, never on any agent's say-so. No explicit permission → no label, regardless of how complete the issue looks.

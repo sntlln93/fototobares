@@ -1,5 +1,5 @@
 ---
-name: implement
+name: serve-warrant
 description: Executes the Implementation Handoff stored in .claude/handoffs/<issue_number>.md step by step, with objective validation per step, autonomous commits/pushes under the handoff git policy, and a strict stop-and-ask rule for any deviation.
 ---
 
@@ -8,7 +8,7 @@ description: Executes the Implementation Handoff stored in .claude/handoffs/<iss
 ## Usage
 
 ```text
-/implement #150
+/serve-warrant #150
 ```
 
 Executes the implementation plan stored in `.claude/handoffs/<issue_number>.md`.
@@ -19,7 +19,7 @@ Parses the structured handoff, implements each step with objective validation, a
 
 # Implementation Guidelines
 
-When the user executes `/implement <issue_number>`, follow these rules.
+When the user executes `/serve-warrant <issue_number>`, follow these rules.
 
 ---
 
@@ -54,7 +54,7 @@ Load:
 If the file does not exist:
 
 - Stop immediately.
-- Inform the user that the handoff must be generated first with `/plan-for-issue #<issue_number> --handoff <model>`.
+- Inform the user that the handoff must be generated first with `/canvass-the-scene #<issue_number> --handoff <model>`.
 
 Do not attempt to infer the implementation from the GitHub issue.
 
@@ -303,7 +303,7 @@ After completing and validating a step, respond using this structure:
 
 After all implementation steps are complete:
 
-1. Run all **Final Validation Commands** from the handoff (normally `validate-code --full`, plus e2e on the host when the handoff calls for it).
+1. Run all **Final Validation Commands** from the handoff (normally `run-forensics --full`, plus e2e on the host when the handoff calls for it).
 
 2. Verify output: All pass, no warnings
 
@@ -316,4 +316,4 @@ After all implementation steps are complete:
    - Mark the final checklist in the handoff as complete
    - Push any remaining commits
    - Summarize what was accomplished
-   - Suggest creating a PR — but do **not** create it without the user's approval. Inside the autonomous issue flow, report back to the `leader` instead — opening the PR is the leader's job. Reminders: target `develop` (squash), body in Spanish, closing keyword in English (`Closes #<issue_number>`).
+   - Suggest creating a PR — but do **not** create it without the user's approval. Inside the autonomous issue flow, report back to the `detective` instead — opening the PR is the detective's job. Reminders: target `develop` (squash), body in Spanish, closing keyword in English (`Closes #<issue_number>`).

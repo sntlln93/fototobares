@@ -44,18 +44,18 @@ npm run test:e2e -- e2e/tracking.spec.ts
 
 ### Quality
 
-Use the `validate-code` skill — it detects the touched side(s) and runs the right tools through Sail:
+Use the `run-forensics` skill — it detects the touched side(s) and runs the right tools through Sail:
 
-- After **every** code change: run `validate-code` and fix everything until it passes.
-- Before proposing a PR: run `validate-code` with `--full` (adds the test suites of the touched sides).
+- After **every** code change: run `run-forensics` and fix everything until it passes.
+- Before proposing a PR: run `run-forensics` with `--full` (adds the test suites of the touched sides).
 
 Underlying tools if you need one directly: `sail composer pint` / `sail composer analyse` (phpstan level 9, larastan), `sail npm run format` / `lint` (prettier/eslint), `sail npx tsc`. Pint enforces `declare(strict_types=1)`.
 
 ## Agent rules
 
 - Never create commits or push without explicit approval. Never push directly to `develop`.
-  - **Standing exception (owner-approved 2026-07-16)**: inside the autonomous issue flow orchestrated by the `leader` agent (`.claude/agents/`), the `implementer` and `test-writer` subagents have standing approval to stage (by name), commit and push to the issue's **feature branch only**. The `leader` may open the PR against `develop`. Merging is always human; every other rule in this section still applies.
-- If an autonomous issue run is stopped and later resumed, ask the owner how to continue — through the flow's subagents per the handoff, or directly — instead of deciding alone. Resuming in the main thread silently skips the flow's gates (`code-reviewer`) and forfeits the subagents' standing commit permission, so it is the owner's call, not a judgement to make from a stale constraint.
+  - **Standing exception (owner-approved 2026-07-16)**: inside the autonomous issue flow orchestrated by the `detective` agent (`.claude/agents/`), the `contractor` and `stenographer` subagents have standing approval to stage (by name), commit and push to the issue's **feature branch only**. The `detective` may open the PR against `develop`. Merging is always human; every other rule in this section still applies.
+- If an autonomous issue run is stopped and later resumed, ask the owner how to continue — through the flow's subagents per the handoff, or directly — instead of deciding alone. Resuming in the main thread silently skips the flow's gates (`judge`) and forfeits the subagents' standing commit permission, so it is the owner's call, not a judgement to make from a stale constraint.
 - Use the `prepare-commit` skill to structure commit messages before requesting approval.
 - Never mention the agent in commits, comments or project messages.
 - Never use `git add .` or `git add -A`. Always add to staging by explicitly naming the file.

@@ -1,6 +1,6 @@
 ---
 name: collect-evidence
-description: Archives one session's raw transcripts (root + every subagent) into .claude/ and derives its cost/context report. Use after an autonomous issue run, before a /self-improve retrospective, or whenever a session is worth keeping as evidence.
+description: Archives one session's raw transcripts (root + every subagent) into .claude/ and derives its cost/context report. Use after an autonomous issue run, before a /post-mortem retrospective, or whenever a session is worth keeping as evidence.
 ---
 
 # Collect session evidence
@@ -46,8 +46,8 @@ on the same id overwrites in place, so it is safe to collect a session twice.
   **only** narration written by the agent.
 
 > **Do not** use the old `ownContentPct` field as a verbosity proxy. It lumped
-> prose together with tool_use arguments and read ~10x high (leader: 73% vs 3%
-> real prose). That misreading got copied into `leader.md` as a prompt rule and
+> prose together with tool_use arguments and read ~10x high (detective: 73% vs 3%
+> real prose). That misreading got copied into `detective.md` as a prompt rule and
 > spent a whole section optimizing 3–6% of the cost. See
 > `.claude/docs/who-killed-the-tokens.md`, finding 1. `composition` replaces it.
 

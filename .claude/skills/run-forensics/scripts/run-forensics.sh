@@ -3,7 +3,7 @@
 # runs only the matching tools. PHP and npm run through Sail — there is no
 # local PHP and the local node breaks vitest/rollup.
 #
-# Usage: bash .claude/skills/validate-code/scripts/validate-code.sh [--full]
+# Usage: bash .claude/skills/run-forensics/scripts/run-forensics.sh [--full]
 #   --full | --pr   also run the test suites of the touched side(s)
 #                   (vitest / pest; playwright runs in CI only, never here —
 #                   a local run resets the dev database)

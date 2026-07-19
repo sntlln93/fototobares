@@ -1,5 +1,5 @@
 ---
-name: self-improve
+name: post-mortem
 description: Post-completion retrospective of the autonomous issue FLOW (not the issue's code). Analyzes the run's artifacts, proposes flow improvements one by one, and applies only the ones the owner explicitly approves.
 ---
 
@@ -8,10 +8,10 @@ description: Post-completion retrospective of the autonomous issue FLOW (not the
 ## Usage
 
 ```text
-/self-improve #N   # retro of the flow run for issue N
+/post-mortem #N   # retro of the flow run for issue N
 ```
 
-Run after an issue completes (PR merged or run escalated). The subject is the **flow** — agents, skills, guardrails, budget — never the issue's code (that's `code-review`'s job).
+Run after an issue completes (PR merged or run escalated). The subject is the **flow** — agents, skills, guardrails, budget — never the issue's code (that's `pass-sentence`'s job).
 
 ## Evidence to analyze
 

@@ -1,5 +1,5 @@
 ---
-name: validate-code
+name: run-forensics
 description: Runs linting, formatting, and static analysis tools. Automatically detects if changes are backend or frontend to run the appropriate tools (phpstan, pint, eslint, prettier, tsc). Use this after code changes or before proposing a PR.
 ---
 
@@ -8,8 +8,8 @@ description: Runs linting, formatting, and static analysis tools. Automatically 
 Run the support script from the repo root:
 
 ```bash
-bash .claude/skills/validate-code/scripts/validate-code.sh          # after code changes
-bash .claude/skills/validate-code/scripts/validate-code.sh --full   # before proposing a PR
+bash .claude/skills/run-forensics/scripts/run-forensics.sh          # after code changes
+bash .claude/skills/run-forensics/scripts/run-forensics.sh --full   # before proposing a PR
 ```
 
 The script detects the touched side(s) — comparing the merge-base with

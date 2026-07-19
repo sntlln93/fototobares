@@ -1,5 +1,5 @@
 ---
-name: code-review
+name: pass-sentence
 description: Reviews the current branch's diff against develop, intent-first (does it solve what the issue asks?), plus semantic correctness, test quality and diff security — skipping everything Pint/PHPStan/ESLint/tsc/ArchTest already enforce. With --pr <number>, also posts the report as a Spanish PR comment.
 ---
 
@@ -10,7 +10,7 @@ Review the diff of the current branch against `origin/develop` (`git diff origin
 ## Checklist
 
 1. **Intent (primary check)**: read the issue (`gh issue view <N> --comments`) and, when it exists, `.claude/handoffs/<N>.md`. Does the diff solve what the issue asks? Are the acceptance criteria satisfied in the code, not just checked off? Anything requested but missing? Anything present that was not requested (scope creep)? A handoff that drifted from the issue is itself a REQUIRED finding.
-2. **Semantic correctness**: logic errors, edge cases and regressions that compile and pass — what no tool catches. Assume `validate-code --full` ran green: do NOT re-check formatting, types, naming/layering conventions or size limits (Pint, PHPStan, ESLint `max-lines`, tsc and `tests/Arch/ArchTest.php` already enforce them). If you spot an enforceable convention the tooling misses, write it under **Proposed rules** instead of hand-checking it.
+2. **Semantic correctness**: logic errors, edge cases and regressions that compile and pass — what no tool catches. Assume `run-forensics --full` ran green: do NOT re-check formatting, types, naming/layering conventions or size limits (Pint, PHPStan, ESLint `max-lines`, tsc and `tests/Arch/ArchTest.php` already enforce them). If you spot an enforceable convention the tooling misses, write it under **Proposed rules** instead of hand-checking it.
 3. **Test quality**: new/changed tests must pin behavior — they should fail if the fix were reverted. Flag tautological tests and tests that mirror the implementation instead of asserting the requirement.
 4. **What tooling cannot see**: page-level horizontal scroll on any viewport, UI copy in Spanish, eager loads on paths `PageSmokeTest` does not visit (non-GET requests, conditional serialization).
 5. **Diff security**: any secret/credential, or any change under `.github/**`, `Dockerfile`, `docker/**` or `.env*`, is an automatic REQUIRED finding flagged **ESCALATE**.
@@ -40,7 +40,7 @@ Post the report with `gh pr comment <number>`, translated to Spanish:
 
 - [REQUERIDO|OPCIONAL] `file:line` — problema — corrección sugerida
 
-Validación: <resultado de validate-code --full si se conoce>
+Validación: <resultado de run-forensics --full si se conoce>
 ```
 
 Never mention agents or tooling in the comment.
