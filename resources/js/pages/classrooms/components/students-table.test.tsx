@@ -38,6 +38,7 @@ const makeStudent = (
     total_price: 15000,
     payment_plan: 3,
     paid_installments: 1,
+    current_installment_fraction: 0,
     due_date: '1 de ago 2026',
     ...overrides,
 });
@@ -117,12 +118,11 @@ describe('StudentsTable', () => {
             />,
         );
 
-        const squares = container.querySelectorAll('span.rounded-sm');
+        const squares = container.querySelectorAll('span.rounded-none');
         const filled = container.querySelectorAll('span.bg-primary');
 
         expect(squares).toHaveLength(3);
         expect(filled).toHaveLength(1);
-        expect(squares.length - filled.length).toBe(2);
     });
 
     it('fills every square when the plan is fully paid', () => {
@@ -134,7 +134,7 @@ describe('StudentsTable', () => {
             />,
         );
 
-        const squares = container.querySelectorAll('span.rounded-sm');
+        const squares = container.querySelectorAll('span.rounded-none');
         const filled = container.querySelectorAll('span.bg-primary');
 
         expect(squares).toHaveLength(4);
@@ -152,7 +152,7 @@ describe('StudentsTable', () => {
 
         const row = screen.getAllByRole('row')[1];
 
-        expect(container.querySelectorAll('span.rounded-sm')).toHaveLength(0);
+        expect(container.querySelectorAll('span.rounded-none')).toHaveLength(0);
         expect(within(row).getByText('—')).toBeTruthy();
     });
 

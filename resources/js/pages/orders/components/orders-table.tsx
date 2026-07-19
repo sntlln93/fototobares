@@ -8,6 +8,7 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import { Highlight } from '@/features/highlight';
+import { InstallmentsIndicator } from '@/features/installments-indicator';
 import { PhoneLink } from '@/features/phone-link';
 import { onSort } from '@/lib/services/filter';
 import { cn, formatPrice } from '@/lib/utils';
@@ -43,18 +44,6 @@ export function OrdersTable({ orders, search, onDelete }: OrdersTableProps) {
                     <TableHead>Cliente</TableHead>
                     <TableHead>Teléfono</TableHead>
                     <TableHead>Productos</TableHead>
-                    <TableHead>
-                        <div className="flex items-center gap-2">
-                            <button
-                                onClick={() =>
-                                    onSort('total_price', 'orders.index')
-                                }
-                            >
-                                <ArrowUpDown className="h-4 w-4" />
-                            </button>
-                            Precio
-                        </div>
-                    </TableHead>
                     <TableHead>Cuotas ($)</TableHead>
                     <TableHead>Escuela (Aula)</TableHead>
                     <TableHead>Acciones</TableHead>
@@ -106,13 +95,25 @@ export function OrdersTable({ orders, search, onDelete }: OrdersTableProps) {
                                 )}
                             </div>
                         </TableCell>
-                        <TableCell>{formatPrice(order.total_price)}</TableCell>
                         <TableCell>
-                            {order.payment_plan} (
-                            {formatPrice(
-                                order.total_price / order.payment_plan,
-                            )}
-                            )
+                            <div className="flex flex-col gap-1">
+                                <span>
+                                    {order.payment_plan} (
+                                    {formatPrice(
+                                        order.total_price / order.payment_plan,
+                                    )}
+                                    )
+                                </span>
+                                <InstallmentsIndicator
+                                    paymentPlan={order.payment_plan}
+                                    paidInstallments={
+                                        order.paid_installments ?? 0
+                                    }
+                                    currentInstallmentFraction={
+                                        order.current_installment_fraction
+                                    }
+                                />
+                            </div>
                         </TableCell>
                         <TableCell>
                             <Link

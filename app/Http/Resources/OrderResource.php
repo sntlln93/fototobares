@@ -49,6 +49,8 @@ class OrderResource extends JsonResource
             'status' => $this->aggregateStatus(),
             'paid_total' => $this->whenLoaded('payments', fn () => $this->sumPayments()),
             'balance' => $this->whenLoaded('payments', fn () => $this->total_price - $this->sumPayments()),
+            'paid_installments' => $this->whenLoaded('payments', fn () => $this->paidInstallments()),
+            'current_installment_fraction' => $this->whenLoaded('payments', fn () => $this->currentInstallmentFraction()),
             'can_edit' => $this->canEdit(),
             'first_installment_paid' => $this->firstInstallmentPaid(),
             'can_delete' => $this->cancelled_at === null && $this->payments()->doesntExist(),
@@ -122,6 +124,59 @@ class OrderResource extends JsonResource
             fn (int $carry, Payment $payment) => $carry + $payment->amount,
             0,
         );
+    }
+
+    /**
+     * Installments actually covered by payments, capped at the plan.
+     * Mirrors the semantics of `Order::firstInstallmentPaid()`.
+     */
+    private function paidInstallments(): int
+    {
+        $plan = (int) $this->payment_plan;
+
+        if ($plan <= 0) {
+            return 0;
+        }
+
+        $paid = $this->sumPayments();
+        $totalPrice = (int) $this->total_price;
+        $installment = $totalPrice / $plan;
+
+        if ($installment == 0) {
+            return 0;
+        }
+
+        return min($plan, (int) floor($paid / $installment));
+    }
+
+    /**
+     * Fraction (0..1) paid of the current (first incomplete) installment.
+     */
+    private function currentInstallmentFraction(): float
+    {
+        $plan = (int) $this->payment_plan;
+
+        if ($plan <= 0) {
+            return 0.0;
+        }
+
+        $paid = $this->sumPayments();
+        $totalPrice = (int) $this->total_price;
+        $installment = $totalPrice / $plan;
+
+        if ($installment == 0) {
+            return 0.0;
+        }
+
+        $paidInstallments = min($plan, (int) floor($paid / $installment));
+
+        if ($paidInstallments >= $plan) {
+            return 0.0;
+        }
+
+        $remainder = $paid - $paidInstallments * $installment;
+
+        return max(0.0, min(1.0, $remainder / $installment));
     }
 
     private function canEdit(): bool

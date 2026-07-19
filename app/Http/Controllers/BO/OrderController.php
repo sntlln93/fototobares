@@ -48,7 +48,7 @@ class OrderController extends Controller
             ->whereHas('classrooms')
             ->get();
 
-        $orders = Order::with('client', 'products.type', 'classroom.school')
+        $orders = Order::with('client', 'products.type', 'classroom.school', 'payments')
             ->search($search)
             ->forSchool($school_id)
             ->forClassroom($classroom_id)

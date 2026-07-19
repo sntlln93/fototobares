@@ -9,6 +9,7 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import { Highlight } from '@/features/highlight';
+import { InstallmentsIndicator } from '@/features/installments-indicator';
 import { PhoneLink } from '@/features/phone-link';
 import { cn, formatPrice } from '@/lib/utils';
 import { Link } from '@inertiajs/react';
@@ -24,6 +25,7 @@ export interface ClassroomStudent {
     total_price: number;
     payment_plan: number;
     paid_installments: number;
+    current_installment_fraction: number;
     due_date: string | null;
 }
 
@@ -43,7 +45,6 @@ export function StudentsTable({ students, search }: StudentsTableProps) {
                     <TableHead>Cliente</TableHead>
                     <TableHead>Teléfono</TableHead>
                     <TableHead>Productos</TableHead>
-                    <TableHead>Precio</TableHead>
                     <TableHead>Cuotas</TableHead>
                     <TableHead>Vencimiento</TableHead>
                     <TableHead>Acción</TableHead>
@@ -95,9 +96,6 @@ export function StudentsTable({ students, search }: StudentsTableProps) {
                         </TableCell>
                         <TableCell>{student.products_count}</TableCell>
                         <TableCell>
-                            {formatPrice(student.total_price)}
-                        </TableCell>
-                        <TableCell>
                             {student.payment_plan > 0 ? (
                                 <div className="flex flex-col gap-1">
                                     <span>
@@ -108,22 +106,15 @@ export function StudentsTable({ students, search }: StudentsTableProps) {
                                         )}
                                         )
                                     </span>
-                                    <div className="flex flex-wrap gap-1">
-                                        {Array.from({
-                                            length: student.payment_plan,
-                                        }).map((_, index) => (
-                                            <span
-                                                key={index}
-                                                className={cn(
-                                                    'size-3 rounded-sm',
-                                                    index <
-                                                        student.paid_installments
-                                                        ? 'bg-primary'
-                                                        : 'border bg-transparent',
-                                                )}
-                                            />
-                                        ))}
-                                    </div>
+                                    <InstallmentsIndicator
+                                        paymentPlan={student.payment_plan}
+                                        paidInstallments={
+                                            student.paid_installments
+                                        }
+                                        currentInstallmentFraction={
+                                            student.current_installment_fraction
+                                        }
+                                    />
                                 </div>
                             ) : (
                                 '—'
