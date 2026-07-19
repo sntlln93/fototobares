@@ -158,6 +158,31 @@ it('excludes cancelled orders and recycled details from production stats', funct
     );
 });
 
+it('groups details with empty or pending variant under Sin variante', function () {
+    actingAsRole();
+
+    $product = Product::factory()->create(['name' => 'Banda']);
+    $order = Order::factory()->create();
+
+    OrderDetail::factory()->create([
+        'order_id' => $order->id,
+        'product_id' => $product->id,
+        'variant' => [],
+    ]);
+    OrderDetail::factory()->create([
+        'order_id' => $order->id,
+        'product_id' => $product->id,
+        'variant' => [['label' => 'Color', 'type' => 'color', 'value' => null]],
+    ]);
+
+    get(route('dashboard'))->assertInertia(
+        fn (Assert $page) => $page
+            ->has('productionStats.0.variants', 1)
+            ->where('productionStats.0.variants.0.label', 'Sin variante')
+            ->where('productionStats.0.variants.0.count', 2),
+    );
+});
+
 it('stops counting installments once the plan is complete', function () {
     actingAsRole();
 

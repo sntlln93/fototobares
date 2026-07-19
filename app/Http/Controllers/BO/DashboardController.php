@@ -173,6 +173,7 @@ class DashboardController extends Controller
     {
         $pairs = collect($variant ?? [])
             ->map(fn (array $entry) => [$entry['label'], $entry['value']['label'] ?? null])
+            ->filter(fn (array $pair) => $pair[1] !== null)
             ->sortBy(fn (array $pair) => $pair[0])
             ->values()
             ->all();
