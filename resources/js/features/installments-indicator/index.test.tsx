@@ -45,6 +45,7 @@ describe('InstallmentsIndicator', () => {
 
         expect(overlay).not.toBeNull();
         expect((overlay as HTMLElement).style.height).toBe('37%');
+        expect(squares[1].classList.contains('border')).toBe(true);
     });
 
     it('renders the in-progress square empty when the fraction is omitted', () => {

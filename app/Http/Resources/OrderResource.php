@@ -176,7 +176,7 @@ class OrderResource extends JsonResource
 
         $remainder = $paid - $paidInstallments * $installment;
 
-        return min(1.0, $remainder / $installment);
+        return max(0.0, min(1.0, $remainder / $installment));
     }
 
     private function canEdit(): bool

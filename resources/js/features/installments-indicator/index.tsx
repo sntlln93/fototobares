@@ -33,10 +33,8 @@ export function InstallmentsIndicator({
                     <span
                         key={index}
                         className={cn(
-                            'relative size-3 overflow-hidden rounded-none',
-                            filledFraction > 0
-                                ? 'bg-transparent'
-                                : 'border bg-transparent',
+                            'relative size-3 overflow-hidden rounded-none bg-transparent',
+                            filledFraction < 1 && 'border',
                         )}
                     >
                         {filledFraction > 0 && (
