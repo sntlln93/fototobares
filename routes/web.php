@@ -22,6 +22,7 @@ use App\Http\Controllers\BO\ProductionStatusController;
 use App\Http\Controllers\BO\ProductionStatusStockableController;
 use App\Http\Controllers\BO\RecyclingController;
 use App\Http\Controllers\BO\SchoolController;
+use App\Http\Controllers\BO\StickerController;
 use App\Http\Controllers\BO\StockController;
 use App\Http\Controllers\BO\StockMovementController;
 use App\Http\Controllers\BO\TrackingController;
@@ -60,6 +61,9 @@ Route::middleware(['auth', 'role:master,administración,oficina'])->group(functi
     Route::post('/editor-assignments', [EditorAssignmentController::class, 'store'])->name('editor-assignments.store');
     Route::post('/editor-assignments/bulk', [EditorAssignmentController::class, 'bulkStore'])->name('editor-assignments.bulk');
     Route::delete('/editor-assignments/{orderDetail}', [EditorAssignmentController::class, 'destroy'])->name('editor-assignments.destroy');
+
+    Route::get('/stickers', [StickerController::class, 'index'])->name('stickers.index');
+    Route::get('/stickers/print', [StickerController::class, 'print'])->name('stickers.print');
 });
 
 // Fotos: también accesibles para el rol editor
