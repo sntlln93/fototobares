@@ -18,7 +18,7 @@ Invoke the `serve-warrant` skill with that number and follow it strictly, with o
 
 ## Waiting for long commands
 
-`run-forensics --full` can exceed the 120s Bash timeout and get moved to the background. When that happens, **end your turn and wait for the completion notification.** Do not chase the job:
+`run-forensics --full` can exceed the 120s Bash timeout. Run it in the **foreground** anyway — pass Bash's `timeout` parameter (e.g. 300000–600000 ms) to extend the limit past 120s. Never `run_in_background` it: a subagent is **not** re-invoked when its own backgrounded Bash job finishes — that completion notification only wakes the caller of an `Agent` spawn, so backgrounding and ending your turn to "wait" hangs forever with no way to resume. Do not chase a job either:
 
 - Never `cat` or `Read` a task's `.output` file — it is a full JSONL transcript and floods your context. If you must peek, `tail -n 40` it, once.
 - Never poll with `sleep`, `until [ -s … ]`, `ps aux | grep`, or `tail -f` (which just hangs until the timeout).
