@@ -18,6 +18,12 @@ export type OverdueOrder = {
     balance: number;
 };
 
+export type ProductionStat = {
+    product: string;
+    total: number;
+    variants: { label: string; count: number }[];
+};
+
 export function useDashboard(metrics: Metrics) {
     const production = metrics.production;
     const productionTotal =

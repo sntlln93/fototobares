@@ -98,6 +98,8 @@ class DashboardController extends Controller
             ->whereColumn('quantity', '<=', 'alert_at')
             ->get(['id', 'name', 'quantity', 'unit', 'alert_at']);
 
+        $productionStats = $this->buildProductionStats();
+
         return Inertia::render('dashboard', [
             'metrics' => [
                 'sales_this_month' => $salesThisMonth,
@@ -111,6 +113,85 @@ class DashboardController extends Controller
             ],
             'overdueOrders' => $overdueOrders,
             'stockAlerts' => $stockAlerts,
+            'productionStats' => $productionStats,
         ]);
+    }
+
+    /**
+     * Aggregate non-cancelled, non-recycled order details by product and by
+     * variant combination, for a snapshot production overview.
+     *
+     * @return array<int, array{product: string, total: int, variants: array<int, array{label: string, count: int}>}>
+     */
+    private function buildProductionStats(): array
+    {
+        $details = OrderDetail::query()
+            ->whereNull('recycled_to')
+            ->whereHas('order', fn ($q) => $q->whereNull('cancelled_at'))
+            ->with('product:id,name')
+            ->get(['id', 'product_id', 'variant']);
+
+        return $details
+            ->groupBy('product_id')
+            ->map(function ($group) {
+                /** @var OrderDetail $first */
+                $first = $group->first();
+
+                $variants = $group
+                    ->groupBy(fn (OrderDetail $detail) => $this->variantGroupKey($detail->variant))
+                    ->map(function ($variantGroup) {
+                        /** @var OrderDetail $sample */
+                        $sample = $variantGroup->first();
+
+                        return [
+                            'label' => $this->variantDisplayLabel($sample->variant),
+                            'count' => $variantGroup->count(),
+                        ];
+                    })
+                    ->sortByDesc('count')
+                    ->values()
+                    ->all();
+
+                return [
+                    'product' => $first->product === null ? '' : $first->product->name,
+                    'total' => $group->count(),
+                    'variants' => $variants,
+                ];
+            })
+            ->sortByDesc('total')
+            ->values()
+            ->all();
+    }
+
+    /**
+     * Build a stable grouping key for a variant snapshot list, ignoring
+     * entry order.
+     *
+     * @param  array<int, array{label: string, type: string, value: array{label: string, color?: string|null}|null}>|null  $variant
+     */
+    private function variantGroupKey(?array $variant): string
+    {
+        $pairs = collect($variant ?? [])
+            ->map(fn (array $entry) => [$entry['label'], $entry['value']['label'] ?? null])
+            ->sortBy(fn (array $pair) => $pair[0])
+            ->values()
+            ->all();
+
+        return serialize($pairs);
+    }
+
+    /**
+     * Build the human-readable label for a variant snapshot list, matching
+     * the "a definir" convention used elsewhere for pending values (#113).
+     *
+     * @param  array<int, array{label: string, type: string, value: array{label: string, color?: string|null}|null}>|null  $variant
+     */
+    private function variantDisplayLabel(?array $variant): string
+    {
+        $labels = collect($variant ?? [])
+            ->map(fn (array $entry) => $entry['value']['label'] ?? "{$entry['label']}: a definir")
+            ->all();
+
+        return $labels === [] ? 'Sin variante' : implode(' · ', $labels);
     }
 }
