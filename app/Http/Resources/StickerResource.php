@@ -40,10 +40,13 @@ class StickerResource extends JsonResource
             'school_name' => $school->name,
             'classroom_name' => $classroom->name,
             'photo_url' => $photo !== null ? Storage::url($photo->file_path) : null,
-            'products' => $this->products->map(fn ($product) => [
-                'name' => $product->name,
-                'variant' => $product->pivot->variant, // @phpstan-ignore-line
-            ]),
+            'products' => $this->products
+                ->filter(fn ($product) => $product->pivot->recycled_to === null) // @phpstan-ignore-line
+                ->map(fn ($product) => [
+                    'name' => $product->name,
+                    'variant' => $product->pivot->variant, // @phpstan-ignore-line
+                ])
+                ->values(),
         ];
     }
 }

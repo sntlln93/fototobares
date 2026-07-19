@@ -34,7 +34,8 @@ export const nextStatusFor = (
     statuses.find((status) => status.position === position + 1);
 
 /**
- * Batch selection state for the tracking table.
+ * Batch selection state shared by tables that let users pick multiple
+ * items (e.g. tracking, stickers).
  */
 export function useSelection() {
     const [selected, setSelected] = useState<number[]>([]);
