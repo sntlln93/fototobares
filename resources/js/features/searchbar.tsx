@@ -1,5 +1,6 @@
 import { Button, buttonVariants } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Spinner } from '@/components/ui/spinner';
 import { onSearch } from '@/lib/services/filter';
 import { cn } from '@/lib/utils';
 import { router } from '@inertiajs/react';
@@ -26,6 +27,8 @@ export function Searchbar({
     const [search, setSearch] = useState(applied);
     const [debouncedSearch] = useDebounce(search, 1000);
     const requested = useRef(applied);
+    const [inFlight, setInFlight] = useState(false);
+    const isSearching = search !== debouncedSearch || inFlight;
 
     useEffect(() => {
         // Already the applied filter: nothing to do (this is also the mount case).
@@ -37,7 +40,10 @@ export function Searchbar({
         if (debouncedSearch === requested.current) return;
 
         requested.current = debouncedSearch;
-        onSearch(debouncedSearch, indexRoute, routeParams);
+        setInFlight(true);
+        onSearch(debouncedSearch, indexRoute, routeParams, {
+            onFinish: () => setInFlight(false),
+        });
     }, [debouncedSearch, applied, indexRoute, routeParams]);
 
     return (
@@ -60,7 +66,11 @@ export function Searchbar({
                     'pointer-events-none absolute right-11',
                 )}
             >
-                <Search />
+                {isSearching ? (
+                    <Spinner size={16} className="text-muted-foreground" />
+                ) : (
+                    <Search />
+                )}
             </div>
             <Button
                 variant="outline"

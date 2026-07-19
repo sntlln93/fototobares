@@ -1,5 +1,3 @@
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import {
     Select,
     SelectContent,
@@ -7,9 +5,8 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import { Searchbar } from '@/features/searchbar';
 import { capitalize } from '@/lib/utils';
-import { Search } from 'lucide-react';
-import { useState } from 'react';
 
 export type Filters = {
     search: string | null;
@@ -36,8 +33,6 @@ export function TrackingFilters({
     productTypes: ProductType[];
     onApply: (overrides: Partial<Filters> & { search?: string }) => void;
 }) {
-    const [search, setSearch] = useState(filters.search ?? '');
-
     // A classroom implies its school, so the school select also reflects
     // visits that only carried classroom_id
     const selectedSchool =
@@ -62,30 +57,17 @@ export function TrackingFilters({
 
     return (
         <div className="flex flex-col gap-2 md:flex-row md:flex-wrap md:items-center">
-            <form
-                className="flex items-center gap-2"
-                onSubmit={(e) => {
-                    e.preventDefault();
-                    onApply({ search });
-                }}
-            >
-                <Input
-                    placeholder="Niño, cliente o n° de pedido"
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    className="min-w-0 flex-1 md:w-64 md:flex-none"
-                />
-                <Button type="submit" variant="secondary" size="icon">
-                    <Search className="h-4 w-4" />
-                </Button>
-            </form>
+            <Searchbar
+                indexRoute="tracking.index"
+                term={filters.search}
+                placeholder="Niño, cliente o n° de pedido"
+            />
 
             <Select
                 value={selectedSchool ? String(selectedSchool.id) : 'all'}
                 onValueChange={(value) =>
                     // Changing school invalidates any classroom filter
                     onApply({
-                        search,
                         school_id: value === 'all' ? null : Number(value),
                         classroom_id: null,
                     })
@@ -110,7 +92,6 @@ export function TrackingFilters({
                 }
                 onValueChange={(value) =>
                     onApply({
-                        search,
                         classroom_id: value === 'all' ? null : Number(value),
                     })
                 }
@@ -139,7 +120,6 @@ export function TrackingFilters({
                 }
                 onValueChange={(value) =>
                     onApply({
-                        search,
                         product_type_id: value === 'all' ? null : value,
                     })
                 }

@@ -4,6 +4,7 @@ export function onSearch(
     searchTerm: string,
     indexRoute: string,
     routeParams?: Record<string, string | number>,
+    options?: { onFinish?: () => void },
 ) {
     const query = route().queryParams;
     delete query.search;
@@ -19,6 +20,7 @@ export function onSearch(
         preserveState: true,
         preserveScroll: true,
         replace: true,
+        ...options,
     });
 }
 

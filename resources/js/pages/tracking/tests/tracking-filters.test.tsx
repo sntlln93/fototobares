@@ -6,6 +6,16 @@ import {
     TrackingFilters,
 } from '../components/tracking-filters';
 
+vi.mock('@inertiajs/react', () => ({
+    router: { get: vi.fn() },
+}));
+
+vi.mock('@/lib/services/filter', () => ({
+    onSearch: vi.fn(),
+}));
+
+vi.stubGlobal('route', (name?: string) => `http://localhost/${name ?? ''}`);
+
 const schools: SchoolWithClassrooms[] = [
     {
         id: 1,
@@ -68,7 +78,6 @@ describe('TrackingFilters', () => {
         fireEvent.click(screen.getByRole('option', { name: 'San José' }));
 
         expect(onApply).toHaveBeenCalledWith({
-            search: '',
             school_id: 2,
             classroom_id: null,
         });
@@ -104,7 +113,6 @@ describe('TrackingFilters', () => {
         fireEvent.click(screen.getByRole('option', { name: '5 B' }));
 
         expect(onApply).toHaveBeenCalledWith({
-            search: '',
             classroom_id: 11,
         });
     });
