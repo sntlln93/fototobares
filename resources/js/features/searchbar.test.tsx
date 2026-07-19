@@ -49,7 +49,14 @@ describe('Searchbar', () => {
         });
         settle();
 
-        expect(search).toHaveBeenCalledWith('lopez', 'orders.index', undefined);
+        expect(search).toHaveBeenCalledWith(
+            'lopez',
+            'orders.index',
+            undefined,
+            {
+                onFinish: expect.any(Function),
+            },
+        );
     });
 
     it('searches a single digit, which is an order number', () => {
@@ -60,7 +67,9 @@ describe('Searchbar', () => {
         });
         settle();
 
-        expect(search).toHaveBeenCalledWith('7', 'orders.index', undefined);
+        expect(search).toHaveBeenCalledWith('7', 'orders.index', undefined, {
+            onFinish: expect.any(Function),
+        });
     });
 
     it('clears the filter when the input is emptied', () => {
@@ -71,7 +80,9 @@ describe('Searchbar', () => {
         });
         settle();
 
-        expect(search).toHaveBeenCalledWith('', 'orders.index', undefined);
+        expect(search).toHaveBeenCalledWith('', 'orders.index', undefined, {
+            onFinish: expect.any(Function),
+        });
     });
 
     it('carries the route params of pages that are not plain indexes', () => {
@@ -87,8 +98,35 @@ describe('Searchbar', () => {
         });
         settle();
 
-        expect(search).toHaveBeenCalledWith('lopez', 'classrooms.show', {
-            classroom: 4,
+        expect(search).toHaveBeenCalledWith(
+            'lopez',
+            'classrooms.show',
+            { classroom: 4 },
+            { onFinish: expect.any(Function) },
+        );
+    });
+
+    it('shows a spinner while a search is in flight', () => {
+        const { container } = render(<Searchbar indexRoute="orders.index" />);
+
+        expect(container.querySelector('svg.animate-spin')).toBeNull();
+
+        fireEvent.change(screen.getByRole('textbox'), {
+            target: { value: 'lopez' },
         });
+
+        // Not settled yet: the debounce hasn't elapsed.
+        expect(container.querySelector('svg.animate-spin')).not.toBeNull();
+
+        settle();
+
+        // Settled and the visit is in flight: still spinning.
+        expect(container.querySelector('svg.animate-spin')).not.toBeNull();
+
+        act(() => {
+            search.mock.calls[0][3]?.onFinish?.();
+        });
+
+        expect(container.querySelector('svg.animate-spin')).toBeNull();
     });
 });
