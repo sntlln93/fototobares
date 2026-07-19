@@ -4,6 +4,7 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
+import { useSelection } from '@/hooks/use-selection';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { Head, router } from '@inertiajs/react';
@@ -18,7 +19,6 @@ import {
     SchoolWithClassrooms,
     TrackingFilters,
 } from './components/tracking-filters';
-import { useSelection } from './hooks/use-selection';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
